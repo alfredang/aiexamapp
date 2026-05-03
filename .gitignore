@@ -8,3 +8,4 @@ dist
 *.log
 *.tsbuildinfo
 .playwright-mcp/
+.mcp.json
