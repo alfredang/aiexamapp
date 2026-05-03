@@ -30,7 +30,9 @@ const VENDORS = [
   { slug: 'aws', name: 'Amazon Web Services', description: 'Cloud certifications from AWS.' },
   { slug: 'microsoft', name: 'Microsoft', description: 'Azure, Microsoft 365, and AI certifications.' },
   { slug: 'comptia', name: 'CompTIA', description: 'Vendor-neutral IT industry certifications.' },
-  { slug: 'cisco', name: 'Cisco', description: 'Networking, security, and DevNet certifications.' }
+  { slug: 'cisco', name: 'Cisco', description: 'Networking, security, and DevNet certifications.' },
+  { slug: 'oracle', name: 'Oracle', description: 'Oracle Cloud Infrastructure, database, and AI certifications.' },
+  { slug: 'google', name: 'Google Cloud', description: 'Google Cloud Platform certifications across cloud, data, and ML.' }
 ];
 
 const EXAMS: ExamSeed[] = [
@@ -369,6 +371,155 @@ const EXAMS: ExamSeed[] = [
       { name: 'Host-Based Analysis', weight: 20 },
       { name: 'Network Intrusion Analysis', weight: 20 },
       { name: 'Security Policies and Procedures', weight: 15 }
+    ]
+  },
+
+  // ───── Oracle ─────
+  {
+    vendorSlug: 'oracle', slug: 'oracle-oci-foundations-1z0-1085', code: '1Z0-1085-25',
+    title: 'Oracle Cloud Infrastructure Foundations Associate',
+    description: 'Fundamental concepts of Oracle Cloud Infrastructure: identity, compute, storage, networking, and security.',
+    level: 'Foundational', durationMinutes: 60, passingScore: 65, questionCount: 40,
+    domains: [
+      { name: 'OCI Introduction', weight: 15 },
+      { name: 'OCI Identity and Access Management', weight: 20 },
+      { name: 'Networking', weight: 20 },
+      { name: 'Compute', weight: 15 },
+      { name: 'Storage', weight: 15 },
+      { name: 'Security and Observability', weight: 15 }
+    ]
+  },
+  {
+    vendorSlug: 'oracle', slug: 'oracle-oci-architect-associate-1z0-1072', code: '1Z0-1072-25',
+    title: 'Oracle Cloud Infrastructure Architect Associate',
+    description: 'Design and implement OCI workloads with networking, compute, storage, identity, security, and HA/DR.',
+    level: 'Associate', durationMinutes: 90, passingScore: 65, questionCount: 60,
+    domains: [
+      { name: 'Identity and Access Management', weight: 15 },
+      { name: 'Networking', weight: 25 },
+      { name: 'Compute', weight: 15 },
+      { name: 'Storage', weight: 15 },
+      { name: 'Database', weight: 10 },
+      { name: 'Security and Observability', weight: 10 },
+      { name: 'High Availability and Disaster Recovery', weight: 10 }
+    ]
+  },
+  {
+    vendorSlug: 'oracle', slug: 'oracle-oci-architect-pro-1z0-997', code: '1Z0-997-25',
+    title: 'Oracle Cloud Infrastructure Architect Professional',
+    description: 'Advanced OCI architecture: complex networks, governance, automation, and hybrid solutions.',
+    level: 'Professional', durationMinutes: 90, passingScore: 70, questionCount: 55,
+    domains: [
+      { name: 'Plan and Design Solutions', weight: 25 },
+      { name: 'Implement and Operate Solutions', weight: 30 },
+      { name: 'Migration', weight: 15 },
+      { name: 'Performance and Cost Optimization', weight: 15 },
+      { name: 'Security and Compliance', weight: 15 }
+    ]
+  },
+  {
+    vendorSlug: 'oracle', slug: 'oracle-genai-professional-1z0-1127', code: '1Z0-1127-24',
+    title: 'Oracle Cloud Infrastructure Generative AI Professional',
+    description: 'Generative AI fundamentals, large language models, and OCI Generative AI Service implementation.',
+    level: 'Professional', durationMinutes: 90, passingScore: 65, questionCount: 40,
+    domains: [
+      { name: 'Fundamentals of Large Language Models', weight: 30 },
+      { name: 'Using OCI Generative AI Service', weight: 30 },
+      { name: 'Building an LLM Application with OCI Generative AI Service', weight: 40 }
+    ]
+  },
+  {
+    vendorSlug: 'oracle', slug: 'oracle-db-sql-1z0-071', code: '1Z0-071',
+    title: 'Oracle Database SQL Certified Associate',
+    description: 'Relational database concepts and SQL skills using Oracle Database.',
+    level: 'Associate', durationMinutes: 100, passingScore: 63, questionCount: 78,
+    domains: [
+      { name: 'Relational Database Concepts', weight: 10 },
+      { name: 'Retrieving and Restricting Data', weight: 25 },
+      { name: 'Manipulating Data and Tables', weight: 25 },
+      { name: 'Using Functions and Group Operations', weight: 20 },
+      { name: 'Joins, Subqueries, and Set Operators', weight: 20 }
+    ]
+  },
+
+  // ───── Google Cloud ─────
+  {
+    vendorSlug: 'google', slug: 'google-cloud-digital-leader', code: 'CDL',
+    title: 'Google Cloud Digital Leader',
+    description: 'Foundational understanding of cloud concepts and Google Cloud products and services.',
+    level: 'Foundational', durationMinutes: 90, passingScore: 70, questionCount: 60,
+    domains: [
+      { name: 'Digital Transformation with Google Cloud', weight: 10 },
+      { name: 'Exploring Data Transformation with Google Cloud', weight: 30 },
+      { name: 'Innovating with Google Cloud Artificial Intelligence', weight: 30 },
+      { name: 'Modernizing Infrastructure and Applications with Google Cloud', weight: 30 }
+    ]
+  },
+  {
+    vendorSlug: 'google', slug: 'google-associate-cloud-engineer', code: 'ACE',
+    title: 'Google Associate Cloud Engineer',
+    description: 'Deploy applications, monitor operations, and manage enterprise solutions on Google Cloud.',
+    level: 'Associate', durationMinutes: 120, passingScore: 70, questionCount: 50,
+    domains: [
+      { name: 'Setting up a cloud solution environment', weight: 20 },
+      { name: 'Planning and configuring a cloud solution', weight: 20 },
+      { name: 'Deploying and implementing a cloud solution', weight: 25 },
+      { name: 'Ensuring successful operation of a cloud solution', weight: 20 },
+      { name: 'Configuring access and security', weight: 15 }
+    ]
+  },
+  {
+    vendorSlug: 'google', slug: 'google-professional-cloud-architect', code: 'PCA',
+    title: 'Google Professional Cloud Architect',
+    description: 'Design, develop, and manage robust, secure, scalable, and dynamic Google Cloud solutions.',
+    level: 'Professional', durationMinutes: 120, passingScore: 70, questionCount: 50,
+    domains: [
+      { name: 'Designing and planning a cloud solution architecture', weight: 24 },
+      { name: 'Managing and provisioning a solution infrastructure', weight: 15 },
+      { name: 'Designing for security and compliance', weight: 18 },
+      { name: 'Analyzing and optimizing technical and business processes', weight: 18 },
+      { name: 'Managing implementation', weight: 11 },
+      { name: 'Ensuring solution and operations reliability', weight: 14 }
+    ]
+  },
+  {
+    vendorSlug: 'google', slug: 'google-professional-data-engineer', code: 'PDE',
+    title: 'Google Professional Data Engineer',
+    description: 'Design data processing systems, build and operationalize ML models, and ensure solution quality.',
+    level: 'Professional', durationMinutes: 120, passingScore: 70, questionCount: 50,
+    domains: [
+      { name: 'Designing data processing systems', weight: 22 },
+      { name: 'Ingesting and processing the data', weight: 25 },
+      { name: 'Storing the data', weight: 20 },
+      { name: 'Preparing and using data for analysis', weight: 15 },
+      { name: 'Maintaining and automating data workloads', weight: 18 }
+    ]
+  },
+  {
+    vendorSlug: 'google', slug: 'google-professional-cloud-security', code: 'PCSE',
+    title: 'Google Professional Cloud Security Engineer',
+    description: 'Configure access, network security, and ensure data protection on Google Cloud.',
+    level: 'Professional', durationMinutes: 120, passingScore: 70, questionCount: 50,
+    domains: [
+      { name: 'Configuring access', weight: 22 },
+      { name: 'Securing communications and establishing boundary protection', weight: 20 },
+      { name: 'Ensuring data protection', weight: 20 },
+      { name: 'Managing operations', weight: 18 },
+      { name: 'Supporting compliance requirements', weight: 20 }
+    ]
+  },
+  {
+    vendorSlug: 'google', slug: 'google-professional-ml-engineer', code: 'PMLE',
+    title: 'Google Professional Machine Learning Engineer',
+    description: 'Design, build, and productionize ML models using Google Cloud technologies.',
+    level: 'Professional', durationMinutes: 120, passingScore: 70, questionCount: 50,
+    domains: [
+      { name: 'Architecting low-code AI solutions', weight: 12 },
+      { name: 'Collaborating within and across teams to manage data and models', weight: 16 },
+      { name: 'Scaling prototypes into ML models', weight: 18 },
+      { name: 'Serving and scaling models', weight: 19 },
+      { name: 'Automating and orchestrating ML pipelines', weight: 21 },
+      { name: 'Monitoring AI solutions', weight: 14 }
     ]
   }
 ];
