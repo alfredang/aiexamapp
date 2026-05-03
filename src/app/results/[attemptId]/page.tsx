@@ -1,0 +1,104 @@
+import { cookies } from 'next/headers';
+import Link from 'next/link';
+import { notFound, redirect } from 'next/navigation';
+import { db } from '@/lib/db';
+import { auth } from '@/lib/auth';
+import { isAnswerCorrect, scoreAttempt, type Responses } from '@/lib/attempts';
+
+export default async function ResultsPage({ params }: { params: Promise<{ attemptId: string }> }) {
+  const { attemptId } = await params;
+  const session = await auth();
+  const userId = (session?.user as any)?.id as string | undefined;
+  const gt = (await cookies()).get('gt')?.value;
+
+  const attempt = await db.attempt.findUnique({
+    where: { id: attemptId },
+    include: { exam: { include: { vendor: true } } }
+  });
+  if (!attempt) notFound();
+  if (attempt.userId) {
+    if (attempt.userId !== userId) redirect('/login');
+  } else {
+    if (!gt || gt !== attempt.guestToken) redirect('/login');
+  }
+  if (!attempt.submittedAt) redirect(`/exam/${attempt.id}`);
+
+  const questions = await db.question.findMany({
+    where: { id: { in: attempt.questionIds } }
+  });
+  const ordered = attempt.questionIds.map(id => questions.find(q => q.id === id)!).filter(Boolean);
+  const responses = (attempt.responses as Responses) || {};
+  const { score, correctCount, total, perDomain } = scoreAttempt(ordered, responses);
+  const passed = attempt.passed ?? score >= attempt.exam.passingScore;
+
+  return (
+    <div className="container-app py-10">
+      <div className="card p-8 text-center">
+        <p className="text-sm text-slate-500">{attempt.exam.vendor.name} · {attempt.exam.code}</p>
+        <h1 className="mt-1 text-3xl font-bold">{attempt.exam.title}</h1>
+        <div className={`mt-6 inline-flex flex-col items-center rounded-full ${passed ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'} px-8 py-6`}>
+          <span className="text-5xl font-bold">{score}%</span>
+          <span className="text-sm font-semibold uppercase tracking-wide">{passed ? 'Pass' : 'Did not pass'}</span>
+        </div>
+        <p className="mt-4 text-slate-600">{correctCount} correct out of {total} · pass mark {attempt.exam.passingScore}%</p>
+        <div className="mt-6 flex justify-center gap-2">
+          <Link href="/my-content" className="btn-outline">My Content</Link>
+          <Link href={`/practice-exams/${attempt.exam.vendor.slug}/${attempt.exam.slug}`} className="btn-primary-grad">Back to exam</Link>
+        </div>
+      </div>
+
+      {/* Per-domain breakdown */}
+      <div className="mt-8 card p-6">
+        <h2 className="font-semibold">Per-domain performance</h2>
+        <div className="mt-3 space-y-2">
+          {Object.entries(perDomain).map(([domain, d]) => {
+            const pct = d.total ? Math.round((d.correct / d.total) * 100) : 0;
+            return (
+              <div key={domain}>
+                <div className="flex justify-between text-sm">
+                  <span>{domain}</span>
+                  <span className="text-slate-500">{d.correct}/{d.total} · {pct}%</span>
+                </div>
+                <div className="mt-1 h-2 overflow-hidden rounded-full bg-slate-100">
+                  <div className={`h-full ${pct >= attempt.exam.passingScore ? 'bg-green-500' : 'bg-amber-500'}`} style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <h2 className="mt-10 mb-4 text-xl font-semibold">Review</h2>
+      <div className="space-y-4">
+        {ordered.map((q, i) => {
+          const r = responses[q.id];
+          const ans = r?.answer || [];
+          const correct = isAnswerCorrect(q, ans);
+          const correctIds = (q.correct as unknown as string[]) || [];
+          return (
+            <div key={q.id} className="card p-5">
+              <div className="mb-2 flex items-center gap-2 text-xs">
+                <span className="badge">Q{i + 1}</span>
+                <span className="badge">{q.domain}</span>
+                <span className={`badge ${correct ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{correct ? 'Correct' : 'Incorrect'}</span>
+              </div>
+              <p className="font-medium">{q.stem}</p>
+              <ul className="mt-2 space-y-1 text-sm">
+                {(q.options as any[]).map((o: any) => {
+                  const sel = ans.includes(o.id);
+                  const isC = correctIds.includes(o.id);
+                  return (
+                    <li key={o.id} className={`rounded px-3 py-1 ${isC ? 'bg-green-50 text-green-800' : sel ? 'bg-red-50 text-red-800' : 'text-slate-700'}`}>
+                      {sel ? '● ' : '○ '}{o.text}{isC ? ' ✓' : ''}
+                    </li>
+                  );
+                })}
+              </ul>
+              <p className="mt-2 text-sm text-slate-600"><b>Explanation:</b> {q.explanation}</p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

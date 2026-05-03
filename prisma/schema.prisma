@@ -1,0 +1,198 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =========== Enums ===========
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum QType {
+  SINGLE
+  MULTI
+  TRUE_FALSE
+  ORDERING
+  HOTSPOT
+}
+
+enum QStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum Tier {
+  PRACTICE
+  BUNDLE
+  VOUCHER
+  ADMIN_GRANT
+}
+
+enum Mode {
+  PRACTICE
+  EXAM
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+// =========== Models ===========
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String?
+  name          String?
+  role          Role      @default(USER)
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  attempts      Attempt[]
+  entitlements  Entitlement[]
+  orders        Order[]
+  adminLogs     AdminLog[]
+}
+
+model Vendor {
+  id    String  @id @default(cuid())
+  slug  String  @unique
+  name  String
+  logo  String?
+  description String?
+  exams Exam[]
+}
+
+model Exam {
+  id              String     @id @default(cuid())
+  vendorId        String
+  vendor          Vendor     @relation(fields: [vendorId], references: [id])
+  code            String
+  slug            String     @unique
+  title           String
+  description     String
+  level           String     // Foundational | Associate | Professional | Specialty
+  durationMinutes Int
+  passingScore    Int
+  questionCount   Int        // questions per practice exam attempt
+  domains         Json       // [{name: string, weight: number}]
+  pricePractice   Int        // cents
+  priceBundle     Int
+  priceVoucher    Int
+  published       Boolean    @default(false)
+  createdAt       DateTime   @default(now())
+  questions       Question[]
+  attempts        Attempt[]
+  entitlements    Entitlement[]
+  orders          Order[]
+  @@index([vendorId])
+}
+
+model Question {
+  id          String    @id @default(cuid())
+  examId      String
+  exam        Exam      @relation(fields: [examId], references: [id], onDelete: Cascade)
+  domain      String
+  difficulty  Int       @default(3) // 1-5
+  type        QType     @default(SINGLE)
+  stem        String
+  options     Json      // [{id: string, text: string}]
+  correct     Json      // string[] of option ids (for HOTSPOT/ORDERING this is type-specific)
+  explanation String
+  references  Json?     // [{label: string, url: string}]
+  status      QStatus   @default(DRAFT)
+  generatedBy String?   // "manual" | model id
+  isTeaser    Boolean   @default(false)
+  version     Int       @default(1)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  @@index([examId, status])
+  @@index([examId, isTeaser])
+}
+
+model Entitlement {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  examId    String
+  exam      Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  tier      Tier
+  voucher   String?  @unique
+  grantedAt DateTime @default(now())
+  expiresAt DateTime?
+  @@unique([userId, examId, tier])
+  @@index([userId])
+}
+
+model Attempt {
+  id          String    @id @default(cuid())
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  guestToken  String?
+  examId      String
+  exam        Exam      @relation(fields: [examId], references: [id])
+  mode        Mode
+  isTeaser    Boolean   @default(false)
+  startedAt   DateTime  @default(now())
+  submittedAt DateTime?
+  expiresAt   DateTime?
+  durationSec Int       @default(0)
+  score       Float?
+  passed      Boolean?
+  questionIds String[]
+  // responses: Record<questionId, { answer: string[]; flagged?: boolean; timeSpent?: number }>
+  responses   Json      @default("{}")
+  lastSavedAt DateTime  @default(now())
+  @@index([userId, examId])
+  @@index([guestToken])
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  examId          String
+  exam            Exam        @relation(fields: [examId], references: [id])
+  tier            Tier
+  paypalOrderId   String      @unique
+  paypalCaptureId String?     @unique
+  paypalPayload   Json?
+  amount          Int         // cents
+  currency        String      @default("USD")
+  status          OrderStatus @default(PENDING)
+  createdAt       DateTime    @default(now())
+  capturedAt      DateTime?
+  @@index([userId, status])
+}
+
+model OtpCode {
+  id        String   @id @default(cuid())
+  email     String
+  codeHash  String
+  purpose   String   // "LOGIN" | "REGISTER" | "RESET" | "TEASER_GATE"
+  expiresAt DateTime
+  consumed  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  @@index([email, purpose])
+}
+
+model AdminLog {
+  id         String   @id @default(cuid())
+  adminId    String
+  admin      User     @relation(fields: [adminId], references: [id])
+  action     String
+  targetType String
+  targetId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+  @@index([adminId, createdAt])
+}

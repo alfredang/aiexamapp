@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body { @apply bg-white text-slate-900; }
+  body { font-feature-settings: 'cv11', 'ss01'; }
+}
+
+@layer components {
+  .container-app { @apply mx-auto w-full max-w-6xl px-4 sm:px-6; }
+  .btn { @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition; }
+  .btn-primary { @apply btn bg-brand text-white hover:bg-brand-700; }
+  .btn-primary-grad { @apply btn rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-sm hover:from-blue-700 hover:to-purple-700; }
+  .btn-outline { @apply btn border border-slate-200 bg-white text-slate-900 hover:bg-slate-50; }
+  .btn-ghost { @apply btn text-slate-700 hover:bg-slate-100; }
+  .card { @apply rounded-xl border border-slate-200 bg-white shadow-card transition; }
+  .card-hover { @apply card hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md; }
+  .input { @apply w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20; }
+  .label { @apply mb-1 block text-sm font-medium text-slate-700; }
+  .badge { @apply inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700; }
+  .badge-brand { @apply inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700; }
+  .gradient-text { @apply bg-gradient-to-r from-blue-600 via-purple-600 to-emerald-500 bg-clip-text text-transparent; }
+}
