@@ -627,7 +627,7 @@ async function main() {
     }
   }
 
-  console.log(`Seed complete. Vendors: ${VENDORS.length}, Exams: ${EXAMS.length}. Admin: ${adminEmail}`);
+  console.log(`Seed complete. Vendors: ${VENDORS.length}, Exams: ${EXAMS.length}. Admins: ${admins.map(a => a.email).join(', ')}`);
 }
 
 main().finally(() => db.$disconnect());
