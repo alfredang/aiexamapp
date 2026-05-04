@@ -566,7 +566,8 @@ async function main() {
       name: 'Admin',
       password: process.env.ADMIN_PASSWORD || 'ChangeMe!2026'
     },
-    { email: 'angch@tertiaryinfotech.com', name: 'Alfred', password: 'password123' }
+    { email: 'angch@tertiaryinfotech.com', name: 'Alfred', password: 'password123' },
+    { email: 'marcus@tertiaryinfotech.com', name: 'Marcus', password: 'password123' }
   ];
   for (const a of admins) {
     await db.user.upsert({
@@ -627,16 +628,17 @@ async function main() {
     });
   }
 
-  // Grant Alfred test access (PRACTICE tier) on every published exam so the team
-  // can dogfood the full catalog without going through checkout.
-  const alfred = await db.user.findUnique({ where: { email: 'angch@tertiaryinfotech.com' } });
-  if (alfred) {
-    const allExams = await db.exam.findMany({ where: { published: true }, select: { id: true } });
+  // Grant the internal team test access (PRACTICE tier) on every published exam
+  // so they can dogfood the full catalog without going through checkout.
+  const teamEmails = ['angch@tertiaryinfotech.com', 'marcus@tertiaryinfotech.com'];
+  const teamUsers = await db.user.findMany({ where: { email: { in: teamEmails } } });
+  const allExams = await db.exam.findMany({ where: { published: true }, select: { id: true } });
+  for (const u of teamUsers) {
     for (const e of allExams) {
       await db.entitlement.upsert({
-        where: { userId_examId_tier: { userId: alfred.id, examId: e.id, tier: Tier.PRACTICE } },
+        where: { userId_examId_tier: { userId: u.id, examId: e.id, tier: Tier.PRACTICE } },
         update: {},
-        create: { userId: alfred.id, examId: e.id, tier: Tier.PRACTICE }
+        create: { userId: u.id, examId: e.id, tier: Tier.PRACTICE }
       });
     }
   }
