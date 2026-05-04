@@ -9,7 +9,9 @@ export default async function VendorCatalogPage({ params }: { params: Promise<{ 
     where: { slug },
     include: {
       exams: {
-        where: { published: true },
+        // Hide exams without any published questions — placeholders only
+        // visible to admins via /admin.
+        where: { published: true, questions: { some: { status: 'PUBLISHED' } } },
         include: { _count: { select: { questions: { where: { status: 'PUBLISHED' } } } } }
       }
     }

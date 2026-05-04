@@ -5,9 +5,15 @@ import { DotPattern } from '@/components/dot-pattern';
 import { Search, ShieldCheck, Sparkles, BookOpen, BadgeCheck, Award } from 'lucide-react';
 
 export default async function HomePage() {
-  const vendors = await db.vendor.findMany({ include: { _count: { select: { exams: true } } }, take: 12 });
+  // Vendor exam counts only count exams visible in the public catalog
+  // (i.e. published AND have at least one published question), so the
+  // "X exams" label matches what users actually see when they click in.
+  const vendors = await db.vendor.findMany({
+    include: { _count: { select: { exams: { where: { published: true, questions: { some: { status: 'PUBLISHED' } } } } } } },
+    take: 12
+  });
   const popular = await db.exam.findMany({
-    where: { published: true },
+    where: { published: true, questions: { some: { status: 'PUBLISHED' } } },
     include: { vendor: true, _count: { select: { questions: { where: { status: 'PUBLISHED' } } } } },
     take: 6,
     orderBy: { createdAt: 'desc' }

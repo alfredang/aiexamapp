@@ -2,7 +2,12 @@ import Link from 'next/link';
 import { db } from '@/lib/db';
 
 export default async function VendorsPage() {
-  const vendors = await db.vendor.findMany({ include: { _count: { select: { exams: true } } }, orderBy: { name: 'asc' } });
+  // Count only exams visible to the public (published + has questions)
+  // so the "X exams" label is accurate.
+  const vendors = await db.vendor.findMany({
+    include: { _count: { select: { exams: { where: { published: true, questions: { some: { status: 'PUBLISHED' } } } } } } },
+    orderBy: { name: 'asc' }
+  });
   return (
     <div className="container-app py-10">
       <h1 className="text-3xl font-bold tracking-tight">Vendors</h1>
