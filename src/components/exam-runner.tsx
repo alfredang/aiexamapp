@@ -41,7 +41,7 @@ export function ExamRunner(props: ExamRunnerProps) {
     return () => clearInterval(t);
   }, [props.mode, props.remainingSec]);
   useEffect(() => {
-    if (props.mode === 'EXAM' && props.remainingSec > 0 && remaining === 0 && !submitted) submitAttempt();
+    if (props.mode === 'EXAM' && props.remainingSec > 0 && remaining === 0 && !submitted) submitAttempt(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [remaining]);
 
@@ -122,8 +122,17 @@ export function ExamRunner(props: ExamRunnerProps) {
     }).catch(() => {});
   }
 
-  async function submitAttempt() {
+  async function submitAttempt(force = false) {
     if (submitted) return;
+    // EXAM mode requires every question answered before manual submit.
+    // `force=true` is passed by the timer-expiry effect so time-out still submits.
+    if (!force && props.mode === 'EXAM') {
+      const unanswered = props.questions.length - answeredCount;
+      if (unanswered > 0) {
+        alert(`You have ${unanswered} unanswered question${unanswered === 1 ? '' : 's'}. Please answer all questions before submitting the exam.`);
+        return;
+      }
+    }
     setSubmitted(true);
     // Final autosave
     const payload = Object.fromEntries(Object.entries(answers).map(([qid, r]) => [qid, { answer: r.answer || [], flagged: r.flagged }]));
@@ -155,7 +164,7 @@ export function ExamRunner(props: ExamRunnerProps) {
             <span className={`badge ${remaining < 60 ? 'bg-red-50 text-red-700' : ''}`}>⏱ {fmt(remaining)}</span>
           )}
           <button onClick={toggleFlag} className={`btn-outline ${a.flagged ? 'border-amber-400 text-amber-700' : ''}`}><Flag className="mr-1 h-4 w-4 inline" />{a.flagged ? 'Flagged' : 'Flag'}</button>
-          <button onClick={submitAttempt} className="btn-primary-grad">Submit exam</button>
+          <button onClick={() => submitAttempt()} className="btn-primary-grad">Submit exam</button>
         </div>
       </div>
 
