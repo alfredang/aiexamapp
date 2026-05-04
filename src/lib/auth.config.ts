@@ -3,6 +3,7 @@
 import type { NextAuthConfig } from 'next-auth';
 
 export const authConfig: NextAuthConfig = {
+  trustHost: true, // required behind reverse proxy (Coolify/Traefik); else NextAuth rejects host
   session: { strategy: 'jwt', maxAge: 30 * 24 * 60 * 60 },
   pages: { signIn: '/login' },
   providers: [], // populated in src/lib/auth.ts
