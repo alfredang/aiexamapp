@@ -9,5 +9,5 @@ dist
 *.tsbuildinfo
 .playwright-mcp/
 .mcp.json
-Claude Certified Architect Exam.pdf
+*.pdf
 .claude/
