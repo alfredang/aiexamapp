@@ -570,13 +570,14 @@ async function main() {
     { email: 'marcus@tertiaryinfotech.com', name: 'Marcus', password: 'password123' }
   ];
   for (const a of admins) {
+    const passwordHash = await argon2.hash(a.password);
     await db.user.upsert({
       where: { email: a.email },
-      update: { name: a.name, role: Role.ADMIN, emailVerified: new Date() },
+      update: { name: a.name, role: Role.ADMIN, emailVerified: new Date(), passwordHash },
       create: {
         email: a.email,
         name: a.name,
-        passwordHash: await argon2.hash(a.password),
+        passwordHash,
         role: Role.ADMIN,
         emailVerified: new Date()
       }
