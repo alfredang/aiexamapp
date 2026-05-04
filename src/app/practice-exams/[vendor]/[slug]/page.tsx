@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
+import { auth } from '@/lib/auth';
 import { formatPrice, tiersForExam, tierLabel } from '@/lib/utils';
-import { Check, Timer, BookOpen, Award } from 'lucide-react';
+import { Check, Timer, BookOpen, Award, BookOpenCheck, Hourglass } from 'lucide-react';
 
 export default async function ExamDetailPage({ params }: { params: Promise<{ vendor: string; slug: string }> }) {
   const { vendor: vendorSlug, slug } = await params;
@@ -17,6 +18,14 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ ven
 
   const teaserCount = await db.question.count({ where: { examId: exam.id, isTeaser: true, status: 'PUBLISHED' } });
   const domains = (exam.domains as any[]) || [];
+
+  const session = await auth();
+  const userId = (session?.user as any)?.id as string | undefined;
+  const entitled = userId
+    ? !!(await db.entitlement.findFirst({
+        where: { userId, examId: exam.id, tier: { in: ['PRACTICE', 'BUNDLE', 'ADMIN_GRANT'] } }
+      }))
+    : false;
 
   return (
     <div className="container-app py-10">
@@ -40,6 +49,19 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ ven
             <Stat icon={BookOpen} label="Questions" value={`${exam._count.questions}`} />
             <Stat icon={Timer} label="Duration" value={`${exam.durationMinutes} min`} />
             <Stat icon={Award} label="Pass score" value={`${exam.passingScore}%`} />
+          </div>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <div className="card p-5">
+              <BookOpenCheck className="h-6 w-6 text-blue-600" />
+              <h3 className="mt-3 font-semibold">Practice mode</h3>
+              <p className="mt-1 text-sm text-slate-600">See the correct answer and full explanation immediately after each question. Best for studying.</p>
+            </div>
+            <div className="card p-5">
+              <Hourglass className="h-6 w-6 text-blue-600" />
+              <h3 className="mt-3 font-semibold">Exam mode</h3>
+              <p className="mt-1 text-sm text-slate-600">{exam.durationMinutes}-minute timer, no answer reveal until you submit. Auto-saves and auto-submits — like the real exam.</p>
+            </div>
           </div>
 
           {domains.length > 0 && (
@@ -88,7 +110,18 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ ven
             </dl>
           </div>
 
-          {teaserCount > 0 && (
+          {entitled && (
+            <div className="card p-5">
+              <div className="mb-1 text-xs font-semibold uppercase text-emerald-700">You have access</div>
+              <div className="font-semibold">Start your attempt</div>
+              <p className="mt-1 text-sm text-slate-600">Pick a mode below.</p>
+              <div className="mt-3 flex flex-col gap-2">
+                <StartButton examId={exam.id} mode="PRACTICE" />
+                <StartButton examId={exam.id} mode="EXAM" />
+              </div>
+            </div>
+          )}
+          {!entitled && teaserCount > 0 && (
             <Link href={`/practice-exams/${exam.vendor.slug}/${exam.slug}/teaser`} className="card-hover block p-5">
               <div className="mb-1 text-xs font-semibold uppercase text-blue-700">Free</div>
               <div className="font-semibold">Try {Math.min(30, teaserCount)} questions free</div>
@@ -96,7 +129,7 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ ven
               <div className="btn-outline mt-3 w-full">Start free practice exam</div>
             </Link>
           )}
-          {tiersForExam(exam).map(t => (
+          {!entitled && tiersForExam(exam).map(t => (
             <Link key={t.tier} href={`/checkout/${exam.id}?tier=${t.tier}`} className="card-hover block p-5">
               <div className="flex items-baseline justify-between">
                 <div className="font-semibold">{tierLabel(t.tier)}</div>
@@ -125,4 +158,38 @@ function Stat({ icon: Icon, label, value }: { icon: any; label: string; value: s
 
 function Row({ k, v }: { k: string; v: string }) {
   return <div className="flex justify-between"><dt className="text-slate-500">{k}</dt><dd className="font-medium">{v}</dd></div>;
+}
+
+function StartButton({ examId, mode }: { examId: string; mode: 'PRACTICE' | 'EXAM' }) {
+  return (
+    <form action={async () => {
+      'use server';
+      const { db } = await import('@/lib/db');
+      const { auth } = await import('@/lib/auth');
+      const { redirect } = await import('next/navigation');
+      const s = await auth();
+      const uid = (s?.user as any)?.id;
+      const exam = await db.exam.findUnique({ where: { id: examId } });
+      if (!exam || !uid) return;
+      const ent = await db.entitlement.findFirst({
+        where: { userId: uid, examId, tier: { in: ['PRACTICE', 'BUNDLE', 'ADMIN_GRANT'] } }
+      });
+      if (!ent) return;
+      const qs = await db.question.findMany({ where: { examId, status: 'PUBLISHED' }, select: { id: true } });
+      const ids = qs.map(q => q.id).sort(() => Math.random() - 0.5).slice(0, exam.questionCount);
+      const att = await db.attempt.create({
+        data: {
+          userId: uid, examId, mode, questionIds: ids,
+          durationSec: mode === 'EXAM' ? exam.durationMinutes * 60 : 0,
+          expiresAt: mode === 'EXAM' ? new Date(Date.now() + exam.durationMinutes * 60_000) : null,
+          responses: {}
+        }
+      });
+      redirect(`/exam/${att.id}`);
+    }}>
+      <button className={mode === 'EXAM' ? 'btn-primary-grad w-full' : 'btn-secondary w-full'}>
+        {mode === 'EXAM' ? 'Start exam' : 'Practice'}
+      </button>
+    </form>
+  );
 }

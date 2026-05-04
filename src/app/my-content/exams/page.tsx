@@ -54,7 +54,7 @@ function StartButton({ examId, mode }: { examId: string; mode: 'PRACTICE' | 'EXA
       });
       redirect(`/exam/${att.id}`);
     }}>
-      <button className={mode === 'EXAM' ? 'btn-primary-grad w-full' : 'btn-outline w-full'}>{mode === 'EXAM' ? 'Start exam' : 'Practice'}</button>
+      <button className={mode === 'EXAM' ? 'btn-primary-grad w-full' : 'btn-secondary w-full'}>{mode === 'EXAM' ? 'Start exam' : 'Practice'}</button>
     </form>
   );
 }

@@ -13,6 +13,7 @@
   .btn-primary { @apply btn bg-brand text-white hover:bg-brand-700; }
   .btn-primary-grad { @apply btn rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-sm hover:from-blue-700 hover:to-purple-700; }
   .btn-outline { @apply btn border border-slate-200 bg-white text-slate-900 hover:bg-slate-50; }
+  .btn-secondary { @apply btn rounded-full border-2 border-blue-600 bg-blue-50 text-blue-700 font-semibold hover:bg-blue-100; }
   .btn-ghost { @apply btn text-slate-700 hover:bg-slate-100; }
   .card { @apply rounded-xl border border-slate-200 bg-white shadow-card transition; }
   .card-hover { @apply card hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md; }

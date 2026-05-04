@@ -5,6 +5,7 @@ import type { Tier } from '@prisma/client';
 export function cn(...inputs: ClassValue[]) { return twMerge(clsx(inputs)); }
 
 export function formatPrice(cents: number, currency = 'USD') {
+  if (cents === 0) return 'Free';
   return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(cents / 100);
 }
 
