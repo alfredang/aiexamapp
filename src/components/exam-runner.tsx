@@ -94,23 +94,44 @@ export function ExamRunner(props: ExamRunnerProps) {
       ? (cur.includes(optId) ? cur.filter(x => x !== optId) : [...cur, optId])
       : [optId];
     setAnswer(next);
+    // PRACTICE mode auto-reveals the answer for single-pick types as soon as
+    // the user clicks an option — no "Show answer" button needed.
+    if (props.mode === 'PRACTICE' && q.type !== 'MULTI') {
+      revealAnswer(next);
+    }
   }
 
-  async function checkAnswer() {
-    if (!a.answer.length) return;
-    const r = await fetch('/api/attempts/answer', {
-      method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ attemptId: props.attemptId, questionId: q.id, answer: a.answer, flagged: a.flagged })
-    });
-    const j = await r.json();
+  async function revealAnswer(answer: string[]) {
+    if (!answer.length) {
+      alert('Select an option first.');
+      return;
+    }
+    let j: any;
+    try {
+      const r = await fetch('/api/attempts/answer', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ attemptId: props.attemptId, questionId: q.id, answer, flagged: a.flagged })
+      });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      j = await r.json();
+    } catch (e) {
+      alert(`Couldn't reveal the answer (${(e as Error).message}). Check your connection and try again.`);
+      return;
+    }
     if (props.mode === 'PRACTICE') {
-      setAnswers(prev => ({ ...prev, [q.id]: { ...prev[q.id], submitted: true, isCorrect: j.isCorrect, correct: j.correct, explanation: j.explanation } }));
+      setAnswers(prev => ({ ...prev, [q.id]: { ...prev[q.id], answer, submitted: true, isCorrect: j.isCorrect, correct: j.correct, explanation: j.explanation } }));
     }
     // Teaser gate check (after answering, not flagging)
     const newCount = answeredCount + (a.submitted ? 0 : 1);
     if (props.isTeaser && props.teaserGateAt?.includes(newCount)) {
       props.onTeaserGate?.(newCount);
     }
+  }
+
+  // For MULTI questions in PRACTICE mode, the user still needs an explicit
+  // confirm button since one click doesn't mean "done picking".
+  function checkAnswer() {
+    return revealAnswer(a.answer);
   }
 
   async function toggleFlag() {
@@ -182,17 +203,33 @@ export function ExamRunner(props: ExamRunnerProps) {
                   key={o.id}
                   onClick={() => toggle(o.id)}
                   disabled={a.submitted && props.mode === 'PRACTICE'}
-                  className={`block w-full rounded-md border px-4 py-3 text-left text-sm transition ${
-                    isAnswered && correct ? 'border-green-400 bg-green-50' :
-                    wrong ? 'border-red-400 bg-red-50' :
+                  className={`flex w-full items-start justify-between gap-3 rounded-md border px-4 py-3 text-left text-sm transition ${
+                    isAnswered && correct ? 'border-green-500 bg-green-50' :
+                    wrong ? 'border-red-500 bg-red-50' :
                     sel ? 'border-blue-500 bg-blue-50' : 'border-slate-200 hover:border-slate-300'
                   }`}
-                >{o.text}</button>
+                >
+                  <span>{o.text}</span>
+                  {isAnswered && correct && (
+                    <span className="shrink-0 rounded-full bg-green-600 px-2 py-0.5 text-xs font-semibold text-white">✓ Correct answer</span>
+                  )}
+                  {wrong && (
+                    <span className="shrink-0 rounded-full bg-red-600 px-2 py-0.5 text-xs font-semibold text-white">✗ Your answer</span>
+                  )}
+                </button>
               );
             })}
           </div>
-          {!a.submitted && props.mode === 'PRACTICE' && (
-            <button onClick={checkAnswer} className="btn-primary-grad mt-4">Show answer</button>
+          {!a.submitted && props.mode === 'PRACTICE' && q.type === 'MULTI' && (
+            <button
+              onClick={checkAnswer}
+              disabled={!a.answer.length}
+              title={!a.answer.length ? 'Select at least one option first' : ''}
+              className="btn-primary-grad mt-4 disabled:cursor-not-allowed disabled:opacity-50"
+            >Check answer</button>
+          )}
+          {!a.submitted && props.mode === 'PRACTICE' && q.type !== 'MULTI' && !a.answer.length && (
+            <p className="mt-4 text-xs text-slate-500">Pick an option to reveal the answer.</p>
           )}
           {a.submitted && a.explanation && (
             <div className="mt-4 rounded-md border border-slate-200 bg-slate-50 p-4 text-sm">
