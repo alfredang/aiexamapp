@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Suspense, useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   return <Suspense><LoginInner /></Suspense>;
@@ -19,6 +20,7 @@ function LoginInner() {
   const [otpSent, setOtpSent] = useState(false);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function loginPassword(e: React.FormEvent) {
     e.preventDefault(); setBusy(true); setErr('');
@@ -58,7 +60,15 @@ function LoginInner() {
         {tab === 'password' ? (
           <form onSubmit={loginPassword} className="mt-6 space-y-4">
             <div><label className="label">Email</label><input className="input" type="email" required value={email} onChange={e => setEmail(e.target.value)} /></div>
-            <div><label className="label">Password</label><input className="input" type="password" required value={password} onChange={e => setPassword(e.target.value)} /></div>
+            <div>
+              <label className="label">Password</label>
+              <div className="relative">
+                <input className="input pr-10" type={showPassword ? 'text' : 'password'} required value={password} onChange={e => setPassword(e.target.value)} />
+                <button type="button" onClick={() => setShowPassword(s => !s)} aria-label={showPassword ? 'Hide password' : 'Show password'} className="absolute inset-y-0 right-2 flex items-center text-slate-500 hover:text-slate-700">
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
             {err && <p className="text-sm text-red-600">{err}</p>}
             <button className="btn-primary w-full" disabled={busy}>{busy ? 'Signing in…' : 'Sign in'}</button>
             <div className="text-right text-sm"><Link href="/forgot-password" className="text-brand hover:underline">Forgot password?</Link></div>

@@ -1,4 +1,4 @@
-import { PrismaClient, QStatus, QType, Role } from '@prisma/client';
+import { PrismaClient, QStatus, QType, Role, Tier } from '@prisma/client';
 import argon2 from 'argon2';
 
 const db = new PrismaClient();
@@ -32,8 +32,20 @@ const VENDORS = [
   { slug: 'comptia', name: 'CompTIA', description: 'Vendor-neutral IT industry certifications.' },
   { slug: 'cisco', name: 'Cisco', description: 'Networking, security, and DevNet certifications.' },
   { slug: 'oracle', name: 'Oracle', description: 'Oracle Cloud Infrastructure, database, and AI certifications.' },
-  { slug: 'google', name: 'Google Cloud', description: 'Google Cloud Platform certifications across cloud, data, and ML.' }
+  { slug: 'google', name: 'Google Cloud', description: 'Google Cloud Platform certifications across cloud, data, and ML.' },
+  { slug: 'anthropic', name: 'Anthropic', description: 'Anthropic Claude — agent SDK, Claude Code, MCP, and applied AI architecture.' }
 ];
+
+const CLAUDE_ARCHITECT_DOMAINS = [
+  { name: 'Agentic Architecture & Orchestration', weight: 27 },
+  { name: 'Tool Design & MCP Integration', weight: 18 },
+  { name: 'Claude Code Configuration & Workflows', weight: 20 },
+  { name: 'Prompt Engineering & Structured Output', weight: 20 },
+  { name: 'Context Management & Reliability', weight: 15 }
+];
+
+const CLAUDE_ARCHITECT_DESCRIPTION =
+  'Practice for the Anthropic Claude Certified Architect — Foundations exam. Covers Claude Agent SDK orchestration, MCP tool integration, Claude Code workflows, prompt engineering with structured output, and context/reliability patterns.';
 
 const EXAMS: ExamSeed[] = [
   // ───── AWS ─────
@@ -508,6 +520,29 @@ const EXAMS: ExamSeed[] = [
       { name: 'Supporting compliance requirements', weight: 20 }
     ]
   },
+  // ───── Anthropic — Claude Certified Architect — Foundations (3 practice exams) ─────
+  {
+    vendorSlug: 'anthropic', slug: 'anthropic-claude-architect-foundations-1', code: 'CCAF-P1',
+    title: 'Anthropic Claude Certified Architect — Foundations · Practice Exam 1',
+    description: CLAUDE_ARCHITECT_DESCRIPTION,
+    level: 'Foundational', durationMinutes: 120, passingScore: 72, questionCount: 60,
+    domains: CLAUDE_ARCHITECT_DOMAINS
+  },
+  {
+    vendorSlug: 'anthropic', slug: 'anthropic-claude-architect-foundations-2', code: 'CCAF-P2',
+    title: 'Anthropic Claude Certified Architect — Foundations · Practice Exam 2',
+    description: CLAUDE_ARCHITECT_DESCRIPTION,
+    level: 'Foundational', durationMinutes: 120, passingScore: 72, questionCount: 60,
+    domains: CLAUDE_ARCHITECT_DOMAINS
+  },
+  {
+    vendorSlug: 'anthropic', slug: 'anthropic-claude-architect-foundations-3', code: 'CCAF-P3',
+    title: 'Anthropic Claude Certified Architect — Foundations · Practice Exam 3',
+    description: CLAUDE_ARCHITECT_DESCRIPTION,
+    level: 'Foundational', durationMinutes: 120, passingScore: 72, questionCount: 60,
+    domains: CLAUDE_ARCHITECT_DOMAINS
+  },
+
   {
     vendorSlug: 'google', slug: 'google-professional-ml-engineer', code: 'PMLE',
     title: 'Google Professional Machine Learning Engineer',
@@ -590,6 +625,20 @@ async function main() {
         published: true
       }
     });
+  }
+
+  // Grant Alfred test access (PRACTICE tier) on every published exam so the team
+  // can dogfood the full catalog without going through checkout.
+  const alfred = await db.user.findUnique({ where: { email: 'angch@tertiaryinfotech.com' } });
+  if (alfred) {
+    const allExams = await db.exam.findMany({ where: { published: true }, select: { id: true } });
+    for (const e of allExams) {
+      await db.entitlement.upsert({
+        where: { userId_examId_tier: { userId: alfred.id, examId: e.id, tier: Tier.PRACTICE } },
+        update: {},
+        create: { userId: alfred.id, examId: e.id, tier: Tier.PRACTICE }
+      });
+    }
   }
 
   // Keep the existing SAA-C03 placeholder questions so the teaser flow has something

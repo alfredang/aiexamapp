@@ -1,9 +1,7 @@
 import Link from 'next/link';
-import { auth } from '@/lib/auth';
+import { UserMenu } from './user-menu';
 
-export async function Nav() {
-  const session = await auth();
-  const isAdmin = (session?.user as any)?.role === 'ADMIN';
+export function Nav() {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
       <div className="container-app flex h-16 items-center justify-between">
@@ -18,17 +16,7 @@ export async function Nav() {
           <Link href="/#faq" className="btn-ghost">FAQ</Link>
         </nav>
         <div className="flex items-center gap-2">
-          {session?.user ? (
-            <>
-              {isAdmin && <Link href="/admin" className="btn-ghost">Admin</Link>}
-              <Link href="/my-content" className="btn-outline">My Content</Link>
-            </>
-          ) : (
-            <>
-              <Link href="/login" className="btn-ghost">Sign in</Link>
-              <Link href="/signup" className="btn-primary-grad">Get started</Link>
-            </>
-          )}
+          <UserMenu />
         </div>
       </div>
     </header>

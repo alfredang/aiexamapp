@@ -31,62 +31,55 @@ const SYSTEM = `You are an expert practice-exam author for industry IT certifica
 Rules — these are non-negotiable:
 - Produce ORIGINAL questions for educational use only.
 - NEVER reproduce real exam questions or claim to be official dumps.
-- Every question gets a clear explanation and at least one reference URL pointing to official vendor documentation (Microsoft Learn, AWS docs, Google Cloud docs, RFCs, vendor study guide, etc).
+- Every question gets a clear explanation and at least one reference URL pointing to official vendor documentation (Microsoft Learn, AWS docs, Anthropic docs, Google Cloud docs, RFCs, vendor study guide, etc).
 - Single-answer questions have exactly one option with isCorrect.
 - Multi-answer questions have 2-3 correct options of 5-6 total options.
 
-Use the submit_question tool repeatedly — once per question — to emit a question. Do not include questions in your final text response. After all questions are submitted, reply with the literal string "DONE".`;
+Output format: respond with ONLY a JSON array — no prose, no markdown fences, no explanation outside the JSON.
+
+Each array element MUST match this exact schema:
+{
+  "stem": string (the question text, at least 10 chars),
+  "type": "SINGLE" | "MULTI" | "TRUE_FALSE",
+  "options": [{ "id": "a"|"b"|"c"|"d"|"e"|"f", "text": string }],
+  "correct": [string]  (option ids that are correct, length 1 for SINGLE),
+  "explanation": string (why the correct answer is right and why distractors are wrong),
+  "domain": string (the exam domain this question covers),
+  "difficulty": integer 1-5,
+  "references": [{ "label": string, "url": string (full https URL) }],
+  "tags": [string]
+}
+
+Output ONLY the JSON array. Do not wrap in code fences. Do not add commentary before or after.`;
 
 function userPrompt(input: GenerateInput) {
   const weights = input.domainWeights?.length
-    ? `Domain weighting:\n${input.domainWeights.map(d => `- ${d.name}: ${d.weight}%`).join('\n')}\n`
+    ? `Full exam blueprint (for context):\n${input.domainWeights.map(d => `- ${d.name}: ${d.weight}%`).join('\n')}\n\n`
     : '';
-  return `Generate ${input.count} ${input.type} practice questions.
+  return `Generate exactly ${input.count} ${input.type} practice questions in JSON.
 
 Vendor: ${input.vendor}
 Certification: ${input.certification}
 Exam code: ${input.examCode}
-Target domain (focus): ${input.domain}
-Difficulty: ${input.difficulty}/5
-${weights}${input.examGuideUrl ? `Official exam guide: ${input.examGuideUrl}\n` : ''}
-Call submit_question once per question. Then reply DONE.`;
+Focus domain (every question must cover this domain): ${input.domain}
+Difficulty target: ${input.difficulty}/5
+${weights}${input.examGuideUrl ? `Official exam guide: ${input.examGuideUrl}\n\n` : ''}Respond with the JSON array only.`;
 }
 
-const submitQuestionTool = {
-  name: 'submit_question',
-  description: 'Submit one practice question with options, correct answers, explanation, and references.',
-  input_schema: {
-    type: 'object',
-    properties: {
-      stem: { type: 'string' },
-      type: { type: 'string', enum: ['SINGLE', 'MULTI', 'TRUE_FALSE'] },
-      options: {
-        type: 'array',
-        items: {
-          type: 'object',
-          properties: { id: { type: 'string' }, text: { type: 'string' } },
-          required: ['id', 'text']
-        },
-        minItems: 2,
-        maxItems: 6
-      },
-      correct: { type: 'array', items: { type: 'string' }, minItems: 1 },
-      explanation: { type: 'string' },
-      domain: { type: 'string' },
-      difficulty: { type: 'integer', minimum: 1, maximum: 5 },
-      references: {
-        type: 'array',
-        items: {
-          type: 'object',
-          properties: { label: { type: 'string' }, url: { type: 'string' } },
-          required: ['label', 'url']
-        }
-      },
-      tags: { type: 'array', items: { type: 'string' } }
-    },
-    required: ['stem', 'type', 'options', 'correct', 'explanation', 'domain', 'difficulty']
+function extractJsonArray(text: string): unknown[] | null {
+  // Strip code fences if present
+  const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
+  // Find first '[' and last ']' to be lenient about prose around the array
+  const start = cleaned.indexOf('[');
+  const end = cleaned.lastIndexOf(']');
+  if (start === -1 || end === -1 || end <= start) return null;
+  try {
+    const parsed = JSON.parse(cleaned.slice(start, end + 1));
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
   }
-};
+}
 
 export type StreamEvent =
   | { type: 'question'; question: GeneratedQuestion }
@@ -102,24 +95,52 @@ export async function* streamGenerateQuestions(input: GenerateInput): AsyncGener
       options: {
         systemPrompt: SYSTEM,
         model: 'claude-sonnet-4-6',
-        maxTurns: input.count + 4,
-        tools: [submitQuestionTool] as any
+        maxTurns: 1
       } as any
     });
 
+    let assistantText = '';
     for await (const msg of result) {
-      if (msg.type !== 'assistant') continue;
-      for (const block of msg.message.content) {
-        if (block.type === 'tool_use' && block.name === 'submit_question') {
-          const parsed = QuestionSchema.safeParse(block.input);
-          if (parsed.success) {
-            count += 1;
-            yield { type: 'question', question: parsed.data };
-            yield { type: 'progress', count, total: input.count };
-          } else {
-            yield { type: 'error', message: `Validation failed: ${parsed.error.issues[0]?.message}` };
-          }
+      if (msg.type === 'assistant') {
+        for (const block of msg.message.content) {
+          if (block.type === 'text') assistantText += (block as any).text;
         }
+      }
+    }
+    // Fallback: if no assistant text was captured (some SDK builds), use result event
+    if (!assistantText) {
+      const result2 = query({
+        prompt: userPrompt(input),
+        options: { systemPrompt: SYSTEM, model: 'claude-sonnet-4-6', maxTurns: 1 } as any
+      });
+      for await (const msg of result2) {
+        if (msg.type === 'result' && (msg as any).result) assistantText = (msg as any).result;
+      }
+    }
+
+    const arr = extractJsonArray(assistantText);
+    if (!arr) {
+      if (process.env.DEBUG_CLAUDE) {
+        const fs = await import('fs');
+        const path = `/tmp/claude-debug-${Date.now()}.txt`;
+        fs.writeFileSync(path, assistantText);
+        yield { type: 'error', message: `Could not parse JSON. Raw output saved to ${path} (${assistantText.length} chars).` };
+      } else {
+        const preview = assistantText.slice(0, 400).replace(/\s+/g, ' ');
+        yield { type: 'error', message: `Could not parse JSON array (${assistantText.length} chars). Preview: ${preview}` };
+      }
+      yield { type: 'done', total: 0 };
+      return;
+    }
+
+    for (const raw of arr) {
+      const parsed = QuestionSchema.safeParse(raw);
+      if (parsed.success) {
+        count += 1;
+        yield { type: 'question', question: parsed.data };
+        yield { type: 'progress', count, total: input.count };
+      } else {
+        yield { type: 'error', message: `Validation failed: ${parsed.error.issues[0]?.message}` };
       }
     }
     yield { type: 'done', total: count };
