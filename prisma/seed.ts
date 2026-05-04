@@ -45,7 +45,16 @@ const CLAUDE_ARCHITECT_DOMAINS = [
 ];
 
 const CLAUDE_ARCHITECT_DESCRIPTION =
-  'Practice for the Anthropic Claude Certified Architect — Foundations exam. Covers Claude Agent SDK orchestration, MCP tool integration, Claude Code workflows, prompt engineering with structured output, and context/reliability patterns.';
+  'Foundational certification covering Claude Code, the Claude Agent SDK, the Claude API, and the Model Context Protocol (MCP). Scenario-based questions test architectural judgment for production deployments — agentic loops, tool design, prompt engineering, structured output, and context management.';
+
+// Slugs that previously held empty CCA-F practice-exam shells before the
+// catalog was consolidated to a single `anthropic-cca-foundations` slug.
+// Cleanup in main() deletes any rows still pointing at these.
+const OBSOLETE_EXAM_SLUGS = [
+  'anthropic-claude-architect-foundations-1',
+  'anthropic-claude-architect-foundations-2',
+  'anthropic-claude-architect-foundations-3'
+];
 
 const EXAMS: ExamSeed[] = [
   // ───── AWS ─────
@@ -520,24 +529,11 @@ const EXAMS: ExamSeed[] = [
       { name: 'Supporting compliance requirements', weight: 20 }
     ]
   },
-  // ───── Anthropic — Claude Certified Architect — Foundations (3 practice exams) ─────
+  // ───── Anthropic — Claude Certified Architect — Foundations ─────
+  // Single consolidated exam (slug matches scripts/seed-cca-foundations.ts).
   {
-    vendorSlug: 'anthropic', slug: 'anthropic-claude-architect-foundations-1', code: 'CCAF-P1',
-    title: 'Anthropic Claude Certified Architect — Foundations · Practice Exam 1',
-    description: CLAUDE_ARCHITECT_DESCRIPTION,
-    level: 'Foundational', durationMinutes: 120, passingScore: 72, questionCount: 60,
-    domains: CLAUDE_ARCHITECT_DOMAINS
-  },
-  {
-    vendorSlug: 'anthropic', slug: 'anthropic-claude-architect-foundations-2', code: 'CCAF-P2',
-    title: 'Anthropic Claude Certified Architect — Foundations · Practice Exam 2',
-    description: CLAUDE_ARCHITECT_DESCRIPTION,
-    level: 'Foundational', durationMinutes: 120, passingScore: 72, questionCount: 60,
-    domains: CLAUDE_ARCHITECT_DOMAINS
-  },
-  {
-    vendorSlug: 'anthropic', slug: 'anthropic-claude-architect-foundations-3', code: 'CCAF-P3',
-    title: 'Anthropic Claude Certified Architect — Foundations · Practice Exam 3',
+    vendorSlug: 'anthropic', slug: 'anthropic-cca-foundations', code: 'CCA-F',
+    title: 'Claude Certified Architect — Foundations',
     description: CLAUDE_ARCHITECT_DESCRIPTION,
     level: 'Foundational', durationMinutes: 120, passingScore: 72, questionCount: 60,
     domains: CLAUDE_ARCHITECT_DOMAINS
@@ -627,6 +623,22 @@ async function main() {
         published: true
       }
     });
+  }
+
+  // One-time cleanup: remove the obsolete CCA-F placeholder exam shells that
+  // were replaced by the consolidated `anthropic-cca-foundations` slug.
+  // Safe to delete because they were 0-question placeholders; we still cascade
+  // any FK-attached rows (entitlements, questions, attempts, orders) defensively
+  // in case the team-entitlement grant loop or admin actions touched them.
+  const obsoleteExams = await db.exam.findMany({ where: { slug: { in: OBSOLETE_EXAM_SLUGS } } });
+  if (obsoleteExams.length > 0) {
+    const obsoleteIds = obsoleteExams.map(e => e.id);
+    await db.entitlement.deleteMany({ where: { examId: { in: obsoleteIds } } });
+    await db.question.deleteMany({ where: { examId: { in: obsoleteIds } } });
+    await db.attempt.deleteMany({ where: { examId: { in: obsoleteIds } } });
+    await db.order.deleteMany({ where: { examId: { in: obsoleteIds } } });
+    await db.exam.deleteMany({ where: { slug: { in: OBSOLETE_EXAM_SLUGS } } });
+    console.log(`✓ Removed ${obsoleteExams.length} obsolete CCA-F placeholder exam shell(s).`);
   }
 
   // Grant the internal team test access (PRACTICE tier) on every published exam
