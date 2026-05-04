@@ -51,7 +51,7 @@ export function ExamRunner(props: ExamRunnerProps) {
       if (!dirty.current) return;
       dirty.current = false;
       const payload = Object.fromEntries(
-        Object.entries(answers).map(([qid, r]) => [qid, { answer: r.answer, flagged: r.flagged }])
+        Object.entries(answers).map(([qid, r]) => [qid, { answer: r.answer || [], flagged: r.flagged }])
       );
       await fetch('/api/attempts/autosave', {
         method: 'POST', headers: { 'content-type': 'application/json' },
@@ -69,7 +69,8 @@ export function ExamRunner(props: ExamRunnerProps) {
   }, []);
 
   const q = props.questions[idx];
-  const a = answers[q.id] || { answer: [] };
+  const stored = answers[q.id];
+  const a: RunnerResponse = { ...stored, answer: stored?.answer ?? [] };
 
   const visible = useMemo(() => props.questions.map((_, i) => i).filter(i => {
     const r = answers[props.questions[i].id];
@@ -79,7 +80,7 @@ export function ExamRunner(props: ExamRunnerProps) {
     return true;
   }), [answers, filter, props.questions]);
 
-  const answeredCount = Object.values(answers).filter(r => r.answer.length).length;
+  const answeredCount = Object.values(answers).filter(r => r.answer?.length).length;
 
   function setAnswer(answer: string[]) {
     setAnswers(prev => ({ ...prev, [q.id]: { ...prev[q.id], answer } }));
@@ -125,13 +126,20 @@ export function ExamRunner(props: ExamRunnerProps) {
     if (submitted) return;
     setSubmitted(true);
     // Final autosave
-    const payload = Object.fromEntries(Object.entries(answers).map(([qid, r]) => [qid, { answer: r.answer, flagged: r.flagged }]));
+    const payload = Object.fromEntries(Object.entries(answers).map(([qid, r]) => [qid, { answer: r.answer || [], flagged: r.flagged }]));
     await fetch('/api/attempts/autosave', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ attemptId: props.attemptId, responses: payload }) }).catch(() => {});
     const r = await fetch('/api/attempts/submit', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ attemptId: props.attemptId }) });
     if (r.ok) router.push(`/results/${props.attemptId}`);
   }
 
-  function fmt(sec: number) { const m = Math.floor(sec / 60), s = sec % 60; return `${m}:${String(s).padStart(2, '0')}`; }
+  function fmt(sec: number) {
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    return h > 0
+      ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+      : `${m}:${String(s).padStart(2, '0')}`;
+  }
 
   return (
     <div className="container-app py-8">
