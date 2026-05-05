@@ -26,7 +26,7 @@ export default async function HomePage() {
         <div className="pointer-events-none absolute right-0 top-0 hidden h-full w-1/2 text-blue-200/40 md:block">
           <DotPattern className="h-full w-full" />
         </div>
-        <div className="container-app relative grid gap-10 py-16 md:grid-cols-[1.2fr_1fr] md:py-24">
+        <div className="container-app relative grid gap-10 py-16 md:grid-cols-2 md:py-24">
           <div>
             <span className="badge-brand mb-4">Original AI-curated practice content</span>
             <h1 className="text-4xl font-bold leading-tight tracking-tight md:text-6xl">
@@ -45,6 +45,13 @@ export default async function HomePage() {
               <span className="inline-flex items-center gap-1"><Sparkles className="h-4 w-4" /> AI-curated content</span>
               <span className="inline-flex items-center gap-1"><Award className="h-4 w-4" /> 100+ certifications</span>
             </div>
+          </div>
+          <div className="relative hidden items-center justify-center md:flex">
+            <img
+              src="/hero.png"
+              alt="CertPrep AI exam-prep dashboard preview"
+              className="h-auto max-h-[480px] w-full max-w-full object-contain"
+            />
           </div>
         </div>
       </section>
