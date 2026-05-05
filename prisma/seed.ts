@@ -24,6 +24,13 @@ type ExamSeed = {
   passingScore: number;
   questionCount: number;
   domains: { name: string; weight: number }[];
+  // Optional per-exam pricing overrides (cents). When omitted, the loop
+  // falls back to PRICING[level] defaults. Use these when an exam's real
+  // vendor fee diverges from the level default — e.g. AWS CLF-C02's
+  // $100 voucher vs the Foundational tier default.
+  pricePractice?: number;
+  priceBundle?: number;
+  priceVoucher?: number;
 };
 
 const VENDORS = [
@@ -47,13 +54,16 @@ const CLAUDE_ARCHITECT_DOMAINS = [
 const CLAUDE_ARCHITECT_DESCRIPTION =
   'Foundational certification covering Claude Code, the Claude Agent SDK, the Claude API, and the Model Context Protocol (MCP). Scenario-based questions test architectural judgment for production deployments — agentic loops, tool design, prompt engineering, structured output, and context management.';
 
-// Slugs that previously held empty CCA-F practice-exam shells before the
-// catalog was consolidated to a single `anthropic-cca-foundations` slug.
-// Cleanup in main() deletes any rows still pointing at these.
+// Slugs that previously existed but have been removed from the catalog.
+// Cleanup in main() deletes any DB rows still pointing at these (exam,
+// questions, entitlements, attempts, orders).
+//   - The 3 CCA-F shells were consolidated to a single `anthropic-cca-foundations` slug
+//   - aws-saa-c03 was removed from the catalog (was a 60-placeholder shell)
 const OBSOLETE_EXAM_SLUGS = [
   'anthropic-claude-architect-foundations-1',
   'anthropic-claude-architect-foundations-2',
-  'anthropic-claude-architect-foundations-3'
+  'anthropic-claude-architect-foundations-3',
+  'aws-saa-c03'
 ];
 
 const EXAMS: ExamSeed[] = [
@@ -61,25 +71,14 @@ const EXAMS: ExamSeed[] = [
   {
     vendorSlug: 'aws', slug: 'aws-clf-c02', code: 'CLF-C02',
     title: 'AWS Certified Cloud Practitioner',
-    description: 'Foundational understanding of AWS Cloud, services, security, architecture, pricing, and support.',
+    description: 'Foundational AWS certification covering the value of the AWS Cloud, the shared responsibility model, the Well-Architected Framework, security best practices, AWS pricing and billing economics, and core services across compute, networking, database, and storage. Available in-person at AWS-authorized testing centers or online via remote proctoring. Real exam fee is USD 100 (voucher).',
     level: 'Foundational', durationMinutes: 90, passingScore: 70, questionCount: 65,
+    pricePractice: 2000, priceBundle: 10000, priceVoucher: 10000,
     domains: [
       { name: 'Cloud Concepts', weight: 24 },
       { name: 'Security and Compliance', weight: 30 },
       { name: 'Cloud Technology and Services', weight: 34 },
       { name: 'Billing, Pricing, and Support', weight: 12 }
-    ]
-  },
-  {
-    vendorSlug: 'aws', slug: 'aws-saa-c03', code: 'SAA-C03',
-    title: 'AWS Certified Solutions Architect — Associate',
-    description: 'Practice for the SAA-C03 exam covering compute, storage, networking, security, and cost optimization.',
-    level: 'Associate', durationMinutes: 130, passingScore: 72, questionCount: 65,
-    domains: [
-      { name: 'Design Secure Architectures', weight: 30 },
-      { name: 'Design Resilient Architectures', weight: 26 },
-      { name: 'Design High-Performing Architectures', weight: 24 },
-      { name: 'Design Cost-Optimized Architectures', weight: 20 }
     ]
   },
   {
@@ -593,7 +592,10 @@ async function main() {
   );
 
   for (const e of EXAMS) {
-    const price = PRICING[e.level];
+    const defaults = PRICING[e.level];
+    const pricePractice = e.pricePractice ?? defaults.practice;
+    const priceBundle   = e.priceBundle   ?? defaults.bundle;
+    const priceVoucher  = e.priceVoucher  ?? defaults.voucher;
     await db.exam.upsert({
       where: { slug: e.slug },
       update: {
@@ -604,6 +606,9 @@ async function main() {
         passingScore: e.passingScore,
         questionCount: e.questionCount,
         domains: e.domains,
+        // Push pricing on update too so per-exam overrides reach existing
+        // rows when seed is re-run, not just on first create.
+        pricePractice, priceBundle, priceVoucher,
         published: true
       },
       create: {
@@ -617,9 +622,7 @@ async function main() {
         passingScore: e.passingScore,
         questionCount: e.questionCount,
         domains: e.domains,
-        pricePractice: price.practice,
-        priceBundle: price.bundle,
-        priceVoucher: price.voucher,
+        pricePractice, priceBundle, priceVoucher,
         published: true
       }
     });
@@ -653,41 +656,6 @@ async function main() {
         update: {},
         create: { userId: u.id, examId: e.id, tier: Tier.PRACTICE }
       });
-    }
-  }
-
-  // Keep the existing SAA-C03 placeholder questions so the teaser flow has something
-  // to render for that exam until real questions are generated via the admin UI.
-  const saa = await db.exam.findUnique({ where: { slug: 'aws-saa-c03' } });
-  if (saa) {
-    const existing = await db.question.count({ where: { examId: saa.id } });
-    if (existing === 0) {
-      const domains = ['Design Secure Architectures', 'Design Resilient Architectures', 'Design High-Performing Architectures', 'Design Cost-Optimized Architectures'];
-      for (let i = 0; i < 60; i++) {
-        const correctIdx = i % 4;
-        const optionIds = ['a', 'b', 'c', 'd'];
-        await db.question.create({
-          data: {
-            examId: saa.id,
-            stem: `Sample SAA-C03 question #${i + 1}: which AWS service best fits scenario ${i + 1}?`,
-            explanation: 'Placeholder explanation — replace with real practice content via the admin question generator.',
-            domain: domains[i % 4],
-            difficulty: 3,
-            type: QType.SINGLE,
-            status: QStatus.PUBLISHED,
-            generatedBy: 'manual',
-            isTeaser: i < 30,
-            options: [
-              { id: 'a', text: 'Amazon S3' },
-              { id: 'b', text: 'Amazon EC2' },
-              { id: 'c', text: 'AWS Lambda' },
-              { id: 'd', text: 'Amazon RDS' }
-            ],
-            correct: [optionIds[correctIdx]],
-            references: [{ label: 'AWS Well-Architected', url: 'https://aws.amazon.com/architecture/well-architected/' }]
-          }
-        });
-      }
     }
   }
 
