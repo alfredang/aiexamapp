@@ -17,7 +17,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             ['Exams', '/admin/exams'],
             ['Questions', '/admin/questions'],
             ['Users', '/admin/users'],
-            ['Orders', '/admin/orders']
+            ['Orders', '/admin/orders'],
+            ['Vouchers', '/admin/vouchers']
           ].map(([t, h]) => (
             <Link key={h} href={h as string} className="rounded px-2 py-1.5 hover:bg-slate-100">{t}</Link>
           ))}
