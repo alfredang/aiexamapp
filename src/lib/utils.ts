@@ -9,11 +9,15 @@ export function formatPrice(cents: number, currency = 'USD') {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(cents / 100);
 }
 
+// Per the simplified tier model: VOUCHER now includes practice access
+// (it absorbs what the old BUNDLE tier did). The BUNDLE label/price
+// are preserved here for legacy orders/entitlements that already exist
+// in the DB, but the public catalogue no longer offers BUNDLE.
 export function tierLabel(t: Tier) {
   return ({
     PRACTICE: 'Practice Exam',
-    BUNDLE: 'Practice + Exam Voucher',
-    VOUCHER: 'Exam Voucher Only',
+    BUNDLE: 'Practice + Exam Voucher',  // legacy orders only
+    VOUCHER: 'Exam Voucher (practice exams included)',
     ADMIN_GRANT: 'Admin Grant'
   } as const)[t];
 }
@@ -25,11 +29,14 @@ export function priceForTier(exam: { pricePractice: number; priceBundle: number;
   return 0;
 }
 
+// Public catalogue offers two tiers per exam: PRACTICE alone, and VOUCHER
+// (which now bundles practice access in). The legacy BUNDLE tier is no
+// longer surfaced — kept in the Tier enum so existing orders/entitlements
+// still typecheck.
 export function tiersForExam(exam: { pricePractice: number; priceBundle: number; priceVoucher: number }): { tier: Tier; price: number }[] {
   return [
     { tier: 'PRACTICE', price: exam.pricePractice },
-    { tier: 'BUNDLE', price: exam.priceBundle },
-    { tier: 'VOUCHER', price: exam.priceVoucher }
+    { tier: 'VOUCHER',  price: exam.priceVoucher }
   ];
 }
 

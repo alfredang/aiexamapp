@@ -40,7 +40,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
     <div className="container-app py-10">
       <div className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight">Practice exams</h1>
-        <p className="mt-1 text-slate-600">Browse certifications across leading vendors. Free 30-question teaser on every exam.</p>
+        <p className="mt-1 text-slate-600">Browse certifications across leading vendors. Try 10 questions for free on every exam.</p>
       </div>
 
       <form className="mb-6 flex flex-wrap gap-2">
@@ -69,6 +69,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
                 <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
                   <span className="badge bg-purple-50 text-purple-700">Bundle</span>
                   <span className="badge">{b.items.length} items</span>
+                  {b.price === 0 && <span className="badge bg-emerald-100 text-emerald-800">Free</span>}
                 </div>
                 <h3 className="font-semibold">{b.title}</h3>
                 <p className="mt-1 line-clamp-2 text-sm text-slate-600">{b.description}</p>
@@ -78,7 +79,9 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
                   ))}
                 </ul>
                 <div className="mt-4 flex items-center justify-end text-sm">
-                  <span className="font-semibold text-purple-700">{formatPrice(b.price)}</span>
+                  <span className={`font-semibold ${b.price === 0 ? 'text-emerald-700' : 'text-purple-700'}`}>
+                    {b.price === 0 ? 'Free' : formatPrice(b.price)}
+                  </span>
                 </div>
               </Link>
             ))}

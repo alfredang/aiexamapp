@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { formatPrice } from '@/lib/utils';
 import { Package, Check, Ticket } from 'lucide-react';
+import { ClaimFreeBundleButton } from './claim-free-button';
 
 export default async function BundleDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -20,6 +21,7 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ s
 
   const session = await auth();
   const userId = (session?.user as any)?.id as string | undefined;
+  const isFree = bundle.price === 0;
 
   // Compute "you save" — sum of individual prices vs bundle price
   const individualTotal = bundle.items.reduce((sum, item) => {
@@ -78,20 +80,31 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ s
 
         <aside className="space-y-4">
           <div className="card p-5">
-            <div className="text-xs font-semibold uppercase text-purple-700">Bundle price</div>
-            <div className="mt-1 text-3xl font-bold text-slate-900">{formatPrice(bundle.price)}</div>
-            {savings > 0 && (
+            <div className="text-xs font-semibold uppercase text-purple-700">
+              {isFree ? 'Free for a limited time' : 'Bundle price'}
+            </div>
+            <div className="mt-1 text-3xl font-bold text-slate-900">
+              {isFree ? 'Free' : formatPrice(bundle.price)}
+            </div>
+            {!isFree && savings > 0 && (
               <div className="mt-1 text-sm text-emerald-700">
                 You save {formatPrice(savings)} vs buying separately
               </div>
             )}
-            {userId ? (
+            {isFree && (
+              <div className="mt-1 text-sm text-emerald-700">
+                Worth {formatPrice(individualTotal)} — claim it at no charge
+              </div>
+            )}
+            {!userId ? (
+              <Link href={`/login?next=/bundles/${bundle.slug}`} className="btn-primary-grad mt-4 block w-full text-center">
+                Sign in to {isFree ? 'claim' : 'buy'}
+              </Link>
+            ) : isFree ? (
+              <ClaimFreeBundleButton bundleId={bundle.id} />
+            ) : (
               <Link href={`/checkout/bundle/${bundle.id}`} className="btn-primary-grad mt-4 block w-full text-center">
                 Get this bundle
-              </Link>
-            ) : (
-              <Link href={`/login?next=/bundles/${bundle.slug}`} className="btn-primary-grad mt-4 block w-full text-center">
-                Sign in to buy
               </Link>
             )}
           </div>

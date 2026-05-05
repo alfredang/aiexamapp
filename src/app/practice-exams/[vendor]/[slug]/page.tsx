@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { formatPrice, tiersForExam, tierLabel } from '@/lib/utils';
 import { Check, Timer, BookOpen, Award, BookOpenCheck, Hourglass } from 'lucide-react';
+import { BuyTierForm } from './buy-tier-form';
 
 export default async function ExamDetailPage({ params }: { params: Promise<{ vendor: string; slug: string }> }) {
   const { vendor: vendorSlug, slug } = await params;
@@ -124,20 +125,20 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ ven
           {!entitled && teaserCount > 0 && (
             <Link href={`/practice-exams/${exam.vendor.slug}/${exam.slug}/teaser`} className="card-hover block p-5">
               <div className="mb-1 text-xs font-semibold uppercase text-blue-700">Free</div>
-              <div className="font-semibold">Try {Math.min(30, teaserCount)} questions free</div>
+              <div className="font-semibold">Try 10 questions for free</div>
               <p className="mt-1 text-sm text-slate-600">No credit card required.</p>
               <div className="btn-outline mt-3 w-full">Start free practice exam</div>
             </Link>
           )}
-          {!entitled && tiersForExam(exam).map(t => (
-            <Link key={t.tier} href={`/checkout/${exam.id}?tier=${t.tier}`} className="card-hover block p-5">
-              <div className="flex items-baseline justify-between">
-                <div className="font-semibold">{tierLabel(t.tier)}</div>
-                <div className="text-xl font-bold text-blue-700">{formatPrice(t.price)}</div>
-              </div>
-              <div className="btn-primary-grad mt-3 w-full">Buy now</div>
-            </Link>
-          ))}
+          {!entitled && (
+            <BuyTierForm
+              examId={exam.id}
+              vendorSlug={exam.vendor.slug}
+              examSlug={exam.slug}
+              isSignedIn={!!userId}
+              options={tiersForExam(exam).map(t => ({ tier: t.tier, label: tierLabel(t.tier), price: t.price }))}
+            />
+          )}
         </aside>
       </div>
     </div>
@@ -188,7 +189,7 @@ function StartButton({ examId, mode }: { examId: string; mode: 'PRACTICE' | 'EXA
       redirect(`/exam/${att.id}`);
     }}>
       <button className={mode === 'EXAM' ? 'btn-primary-grad w-full' : 'btn-secondary w-full'}>
-        {mode === 'EXAM' ? 'Start exam' : 'Practice'}
+        {mode === 'EXAM' ? 'Exam Mode' : 'Practice Mode'}
       </button>
     </form>
   );

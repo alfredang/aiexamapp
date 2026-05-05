@@ -33,7 +33,7 @@ export default async function HomePage() {
               Practice Smarter <br />for Your <span className="gradient-text">Next Certification</span>
             </h1>
             <p className="mt-5 max-w-xl text-lg text-slate-600">
-              Realistic practice exams across AWS, Microsoft, Cisco, CompTIA, Google Cloud and more. Start with 30 free questions on any exam.
+              Realistic practice exams across AWS, Microsoft, Cisco, CompTIA, Google Cloud and more. Try 10 questions for free on any exam.
             </p>
             <form action="/practice-exams" className="mt-8 flex max-w-lg items-center gap-2 rounded-full border border-slate-200 bg-white p-1.5 shadow-card">
               <Search className="ml-3 h-5 w-5 text-slate-400" />
@@ -116,14 +116,14 @@ export default async function HomePage() {
           <h2 className="text-center text-2xl font-semibold">Three ways to prepare</h2>
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {[
-              { t: 'Practice Exam', d: 'Lifetime access to the practice question bank with detailed explanations.' },
-              { t: 'Practice + Voucher', d: 'Practice access bundled with an official exam voucher at a discount.' },
-              { t: 'Voucher Only', d: 'Already studied? Buy just the voucher and book your test.' }
+              { t: 'Try 10 questions for free', d: 'Free teaser on every exam — no credit card required. Get a feel for our content before you buy.', cta: 'Browse exams' },
+              { t: 'Practice Exam', d: 'Full access to the practice question bank with detailed explanations. Practice Mode and Exam Mode included.', cta: 'Browse' },
+              { t: 'Exam Voucher (practice included)', d: 'A real exam voucher PLUS full practice access for the same exam — no separate practice purchase needed.', cta: 'Browse' }
             ].map((p, i) => (
               <div key={i} className="card p-6">
                 <h3 className="font-semibold">{p.t}</h3>
                 <p className="mt-1 text-sm text-slate-600">{p.d}</p>
-                <Link href="/practice-exams" className="btn-outline mt-4 w-full">Browse</Link>
+                <Link href="/practice-exams" className="btn-outline mt-4 w-full">{p.cta}</Link>
               </div>
             ))}
           </div>
@@ -136,9 +136,9 @@ export default async function HomePage() {
         <div className="mx-auto mt-8 max-w-3xl divide-y divide-slate-200">
           {[
             { q: 'Are these real exam questions?', a: 'No. We only provide original practice questions for learning. We do not offer dumps.' },
-            { q: 'How does the 30-question free teaser work?', a: 'Every paid exam includes a 30-question teaser. Registered users can retake it unlimited times.' },
-            { q: 'What is the difference between Practice and Exam mode?', a: 'Practice mode shows answers and explanations immediately. Exam mode is timed and only reveals results at the end.' },
-            { q: 'How do exam vouchers work?', a: 'Vouchers are issued by the certification vendor and let you book the official test. We email the code after purchase.' }
+            { q: 'How does the free teaser work?', a: 'Every paid exam includes a free 10-question teaser. Registered users can retake it unlimited times.' },
+            { q: 'What is the difference between Practice Mode and Exam Mode?', a: 'Practice Mode shows answers and explanations immediately after each question. Exam Mode is timed and only reveals results at the end — like the real test.' },
+            { q: 'How do exam vouchers work?', a: 'When you buy the Exam Voucher tier, you get a real exam voucher (emailed after purchase) AND practice access for the same exam included at no extra charge.' }
           ].map((f, i) => (
             <details key={i} className="group py-4">
               <summary className="flex cursor-pointer items-center justify-between font-medium">{f.q}<span className="text-slate-400 transition group-open:rotate-180">▾</span></summary>

@@ -6,7 +6,7 @@ export default function SuccessPage() {
       <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-50 text-green-600 text-3xl">✓</div>
       <h1 className="text-2xl font-bold">Payment successful</h1>
       <p className="mt-2 text-slate-600">Your purchase is unlocked. A confirmation email is on the way.</p>
-      <Link href="/dashboard" className="btn-primary mt-6 inline-flex">Go to dashboard</Link>
+      <Link href="/my-content" className="btn-primary mt-6 inline-flex">Go to My Content</Link>
     </div>
   );
 }

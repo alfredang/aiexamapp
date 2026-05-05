@@ -76,41 +76,13 @@ type BundleSeed = {
   items: { examSlug: string; tier: 'PRACTICE' | 'VOUCHER'; position?: number }[];
 };
 
-const BUNDLES: BundleSeed[] = [
-  {
-    slug: 'cloud-foundations-pack',
-    title: 'Microsoft + AWS Foundations Bundle',
-    description: 'Practice access to both Microsoft Azure Fundamentals (AZ-900) and AWS Cloud Practitioner (CLF-C02), plus an AWS Cloud Practitioner exam voucher. Save vs buying separately — the voucher alone is USD 100.',
-    price: 11500,
-    items: [
-      { examSlug: 'microsoft-az-900', tier: 'PRACTICE', position: 1 },
-      { examSlug: 'aws-clf-c02',      tier: 'PRACTICE', position: 2 },
-      { examSlug: 'aws-clf-c02',      tier: 'VOUCHER',  position: 3 }
-    ]
-  },
-  {
-    slug: 'aws-devops-track',
-    title: 'AWS DevOps Track Bundle',
-    description: 'Practice access to both AWS Certified Developer — Associate (DVA-C02) and AWS Certified DevOps Engineer — Professional (DOP-C02), plus a real DOP-C02 exam voucher. The Developer Associate is the natural prerequisite for DevOps Professional, so this pack covers both tiers in one go. The DOP-C02 voucher alone is USD 300.',
-    price: 32900,
-    items: [
-      { examSlug: 'aws-dva-c02', tier: 'PRACTICE', position: 1 },
-      { examSlug: 'aws-dop-c02', tier: 'PRACTICE', position: 2 },
-      { examSlug: 'aws-dop-c02', tier: 'VOUCHER',  position: 3 }
-    ]
-  },
-  {
-    slug: 'aws-data-engineer-track',
-    title: 'AWS Data Engineer Track Bundle',
-    description: 'Practice access to both AWS Cloud Practitioner (CLF-C02) and AWS Certified Data Engineer — Associate (DEA-C01), plus a real DEA-C01 exam voucher. CLF-C02 builds the cloud-fundamentals foundation that the Data Engineer Associate exam assumes. The DEA-C01 voucher alone is USD 150.',
-    price: 17900,
-    items: [
-      { examSlug: 'aws-clf-c02', tier: 'PRACTICE', position: 1 },
-      { examSlug: 'aws-dea-c01', tier: 'PRACTICE', position: 2 },
-      { examSlug: 'aws-dea-c01', tier: 'VOUCHER',  position: 3 }
-    ]
-  }
-];
+// Bundles are no longer offered. Per the simplified product model the
+// public catalogue now sells only per-exam PRACTICE and VOUCHER tiers
+// (where VOUCHER includes practice access). Existing Bundle rows in the
+// DB are unpublished by main() so they disappear from the UI without
+// breaking referential integrity on historical Order rows that point
+// at them via bundleId.
+const BUNDLES: BundleSeed[] = [];
 
 const EXAMS: ExamSeed[] = [
   // ───── AWS ─────
@@ -720,10 +692,17 @@ async function main() {
     }
   }
 
-  // Seed bundles. Items are kept in sync declaratively — on each seed run
-  // we delete-then-recreate the BundleItem rows so the seed file is the
-  // source of truth for what each bundle contains.
+  // Seed bundles. The seed file is the source of truth for what bundles
+  // are offered — any existing Bundle rows not present in BUNDLES are
+  // unpublished (not deleted, to preserve referential integrity with
+  // any historical Order.bundleId references).
   const examMap = Object.fromEntries((await db.exam.findMany()).map(e => [e.slug, e.id]));
+  const seededSlugs = new Set(BUNDLES.map(b => b.slug));
+  // Unpublish bundles no longer in the seed list.
+  await db.bundle.updateMany({
+    where: { slug: { notIn: [...seededSlugs] }, published: true },
+    data: { published: false }
+  });
   for (const b of BUNDLES) {
     const bundle = await db.bundle.upsert({
       where: { slug: b.slug },
@@ -742,6 +721,36 @@ async function main() {
       });
     }
   }
+
+  // Ensure every visible exam has up to 10 isTeaser questions so the
+  // "Try 10 questions for free" teaser link always lands on a real
+  // 10-question attempt. Top-up only — never unflags existing teasers.
+  // Idempotent: skips exams that already have >= 10.
+  const examsWithContent = await db.exam.findMany({
+    where: { published: true, questions: { some: { status: QStatus.PUBLISHED } } },
+    select: { id: true, slug: true }
+  });
+  let topUpTotal = 0;
+  for (const e of examsWithContent) {
+    const teaserCount = await db.question.count({
+      where: { examId: e.id, isTeaser: true, status: QStatus.PUBLISHED }
+    });
+    if (teaserCount >= 10) continue;
+    const need = 10 - teaserCount;
+    const candidates = await db.question.findMany({
+      where: { examId: e.id, isTeaser: false, status: QStatus.PUBLISHED },
+      take: need,
+      orderBy: { createdAt: 'asc' },
+      select: { id: true }
+    });
+    if (candidates.length === 0) continue;
+    await db.question.updateMany({
+      where: { id: { in: candidates.map(c => c.id) } },
+      data: { isTeaser: true }
+    });
+    topUpTotal += candidates.length;
+  }
+  if (topUpTotal > 0) console.log(`✓ Topped up ${topUpTotal} questions to isTeaser=true across ${examsWithContent.length} exams`);
 
   console.log(`Seed complete. Vendors: ${VENDORS.length}, Exams: ${EXAMS.length}, Bundles: ${BUNDLES.length}. Admins: ${admins.map(a => a.email).join(', ')}`);
 }
