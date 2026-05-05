@@ -77,6 +77,12 @@ const HIDDEN_EXAM_SLUGS = [
   'oracle-1z0-1085-25' // OCI Foundations Associate — only 6 questions; hide until ≥60
 ];
 
+// Vendor allowlist for the public catalog. Any exam whose vendorSlug is NOT
+// in this list is force-hidden (published = false), regardless of question
+// count. Used to launch with AWS only and roll out other vendors gradually.
+// Flip a single string to re-enable a vendor.
+const VISIBLE_VENDOR_SLUGS = ['aws'];
+
 // Curated bundles — multi-exam products defined declaratively here.
 // Each item references an exam by slug + the tier the buyer receives.
 type BundleSeed = {
@@ -694,7 +700,8 @@ async function main() {
     const pricePractice = e.pricePractice ?? defaults.practice;
     const priceBundle   = e.priceBundle   ?? defaults.bundle;
     const priceVoucher  = e.priceVoucher  ?? defaults.voucher;
-    const isPublished = !HIDDEN_EXAM_SLUGS.includes(e.slug);
+    const isPublished = !HIDDEN_EXAM_SLUGS.includes(e.slug)
+      && VISIBLE_VENDOR_SLUGS.includes(e.vendorSlug);
     await db.exam.upsert({
       where: { slug: e.slug },
       update: {
