@@ -70,6 +70,13 @@ const OBSOLETE_EXAM_SLUGS = [
   'aws-scs-c02'
 ];
 
+// Slugs that should be kept in the DB but hidden from the public catalog
+// (Exam.published = false). Different from OBSOLETE — these aren't deleted;
+// they're just not surfaced until they reach a presentable question count.
+const HIDDEN_EXAM_SLUGS = [
+  'oracle-1z0-1085-25' // OCI Foundations Associate — only 6 questions; hide until ≥60
+];
+
 // Curated bundles — multi-exam products defined declaratively here.
 // Each item references an exam by slug + the tier the buyer receives.
 type BundleSeed = {
@@ -687,6 +694,7 @@ async function main() {
     const pricePractice = e.pricePractice ?? defaults.practice;
     const priceBundle   = e.priceBundle   ?? defaults.bundle;
     const priceVoucher  = e.priceVoucher  ?? defaults.voucher;
+    const isPublished = !HIDDEN_EXAM_SLUGS.includes(e.slug);
     await db.exam.upsert({
       where: { slug: e.slug },
       update: {
@@ -700,7 +708,7 @@ async function main() {
         // Push pricing on update too so per-exam overrides reach existing
         // rows when seed is re-run, not just on first create.
         pricePractice, priceBundle, priceVoucher,
-        published: true
+        published: isPublished
       },
       create: {
         vendorId: vendorMap[e.vendorSlug],
@@ -714,7 +722,7 @@ async function main() {
         questionCount: e.questionCount,
         domains: e.domains,
         pricePractice, priceBundle, priceVoucher,
-        published: true
+        published: isPublished
       }
     });
   }

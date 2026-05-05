@@ -40,28 +40,38 @@ const SCRIPTS = [
   // AWS DEA-C01: 25 + 40 = 65
   'scripts/seed-dea-c01-fill.ts',
   'scripts/seed-dea-c01-fill2.ts',
-  // AWS SAA-C03 starter (25 of 65)
+  // AWS SAA-C03: 25 + 35 = 60 of 65
   'scripts/seed-saa-c03-fill.ts',
-  // AWS DVA-C02 starter (25 of 65)
+  'scripts/seed-saa-c03-fill2.ts',
+  // AWS DVA-C02: 25 + 35 = 60 of 65
   'scripts/seed-dva-c02-fill.ts',
+  'scripts/seed-dva-c02-fill2.ts',
   // Oracle OCI Foundations starter (6 of 40)
   'scripts/seed-oci-foundations-starter.ts',
-  // AWS SOA-C03 starter (25 of 65) — written this session
+  // AWS SOA-C03: 25 + 35 = 60 of 65
   'scripts/seed-soa-c03-fill.ts',
-  // AWS AIF-C01 starter (25 of 65) — written this session
+  'scripts/seed-soa-c03-fill2.ts',
+  // AWS AIF-C01: 25 + 35 = 60 of 65
   'scripts/seed-aif-c01-fill.ts',
-  // AWS SCS-C03 starter (25 of 65) — written this session
+  'scripts/seed-aif-c01-fill2.ts',
+  // AWS SCS-C03: 25 + 35 = 60 of 65
   'scripts/seed-scs-c03-fill.ts',
-  // AWS MLA-C01 starter (25 of 65) — written this session
+  'scripts/seed-scs-c03-fill2.ts',
+  // AWS MLA-C01: 25 + 35 = 60 of 65
   'scripts/seed-mla-c01-fill.ts',
-  // AWS DOP-C02 starter (25 of 75) — written this session
+  'scripts/seed-mla-c01-fill2.ts',
+  // AWS DOP-C02: 25 + 35 = 60 of 75
   'scripts/seed-dop-c02-fill.ts',
-  // AWS AIP-C01 starter (25 of 75) — written this session
+  'scripts/seed-dop-c02-fill2.ts',
+  // AWS AIP-C01: 25 + 35 = 60 of 75
   'scripts/seed-aip-c01-fill.ts',
-  // AWS SAP-C02 starter (25 of 75) — written this session
+  'scripts/seed-aip-c01-fill2.ts',
+  // AWS SAP-C02: 25 + 35 = 60 of 75
   'scripts/seed-sap-c02-fill.ts',
-  // AWS ANS-C01 starter (25 of 65) — written this session
-  'scripts/seed-ans-c01-fill.ts'
+  'scripts/seed-sap-c02-fill2.ts',
+  // AWS ANS-C01: 25 + 35 = 60 of 65
+  'scripts/seed-ans-c01-fill.ts',
+  'scripts/seed-ans-c01-fill2.ts'
 ];
 
 async function main() {
