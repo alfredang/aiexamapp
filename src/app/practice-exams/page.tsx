@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { db } from '@/lib/db';
 import { formatPrice } from '@/lib/utils';
+import { Package } from 'lucide-react';
 
 export default async function CatalogPage({ searchParams }: { searchParams: Promise<{ q?: string; level?: string; vendor?: string }> }) {
   const sp = await searchParams;
@@ -22,6 +23,16 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
     include: { vendor: true, _count: { select: { questions: { where: { status: 'PUBLISHED' } } } } },
     orderBy: { createdAt: 'desc' }
   });
+  // Show bundles only when there's no active filter — bundles are
+  // catalogue-wide products, not vendor- or level-specific.
+  const showBundles = !sp.vendor && !sp.level && !q;
+  const bundles = showBundles
+    ? await db.bundle.findMany({
+        where: { published: true },
+        include: { items: { include: { exam: true } } },
+        orderBy: { createdAt: 'desc' }
+      })
+    : [];
   const vendors = await db.vendor.findMany({ orderBy: { name: 'asc' } });
   const levels = ['Foundational', 'Associate', 'Professional', 'Specialty'];
 
@@ -45,6 +56,39 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
         <button className="btn-primary">Filter</button>
       </form>
 
+      {bundles.length > 0 && (
+        <section className="mb-8">
+          <div className="mb-3 flex items-center gap-2">
+            <Package className="h-5 w-5 text-purple-700" />
+            <h2 className="text-lg font-semibold">Bundles</h2>
+            <span className="text-xs text-slate-500">— save vs buying separately</span>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {bundles.map(b => (
+              <Link key={b.id} href={`/bundles/${b.slug}`} className="card-hover p-5 ring-1 ring-purple-100">
+                <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
+                  <span className="badge bg-purple-50 text-purple-700">Bundle</span>
+                  <span className="badge">{b.items.length} items</span>
+                </div>
+                <h3 className="font-semibold">{b.title}</h3>
+                <p className="mt-1 line-clamp-2 text-sm text-slate-600">{b.description}</p>
+                <ul className="mt-2 space-y-0.5 text-xs text-slate-500">
+                  {b.items.slice(0, 3).map(it => (
+                    <li key={it.id}>• {it.exam.code} — {it.tier === 'VOUCHER' ? 'voucher' : 'practice'}</li>
+                  ))}
+                </ul>
+                <div className="mt-4 flex items-center justify-end text-sm">
+                  <span className="font-semibold text-purple-700">{formatPrice(b.price)}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {bundles.length > 0 && (
+        <h2 className="mb-3 text-lg font-semibold">Individual exams</h2>
+      )}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {exams.map(e => (
           <Link key={e.id} href={`/practice-exams/${e.vendor.slug}/${e.slug}`} className="card-hover p-5">

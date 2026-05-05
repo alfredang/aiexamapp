@@ -12,7 +12,7 @@ async function refund(formData: FormData) {
 
 export default async function AdminOrdersPage() {
   const orders = await db.order.findMany({
-    include: { user: true, exam: true },
+    include: { user: true, exam: true, bundle: true },
     orderBy: { createdAt: 'desc' },
     take: 100
   });
@@ -20,11 +20,14 @@ export default async function AdminOrdersPage() {
     <div>
       <h1 className="text-2xl font-bold">Orders</h1>
       <div className="card mt-4 divide-y divide-slate-200">
-        {orders.map(o => (
+        {orders.map(o => {
+          const productLabel = o.bundle ? `${o.bundle.title} (bundle)` : o.exam?.title ?? '(unknown)';
+          const tierLabelText = o.bundle ? 'Bundle' : (o.tier ? tierLabel(o.tier) : '—');
+          return (
           <div key={o.id} className="flex items-center justify-between p-4">
             <div>
-              <div className="font-medium">{o.user.email} · {o.exam.title}</div>
-              <div className="text-xs text-slate-500">{tierLabel(o.tier)} · {o.createdAt.toLocaleString()}</div>
+              <div className="font-medium">{o.user.email} · {productLabel}</div>
+              <div className="text-xs text-slate-500">{tierLabelText} · {o.createdAt.toLocaleString()}</div>
             </div>
             <div className="flex items-center gap-3">
               <div className="font-semibold">{formatPrice(o.amount, o.currency)}</div>
@@ -34,7 +37,8 @@ export default async function AdminOrdersPage() {
               )}
             </div>
           </div>
-        ))}
+          );
+        })}
         {orders.length === 0 && <p className="p-4 text-slate-500">No orders yet.</p>}
       </div>
     </div>

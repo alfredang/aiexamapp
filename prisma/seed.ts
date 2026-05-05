@@ -66,6 +66,52 @@ const OBSOLETE_EXAM_SLUGS = [
   'aws-saa-c03'
 ];
 
+// Curated bundles — multi-exam products defined declaratively here.
+// Each item references an exam by slug + the tier the buyer receives.
+type BundleSeed = {
+  slug: string;
+  title: string;
+  description: string;
+  price: number; // cents
+  items: { examSlug: string; tier: 'PRACTICE' | 'VOUCHER'; position?: number }[];
+};
+
+const BUNDLES: BundleSeed[] = [
+  {
+    slug: 'cloud-foundations-pack',
+    title: 'Microsoft + AWS Foundations Bundle',
+    description: 'Practice access to both Microsoft Azure Fundamentals (AZ-900) and AWS Cloud Practitioner (CLF-C02), plus an AWS Cloud Practitioner exam voucher. Save vs buying separately — the voucher alone is USD 100.',
+    price: 11500,
+    items: [
+      { examSlug: 'microsoft-az-900', tier: 'PRACTICE', position: 1 },
+      { examSlug: 'aws-clf-c02',      tier: 'PRACTICE', position: 2 },
+      { examSlug: 'aws-clf-c02',      tier: 'VOUCHER',  position: 3 }
+    ]
+  },
+  {
+    slug: 'aws-devops-track',
+    title: 'AWS DevOps Track Bundle',
+    description: 'Practice access to both AWS Certified Developer — Associate (DVA-C02) and AWS Certified DevOps Engineer — Professional (DOP-C02), plus a real DOP-C02 exam voucher. The Developer Associate is the natural prerequisite for DevOps Professional, so this pack covers both tiers in one go. The DOP-C02 voucher alone is USD 300.',
+    price: 32900,
+    items: [
+      { examSlug: 'aws-dva-c02', tier: 'PRACTICE', position: 1 },
+      { examSlug: 'aws-dop-c02', tier: 'PRACTICE', position: 2 },
+      { examSlug: 'aws-dop-c02', tier: 'VOUCHER',  position: 3 }
+    ]
+  },
+  {
+    slug: 'aws-data-engineer-track',
+    title: 'AWS Data Engineer Track Bundle',
+    description: 'Practice access to both AWS Cloud Practitioner (CLF-C02) and AWS Certified Data Engineer — Associate (DEA-C01), plus a real DEA-C01 exam voucher. CLF-C02 builds the cloud-fundamentals foundation that the Data Engineer Associate exam assumes. The DEA-C01 voucher alone is USD 150.',
+    price: 17900,
+    items: [
+      { examSlug: 'aws-clf-c02', tier: 'PRACTICE', position: 1 },
+      { examSlug: 'aws-dea-c01', tier: 'PRACTICE', position: 2 },
+      { examSlug: 'aws-dea-c01', tier: 'VOUCHER',  position: 3 }
+    ]
+  }
+];
+
 const EXAMS: ExamSeed[] = [
   // ───── AWS ─────
   {
@@ -84,8 +130,9 @@ const EXAMS: ExamSeed[] = [
   {
     vendorSlug: 'aws', slug: 'aws-dva-c02', code: 'DVA-C02',
     title: 'AWS Certified Developer — Associate',
-    description: 'Develop, deploy, and debug cloud-based applications using AWS services.',
+    description: 'Develop, deploy, and debug cloud-based applications using AWS services. Real exam fee is USD 150 (voucher).',
     level: 'Associate', durationMinutes: 130, passingScore: 72, questionCount: 65,
+    priceVoucher: 15000,
     domains: [
       { name: 'Development with AWS Services', weight: 32 },
       { name: 'Security', weight: 26 },
@@ -108,6 +155,19 @@ const EXAMS: ExamSeed[] = [
     ]
   },
   {
+    vendorSlug: 'aws', slug: 'aws-dea-c01', code: 'DEA-C01',
+    title: 'AWS Certified Data Engineer — Associate',
+    description: 'Build and maintain data pipelines, manage data stores, and operate, monitor, and secure data workloads on AWS. Covers Kinesis, Glue, EMR, Redshift, DynamoDB, Lake Formation, and the broader analytics stack. Real exam fee is USD 150 (voucher).',
+    level: 'Associate', durationMinutes: 130, passingScore: 72, questionCount: 65,
+    priceVoucher: 15000,
+    domains: [
+      { name: 'Data Ingestion and Transformation', weight: 34 },
+      { name: 'Data Store Management', weight: 26 },
+      { name: 'Data Operations and Support', weight: 22 },
+      { name: 'Data Security and Governance', weight: 18 }
+    ]
+  },
+  {
     vendorSlug: 'aws', slug: 'aws-sap-c02', code: 'SAP-C02',
     title: 'AWS Certified Solutions Architect — Professional',
     description: 'Advanced architectural design across complex AWS environments.',
@@ -122,8 +182,9 @@ const EXAMS: ExamSeed[] = [
   {
     vendorSlug: 'aws', slug: 'aws-dop-c02', code: 'DOP-C02',
     title: 'AWS Certified DevOps Engineer — Professional',
-    description: 'Implement and manage continuous delivery systems and methodologies on AWS.',
+    description: 'Implement and manage continuous delivery systems and methodologies on AWS — CI/CD pipelines, infrastructure as code, monitoring, incident response, and security automation. Real exam fee is USD 300 (voucher).',
     level: 'Professional', durationMinutes: 180, passingScore: 75, questionCount: 75,
+    priceVoucher: 30000,
     domains: [
       { name: 'SDLC Automation', weight: 22 },
       { name: 'Configuration Management and IaC', weight: 17 },
@@ -659,7 +720,30 @@ async function main() {
     }
   }
 
-  console.log(`Seed complete. Vendors: ${VENDORS.length}, Exams: ${EXAMS.length}. Admins: ${admins.map(a => a.email).join(', ')}`);
+  // Seed bundles. Items are kept in sync declaratively — on each seed run
+  // we delete-then-recreate the BundleItem rows so the seed file is the
+  // source of truth for what each bundle contains.
+  const examMap = Object.fromEntries((await db.exam.findMany()).map(e => [e.slug, e.id]));
+  for (const b of BUNDLES) {
+    const bundle = await db.bundle.upsert({
+      where: { slug: b.slug },
+      update: { title: b.title, description: b.description, price: b.price, published: true },
+      create: { slug: b.slug, title: b.title, description: b.description, price: b.price, published: true }
+    });
+    await db.bundleItem.deleteMany({ where: { bundleId: bundle.id } });
+    for (const item of b.items) {
+      const examId = examMap[item.examSlug];
+      if (!examId) {
+        console.warn(`  ⚠ Bundle "${b.slug}" references unknown exam slug "${item.examSlug}" — skipping`);
+        continue;
+      }
+      await db.bundleItem.create({
+        data: { bundleId: bundle.id, examId, tier: item.tier as Tier, position: item.position ?? 0 }
+      });
+    }
+  }
+
+  console.log(`Seed complete. Vendors: ${VENDORS.length}, Exams: ${EXAMS.length}, Bundles: ${BUNDLES.length}. Admins: ${admins.map(a => a.email).join(', ')}`);
 }
 
 main().finally(() => db.$disconnect());

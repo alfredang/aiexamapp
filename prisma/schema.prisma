@@ -94,7 +94,40 @@ model Exam {
   attempts        Attempt[]
   entitlements    Entitlement[]
   orders          Order[]
+  bundleItems     BundleItem[]
   @@index([vendorId])
+}
+
+// A curated multi-exam product. Distinct from the existing per-exam
+// `BUNDLE` Tier (which packages PRACTICE + VOUCHER for a single exam).
+// A Bundle can contain entitlements across multiple exams — e.g. two
+// practice tiers + one voucher across two different certifications.
+model Bundle {
+  id          String       @id @default(cuid())
+  slug        String       @unique
+  title       String
+  description String
+  price       Int          // cents
+  published   Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  items       BundleItem[]
+  orders      Order[]
+}
+
+// One line item inside a Bundle: which exam, at which tier (PRACTICE
+// or VOUCHER). When a Bundle is purchased, fulfillOrder writes one
+// Entitlement per BundleItem.
+model BundleItem {
+  id       String @id @default(cuid())
+  bundleId String
+  bundle   Bundle @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  examId   String
+  exam     Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
+  tier     Tier   // PRACTICE or VOUCHER (others not meaningful in a bundle)
+  position Int    @default(0)
+  @@unique([bundleId, examId, tier])
+  @@index([examId])
 }
 
 model Question {
@@ -156,13 +189,20 @@ model Attempt {
   @@index([guestToken])
 }
 
+// An order is for EITHER a single Exam at a tier, OR a Bundle.
+// Exactly one of (examId+tier) and bundleId should be set, enforced by
+// application logic in the create-order route. Both fields are nullable
+// in the schema so we can model both purchase types without a separate
+// table.
 model Order {
   id              String      @id @default(cuid())
   userId          String
   user            User        @relation(fields: [userId], references: [id])
-  examId          String
-  exam            Exam        @relation(fields: [examId], references: [id])
-  tier            Tier
+  examId          String?
+  exam            Exam?       @relation(fields: [examId], references: [id])
+  tier            Tier?
+  bundleId        String?
+  bundle          Bundle?     @relation(fields: [bundleId], references: [id])
   paypalOrderId   String      @unique
   paypalCaptureId String?     @unique
   paypalPayload   Json?
