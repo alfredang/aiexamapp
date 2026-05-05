@@ -39,7 +39,29 @@ const SCRIPTS = [
   'scripts/seed-clf-c02-top.ts',
   // AWS DEA-C01: 25 + 40 = 65
   'scripts/seed-dea-c01-fill.ts',
-  'scripts/seed-dea-c01-fill2.ts'
+  'scripts/seed-dea-c01-fill2.ts',
+  // AWS SAA-C03 starter (25 of 65)
+  'scripts/seed-saa-c03-fill.ts',
+  // AWS DVA-C02 starter (25 of 65)
+  'scripts/seed-dva-c02-fill.ts',
+  // Oracle OCI Foundations starter (6 of 40)
+  'scripts/seed-oci-foundations-starter.ts',
+  // AWS SOA-C03 starter (25 of 65) — written this session
+  'scripts/seed-soa-c03-fill.ts',
+  // AWS AIF-C01 starter (25 of 65) — written this session
+  'scripts/seed-aif-c01-fill.ts',
+  // AWS SCS-C03 starter (25 of 65) — written this session
+  'scripts/seed-scs-c03-fill.ts',
+  // AWS MLA-C01 starter (25 of 65) — written this session
+  'scripts/seed-mla-c01-fill.ts',
+  // AWS DOP-C02 starter (25 of 75) — written this session
+  'scripts/seed-dop-c02-fill.ts',
+  // AWS AIP-C01 starter (25 of 75) — written this session
+  'scripts/seed-aip-c01-fill.ts',
+  // AWS SAP-C02 starter (25 of 75) — written this session
+  'scripts/seed-sap-c02-fill.ts',
+  // AWS ANS-C01 starter (25 of 65) — written this session
+  'scripts/seed-ans-c01-fill.ts'
 ];
 
 async function main() {

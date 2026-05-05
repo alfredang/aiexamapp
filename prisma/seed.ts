@@ -58,12 +58,16 @@ const CLAUDE_ARCHITECT_DESCRIPTION =
 // Cleanup in main() deletes any DB rows still pointing at these (exam,
 // questions, entitlements, attempts, orders).
 //   - The 3 CCA-F shells were consolidated to a single `anthropic-cca-foundations` slug
-//   - aws-saa-c03 was removed from the catalog (was a 60-placeholder shell)
+//   - aws-soa-c02 retired/renamed to CloudOps Engineer (now aws-soa-c03)
+//   - aws-scs-c02 superseded by SCS-C03 (now aws-scs-c03)
+// Note: aws-saa-c03 was previously deleted as a placeholder shell but is
+// re-added below now that the official AWS catalogue still offers it.
 const OBSOLETE_EXAM_SLUGS = [
   'anthropic-claude-architect-foundations-1',
   'anthropic-claude-architect-foundations-2',
   'anthropic-claude-architect-foundations-3',
-  'aws-saa-c03'
+  'aws-soa-c02',
+  'aws-scs-c02'
 ];
 
 // Curated bundles — multi-exam products defined declaratively here.
@@ -113,17 +117,17 @@ const EXAMS: ExamSeed[] = [
     ]
   },
   {
-    vendorSlug: 'aws', slug: 'aws-soa-c02', code: 'SOA-C02',
-    title: 'AWS Certified SysOps Administrator — Associate',
-    description: 'Deploy, manage, and operate workloads on AWS with focus on monitoring, security, and reliability.',
+    vendorSlug: 'aws', slug: 'aws-soa-c03', code: 'SOA-C03',
+    title: 'AWS Certified CloudOps Engineer — Associate',
+    description: 'Deploy, manage, and operate workloads on AWS following the Well-Architected Framework. Covers monitoring, logging, remediation, performance optimisation, reliability and business continuity, deployment provisioning and automation, security and compliance, and networking. Replaces the SysOps Administrator (SOA-C02) exam. Real exam fee is USD 150 (voucher).',
     level: 'Associate', durationMinutes: 180, passingScore: 72, questionCount: 65,
+    priceVoucher: 15000,
     domains: [
-      { name: 'Monitoring, Logging, and Remediation', weight: 20 },
-      { name: 'Reliability and Business Continuity', weight: 16 },
-      { name: 'Deployment, Provisioning, and Automation', weight: 18 },
+      { name: 'Monitoring, Logging, Analysis, Remediation, and Performance Optimization', weight: 22 },
+      { name: 'Reliability and Business Continuity', weight: 22 },
+      { name: 'Deployment, Provisioning, and Automation', weight: 22 },
       { name: 'Security and Compliance', weight: 16 },
-      { name: 'Networking and Content Delivery', weight: 18 },
-      { name: 'Cost and Performance Optimization', weight: 12 }
+      { name: 'Networking and Content Delivery', weight: 18 }
     ]
   },
   {
@@ -167,17 +171,18 @@ const EXAMS: ExamSeed[] = [
     ]
   },
   {
-    vendorSlug: 'aws', slug: 'aws-scs-c02', code: 'SCS-C02',
+    vendorSlug: 'aws', slug: 'aws-scs-c03', code: 'SCS-C03',
     title: 'AWS Certified Security — Specialty',
-    description: 'Specialized expertise in securing AWS workloads, identity, data protection, and compliance.',
+    description: 'Validate expertise in securing AWS workloads — detection, incident response, infrastructure security, identity and access management, data protection, and security governance. Targets candidates with 3–5 years of cloud security experience. Real exam fee is USD 300 (voucher).',
     level: 'Specialty', durationMinutes: 170, passingScore: 75, questionCount: 65,
+    priceVoucher: 30000,
     domains: [
-      { name: 'Threat Detection and Incident Response', weight: 14 },
-      { name: 'Security Logging and Monitoring', weight: 18 },
-      { name: 'Infrastructure Security', weight: 20 },
-      { name: 'Identity and Access Management', weight: 16 },
+      { name: 'Detection', weight: 16 },
+      { name: 'Incident Response', weight: 14 },
+      { name: 'Infrastructure Security', weight: 18 },
+      { name: 'Identity and Access Management', weight: 20 },
       { name: 'Data Protection', weight: 18 },
-      { name: 'Management and Security Governance', weight: 14 }
+      { name: 'Security Foundations and Governance', weight: 14 }
     ]
   },
   {
@@ -191,6 +196,59 @@ const EXAMS: ExamSeed[] = [
       { name: 'Applications of Foundation Models', weight: 28 },
       { name: 'Guidelines for Responsible AI', weight: 14 },
       { name: 'Security, Compliance, and Governance for AI Solutions', weight: 14 }
+    ]
+  },
+  {
+    vendorSlug: 'aws', slug: 'aws-saa-c03', code: 'SAA-C03',
+    title: 'AWS Certified Solutions Architect — Associate',
+    description: 'Design solutions on AWS based on the Well-Architected Framework — secure, resilient, high-performing, and cost-optimised architectures. Targets candidates with at least 1 year of hands-on AWS design experience. Real exam fee is USD 150 (voucher).',
+    level: 'Associate', durationMinutes: 130, passingScore: 72, questionCount: 65,
+    priceVoucher: 15000,
+    domains: [
+      { name: 'Design Secure Architectures', weight: 30 },
+      { name: 'Design Resilient Architectures', weight: 26 },
+      { name: 'Design High-Performing Architectures', weight: 24 },
+      { name: 'Design Cost-Optimized Architectures', weight: 20 }
+    ]
+  },
+  {
+    vendorSlug: 'aws', slug: 'aws-mla-c01', code: 'MLA-C01',
+    title: 'AWS Certified Machine Learning Engineer — Associate',
+    description: 'Build, operationalise, deploy, and maintain ML solutions and pipelines on AWS — data preparation, model development, deployment and orchestration, monitoring, maintenance, and security. Targets ML engineers with at least 1 year of hands-on SageMaker experience. Real exam fee is USD 150 (voucher).',
+    level: 'Associate', durationMinutes: 130, passingScore: 72, questionCount: 65,
+    priceVoucher: 15000,
+    domains: [
+      { name: 'Data Preparation for Machine Learning (ML)', weight: 28 },
+      { name: 'ML Model Development', weight: 26 },
+      { name: 'Deployment and Orchestration of ML Workflows', weight: 22 },
+      { name: 'ML Solution Monitoring, Maintenance, and Security', weight: 24 }
+    ]
+  },
+  {
+    vendorSlug: 'aws', slug: 'aws-aip-c01', code: 'AIP-C01',
+    title: 'AWS Certified Generative AI Developer — Professional',
+    description: 'Integrate foundation models into applications and business workflows on AWS — vector stores, RAG, agentic AI, prompt engineering, AI safety and governance, performance and cost optimisation. Targets GenAI developers with 1+ year hands-on GenAI experience. Real exam fee is USD 300 (voucher).',
+    level: 'Professional', durationMinutes: 180, passingScore: 75, questionCount: 75,
+    priceVoucher: 30000,
+    domains: [
+      { name: 'Foundation Model Integration, Data Management, and Compliance', weight: 31 },
+      { name: 'Implementation and Integration', weight: 26 },
+      { name: 'AI Safety, Security, and Governance', weight: 20 },
+      { name: 'Operational Efficiency and Optimization for GenAI Applications', weight: 12 },
+      { name: 'Testing, Validation, and Troubleshooting', weight: 11 }
+    ]
+  },
+  {
+    vendorSlug: 'aws', slug: 'aws-ans-c01', code: 'ANS-C01',
+    title: 'AWS Certified Advanced Networking — Specialty',
+    description: 'Design, implement, manage, and secure AWS and hybrid network architectures at scale. Targets candidates with 5+ years of networking experience and 2+ years cloud/hybrid networking. Real exam fee is USD 300 (voucher).',
+    level: 'Specialty', durationMinutes: 170, passingScore: 70, questionCount: 65,
+    priceVoucher: 30000,
+    domains: [
+      { name: 'Network Design', weight: 30 },
+      { name: 'Network Implementation', weight: 26 },
+      { name: 'Network Management and Operation', weight: 20 },
+      { name: 'Network Security, Compliance, and Governance', weight: 24 }
     ]
   },
 
