@@ -1,20 +1,21 @@
 /**
  * One-shot wrapper: run every content seed in the correct order so that
- * AWS-SAA-C03, Anthropic CCA-F, Microsoft AZ-900, and Google ACE all
- * end up at 60 published questions each.
+ * Anthropic CCA-F, Microsoft AZ-900, Google ACE, and AWS CLF-C02 all
+ * end up at their target question counts.
  *
  *   npx tsx scripts/seed-all-content.ts
  *
  * Each underlying script is independently idempotent (skips its own
  * batch if it already ran), so re-running this wrapper is a no-op.
  *
- * Production rollout (typically inside the Coolify container):
- *   1. Pull latest code & deploy (runs `prisma migrate deploy` and
- *      `npm run db:seed` on boot — that creates the catalog + admins).
- *   2. Exec into the container and run:    npx tsx scripts/seed-all-content.ts
- *
- * AWS SAA-C03 is already filled by prisma/seed.ts itself (60 placeholder
- * questions are inserted on first seed if the exam has none).
+ * Production rollout (typically inside the Coolify container, or
+ * automatically as part of the Dockerfile boot CMD):
+ *   1. Pull latest code & deploy — Dockerfile runs `prisma migrate deploy`,
+ *      `npm run db:seed` (catalog + admins + obsolete-slug cleanup),
+ *      then this wrapper, all before starting the Next.js server.
+ *   2. After deploy, all four exams will have content; other catalog
+ *      entries remain 0-question placeholders (hidden by the public
+ *      catalog filter until they get content).
  */
 import { execSync } from 'node:child_process';
 import { resolve } from 'node:path';
@@ -31,7 +32,11 @@ const SCRIPTS = [
   'scripts/seed-az900-fill2.ts',
   // Google ACE: 10 + 25 + 25 = 60
   'scripts/seed-ace-fill.ts',
-  'scripts/seed-ace-fill2.ts'
+  'scripts/seed-ace-fill2.ts',
+  // AWS CLF-C02: 25 + 39 + 1 = 65
+  'scripts/seed-clf-c02-fill.ts',
+  'scripts/seed-clf-c02-fill2.ts',
+  'scripts/seed-clf-c02-top.ts'
 ];
 
 async function main() {
