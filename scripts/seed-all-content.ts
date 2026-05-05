@@ -36,7 +36,10 @@ const SCRIPTS = [
   // AWS CLF-C02: 25 + 39 + 1 = 65
   'scripts/seed-clf-c02-fill.ts',
   'scripts/seed-clf-c02-fill2.ts',
-  'scripts/seed-clf-c02-top.ts'
+  'scripts/seed-clf-c02-top.ts',
+  // AWS DEA-C01: 25 + 40 = 65
+  'scripts/seed-dea-c01-fill.ts',
+  'scripts/seed-dea-c01-fill2.ts'
 ];
 
 async function main() {
