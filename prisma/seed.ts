@@ -81,7 +81,7 @@ const HIDDEN_EXAM_SLUGS = [
 // in this list is force-hidden (published = false), regardless of question
 // count. Used to launch with AWS only and roll out other vendors gradually.
 // Flip a single string to re-enable a vendor.
-const VISIBLE_VENDOR_SLUGS = ['aws'];
+const VISIBLE_VENDOR_SLUGS = ['aws', 'microsoft', 'google', 'anthropic', 'cisco', 'comptia', 'oracle'];
 
 // Curated bundles — multi-exam products defined declaratively here.
 // Each item references an exam by slug + the tier the buyer receives.
