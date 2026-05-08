@@ -23,7 +23,7 @@ export default async function HomePage() {
     <>
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-slate-200 dark:border-slate-800">
-        <div className="pointer-events-none absolute right-0 top-0 hidden h-full w-1/2 text-blue-200/40 md:block dark:text-blue-400/15">
+        <div className="pointer-events-none absolute right-0 top-0 hidden h-full w-1/2 text-blue-200/40 md:block dark:text-blue-400/15 md:dark:hidden">
           <DotPattern className="h-full w-full" />
         </div>
         <div className="container-app relative grid gap-10 py-16 md:grid-cols-2 md:py-24">
@@ -55,7 +55,7 @@ export default async function HomePage() {
             <img
               src="/hero-dark.png"
               alt="CertPrep AI exam-prep dashboard preview"
-              className="hidden h-auto max-h-[480px] w-full max-w-full object-contain dark:block"
+              className="hidden h-auto max-h-[480px] w-full max-w-full object-contain dark:block [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_85%)] [-webkit-mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_85%)]"
             />
           </div>
         </div>
