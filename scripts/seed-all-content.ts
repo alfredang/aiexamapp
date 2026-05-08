@@ -71,7 +71,18 @@ const SCRIPTS = [
   'scripts/seed-sap-c02-fill2.ts',
   // AWS ANS-C01: 25 + 35 = 60 of 65
   'scripts/seed-ans-c01-fill.ts',
-  'scripts/seed-ans-c01-fill2.ts'
+  'scripts/seed-ans-c01-fill2.ts',
+  // CompTIA Cloud+ practice exams (sourced from Google Forms)
+  'scripts/seed-comptia-cloud-plus-p1.ts',
+  'scripts/seed-comptia-cloud-plus-p5.ts',
+  'scripts/seed-comptia-cloud-plus-p6.ts',
+  'scripts/seed-comptia-cloud-plus-p7.ts',
+  'scripts/seed-comptia-cloud-plus-p8.ts',
+  // Professional Scrum Master practice exam (hosted under CompTIA vendor)
+  'scripts/seed-comptia-psm-p6.ts',
+  // Microsoft practice exams
+  'scripts/seed-microsoft-ai102.ts',
+  'scripts/seed-microsoft-dp203-p6.ts'
 ];
 
 async function main() {
