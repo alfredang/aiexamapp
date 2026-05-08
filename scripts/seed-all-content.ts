@@ -221,6 +221,11 @@ const SCRIPTS = [
   'scripts/seed-tableau-desktop-specialist-p5.ts',
   // IASSC CLSSGB practice exam from PDF batch
   'scripts/seed-iassc-clssgb-p1.ts',
+  // Topup scripts — bring exams to 60 questions with hand-authored supplementals
+  'scripts/seed-microsoft-ai-900-topup.ts',
+  'scripts/seed-tableau-desktop-topup.ts',
+  'scripts/seed-axelos-itil4-topup.ts',
+  'scripts/seed-iassc-clssgb-topup.ts',
   // CompTIA Cloud+ practice exams (sourced from Google Forms)
   'scripts/seed-comptia-cloud-plus-p1.ts',
   'scripts/seed-comptia-cloud-plus-p5.ts',
