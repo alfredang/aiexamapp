@@ -10,4 +10,6 @@ dist
 .playwright-mcp/
 .mcp.json
 *.pdf
+# Source PDFs and any artifacts under those folders — never commit
+practice-exams-pdfs-*/
 .claude/
