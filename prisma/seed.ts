@@ -40,7 +40,14 @@ const VENDORS = [
   { slug: 'cisco', name: 'Cisco', description: 'Networking, security, and DevNet certifications.' },
   { slug: 'oracle', name: 'Oracle', description: 'Oracle Cloud Infrastructure, database, and AI certifications.' },
   { slug: 'google', name: 'Google Cloud', description: 'Google Cloud Platform certifications across cloud, data, and ML.' },
-  { slug: 'anthropic', name: 'Anthropic', description: 'Anthropic Claude — agent SDK, Claude Code, MCP, and applied AI architecture.' }
+  { slug: 'anthropic', name: 'Anthropic', description: 'Anthropic Claude — agent SDK, Claude Code, MCP, and applied AI architecture.' },
+  { slug: 'isc2', name: 'ISC2', description: 'Information security certifications including CISSP.' },
+  { slug: 'pmi', name: 'PMI', description: 'Project Management Institute — PMP and other project management certifications.' },
+  { slug: 'scrum-org', name: 'Scrum.org', description: 'Agile and Scrum certifications including Professional Scrum Master.' },
+  { slug: 'github', name: 'GitHub', description: 'GitHub developer and platform certifications.' },
+  { slug: 'axelos', name: 'AXELOS', description: 'ITIL, PRINCE2, and IT service management certifications.' },
+  { slug: 'tableau', name: 'Tableau', description: 'Tableau certifications for data visualization and analytics.' },
+  { slug: 'iassc', name: 'IASSC', description: 'Lean Six Sigma certifications.' }
 ];
 
 const CLAUDE_ARCHITECT_DOMAINS = [
