@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
 import { formatPrice } from '@/lib/utils';
 
+export const dynamic = 'force-dynamic';
+
 export default async function VendorCatalogPage({ params }: { params: Promise<{ vendor: string }> }) {
   const { vendor: slug } = await params;
   const vendor = await db.vendor.findUnique({

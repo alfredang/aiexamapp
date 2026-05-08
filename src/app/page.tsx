@@ -4,6 +4,10 @@ import { formatPrice } from '@/lib/utils';
 import { DotPattern } from '@/components/dot-pattern';
 import { Search, ShieldCheck, Sparkles, BookOpen, BadgeCheck, Award } from 'lucide-react';
 
+// Vendor + popular-exam counts come from live DB queries; without this the
+// page is statically prerendered and shows stale counts after seed updates.
+export const dynamic = 'force-dynamic';
+
 export default async function HomePage() {
   // Vendor exam counts only count exams visible in the public catalog
   // (i.e. published AND have at least one published question), so the
