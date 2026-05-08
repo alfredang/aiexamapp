@@ -226,6 +226,10 @@ const SCRIPTS = [
   'scripts/seed-tableau-desktop-topup.ts',
   'scripts/seed-axelos-itil4-topup.ts',
   'scripts/seed-iassc-clssgb-topup.ts',
+  'scripts/seed-isc2-cissp-topup.ts',
+  'scripts/seed-comptia-server-plus-topup.ts',
+  'scripts/seed-microsoft-az-104-topup.ts',
+  'scripts/seed-microsoft-dp-900-topup.ts',
   // CompTIA Cloud+ practice exams (sourced from Google Forms)
   'scripts/seed-comptia-cloud-plus-p1.ts',
   'scripts/seed-comptia-cloud-plus-p5.ts',
