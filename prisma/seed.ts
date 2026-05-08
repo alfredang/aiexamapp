@@ -63,10 +63,16 @@ const CLAUDE_ARCHITECT_DESCRIPTION =
 
 // Slugs that previously existed but have been removed from the catalog.
 // Cleanup in main() deletes any DB rows still pointing at these (exam,
-// questions, entitlements, attempts, orders).
+// questions, entitlements, attempts, orders). The upsert loop also SKIPS
+// these so they are not recreated.
 //   - The 3 CCA-F shells were consolidated to a single `anthropic-cca-foundations` slug
 //   - aws-soa-c02 retired/renamed to CloudOps Engineer (now aws-soa-c03)
 //   - aws-scs-c02 superseded by SCS-C03 (now aws-scs-c03)
+//   - 26 catalog placeholder shells removed in 2026-05 cleanup: every cert
+//     listed below either has PDF-sourced -p1/-p2/... variants now (so the
+//     base shell is redundant) or was a never-implemented catalog stub.
+//     The source EXAMS entries are kept below for historical reference;
+//     the upsert loop skips them due to OBSOLETE_EXAM_SLUGS membership.
 // Note: aws-saa-c03 was previously deleted as a placeholder shell but is
 // re-added below now that the official AWS catalogue still offers it.
 const OBSOLETE_EXAM_SLUGS = [
@@ -74,7 +80,34 @@ const OBSOLETE_EXAM_SLUGS = [
   'anthropic-claude-architect-foundations-2',
   'anthropic-claude-architect-foundations-3',
   'aws-soa-c02',
-  'aws-scs-c02'
+  'aws-scs-c02',
+  // 2026-05 catalog cleanup — placeholder shells with no questions
+  'cisco-cyberops-200-201',
+  'cisco-ccna-200-301',
+  'cisco-ccnp-encor-350-401',
+  'comptia-a-220-1101',
+  'comptia-a-220-1102',
+  'comptia-cysa-cs0-003',
+  'comptia-network-n10-009',
+  'comptia-security-sy0-701',
+  'google-cloud-digital-leader',
+  'google-professional-cloud-architect',
+  'google-professional-cloud-security',
+  'google-professional-data-engineer',
+  'google-professional-ml-engineer',
+  'microsoft-ai-900',
+  'microsoft-az-104',
+  'microsoft-az-204',
+  'microsoft-az-305',
+  'microsoft-az-400',
+  'microsoft-az-500',
+  'microsoft-dp-900',
+  'microsoft-ms-900',
+  'microsoft-sc-900',
+  'oracle-db-sql-1z0-071',
+  'oracle-oci-architect-associate-1z0-1072',
+  'oracle-genai-professional-1z0-1127',
+  'oracle-oci-architect-pro-1z0-997'
 ];
 
 // Slugs that should be kept in the DB but hidden from the public catalog
@@ -703,6 +736,10 @@ async function main() {
   );
 
   for (const e of EXAMS) {
+    // Skip slugs marked obsolete — the cleanup pass below removes any
+    // existing rows. Keeping the catalog entry in the source file (rather
+    // than deleting it) preserves history and makes revival straightforward.
+    if (OBSOLETE_EXAM_SLUGS.includes(e.slug)) continue;
     const defaults = PRICING[e.level];
     const pricePractice = e.pricePractice ?? defaults.practice;
     const priceBundle   = e.priceBundle   ?? defaults.bundle;
@@ -754,7 +791,7 @@ async function main() {
     await db.attempt.deleteMany({ where: { examId: { in: obsoleteIds } } });
     await db.order.deleteMany({ where: { examId: { in: obsoleteIds } } });
     await db.exam.deleteMany({ where: { slug: { in: OBSOLETE_EXAM_SLUGS } } });
-    console.log(`✓ Removed ${obsoleteExams.length} obsolete CCA-F placeholder exam shell(s).`);
+    console.log(`✓ Removed ${obsoleteExams.length} obsolete placeholder exam shell(s).`);
   }
 
   // Grant the internal team test access (PRACTICE tier) on every published exam
