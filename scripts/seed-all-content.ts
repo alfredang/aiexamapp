@@ -103,6 +103,15 @@ const SCRIPTS = [
   'scripts/seed-aws-aif-c01-p1.ts',
   'scripts/seed-aws-aif-c01-p2.ts',
   'scripts/seed-aws-aif-c01-p3.ts',
+  'scripts/seed-aws-aif-c01-p4.ts',
+  'scripts/seed-aws-aif-c01-p5.ts',
+  'scripts/seed-aws-aif-c01-p6.ts',
+  'scripts/seed-aws-aif-c01-p7.ts',
+  // AWS DEA-C01 practice exams (recovered via raw-mode parser)
+  'scripts/seed-aws-dea-c01-p1.ts',
+  'scripts/seed-aws-dea-c01-p2.ts',
+  'scripts/seed-aws-dea-c01-p3.ts',
+  'scripts/seed-aws-dea-c01-p4.ts',
   // Microsoft practice exams from PDF batch
   'scripts/seed-microsoft-ai-900-p1.ts',
   'scripts/seed-microsoft-ai-900-p2.ts',
@@ -129,6 +138,20 @@ const SCRIPTS = [
   'scripts/seed-microsoft-sc-200-p2.ts',
   'scripts/seed-microsoft-sc-200-p3.ts',
   'scripts/seed-microsoft-sc-200-p4.ts',
+  // Microsoft additional practice exams (recovered via raw-mode parser)
+  'scripts/seed-microsoft-ai-102-p1.ts',
+  'scripts/seed-microsoft-ai-102-p2.ts',
+  'scripts/seed-microsoft-ai-102-p3.ts',
+  'scripts/seed-microsoft-ai-102-p4.ts',
+  'scripts/seed-microsoft-dp-100-p1.ts',
+  'scripts/seed-microsoft-dp-100-p2.ts',
+  'scripts/seed-microsoft-dp-300-p1.ts',
+  'scripts/seed-microsoft-dp-300-p2.ts',
+  'scripts/seed-microsoft-dp-300-p3.ts',
+  'scripts/seed-microsoft-dp-300-p4.ts',
+  'scripts/seed-microsoft-ms-102-p1.ts',
+  'scripts/seed-microsoft-ms-102-p2.ts',
+  'scripts/seed-microsoft-ms-102-p4.ts',
   // Google practice exams from PDF batch
   'scripts/seed-google-ace-p1.ts',
   'scripts/seed-google-ace-p2.ts',
@@ -155,6 +178,13 @@ const SCRIPTS = [
   // Cisco CCNP ENCOR practice exams from PDF batch
   'scripts/seed-cisco-ccnp-encor-p1.ts',
   'scripts/seed-cisco-ccnp-encor-p2.ts',
+  // Cisco CCNA practice exams (recovered via raw-mode parser)
+  'scripts/seed-cisco-ccna-p1.ts',
+  'scripts/seed-cisco-ccna-p2.ts',
+  'scripts/seed-cisco-ccna-p3.ts',
+  'scripts/seed-cisco-ccna-p4.ts',
+  'scripts/seed-cisco-ccna-p5.ts',
+  'scripts/seed-cisco-ccna-p6.ts',
   // ISC2 CISSP practice exams from PDF batch
   'scripts/seed-isc2-cissp-p1.ts',
   'scripts/seed-isc2-cissp-p2.ts',
