@@ -50,7 +50,12 @@ export default async function HomePage() {
             <img
               src="/hero.png"
               alt="CertPrep AI exam-prep dashboard preview"
-              className="h-auto max-h-[480px] w-full max-w-full object-contain"
+              className="block h-auto max-h-[480px] w-full max-w-full object-contain dark:hidden"
+            />
+            <img
+              src="/hero-dark.png"
+              alt="CertPrep AI exam-prep dashboard preview"
+              className="hidden h-auto max-h-[480px] w-full max-w-full object-contain dark:block"
             />
           </div>
         </div>
