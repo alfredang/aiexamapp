@@ -51,6 +51,10 @@ function extractText(pdfPath: string): string {
   return execSync(`pdftotext -layout "${pdfPath}" -`, { encoding: 'utf8', maxBuffer: 50 * 1024 * 1024 });
 }
 
+function extractTextRaw(pdfPath: string): string {
+  return execSync(`pdftotext "${pdfPath}" -`, { encoding: 'utf8', maxBuffer: 50 * 1024 * 1024 });
+}
+
 function normalizeWhitespace(s: string): string {
   return s.replace(/\s+/g, ' ').trim();
 }
@@ -182,6 +186,129 @@ function parsePDF(pdfPath: string, defaultDomain: string): Q[] {
     if (q) out.push(q);
   }
   return out;
+}
+
+// Raw-mode parser for PDFs whose -layout output has no explicit
+// "Correct option:" marker AND no consistent leading-space differences in
+// -layout mode. The raw extraction preserves a different signal: the
+// correct option's text either (a) starts on a line with one leading space
+// before the option marker (` C. ...`), or (b) wraps to a continuation
+// line that itself starts with leading whitespace.
+function parseBlockRaw(block: string, defaultDomain: string): Q | null {
+  // Find first option marker — at line start (with optional leading whitespace)
+  const optStart = block.search(/(^|\n)[ \t]*A\.\s+/);
+  if (optStart < 0) return null;
+
+  const stemRaw = block.slice(0, block.indexOf('A.', optStart));
+  let type: 'SINGLE' | 'MULTI' | 'TRUE_FALSE' = 'SINGLE';
+  const typeMatch = stemRaw.match(/\b(SINGLE|MULTI|TRUE_FALSE)\b\s*$/);
+  if (typeMatch) type = typeMatch[1] as any;
+  const stem = normalizeWhitespace(stemRaw.replace(/\b(SINGLE|MULTI|TRUE_FALSE)\b\s*$/, ''));
+
+  // Collect option markers — at line start OR inline after whitespace.
+  // We also capture the whitespace gap preceding each option, since 2+
+  // inline spaces in raw mode can indicate the option was originally on its
+  // own (indented = correct) line that pdftotext merged onto the prior line.
+  type RawOpt = { id: string; startIdx: number; lineLeadingSpaces: number; precedingSpaces: number };
+  const optRe = /(^|\n)([ \t]*)([A-E])\.\s+/g;
+  const inlineOptRe = /(?<=\S)( +)([B-E])\.\s+/g;
+  const rawOpts: RawOpt[] = [];
+  let m: RegExpExecArray | null;
+  while ((m = optRe.exec(block)) !== null) {
+    const lead = m[2].replace(/\t/g, '    ').length;
+    rawOpts.push({
+      id: m[3],
+      startIdx: m.index + m[1].length + m[2].length,
+      lineLeadingSpaces: lead,
+      precedingSpaces: lead
+    });
+  }
+  while ((m = inlineOptRe.exec(block)) !== null) {
+    const id = m[2];
+    const gapLen = m[1].length;
+    // m.index points at the first space; the letter sits at m.index + gapLen.
+    const startIdx = m.index + gapLen;
+    if (rawOpts.some(o => o.id === id && Math.abs(o.startIdx - startIdx) < 5)) continue;
+    rawOpts.push({ id, startIdx, lineLeadingSpaces: -1, precedingSpaces: gapLen });
+  }
+  rawOpts.sort((a, b) => a.startIdx - b.startIdx);
+  // Keep first occurrence of each id, but only after we've seen A
+  // (some PDFs have "A." in the question stem; we want to start at the
+  // first A that comes after the question type marker).
+  const seen = new Set<string>();
+  const uniqueOpts = rawOpts.filter(o => {
+    if (seen.has(o.id)) return false;
+    seen.add(o.id);
+    return true;
+  });
+  if (uniqueOpts.length < 2) return null;
+
+  // Slice each option's text from its start to the next option's start
+  const options: { id: string; text: string; isCorrect: boolean }[] = [];
+  for (let i = 0; i < uniqueOpts.length; i++) {
+    const o = uniqueOpts[i];
+    const end = i + 1 < uniqueOpts.length ? uniqueOpts[i + 1].startIdx : block.length;
+    const slice = block.slice(o.startIdx, end).replace(/^[A-E]\.\s+/, '');
+    // Correct if: marker at line start with leading-whitespace indent, OR
+    // marker preceded inline by 2+ spaces (indicates it was originally on
+    // its own indented line that pdftotext merged), OR option text contains
+    // a continuation line that starts with leading whitespace.
+    const correctByLineIndent = o.lineLeadingSpaces > 0;
+    const correctByInlineGap = o.lineLeadingSpaces < 0 && o.precedingSpaces >= 2;
+    const correctByContinuation = /\n[ \t]+\S/.test(slice);
+    options.push({
+      id: o.id,
+      text: normalizeWhitespace(slice),
+      isCorrect: correctByLineIndent || correctByInlineGap || correctByContinuation
+    });
+  }
+
+  const correct = options.filter(o => o.isCorrect).map(o => o.id);
+  if (correct.length === 0) return null;
+  if (type === 'SINGLE' && correct.length > 1) {
+    // For SINGLE, prefer line-start-with-leading-space over indented-continuation
+    const lineStartCorrect = options.find(o => {
+      const ro = uniqueOpts.find(u => u.id === o.id);
+      return o.isCorrect && ro && ro.lineLeadingSpaces > 0;
+    });
+    if (lineStartCorrect) correct.length = 0, correct.push(lineStartCorrect.id);
+    else correct.length = 1;
+  }
+
+  // Reasonable explanation: just use the first 1500 chars of the explanation
+  // section if it exists, otherwise omit. Many of these PDFs don't have
+  // explanations at all in raw mode.
+  let explanation = '';
+  const explMatch = block.match(/Explanation:\s*([\s\S]+?)(?=$)/);
+  if (explMatch) explanation = normalizeWhitespace(explMatch[1]).slice(0, 2000);
+
+  return {
+    domain: defaultDomain,
+    type,
+    stem,
+    options: options.map(o => ({ id: o.id, text: o.text })),
+    correct,
+    explanation
+  };
+}
+
+function parsePDFRaw(pdfPath: string, defaultDomain: string): Q[] {
+  const text = extractTextRaw(pdfPath);
+  const blocks = splitIntoBlocks(text);
+  const out: Q[] = [];
+  for (const b of blocks) {
+    const q = parseBlockRaw(b, defaultDomain);
+    if (q) out.push(q);
+  }
+  return out;
+}
+
+// Try -layout mode first; if it produces few questions, also try raw mode
+// and keep whichever gave more.
+function parsePDFAuto(pdfPath: string, defaultDomain: string): Q[] {
+  const layoutQs = parsePDF(pdfPath, defaultDomain);
+  const rawQs = parsePDFRaw(pdfPath, defaultDomain);
+  return rawQs.length > layoutQs.length ? rawQs : layoutQs;
 }
 
 // Escape a string for JS single-quoted source emission
@@ -332,7 +459,7 @@ function main() {
   }
   const cfg: Config = JSON.parse(readFileSync(configPath, 'utf8'));
   const defaultDomain = cfg.defaultDomain || cfg.domains[0]?.name || 'General';
-  const questions = parsePDF(cfg.pdfPath, defaultDomain);
+  const questions = parsePDFAuto(cfg.pdfPath, defaultDomain);
   if (questions.length === 0) {
     console.error(`No questions parsed from ${cfg.pdfPath}`);
     process.exit(1);
