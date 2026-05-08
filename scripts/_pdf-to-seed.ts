@@ -109,12 +109,18 @@ function parseBlock(block: string, defaultDomain: string): Q | null {
   const optionsBlock = block.slice(optStart, explStart);
   const explanationBlock = block.slice(explStart + explanationMatch[0].length);
 
-  // 4. Parse options A/B/C/D/E
-  const options: { id: string; text: string }[] = [];
-  const optRe = /(?:^|\n)\s*([A-E])\.\s+([\s\S]*?)(?=(?:\n\s*[A-E]\.\s+)|$)/g;
+  // 4. Parse options A/B/C/D/E — keep leading-whitespace count for each so
+  // we can use the indentation-difference heuristic when there's no explicit
+  // "Correct option:" marker (Microsoft PDFs use this scheme).
+  const options: { id: string; text: string; leadingSpaces: number }[] = [];
+  const optRe = /(?:^|\n)([ \t]*)([A-E])\.\s+([\s\S]*?)(?=(?:\n[ \t]*[A-E]\.\s+)|$)/g;
   let om: RegExpExecArray | null;
   while ((om = optRe.exec(optionsBlock)) !== null) {
-    options.push({ id: om[1], text: normalizeWhitespace(om[2]) });
+    options.push({
+      id: om[2],
+      text: normalizeWhitespace(om[3]),
+      leadingSpaces: om[1].replace(/\t/g, '    ').length
+    });
   }
   if (options.length < 2) return null;
 
@@ -127,24 +133,33 @@ function parseBlock(block: string, defaultDomain: string): Q | null {
   if (!correctMatch) {
     correctMatch = explanationBlock.match(/CORRECT:\s*([\s\S]*?)(?:INCORRECT:|$)/);
   }
-  if (!correctMatch) return null;
-  const correctPayload = normalizeWhitespace(correctMatch[1]);
 
   const correct: string[] = [];
-  for (const opt of options) {
-    // Use first 40 chars of normalized option text as fingerprint
-    const fingerprint = normalizeWhitespace(opt.text).slice(0, 40);
-    if (fingerprint && correctPayload.includes(fingerprint)) {
-      correct.push(opt.id);
-    }
-  }
-  // Fallback: if nothing matched, try a shorter fingerprint
-  if (correct.length === 0) {
+  if (correctMatch) {
+    const correctPayload = normalizeWhitespace(correctMatch[1]);
     for (const opt of options) {
-      const fingerprint = normalizeWhitespace(opt.text).slice(0, 25);
-      if (fingerprint && correctPayload.includes(fingerprint)) {
-        correct.push(opt.id);
+      const fingerprint = normalizeWhitespace(opt.text).slice(0, 40);
+      if (fingerprint && correctPayload.includes(fingerprint)) correct.push(opt.id);
+    }
+    if (correct.length === 0) {
+      for (const opt of options) {
+        const fingerprint = normalizeWhitespace(opt.text).slice(0, 25);
+        if (fingerprint && correctPayload.includes(fingerprint)) correct.push(opt.id);
       }
+    }
+  } else {
+    // Fallback heuristic: Microsoft PDFs encode correct answers by giving them
+    // a different leading-whitespace count than the majority (no explicit
+    // "Correct option:" marker). Find the modal leading-space count and flag
+    // outliers as correct.
+    const counts = new Map<number, number>();
+    for (const opt of options) counts.set(opt.leadingSpaces, (counts.get(opt.leadingSpaces) ?? 0) + 1);
+    let modeCount = 0, modeSpaces = options[0].leadingSpaces;
+    for (const [sp, c] of counts) if (c > modeCount) { modeCount = c; modeSpaces = sp; }
+    // Only trust the heuristic if at least 2 options share the modal indent
+    // AND at least one option differs from it.
+    if (modeCount >= 2 && counts.size >= 2) {
+      for (const opt of options) if (opt.leadingSpaces !== modeSpaces) correct.push(opt.id);
     }
   }
   if (correct.length === 0) return null;
