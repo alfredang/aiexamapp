@@ -155,6 +155,34 @@ const SCRIPTS = [
   // Cisco CCNP ENCOR practice exams from PDF batch
   'scripts/seed-cisco-ccnp-encor-p1.ts',
   'scripts/seed-cisco-ccnp-encor-p2.ts',
+  // ISC2 CISSP practice exams from PDF batch
+  'scripts/seed-isc2-cissp-p1.ts',
+  'scripts/seed-isc2-cissp-p2.ts',
+  'scripts/seed-isc2-cissp-p3.ts',
+  'scripts/seed-isc2-cissp-p4.ts',
+  'scripts/seed-isc2-cissp-p5.ts',
+  'scripts/seed-isc2-cissp-p6.ts',
+  // PMI PMP practice exams from PDF batch
+  'scripts/seed-pmi-pmp-p1.ts',
+  'scripts/seed-pmi-pmp-p2.ts',
+  'scripts/seed-pmi-pmp-p3.ts',
+  'scripts/seed-pmi-pmp-p4.ts',
+  'scripts/seed-pmi-pmp-p5.ts',
+  'scripts/seed-pmi-pmp-p6.ts',
+  // Scrum.org PSM I practice exams from PDF batch
+  'scripts/seed-scrum-org-psm-i-p1.ts',
+  'scripts/seed-scrum-org-psm-i-p5.ts',
+  // GitHub Foundations practice exams from PDF batch
+  'scripts/seed-github-foundations-p1.ts',
+  'scripts/seed-github-foundations-p2.ts',
+  'scripts/seed-github-foundations-p3.ts',
+  'scripts/seed-github-foundations-p4.ts',
+  // AXELOS ITIL 4 Foundation practice exam from PDF batch
+  'scripts/seed-axelos-itil4-foundation-p7.ts',
+  // Tableau Desktop Specialist practice exam from PDF batch
+  'scripts/seed-tableau-desktop-specialist-p5.ts',
+  // IASSC CLSSGB practice exam from PDF batch
+  'scripts/seed-iassc-clssgb-p1.ts',
   // CompTIA Cloud+ practice exams (sourced from Google Forms)
   'scripts/seed-comptia-cloud-plus-p1.ts',
   'scripts/seed-comptia-cloud-plus-p5.ts',
