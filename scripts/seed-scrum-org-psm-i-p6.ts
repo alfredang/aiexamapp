@@ -1,20 +1,26 @@
 /**
- * One-shot seed: Professional Scrum Master Practice Exam 6 (80 questions).
+ * One-shot seed: Scrum.org Professional Scrum Master I — Practice Exam 6
+ * (80 questions).
  *
- *   npx tsx scripts/seed-comptia-psm-p6.ts
+ *   npx tsx scripts/seed-scrum-org-psm-i-p6.ts
  *
  * Idempotent on Exam (upsert by slug) and skips Question seeding if the
  * exam already has any questions tagged with `manual:psm-p6`.
  *
  * Source: 80-question Professional Scrum Master practice set modelled on the
- * Scrum Guide 2020. Hosted under the existing CompTIA vendor.
+ * Scrum Guide 2020. Hosted under the Scrum.org vendor.
+ *
+ * History: Originally seeded under the CompTIA vendor with slug
+ * `professional-scrum-master-practice-6` before the Scrum.org vendor existed.
+ * Migrated 2026-05 — old slug listed in OBSOLETE_EXAM_SLUGS so the
+ * stale row gets cleaned up at next seed run.
  */
 import { PrismaClient, QStatus, QType } from '@prisma/client';
 
 const db = new PrismaClient();
 
-const VENDOR_SLUG = 'comptia';
-const EXAM_SLUG = 'professional-scrum-master-practice-6';
+const VENDOR_SLUG = 'scrum-org';
+const EXAM_SLUG = 'scrum-org-psm-i-p6';
 const TAG = 'manual:psm-p6';
 
 const DOMAINS = [
@@ -1096,8 +1102,8 @@ async function main() {
   const exam = await db.exam.upsert({
     where: { slug: EXAM_SLUG },
     update: {
-      title: 'Professional Scrum Master Training Practice Exam 6',
-      description: '80-question practice set for the Professional Scrum Master (PSM) certification, covering Scrum framework theory, accountabilities (Product Owner, Scrum Master, Developers), events, artifacts, Scrum values, empiricism, self-management, and scaling.',
+      title: 'Scrum.org Professional Scrum Master I (PSM I) — Practice Exam 6',
+      description: '80-question practice set for the Professional Scrum Master I (PSM I) assessment by Scrum.org, covering Scrum framework theory, accountabilities (Product Owner, Scrum Master, Developers), events, artifacts, Scrum values, empiricism, self-management, and scaling.',
       level: 'Foundational',
       durationMinutes: 60,
       passingScore: 85,
@@ -1107,10 +1113,10 @@ async function main() {
     },
     create: {
       vendorId: vendor.id,
-      code: 'PSM-P6',
+      code: 'PSM-I-P6',
       slug: EXAM_SLUG,
-      title: 'Professional Scrum Master Training Practice Exam 6',
-      description: '80-question practice set for the Professional Scrum Master (PSM) certification, covering Scrum framework theory, accountabilities (Product Owner, Scrum Master, Developers), events, artifacts, Scrum values, empiricism, self-management, and scaling.',
+      title: 'Scrum.org Professional Scrum Master I (PSM I) — Practice Exam 6',
+      description: '80-question practice set for the Professional Scrum Master I (PSM I) assessment by Scrum.org, covering Scrum framework theory, accountabilities (Product Owner, Scrum Master, Developers), events, artifacts, Scrum values, empiricism, self-management, and scaling.',
       level: 'Foundational',
       durationMinutes: 60,
       passingScore: 85,

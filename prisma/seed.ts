@@ -107,7 +107,9 @@ const OBSOLETE_EXAM_SLUGS = [
   'oracle-db-sql-1z0-071',
   'oracle-oci-architect-associate-1z0-1072',
   'oracle-genai-professional-1z0-1127',
-  'oracle-oci-architect-pro-1z0-997'
+  'oracle-oci-architect-pro-1z0-997',
+  // PSM P6 migrated to scrum-org vendor with new slug scrum-org-psm-i-p6
+  'professional-scrum-master-practice-6'
 ];
 
 // Slugs that should be kept in the DB but hidden from the public catalog

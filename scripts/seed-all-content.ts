@@ -253,8 +253,8 @@ const SCRIPTS = [
   'scripts/seed-comptia-cloud-plus-p6.ts',
   'scripts/seed-comptia-cloud-plus-p7.ts',
   'scripts/seed-comptia-cloud-plus-p8.ts',
-  // Professional Scrum Master practice exam (hosted under CompTIA vendor)
-  'scripts/seed-comptia-psm-p6.ts',
+  // Professional Scrum Master practice exam (Scrum.org vendor)
+  'scripts/seed-scrum-org-psm-i-p6.ts',
   // Microsoft practice exams
   'scripts/seed-microsoft-ai102.ts',
   'scripts/seed-microsoft-dp203-p6.ts'
