@@ -231,6 +231,9 @@ const SCRIPTS = [
   'scripts/seed-microsoft-az-104-topup.ts',
   'scripts/seed-microsoft-dp-900-topup.ts',
   'scripts/seed-aws-mla-c01-topup.ts',
+  'scripts/seed-aws-dea-c01-topup.ts',
+  'scripts/seed-scrum-org-psm-i-topup.ts',
+  'scripts/seed-github-foundations-topup.ts',
   // CompTIA Cloud+ practice exams (sourced from Google Forms)
   'scripts/seed-comptia-cloud-plus-p1.ts',
   'scripts/seed-comptia-cloud-plus-p5.ts',
