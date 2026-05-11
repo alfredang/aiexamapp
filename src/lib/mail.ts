@@ -7,7 +7,7 @@ const transport = nodemailer.createTransport({
   auth: process.env.SMTP_USER ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASSWORD } : undefined
 });
 
-const FROM = process.env.SMTP_FROM || process.env.FROM_EMAIL || 'CertPrep AI <noreply@example.com>';
+const FROM = process.env.SMTP_FROM || process.env.FROM_EMAIL || 'ExamNova <noreply@example.com>';
 
 export async function sendMail(to: string, subject: string, html: string, attachments?: any[]) {
   return transport.sendMail({ from: FROM, to, subject, html, attachments });
@@ -27,7 +27,7 @@ export async function sendOTPEmail(to: string, code: string, purpose: 'LOGIN' | 
     <p style="font-size:32px;font-weight:700;letter-spacing:8px;color:#2563eb;margin:8px 0">${code}</p>
     <p style="color:#94a3b8;font-size:13px">Expires in 10 minutes. If you didn't request this, ignore this email.</p>
   </div>`;
-  return sendMail(to, `${title} — CertPrep AI`, html);
+  return sendMail(to, `${title} — ExamNova`, html);
 }
 
 export async function sendPurchaseEmail(

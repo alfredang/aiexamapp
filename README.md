@@ -1,6 +1,6 @@
 <div align="center">
 
-# CertPrep AI
+# ExamNova
 
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
@@ -37,7 +37,7 @@
 
 ## About
 
-CertPrep AI is a production-ready web application for selling and delivering practice exams across industry certifications (AWS, Microsoft Azure / 365, Cisco CCNA, CompTIA, Google Cloud, Linux Foundation, Anthropic, and more). Candidates browse a catalog, try a free 30-question teaser on any exam, then purchase access in three tiers — practice only, practice + voucher, or voucher only. Admins build the question bank manually or by streaming generation through the Claude Agent SDK.
+ExamNova is a production-ready web application for selling and delivering practice exams across industry certifications (AWS, Microsoft Azure / 365, Cisco CCNA, CompTIA, Google Cloud, Linux Foundation, Anthropic, and more). Candidates browse a catalog, try a free 30-question teaser on any exam, then purchase access in three tiers — practice only, practice + voucher, or voucher only. Admins build the question bank manually or by streaming generation through the Claude Agent SDK.
 
 ### Key features
 

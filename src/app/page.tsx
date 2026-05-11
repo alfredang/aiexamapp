@@ -52,13 +52,13 @@ export default async function HomePage() {
           </div>
           <div className="relative hidden items-center justify-center md:flex">
             <img
-              src="/hero.png"
-              alt="CertPrep AI exam-prep dashboard preview"
+              src="/hero.webp"
+              alt="ExamNova exam-prep dashboard preview"
               className="block h-auto max-h-[480px] w-full max-w-full object-contain dark:hidden"
             />
             <img
-              src="/hero-dark.png"
-              alt="CertPrep AI exam-prep dashboard preview"
+              src="/hero-dark.webp"
+              alt="ExamNova exam-prep dashboard preview"
               className="hidden h-auto max-h-[480px] w-full max-w-full object-contain dark:block [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_85%)] [-webkit-mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_85%)]"
             />
           </div>
@@ -74,9 +74,6 @@ export default async function HomePage() {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6">
           {vendors.map(v => (
             <Link key={v.id} href={`/practice-exams/${v.slug}`} className="card-hover flex flex-col items-center justify-center px-4 py-6 text-center">
-              <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-md bg-gradient-to-br from-blue-50 to-purple-50 text-blue-700 font-semibold dark:from-blue-950/40 dark:to-purple-950/40 dark:text-blue-300">
-                {v.name.slice(0, 2).toUpperCase()}
-              </div>
               <div className="text-sm font-medium">{v.name}</div>
               <div className="text-xs text-slate-500 dark:text-slate-400">{v._count.exams} exam{v._count.exams === 1 ? '' : 's'}</div>
             </Link>
@@ -87,7 +84,7 @@ export default async function HomePage() {
       {/* Popular exams */}
       <section className="border-y border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
         <div className="container-app py-14">
-          <h2 className="mb-6 text-2xl font-semibold">Popular practice exams</h2>
+          <h2 className="mb-6 text-2xl font-semibold">Popular Practice Exams</h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {popular.map(e => (
               <Link key={e.id} href={`/practice-exams/${e.vendor.slug}/${e.slug}`} className="card-hover p-5">

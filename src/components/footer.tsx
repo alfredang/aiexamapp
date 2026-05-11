@@ -4,7 +4,7 @@ export function Footer() {
       <div className="container-app py-10 grid gap-8 md:grid-cols-4">
         <div>
           <div className="mb-3 flex items-center gap-2 font-semibold">
-            <span className="inline-block h-6 w-6 rounded-md bg-brand"></span> AI Exams
+            <span className="inline-block h-6 w-6 rounded-md bg-brand"></span> ExamNova
           </div>
           <p className="text-sm text-slate-600 dark:text-slate-400">Practice smarter for your next certification.</p>
         </div>
@@ -30,7 +30,7 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-slate-200 py-4 text-center text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
-        © {new Date().getFullYear()} AI Exams. All rights reserved.
+        © {new Date().getFullYear()} ExamNova. All rights reserved.
       </div>
     </footer>
   );

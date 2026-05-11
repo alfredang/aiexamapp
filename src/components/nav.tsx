@@ -8,7 +8,7 @@ export function Nav() {
       <div className="container-app flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
           <Logo />
-          <span>CertPrep AI</span>
+          <span>ExamNova</span>
         </Link>
         <nav className="hidden items-center gap-1 md:flex">
           <Link href="/practice-exams" className="btn-ghost">Practice Exams</Link>

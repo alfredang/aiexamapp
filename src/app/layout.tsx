@@ -8,7 +8,7 @@ import { AuthProvider } from '@/components/session-provider';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'CertPrep AI — Practice Smarter for Your Next Certification',
+  title: 'ExamNova — Practice Smarter for Your Next Certification',
   description: 'Original practice questions for AWS, Microsoft, Cisco, CompTIA, Google Cloud, Anthropic and more.'
 };
 
