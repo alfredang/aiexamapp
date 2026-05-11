@@ -1,35 +1,44 @@
 import Link from 'next/link';
 import { db } from '@/lib/db';
 import { formatPrice } from '@/lib/utils';
-import { Package } from 'lucide-react';
 
-export default async function CatalogPage({ searchParams }: { searchParams: Promise<{ q?: string; level?: string; vendor?: string }> }) {
+const PAGE_SIZE = 12;
+
+export default async function CatalogPage({ searchParams }: { searchParams: Promise<{ q?: string; level?: string; vendor?: string; page?: string }> }) {
   const sp = await searchParams;
   const q = (sp.q || '').trim();
+  const where = {
+    published: true,
+    // Hide exams that don't have any published questions yet — they're
+    // catalog placeholders waiting on content. Admins still see them
+    // in /admin (which doesn't apply this filter).
+    questions: { some: { status: 'PUBLISHED' as const } },
+    ...(sp.vendor ? { vendor: { slug: sp.vendor } } : {}),
+    ...(sp.level ? { level: sp.level } : {}),
+    ...(q ? { OR: [
+      { title: { contains: q, mode: 'insensitive' as const } },
+      { code: { contains: q, mode: 'insensitive' as const } }
+    ] } : {})
+  };
+  const totalExams = await db.exam.count({ where });
+  const totalPages = Math.max(1, Math.ceil(totalExams / PAGE_SIZE));
+  const requestedPage = Number(sp.page) || 1;
+  const page = Math.min(Math.max(1, requestedPage), totalPages);
   const exams = await db.exam.findMany({
-    where: {
-      published: true,
-      // Hide exams that don't have any published questions yet — they're
-      // catalog placeholders waiting on content. Admins still see them
-      // in /admin (which doesn't apply this filter).
-      questions: { some: { status: 'PUBLISHED' } },
-      ...(sp.vendor ? { vendor: { slug: sp.vendor } } : {}),
-      ...(sp.level ? { level: sp.level } : {}),
-      ...(q ? { OR: [
-        { title: { contains: q, mode: 'insensitive' } },
-        { code: { contains: q, mode: 'insensitive' } }
-      ] } : {})
-    },
+    where,
     include: { vendor: true, _count: { select: { questions: { where: { status: 'PUBLISHED' } } } } },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'desc' },
+    skip: (page - 1) * PAGE_SIZE,
+    take: PAGE_SIZE
   });
-  // Show bundles only when there's no active filter — bundles are
-  // catalogue-wide products, not vendor- or level-specific.
-  const showBundles = !sp.vendor && !sp.level && !q;
+  // Bundles are rendered inline with regular exam cards on page 1 only,
+  // and only when there's no active filter (they're catalogue-wide products,
+  // not vendor- or level-specific).
+  const showBundles = !sp.vendor && !sp.level && !q && (Number(sp.page) || 1) === 1;
   const bundles = showBundles
     ? await db.bundle.findMany({
         where: { published: true },
-        include: { items: { include: { exam: true } } },
+        include: { items: { include: { exam: { include: { vendor: true } } } } },
         orderBy: { createdAt: 'desc' }
       })
     : [];
@@ -56,43 +65,28 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
         <button className="btn-primary">Filter</button>
       </form>
 
-      {bundles.length > 0 && (
-        <section className="mb-8">
-          <div className="mb-3 flex items-center gap-2">
-            <Package className="h-5 w-5 text-purple-700" />
-            <h2 className="text-lg font-semibold">Bundles</h2>
-            <span className="text-xs text-slate-500">— save vs buying separately</span>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {bundles.map(b => (
-              <Link key={b.id} href={`/bundles/${b.slug}`} className="card-hover p-5 ring-1 ring-purple-100">
-                <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
-                  <span className="badge bg-purple-50 text-purple-700">Bundle</span>
-                  <span className="badge">{b.items.length} items</span>
-                  {b.price === 0 && <span className="badge bg-emerald-100 text-emerald-800">Free</span>}
-                </div>
-                <h3 className="font-semibold">{b.title}</h3>
-                <p className="mt-1 line-clamp-2 text-sm text-slate-600">{b.description}</p>
-                <ul className="mt-2 space-y-0.5 text-xs text-slate-500">
-                  {b.items.slice(0, 3).map(it => (
-                    <li key={it.id}>• {it.exam.code} — {it.tier === 'VOUCHER' ? 'voucher' : 'practice'}</li>
-                  ))}
-                </ul>
-                <div className="mt-4 flex items-center justify-end text-sm">
-                  <span className={`font-semibold ${b.price === 0 ? 'text-emerald-700' : 'text-purple-700'}`}>
-                    {b.price === 0 ? 'Free' : formatPrice(b.price)}
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {bundles.length > 0 && (
-        <h2 className="mb-3 text-lg font-semibold">Individual exams</h2>
-      )}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {bundles.map(b => {
+          // Use the first item's exam to derive vendor, code, level — bundles
+          // grouping multiple practice exams of the same cert share these.
+          const firstItem = b.items[0]?.exam;
+          const totalQuestions = b.items.reduce((sum, it) => sum + it.exam.questionCount, 0);
+          return (
+            <Link key={b.id} href={firstItem ? `/practice-exams/${firstItem.vendor.slug}/${b.slug}` : `/bundles/${b.slug}`} className="card-hover p-5">
+              <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
+                {firstItem && <span className="badge">{firstItem.vendor.name}</span>}
+                {firstItem && <span className="badge">{firstItem.code}</span>}
+                {firstItem && <span className="badge">{firstItem.level}</span>}
+              </div>
+              <h3 className="font-semibold">{b.title}</h3>
+              <p className="mt-1 line-clamp-2 text-sm text-slate-600 dark:text-slate-300">{b.description}</p>
+              <div className="mt-4 flex items-center justify-between text-sm">
+                <span className="text-slate-500 dark:text-slate-400">{totalQuestions} questions · {b.items.length} practice exams</span>
+                <span className="font-semibold text-blue-700 dark:text-blue-300">{b.price === 0 ? 'Free' : `from ${formatPrice(b.price)}`}</span>
+              </div>
+            </Link>
+          );
+        })}
         {exams.map(e => (
           <Link key={e.id} href={`/practice-exams/${e.vendor.slug}/${e.slug}`} className="card-hover p-5">
             <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
@@ -101,7 +95,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
               <span className="badge">{e.level}</span>
             </div>
             <h3 className="font-semibold">{e.title}</h3>
-            <p className="mt-1 line-clamp-2 text-sm text-slate-600">{e.description}</p>
+            <p className="mt-1 line-clamp-2 text-sm text-slate-600 dark:text-slate-300">{e.description}</p>
             <div className="mt-4 flex items-center justify-between text-sm">
               <span className="text-slate-500">{e._count.questions} questions · {e.durationMinutes} min</span>
               <span className="font-semibold text-blue-700">from {formatPrice(e.pricePractice)}</span>
@@ -110,6 +104,72 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
         ))}
         {exams.length === 0 && <p className="text-slate-500">No exams found.</p>}
       </div>
+
+      {totalPages > 1 && (
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          totalExams={totalExams}
+          searchParams={{ q, vendor: sp.vendor, level: sp.level }}
+        />
+      )}
     </div>
+  );
+}
+
+function Pagination({ page, totalPages, totalExams, searchParams }: {
+  page: number;
+  totalPages: number;
+  totalExams: number;
+  searchParams: { q?: string; vendor?: string; level?: string };
+}) {
+  const hrefFor = (p: number) => {
+    const params = new URLSearchParams();
+    if (searchParams.q) params.set('q', searchParams.q);
+    if (searchParams.vendor) params.set('vendor', searchParams.vendor);
+    if (searchParams.level) params.set('level', searchParams.level);
+    if (p > 1) params.set('page', String(p));
+    const qs = params.toString();
+    return qs ? `/practice-exams?${qs}` : '/practice-exams';
+  };
+
+  // Build a compact page list with ellipses around the current page
+  const pages: (number | 'gap')[] = [];
+  for (let p = 1; p <= totalPages; p++) {
+    if (p === 1 || p === totalPages || (p >= page - 1 && p <= page + 1)) {
+      pages.push(p);
+    } else if (pages[pages.length - 1] !== 'gap') {
+      pages.push('gap');
+    }
+  }
+
+  const start = (page - 1) * PAGE_SIZE + 1;
+  const end = Math.min(totalExams, page * PAGE_SIZE);
+
+  return (
+    <nav className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-between" aria-label="Pagination">
+      <p className="text-sm text-slate-500 dark:text-slate-400">
+        Showing {start}–{end} of {totalExams} exam{totalExams === 1 ? '' : 's'}
+      </p>
+      <div className="flex items-center gap-1">
+        {page > 1 ? (
+          <Link href={hrefFor(page - 1)} className="rounded-md border border-slate-200 px-3 py-1.5 text-sm hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800">Previous</Link>
+        ) : (
+          <span className="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-400 dark:border-slate-800 dark:text-slate-600">Previous</span>
+        )}
+        {pages.map((p, i) =>
+          p === 'gap'
+            ? <span key={`gap-${i}`} className="px-2 text-slate-400">…</span>
+            : p === page
+              ? <span key={p} aria-current="page" className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-semibold text-white">{p}</span>
+              : <Link key={p} href={hrefFor(p)} className="rounded-md border border-slate-200 px-3 py-1.5 text-sm hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800">{p}</Link>
+        )}
+        {page < totalPages ? (
+          <Link href={hrefFor(page + 1)} className="rounded-md border border-slate-200 px-3 py-1.5 text-sm hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800">Next</Link>
+        ) : (
+          <span className="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-400 dark:border-slate-800 dark:text-slate-600">Next</span>
+        )}
+      </div>
+    </nav>
   );
 }

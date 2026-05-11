@@ -39,15 +39,15 @@ export function BuyTierForm({
 
   return (
     <div className="card p-5">
-      <div className="mb-3 text-xs font-semibold uppercase text-slate-500">Pick a plan</div>
+      <div className="mb-3 text-xs font-semibold uppercase text-slate-500 dark:text-slate-300">Pick a plan</div>
       <div className="space-y-2">
         {options.map(o => (
           <label
             key={o.tier}
             className={`flex cursor-pointer items-start justify-between gap-3 rounded-md border px-4 py-3 text-sm transition ${
               selected === o.tier
-                ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500'
-                : 'border-slate-200 hover:border-slate-300'
+                ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500 dark:bg-blue-950/40 dark:border-blue-400 dark:ring-blue-400'
+                : 'border-slate-200 hover:border-slate-300 dark:border-slate-700 dark:hover:border-slate-500'
             }`}
           >
             <div className="flex items-start gap-3">
@@ -59,14 +59,14 @@ export function BuyTierForm({
                 onChange={() => setSelected(o.tier)}
                 className="mt-1"
               />
-              <span className="font-semibold text-slate-900">{o.label}</span>
+              <span className="font-semibold text-slate-900 dark:text-slate-100">{o.label}</span>
             </div>
-            <span className="shrink-0 font-bold text-blue-700">{formatUSD(o.price)}</span>
+            <span className="shrink-0 font-bold text-blue-700 dark:text-blue-300">{formatUSD(o.price)}</span>
           </label>
         ))}
       </div>
       {showVoucherNotice && (
-        <p className="mt-3 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800">
+        <p className="mt-3 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
           <b>Heads up:</b> exam vouchers take <b>3–5 business days</b> to deliver — you'll get an email with your code when it's ready. Practice access is unlocked immediately on purchase.
         </p>
       )}
