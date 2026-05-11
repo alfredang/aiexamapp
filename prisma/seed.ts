@@ -116,7 +116,20 @@ const OBSOLETE_EXAM_SLUGS = [
 // (Exam.published = false). Different from OBSOLETE — these aren't deleted;
 // they're just not surfaced until they reach a presentable question count.
 const HIDDEN_EXAM_SLUGS = [
-  'oracle-1z0-1085-25' // OCI Foundations Associate — only 6 questions; hide until ≥60
+  'oracle-1z0-1085-25', // OCI Foundations Associate — only 6 questions; hide until ≥60
+  // Hidden because they're sold via the matching bundle (same cert).
+  // Bundle slug = exam slug for the AWS shells, so leaving them published
+  // would shadow the bundle in /practice-exams/[vendor]/[slug] routing.
+  'aws-aif-c01',
+  'aws-clf-c02',
+  'aws-dea-c01',
+  'aws-dop-c02',
+  'aws-dva-c02',
+  'aws-saa-c03',
+  'aws-mla-c01',
+  'google-associate-cloud-engineer',
+  'microsoft-ai-102-official',
+  'microsoft-ai-102-practice'
 ];
 
 // Vendor allowlist for the public catalog. Any exam whose vendorSlug is NOT
@@ -245,21 +258,68 @@ function buildMultiVariantBundles(): BundleSeed[] {
     { slug: 'pmi-pmp', title: 'PMI PMP', description: 'All 6 PMP practice exams in one bundle — covering people, process, and business environment domains of the PMP examination content outline.', variants: 6, price: 2000, priceVoucher: 55500 }
   ];
 
-  return specs.map(s => {
+  const out: BundleSeed[] = specs.map(s => {
     const items: BundleSeed['items'] = [];
     for (let i = 1; i <= s.variants; i++) {
       items.push({ examSlug: `${s.slug}-p${i}`, tier: 'PRACTICE', position: i });
     }
     items.push({ examSlug: `${s.slug}-p1`, tier: 'VOUCHER', position: s.variants + 1 });
     return {
-      slug: s.slug,
-      title: s.title,
-      description: s.description,
-      price: s.price,
-      priceVoucher: s.priceVoucher,
-      items
+      slug: s.slug, title: s.title, description: s.description,
+      price: s.price, priceVoucher: s.priceVoucher, items
     };
   });
+
+  // The microsoft-ai-102 bundle ALSO bundles the two non-pN orphan shells
+  // (microsoft-ai-102-official and microsoft-ai-102-practice). Fold them in
+  // as PRACTICE items so a single bundle purchase grants access to all 6.
+  const ai102 = out.find(b => b.slug === 'microsoft-ai-102');
+  if (ai102) {
+    const nextPos = ai102.items.reduce((m, i) => Math.max(m, i.position ?? 0), 0) + 1;
+    ai102.items.push({ examSlug: 'microsoft-ai-102-practice', tier: 'PRACTICE', position: nextPos });
+    ai102.items.push({ examSlug: 'microsoft-ai-102-official', tier: 'PRACTICE', position: nextPos + 1 });
+  }
+
+  // 3 additional bundles whose variant slugs do NOT follow the -pN pattern
+  // (CompTIA Cloud+ uses -practice-N, DP-203 mixes -pN and -practice-N,
+  // MLA-C01 has the base shell + one P-variant).
+  out.push({
+    slug: 'comptia-cloud-plus',
+    title: 'CompTIA Cloud+',
+    description: 'All 5 CompTIA Cloud+ (CV0-004) practice exams in one bundle — covering cloud architecture & design, deployment, operations & support, and troubleshooting.',
+    price: 2000, priceVoucher: 36900,
+    items: [
+      { examSlug: 'comptia-cloud-plus-practice-1', tier: 'PRACTICE', position: 1 },
+      { examSlug: 'comptia-cloud-plus-practice-5', tier: 'PRACTICE', position: 2 },
+      { examSlug: 'comptia-cloud-plus-practice-6', tier: 'PRACTICE', position: 3 },
+      { examSlug: 'comptia-cloud-plus-practice-7', tier: 'PRACTICE', position: 4 },
+      { examSlug: 'comptia-cloud-plus-practice-8', tier: 'PRACTICE', position: 5 },
+      { examSlug: 'comptia-cloud-plus-practice-1', tier: 'VOUCHER', position: 6 }
+    ]
+  });
+  out.push({
+    slug: 'microsoft-dp-203',
+    title: 'Microsoft Azure Data Engineer Associate (DP-203)',
+    description: 'All 2 DP-203 practice exams in one bundle — covering designing & implementing data storage, data processing, security, monitoring, and optimization for Azure data engineering workloads.',
+    price: 2000, priceVoucher: 16500,
+    items: [
+      { examSlug: 'microsoft-dp-203-p1', tier: 'PRACTICE', position: 1 },
+      { examSlug: 'microsoft-dp-203-practice-6', tier: 'PRACTICE', position: 2 },
+      { examSlug: 'microsoft-dp-203-p1', tier: 'VOUCHER', position: 3 }
+    ]
+  });
+  out.push({
+    slug: 'aws-mla-c01',
+    title: 'AWS Certified Machine Learning Engineer — Associate',
+    description: 'All AWS Certified ML Engineer Associate (MLA-C01) practice exams in one bundle — covering data preparation for ML, ML model development, deployment & orchestration, and ML solution monitoring & maintenance.',
+    price: 2000, priceVoucher: 15000,
+    items: [
+      { examSlug: 'aws-mla-c01',    tier: 'PRACTICE', position: 1 },
+      { examSlug: 'aws-mla-c01-p1', tier: 'PRACTICE', position: 2 },
+      { examSlug: 'aws-mla-c01',    tier: 'VOUCHER', position: 3 }
+    ]
+  });
+  return out;
 }
 
 const EXAMS: ExamSeed[] = [

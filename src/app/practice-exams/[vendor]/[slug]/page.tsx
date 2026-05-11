@@ -17,10 +17,12 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ ven
     }
   });
 
-  // If no exam matched, fall back to checking if this slug is a published
-  // Bundle. Bundles are surfaced at /practice-exams/[vendor]/[bundleSlug]
+  // If no PUBLISHED exam matched, fall back to checking if this slug is a
+  // published Bundle. Bundles are surfaced at /practice-exams/[vendor]/[bundleSlug]
   // (the vendor segment is derived from the bundle's first item's vendor).
-  if (!exam) {
+  // An unpublished exam falls through so a bundle sharing the same slug
+  // (e.g. aws-saa-c03 the bundle vs aws-saa-c03 the legacy base shell) wins.
+  if (!exam || !exam.published) {
     const bundle = await db.bundle.findUnique({
       where: { slug },
       include: {
