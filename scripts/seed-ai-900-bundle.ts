@@ -16,7 +16,7 @@ const BUNDLE = {
   description:
     'All 6 AI-900 practice exams in one bundle — 360 questions covering AI workloads, machine learning on Azure, computer vision, natural language processing, and generative AI. Save vs buying each practice exam separately.',
   price: 2000,         // $79 — PRACTICE tier
-  priceVoucher: 14900, // $149 — VOUCHER tier (adds real Microsoft AI-900 exam voucher)
+  priceVoucher: 9900, // $99 — VOUCHER tier (covers Microsoft AI-900 $99 exam fee)
   // Items keyed by purchase tier. Practice buyers get items[].tier==='PRACTICE'
   // only; Voucher buyers get all items (PRACTICE + VOUCHER). Fulfillment
   // logic enforces this in src/lib/fulfill.ts.

@@ -17,7 +17,7 @@ const BUNDLE = {
   description:
     'All 3 Professional Scrum Master I practice exams in one bundle — covering Scrum framework theory, accountabilities (Product Owner, Scrum Master, Developers), events, artifacts, Scrum values, empiricism, self-management, and scaling.',
   price: 2000,        // $39 — PRACTICE tier
-  priceVoucher: 9900, // $99 — VOUCHER tier (adds real Scrum.org PSM I assessment voucher)
+  priceVoucher: 22900, // $229 — VOUCHER tier (covers Scrum.org PSM I $200 fee + margin)
   practiceItemSlugs: [
     'scrum-org-psm-i-p1',
     'scrum-org-psm-i-p5',

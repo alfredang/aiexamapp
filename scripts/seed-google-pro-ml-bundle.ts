@@ -17,7 +17,7 @@ const BUNDLE = {
   description:
     'All 6 Google Professional ML Engineer practice exams in one bundle — 360 questions covering architecting low-code AI, collaborating across teams, scaling prototypes, serving and scaling models, automating ML pipelines, and monitoring AI solutions.',
   price: 2000,          // $79 — PRACTICE tier
-  priceVoucher: 19900,  // $199 — VOUCHER tier (adds real Google Professional ML Engineer exam voucher)
+  priceVoucher: 20000,  // $200 — VOUCHER tier (covers Google Pro ML Engineer $200 exam fee)
   practiceItemSlugs: [
     'google-professional-ml-engineer-p1',
     'google-professional-ml-engineer-p2',

@@ -39,37 +39,37 @@ const CONFIGS: BundleConfig[] = [
     slug: 'aws-clf-c02', title: 'AWS Certified Cloud Practitioner',
     description: 'All 6 AWS Certified Cloud Practitioner (CLF-C02) practice exams in one bundle — covering cloud concepts, security & compliance, AWS technology & services, and billing/pricing/support.',
     practicePrefix: 'aws-clf-c02', variantCount: 6,
-    price: 2000, priceVoucher: 12900
+    price: 2000, priceVoucher: 10000
   },
   {
     slug: 'aws-saa-c03', title: 'AWS Certified Solutions Architect — Associate',
     description: 'All 6 AWS Certified Solutions Architect Associate (SAA-C03) practice exams in one bundle — covering design of secure, resilient, high-performing, and cost-optimized architectures on AWS.',
     practicePrefix: 'aws-saa-c03', variantCount: 6,
-    price: 2000, priceVoucher: 19900
+    price: 2000, priceVoucher: 15000
   },
   {
     slug: 'aws-dva-c02', title: 'AWS Certified Developer — Associate',
     description: 'All 6 AWS Certified Developer Associate (DVA-C02) practice exams in one bundle — covering development with AWS services, security, deployment, and troubleshooting.',
     practicePrefix: 'aws-dva-c02', variantCount: 6,
-    price: 2000, priceVoucher: 19900
+    price: 2000, priceVoucher: 15000
   },
   {
     slug: 'aws-dop-c02', title: 'AWS Certified DevOps Engineer — Professional',
     description: 'All 8 AWS Certified DevOps Engineer Professional (DOP-C02) practice exams in one bundle — covering SDLC automation, configuration management, monitoring, incident & event response, security & compliance, and HA/business continuity.',
     practicePrefix: 'aws-dop-c02', variantCount: 8,
-    price: 2000, priceVoucher: 29900
+    price: 2000, priceVoucher: 30000
   },
   {
     slug: 'aws-aif-c01', title: 'AWS Certified AI Practitioner',
     description: 'All 7 AWS Certified AI Practitioner (AIF-C01) practice exams in one bundle — covering fundamentals of AI/ML, generative AI on AWS, applications of foundation models, and responsible AI.',
     practicePrefix: 'aws-aif-c01', variantCount: 7,
-    price: 2000, priceVoucher: 12900
+    price: 2000, priceVoucher: 10000
   },
   {
     slug: 'aws-dea-c01', title: 'AWS Certified Data Engineer — Associate',
     description: 'All 4 AWS Certified Data Engineer Associate (DEA-C01) practice exams in one bundle — covering data ingestion, data store management, data operations and support, and data security & governance.',
     practicePrefix: 'aws-dea-c01', variantCount: 4,
-    price: 2000, priceVoucher: 19900
+    price: 2000, priceVoucher: 15000
   },
 
   // ───── Microsoft ─────
@@ -113,7 +113,7 @@ const CONFIGS: BundleConfig[] = [
     slug: 'microsoft-ms-102', title: 'Microsoft 365 Administrator Expert (MS-102)',
     description: 'All 4 MS-102 practice exams in one bundle — covering deploy & manage a Microsoft 365 tenant, implement & manage Microsoft Entra identity & access, manage security & threats with Defender XDR, and Microsoft Purview compliance.',
     practicePrefix: 'microsoft-ms-102', variantCount: 4,
-    price: 2000, priceVoucher: 19900
+    price: 2000, priceVoucher: 16500
   },
   {
     slug: 'microsoft-pl-300', title: 'Microsoft Power BI Data Analyst (PL-300)',
@@ -127,13 +127,13 @@ const CONFIGS: BundleConfig[] = [
     slug: 'cisco-ccna', title: 'Cisco Certified Network Associate (CCNA)',
     description: 'All 6 CCNA (200-301) practice exams in one bundle — covering networking fundamentals, IP services, security fundamentals, automation & programmability, and network access.',
     practicePrefix: 'cisco-ccna', variantCount: 6,
-    price: 2000, priceVoucher: 29900
+    price: 2000, priceVoucher: 30000
   },
   {
     slug: 'cisco-ccnp-encor', title: 'Cisco CCNP Enterprise Core (ENCOR 350-401)',
     description: 'All 2 CCNP Enterprise Core (ENCOR 350-401) practice exams in one bundle — covering architecture, virtualization, infrastructure, network assurance, security, and automation.',
     practicePrefix: 'cisco-ccnp-encor', variantCount: 2,
-    price: 2000, priceVoucher: 39900
+    price: 2000, priceVoucher: 40000
   },
 
   // ───── CompTIA ─────
@@ -161,7 +161,7 @@ const CONFIGS: BundleConfig[] = [
     slug: 'google-ace', title: 'Google Associate Cloud Engineer',
     description: 'All 2 Associate Cloud Engineer practice exams in one bundle — covering setting up a cloud environment, planning and configuring solutions, deploying and implementing, and ensuring successful operation on Google Cloud.',
     practicePrefix: 'google-ace', variantCount: 2,
-    price: 2000, priceVoucher: 19900
+    price: 2000, priceVoucher: 12500
   },
 
   // ───── GitHub ─────
