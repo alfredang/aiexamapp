@@ -278,7 +278,7 @@ async function main() {
         references: REFERENCE,
         status: QStatus.PUBLISHED,
         generatedBy: 'manual:cca-f-pdf',
-        isTeaser: i < 5
+        isTeaser: i < 10
       }
     });
     i++;

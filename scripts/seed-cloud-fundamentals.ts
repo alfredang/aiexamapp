@@ -340,8 +340,8 @@ async function seedExam(slug: string, questions: Q[], references: { label: strin
 }
 
 async function main() {
-  await seedExam('microsoft-az-900', AZ900, REFS_AZ, 4);
-  await seedExam('google-associate-cloud-engineer', ACE, REFS_GCP, 4);
+  await seedExam('microsoft-az-900', AZ900, REFS_AZ, 10);
+  await seedExam('google-associate-cloud-engineer', ACE, REFS_GCP, 10);
 }
 
 main()

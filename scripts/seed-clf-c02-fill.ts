@@ -429,6 +429,7 @@ async function main() {
     return;
   }
 
+  let i = 0;
   for (const q of QUESTIONS) {
     await db.question.create({
       data: {
@@ -443,9 +444,10 @@ async function main() {
         references: [q.ref],
         status: QStatus.PUBLISHED,
         generatedBy: TAG,
-        isTeaser: false
+        isTeaser: i < 10
       }
     });
+    i++;
   }
 
   const total = await db.question.count({ where: { examId: exam.id, status: QStatus.PUBLISHED } });
