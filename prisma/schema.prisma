@@ -103,16 +103,19 @@ model Exam {
 // A Bundle can contain entitlements across multiple exams — e.g. two
 // practice tiers + one voucher across two different certifications.
 model Bundle {
-  id          String       @id @default(cuid())
-  slug        String       @unique
-  title       String
-  description String
-  price       Int          // cents
-  published   Boolean      @default(false)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  items       BundleItem[]
-  orders      Order[]
+  id           String       @id @default(cuid())
+  slug         String       @unique
+  title        String
+  description  String
+  price        Int          // PRACTICE tier price (cents)
+  priceVoucher Int?         // VOUCHER tier price (cents) — set when the bundle
+                            // offers a Voucher upgrade (real exam voucher +
+                            // practice access). null = practice-only bundle.
+  published    Boolean      @default(false)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  items        BundleItem[]
+  orders       Order[]
 }
 
 // One line item inside a Bundle: which exam, at which tier (PRACTICE

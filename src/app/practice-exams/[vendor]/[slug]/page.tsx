@@ -5,6 +5,7 @@ import { auth } from '@/lib/auth';
 import { formatPrice, tiersForExam, tierLabel } from '@/lib/utils';
 import { Check, Timer, BookOpen, Award, BookOpenCheck, Hourglass } from 'lucide-react';
 import { BuyTierForm } from './buy-tier-form';
+import { BundleAsExamView } from './bundle-as-exam-view';
 
 export default async function ExamDetailPage({ params }: { params: Promise<{ vendor: string; slug: string }> }) {
   const { vendor: vendorSlug, slug } = await params;
@@ -15,7 +16,30 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ ven
       _count: { select: { questions: { where: { status: 'PUBLISHED' } } } }
     }
   });
-  if (!exam || exam.vendor.slug !== vendorSlug) notFound();
+
+  // If no exam matched, fall back to checking if this slug is a published
+  // Bundle. Bundles are surfaced at /practice-exams/[vendor]/[bundleSlug]
+  // (the vendor segment is derived from the bundle's first item's vendor).
+  if (!exam) {
+    const bundle = await db.bundle.findUnique({
+      where: { slug },
+      include: {
+        items: {
+          orderBy: { position: 'asc' },
+          include: { exam: { include: { vendor: true } } }
+        }
+      }
+    });
+    const bundleVendor = bundle?.items[0]?.exam.vendor;
+    if (!bundle || !bundle.published || bundleVendor?.slug !== vendorSlug) {
+      notFound();
+    }
+    const session = await auth();
+    const userId = (session?.user as any)?.id as string | undefined;
+    return <BundleAsExamView bundle={bundle} userId={userId} />;
+  }
+
+  if (exam.vendor.slug !== vendorSlug) notFound();
 
   const teaserCount = await db.question.count({ where: { examId: exam.id, isTeaser: true, status: 'PUBLISHED' } });
   const domains = (exam.domains as any[]) || [];
@@ -44,7 +68,7 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ ven
             <span className="badge">{exam.level}</span>
           </div>
           <h1 className="text-3xl font-bold tracking-tight">{exam.title}</h1>
-          <p className="mt-2 text-slate-600">{exam.description}</p>
+          <p className="mt-2 text-slate-600 dark:text-slate-100">{exam.description}</p>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-3">
             <Stat icon={BookOpen} label="Questions" value={`${exam._count.questions}`} />
@@ -56,12 +80,12 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ ven
             <div className="card p-5">
               <BookOpenCheck className="h-6 w-6 text-blue-600" />
               <h3 className="mt-3 font-semibold">Practice mode</h3>
-              <p className="mt-1 text-sm text-slate-600">See the correct answer and full explanation immediately after each question. Best for studying.</p>
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-100">See the correct answer and full explanation immediately after each question. Best for studying.</p>
             </div>
             <div className="card p-5">
               <Hourglass className="h-6 w-6 text-blue-600" />
               <h3 className="mt-3 font-semibold">Exam mode</h3>
-              <p className="mt-1 text-sm text-slate-600">{exam.durationMinutes}-minute timer, no answer reveal until you submit. Auto-saves and auto-submits — like the real exam.</p>
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-100">{exam.durationMinutes}-minute timer, no answer reveal until you submit. Auto-saves and auto-submits — like the real exam.</p>
             </div>
           </div>
 
@@ -71,8 +95,8 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ ven
               <ul className="mt-3 space-y-2 text-sm">
                 {domains.map((d, i) => (
                   <li key={i} className="flex items-center justify-between">
-                    <span className="text-slate-700">{d.name}</span>
-                    <span className="text-slate-500">{d.weight}%</span>
+                    <span className="text-slate-700 dark:text-slate-100">{d.name}</span>
+                    <span className="text-slate-500 dark:text-slate-300">{d.weight}%</span>
                   </li>
                 ))}
               </ul>
@@ -81,7 +105,7 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ ven
 
           <div className="mt-6 card p-6">
             <h2 className="font-semibold">What you get</h2>
-            <ul className="mt-3 space-y-2 text-sm text-slate-700">
+            <ul className="mt-3 space-y-2 text-sm text-slate-700 dark:text-slate-100">
               {[
                 'Practice mode with immediate explanations',
                 'Timed Exam mode that simulates the real test',
@@ -94,14 +118,14 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ ven
             </ul>
           </div>
 
-          <p className="mt-6 text-xs text-slate-500">
+          <p className="mt-6 text-xs text-slate-500 dark:text-slate-400">
             This platform provides original practice questions for learning. We are not affiliated with {exam.vendor.name}, and we do not provide real exam dumps.
           </p>
         </div>
 
-        <aside className="space-y-3">
-          <div className="card p-5 sticky top-24">
-            <h3 className="text-sm font-semibold uppercase text-slate-500">2026 Practice Exam Details</h3>
+        <aside className="space-y-3 lg:sticky lg:top-24 lg:self-start">
+          <div className="card p-5">
+            <h3 className="text-sm font-semibold uppercase text-slate-500 dark:text-slate-300">2026 Practice Exam Details</h3>
             <dl className="mt-3 space-y-1 text-sm">
               <Row k="Exam code" v={exam.code} />
               <Row k="Level" v={exam.level} />
@@ -115,7 +139,7 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ ven
             <div className="card p-5">
               <div className="mb-1 text-xs font-semibold uppercase text-emerald-700">You have access</div>
               <div className="font-semibold">Start your attempt</div>
-              <p className="mt-1 text-sm text-slate-600">Pick a mode below.</p>
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-100">Pick a mode below.</p>
               <div className="mt-3 flex flex-col gap-2">
                 <StartButton examId={exam.id} mode="PRACTICE" />
                 <StartButton examId={exam.id} mode="EXAM" />
@@ -126,7 +150,7 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ ven
             <Link href={`/practice-exams/${exam.vendor.slug}/${exam.slug}/teaser`} className="card-hover block p-5">
               <div className="mb-1 text-xs font-semibold uppercase text-blue-700">Free</div>
               <div className="font-semibold">Try 10 questions for free</div>
-              <p className="mt-1 text-sm text-slate-600">No credit card required.</p>
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-100">No credit card required.</p>
               <div className="btn-outline mt-3 w-full">Start free practice exam</div>
             </Link>
           )}
@@ -150,7 +174,7 @@ function Stat({ icon: Icon, label, value }: { icon: any; label: string; value: s
     <div className="card flex items-center gap-3 p-4">
       <Icon className="h-5 w-5 text-blue-600" />
       <div>
-        <div className="text-xs text-slate-500">{label}</div>
+        <div className="text-xs text-slate-500 dark:text-slate-300">{label}</div>
         <div className="font-semibold">{value}</div>
       </div>
     </div>
@@ -158,7 +182,7 @@ function Stat({ icon: Icon, label, value }: { icon: any; label: string; value: s
 }
 
 function Row({ k, v }: { k: string; v: string }) {
-  return <div className="flex justify-between"><dt className="text-slate-500">{k}</dt><dd className="font-medium">{v}</dd></div>;
+  return <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-300">{k}</dt><dd className="font-medium">{v}</dd></div>;
 }
 
 function StartButton({ examId, mode }: { examId: string; mode: 'PRACTICE' | 'EXAM' }) {

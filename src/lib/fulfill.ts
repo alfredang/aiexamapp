@@ -25,10 +25,21 @@ export async function fulfillOrder(orderId: string, paypalPayload: any, paypalCa
     // `voucher: null` (pending). An admin issues the real code later via
     // /admin/vouchers. The buyer is told "3-5 business days" up front.
 
-    // Bundle orders: write one entitlement per bundle item.
+    // Bundle orders: write one entitlement per qualifying bundle item.
+    //
+    // Tier filter: when a bundle ships both PRACTICE and VOUCHER items
+    // (e.g. the AI-900 bundle), the buyer picks a tier at checkout. The
+    // tier on the Order tells us which items to grant:
+    //   - PRACTICE buyer → only items where item.tier === 'PRACTICE'
+    //   - VOUCHER  buyer → ALL items (practice access + the voucher)
+    //   - tier == null   → grant all items (legacy single-price bundles)
     if (order.bundleId && order.bundle) {
+      const grantAllItems = !order.tier || order.tier === 'VOUCHER';
+      const items = grantAllItems
+        ? order.bundle.items
+        : order.bundle.items.filter(i => i.tier === order.tier);
       let bundleHasVoucher = false;
-      for (const item of order.bundle.items) {
+      for (const item of items) {
         await tx.entitlement.upsert({
           where: { userId_examId_tier: { userId: order.userId, examId: item.examId, tier: item.tier } },
           update: {},

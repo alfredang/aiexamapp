@@ -3,7 +3,7 @@ import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-export function BundleCheckoutClient({ bundleId }: { bundleId: string }) {
+export function BundleCheckoutClient({ bundleId, tier }: { bundleId: string; tier?: 'PRACTICE' | 'VOUCHER' }) {
   const router = useRouter();
   const [err, setErr] = useState('');
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'sb';
@@ -17,7 +17,7 @@ export function BundleCheckoutClient({ bundleId }: { bundleId: string }) {
           const r = await fetch('/api/paypal/create-bundle-order', {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ bundleId })
+            body: JSON.stringify({ bundleId, tier })
           });
           if (!r.ok) { setErr('Could not create order.'); throw new Error('create-bundle-order failed'); }
           return (await r.json()).paypalOrderId;
