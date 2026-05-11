@@ -6,11 +6,11 @@ const db = new PrismaClient();
 type Level = 'Foundational' | 'Associate' | 'Professional' | 'Expert' | 'Specialty';
 
 const PRICING: Record<Level, { practice: number; bundle: number; voucher: number }> = {
-  Foundational: { practice: 1900, bundle: 11900, voucher: 9900 },
-  Associate: { practice: 2900, bundle: 17900, voucher: 14900 },
-  Professional: { practice: 3900, bundle: 24900, voucher: 19900 },
-  Expert: { practice: 4900, bundle: 34900, voucher: 27900 },
-  Specialty: { practice: 3400, bundle: 19900, voucher: 16900 }
+  Foundational: { practice: 2000, bundle: 11900, voucher: 9900 },
+  Associate: { practice: 2000, bundle: 17900, voucher: 14900 },
+  Professional: { practice: 2000, bundle: 24900, voucher: 19900 },
+  Expert: { practice: 2000, bundle: 34900, voucher: 27900 },
+  Specialty: { practice: 2000, bundle: 19900, voucher: 16900 }
 };
 
 type ExamSeed = {

@@ -926,7 +926,7 @@ async function main() {
       passingScore: 70,
       questionCount: 66,
       domains: DOMAINS,
-      pricePractice: 2900,
+      pricePractice: 2000,
       priceBundle: 17900,
       priceVoucher: 14900,
       published: false
