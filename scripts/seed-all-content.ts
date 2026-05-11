@@ -183,6 +183,9 @@ const SCRIPTS = [
   'scripts/seed-comptia-data-plus-p4.ts',
   'scripts/seed-comptia-data-plus-p5.ts',
   'scripts/seed-comptia-data-plus-p6.ts',
+  // CompTIA Security+ (SY0-701) and Network+ (N10-007) practice exams from PDF
+  'scripts/seed-comptia-security-plus-p1.ts',
+  'scripts/seed-comptia-network-plus-p1.ts',
   // Cisco CCNP ENCOR practice exams from PDF batch
   'scripts/seed-cisco-ccnp-encor-p1.ts',
   'scripts/seed-cisco-ccnp-encor-p2.ts',
