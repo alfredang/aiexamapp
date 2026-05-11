@@ -131,17 +131,136 @@ type BundleSeed = {
   slug: string;
   title: string;
   description: string;
-  price: number; // cents
+  price: number; // PRACTICE tier price (cents)
+  priceVoucher?: number; // VOUCHER tier price (cents) — when offering a voucher upgrade
   items: { examSlug: string; tier: 'PRACTICE' | 'VOUCHER'; position?: number }[];
 };
 
-// Bundles are no longer offered. Per the simplified product model the
-// public catalogue now sells only per-exam PRACTICE and VOUCHER tiers
-// (where VOUCHER includes practice access). Existing Bundle rows in the
-// DB are unpublished by main() so they disappear from the UI without
-// breaking referential integrity on historical Order rows that point
-// at them via bundleId.
-const BUNDLES: BundleSeed[] = [];
+// Curated bundles — a single purchase grants entitlement to every
+// item exam. Listed exams should set `published: false` (so they don't
+// appear as standalone catalog cards) — the bundle is what's surfaced.
+// Existing Bundle rows in the DB not listed here are auto-unpublished
+// by main() without losing referential integrity on historical Orders.
+const BUNDLES: BundleSeed[] = [
+  {
+    slug: 'microsoft-ai-900',
+    title: 'Microsoft Azure AI Fundamentals (AI-900)',
+    description:
+      'All 6 AI-900 practice exams in one bundle — 360 questions covering AI workloads, machine learning on Azure, computer vision, natural language processing, and generative AI. Save vs buying each practice exam separately.',
+    price: 2000,         // $79 — PRACTICE tier (all 6 practice exams)
+    priceVoucher: 14900, // $149 — VOUCHER tier (all 6 practice exams + 1 real Microsoft AI-900 exam voucher)
+    items: [
+      { examSlug: 'microsoft-ai-900-p1', tier: 'PRACTICE', position: 1 },
+      { examSlug: 'microsoft-ai-900-p2', tier: 'PRACTICE', position: 2 },
+      { examSlug: 'microsoft-ai-900-p3', tier: 'PRACTICE', position: 3 },
+      { examSlug: 'microsoft-ai-900-p4', tier: 'PRACTICE', position: 4 },
+      { examSlug: 'microsoft-ai-900-p5', tier: 'PRACTICE', position: 5 },
+      { examSlug: 'microsoft-ai-900-p6', tier: 'PRACTICE', position: 6 },
+      // Voucher item — only granted when the buyer picks the VOUCHER tier
+      // at checkout. fulfillOrder filters items by Order.tier so PRACTICE
+      // buyers do not receive this.
+      { examSlug: 'microsoft-ai-900-p1', tier: 'VOUCHER', position: 7 }
+    ]
+  },
+  {
+    slug: 'scrum-org-psm-i',
+    title: 'Professional Scrum Master I (PSM I)',
+    description:
+      'All 3 Professional Scrum Master I practice exams in one bundle — covering Scrum framework theory, accountabilities (Product Owner, Scrum Master, Developers), events, artifacts, Scrum values, empiricism, self-management, and scaling.',
+    price: 2000,         // $39 — PRACTICE tier
+    priceVoucher: 9900,  // $99 — VOUCHER tier (adds real Scrum.org PSM I assessment voucher)
+    items: [
+      { examSlug: 'scrum-org-psm-i-p1', tier: 'PRACTICE', position: 1 },
+      { examSlug: 'scrum-org-psm-i-p5', tier: 'PRACTICE', position: 2 },
+      { examSlug: 'scrum-org-psm-i-p6', tier: 'PRACTICE', position: 3 },
+      { examSlug: 'scrum-org-psm-i-p1', tier: 'VOUCHER', position: 4 }
+    ]
+  },
+  {
+    slug: 'google-professional-ml-engineer',
+    title: 'Google Professional Machine Learning Engineer',
+    description:
+      'All 6 Google Professional ML Engineer practice exams in one bundle — 360 questions covering architecting low-code AI, collaborating across teams, scaling prototypes, serving and scaling models, automating ML pipelines, and monitoring AI solutions.',
+    price: 2000,         // $79 — PRACTICE tier
+    priceVoucher: 19900, // $199 — VOUCHER tier (adds real Google Professional ML Engineer exam voucher)
+    items: [
+      { examSlug: 'google-professional-ml-engineer-p1', tier: 'PRACTICE', position: 1 },
+      { examSlug: 'google-professional-ml-engineer-p2', tier: 'PRACTICE', position: 2 },
+      { examSlug: 'google-professional-ml-engineer-p3', tier: 'PRACTICE', position: 3 },
+      { examSlug: 'google-professional-ml-engineer-p4', tier: 'PRACTICE', position: 4 },
+      { examSlug: 'google-professional-ml-engineer-p5', tier: 'PRACTICE', position: 5 },
+      { examSlug: 'google-professional-ml-engineer-p6', tier: 'PRACTICE', position: 6 },
+      { examSlug: 'google-professional-ml-engineer-p1', tier: 'VOUCHER', position: 7 }
+    ]
+  },
+  {
+    slug: 'microsoft-sc-200',
+    title: 'Microsoft Security Operations Analyst (SC-200)',
+    description:
+      'All 5 SC-200 practice exams in one bundle — 300 questions covering threat mitigation with Microsoft Defender XDR, Microsoft Defender for Cloud, and Microsoft Sentinel, including incident response and KQL query authoring.',
+    price: 2000,         // $69 — PRACTICE tier
+    priceVoucher: 16500, // $165 — VOUCHER tier (adds real Microsoft SC-200 exam voucher)
+    items: [
+      { examSlug: 'microsoft-sc-200-p1', tier: 'PRACTICE', position: 1 },
+      { examSlug: 'microsoft-sc-200-p2', tier: 'PRACTICE', position: 2 },
+      { examSlug: 'microsoft-sc-200-p3', tier: 'PRACTICE', position: 3 },
+      { examSlug: 'microsoft-sc-200-p4', tier: 'PRACTICE', position: 4 },
+      { examSlug: 'microsoft-sc-200-p5', tier: 'PRACTICE', position: 5 },
+      { examSlug: 'microsoft-sc-200-p1', tier: 'VOUCHER', position: 6 }
+    ]
+  },
+  // ───── Auto-generated multi-variant cert bundles ─────
+  // Each entry follows the same shape: practice tier covers all variants,
+  // voucher tier additionally grants a real exam voucher entitlement (which
+  // an admin issues later via /admin/vouchers).
+  ...buildMultiVariantBundles()
+];
+
+// Helper to expand a compact spec into BUNDLES entries with PRACTICE items
+// for variants p1..pN plus a single VOUCHER item attached to p1.
+function buildMultiVariantBundles(): BundleSeed[] {
+  const specs: { slug: string; title: string; description: string; variants: number; price: number; priceVoucher: number }[] = [
+    { slug: 'aws-clf-c02', title: 'AWS Certified Cloud Practitioner', description: 'All 6 AWS Certified Cloud Practitioner (CLF-C02) practice exams in one bundle — covering cloud concepts, security & compliance, AWS technology & services, and billing/pricing/support.', variants: 6, price: 2000, priceVoucher: 12900 },
+    { slug: 'aws-saa-c03', title: 'AWS Certified Solutions Architect — Associate', description: 'All 6 AWS Certified Solutions Architect Associate (SAA-C03) practice exams in one bundle — covering design of secure, resilient, high-performing, and cost-optimized architectures on AWS.', variants: 6, price: 2000, priceVoucher: 19900 },
+    { slug: 'aws-dva-c02', title: 'AWS Certified Developer — Associate', description: 'All 6 AWS Certified Developer Associate (DVA-C02) practice exams in one bundle — covering development with AWS services, security, deployment, and troubleshooting.', variants: 6, price: 2000, priceVoucher: 19900 },
+    { slug: 'aws-dop-c02', title: 'AWS Certified DevOps Engineer — Professional', description: 'All 8 AWS Certified DevOps Engineer Professional (DOP-C02) practice exams in one bundle — covering SDLC automation, configuration management, monitoring, incident & event response, security & compliance, and HA/business continuity.', variants: 8, price: 2000, priceVoucher: 29900 },
+    { slug: 'aws-aif-c01', title: 'AWS Certified AI Practitioner', description: 'All 7 AWS Certified AI Practitioner (AIF-C01) practice exams in one bundle — covering fundamentals of AI/ML, generative AI on AWS, applications of foundation models, and responsible AI.', variants: 7, price: 2000, priceVoucher: 12900 },
+    { slug: 'aws-dea-c01', title: 'AWS Certified Data Engineer — Associate', description: 'All 4 AWS Certified Data Engineer Associate (DEA-C01) practice exams in one bundle — covering data ingestion, data store management, data operations and support, and data security & governance.', variants: 4, price: 2000, priceVoucher: 19900 },
+    { slug: 'microsoft-dp-900', title: 'Microsoft Azure Data Fundamentals (DP-900)', description: 'All 4 DP-900 practice exams in one bundle — covering core data concepts, relational and non-relational data, and data analytics on Azure.', variants: 4, price: 2000, priceVoucher: 9900 },
+    { slug: 'microsoft-az-104', title: 'Microsoft Azure Administrator (AZ-104)', description: 'All 3 AZ-104 practice exams in one bundle — covering identities & governance, storage, compute, virtual networking, and monitoring & maintenance on Azure.', variants: 3, price: 2000, priceVoucher: 16500 },
+    { slug: 'microsoft-ai-102', title: 'Microsoft Azure AI Engineer Associate (AI-102)', description: 'All 4 AI-102 practice exams in one bundle — covering plan & manage Azure AI solutions, implement decision & language solutions, generative AI solutions, and computer vision.', variants: 4, price: 2000, priceVoucher: 16500 },
+    { slug: 'microsoft-dp-100', title: 'Microsoft Azure Data Scientist Associate (DP-100)', description: 'All 2 DP-100 practice exams in one bundle — covering ML solution design, data exploration & model training, deployment preparation, and model retraining on Azure ML.', variants: 2, price: 2000, priceVoucher: 16500 },
+    { slug: 'microsoft-dp-300', title: 'Microsoft Azure Database Administrator (DP-300)', description: 'All 4 DP-300 practice exams in one bundle — covering planning & implementing data platform resources, implementing secure environments, monitoring & optimization, automation, and HA/DR for Azure SQL.', variants: 4, price: 2000, priceVoucher: 16500 },
+    { slug: 'microsoft-md-102', title: 'Microsoft Endpoint Administrator (MD-102)', description: 'All 4 MD-102 practice exams in one bundle — covering deploy Windows clients, manage identity & compliance, manage, protect, and monitor devices.', variants: 4, price: 2000, priceVoucher: 16500 },
+    { slug: 'microsoft-ms-102', title: 'Microsoft 365 Administrator Expert (MS-102)', description: 'All 4 MS-102 practice exams in one bundle — covering deploy & manage a Microsoft 365 tenant, implement & manage Microsoft Entra identity & access, manage security & threats with Defender XDR, and Microsoft Purview compliance.', variants: 4, price: 2000, priceVoucher: 19900 },
+    { slug: 'microsoft-pl-300', title: 'Microsoft Power BI Data Analyst (PL-300)', description: 'All 5 PL-300 practice exams in one bundle — covering data preparation, data modeling, data visualization, and data analysis deployment & maintenance in Power BI.', variants: 5, price: 2000, priceVoucher: 16500 },
+    { slug: 'cisco-ccna', title: 'Cisco Certified Network Associate (CCNA)', description: 'All 6 CCNA (200-301) practice exams in one bundle — covering networking fundamentals, IP services, security fundamentals, automation & programmability, and network access.', variants: 6, price: 2000, priceVoucher: 29900 },
+    { slug: 'cisco-ccnp-encor', title: 'Cisco CCNP Enterprise Core (ENCOR 350-401)', description: 'All 2 CCNP Enterprise Core (ENCOR 350-401) practice exams in one bundle — covering architecture, virtualization, infrastructure, network assurance, security, and automation.', variants: 2, price: 2000, priceVoucher: 39900 },
+    { slug: 'comptia-server-plus', title: 'CompTIA Server+', description: 'All 4 CompTIA Server+ (SK0-005) practice exams in one bundle — covering server hardware install/management, server administration, security & disaster recovery, and troubleshooting.', variants: 4, price: 2000, priceVoucher: 36900 },
+    { slug: 'comptia-linux-plus', title: 'CompTIA Linux+', description: 'All 6 CompTIA Linux+ (XK0-005) practice exams in one bundle — covering system management, security, scripting/containers/automation, and troubleshooting.', variants: 6, price: 2000, priceVoucher: 36900 },
+    { slug: 'comptia-data-plus', title: 'CompTIA Data+', description: 'All 6 CompTIA Data+ (DA0-001) practice exams in one bundle — covering data concepts, mining, analysis, visualization, and governance/quality/controls.', variants: 6, price: 2000, priceVoucher: 23900 },
+    { slug: 'google-ace', title: 'Google Associate Cloud Engineer', description: 'All 2 Associate Cloud Engineer practice exams in one bundle — covering setting up a cloud environment, planning and configuring solutions, deploying and implementing, and ensuring successful operation on Google Cloud.', variants: 2, price: 2000, priceVoucher: 19900 },
+    { slug: 'github-foundations', title: 'GitHub Foundations', description: 'All 4 GitHub Foundations practice exams in one bundle — covering GitHub features, repository management, collaboration, GitHub workflows, and GitHub administration.', variants: 4, price: 2000, priceVoucher: 9900 },
+    { slug: 'isc2-cissp', title: 'ISC2 CISSP', description: 'All 6 CISSP practice exams in one bundle — covering security & risk management, asset security, security architecture & engineering, communication & network security, identity & access management, security assessment & testing, security operations, and software development security.', variants: 6, price: 2000, priceVoucher: 74900 },
+    { slug: 'pmi-pmp', title: 'PMI PMP', description: 'All 6 PMP practice exams in one bundle — covering people, process, and business environment domains of the PMP examination content outline.', variants: 6, price: 2000, priceVoucher: 55500 }
+  ];
+
+  return specs.map(s => {
+    const items: BundleSeed['items'] = [];
+    for (let i = 1; i <= s.variants; i++) {
+      items.push({ examSlug: `${s.slug}-p${i}`, tier: 'PRACTICE', position: i });
+    }
+    items.push({ examSlug: `${s.slug}-p1`, tier: 'VOUCHER', position: s.variants + 1 });
+    return {
+      slug: s.slug,
+      title: s.title,
+      description: s.description,
+      price: s.price,
+      priceVoucher: s.priceVoucher,
+      items
+    };
+  });
+}
 
 const EXAMS: ExamSeed[] = [
   // ───── AWS ─────
@@ -825,8 +944,8 @@ async function main() {
   for (const b of BUNDLES) {
     const bundle = await db.bundle.upsert({
       where: { slug: b.slug },
-      update: { title: b.title, description: b.description, price: b.price, published: true },
-      create: { slug: b.slug, title: b.title, description: b.description, price: b.price, published: true }
+      update: { title: b.title, description: b.description, price: b.price, priceVoucher: b.priceVoucher ?? null, published: true },
+      create: { slug: b.slug, title: b.title, description: b.description, price: b.price, priceVoucher: b.priceVoucher ?? null, published: true }
     });
     await db.bundleItem.deleteMany({ where: { bundleId: bundle.id } });
     for (const item of b.items) {

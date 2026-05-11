@@ -1102,20 +1102,20 @@ async function main() {
   const exam = await db.exam.upsert({
     where: { slug: EXAM_SLUG },
     update: {
-      title: 'Scrum.org Professional Scrum Master I (PSM I) — Practice Exam 6',
+      title: 'Professional Scrum Master I (PSM I) — Practice Exam 6',
       description: '80-question practice set for the Professional Scrum Master I (PSM I) assessment by Scrum.org, covering Scrum framework theory, accountabilities (Product Owner, Scrum Master, Developers), events, artifacts, Scrum values, empiricism, self-management, and scaling.',
       level: 'Foundational',
       durationMinutes: 60,
       passingScore: 85,
       questionCount: 80,
       domains: DOMAINS,
-      published: true
+      published: false
     },
     create: {
       vendorId: vendor.id,
       code: 'PSM-I-P6',
       slug: EXAM_SLUG,
-      title: 'Scrum.org Professional Scrum Master I (PSM I) — Practice Exam 6',
+      title: 'Professional Scrum Master I (PSM I) — Practice Exam 6',
       description: '80-question practice set for the Professional Scrum Master I (PSM I) assessment by Scrum.org, covering Scrum framework theory, accountabilities (Product Owner, Scrum Master, Developers), events, artifacts, Scrum values, empiricism, self-management, and scaling.',
       level: 'Foundational',
       durationMinutes: 60,
@@ -1125,7 +1125,7 @@ async function main() {
       pricePractice: 1900,
       priceBundle: 11900,
       priceVoucher: 9900,
-      published: true
+      published: false
     }
   });
 

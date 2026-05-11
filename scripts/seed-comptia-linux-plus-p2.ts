@@ -924,7 +924,7 @@ async function main() {
       passingScore: 72,
       questionCount: 67,
       domains: DOMAINS,
-      published: true
+      published: false
     },
     create: {
       vendorId: vendor.id,
@@ -940,7 +940,7 @@ async function main() {
       pricePractice: 2900,
       priceBundle: 17900,
       priceVoucher: 14900,
-      published: true
+      published: false
     }
   });
 

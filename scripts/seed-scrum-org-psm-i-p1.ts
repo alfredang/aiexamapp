@@ -1422,20 +1422,20 @@ async function main() {
   const exam = await db.exam.upsert({
     where: { slug: EXAM_SLUG },
     update: {
-      title: 'Scrum.org Professional Scrum Master I (PSM I) (Practice Exam 1)',
+      title: 'Professional Scrum Master I (PSM I) — Practice Exam 1',
       description: 'Scrum.org Professional Scrum Master I (PSM I) practice set covering Scrum theory, team, events, artifacts, and the Definition of Done. Sourced from a third-party practice exam PDF. Not real exam questions.',
       level: 'Foundational',
       durationMinutes: 60,
       passingScore: 85,
       questionCount: 103,
       domains: DOMAINS,
-      published: true
+      published: false
     },
     create: {
       vendorId: vendor.id,
       code: 'PSM-I-P1',
       slug: EXAM_SLUG,
-      title: 'Scrum.org Professional Scrum Master I (PSM I) (Practice Exam 1)',
+      title: 'Professional Scrum Master I (PSM I) — Practice Exam 1',
       description: 'Scrum.org Professional Scrum Master I (PSM I) practice set covering Scrum theory, team, events, artifacts, and the Definition of Done. Sourced from a third-party practice exam PDF. Not real exam questions.',
       level: 'Foundational',
       durationMinutes: 60,
@@ -1445,7 +1445,7 @@ async function main() {
       pricePractice: 2900,
       priceBundle: 17900,
       priceVoucher: 14900,
-      published: true
+      published: false
     }
   });
 
