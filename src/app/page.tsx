@@ -9,19 +9,44 @@ import { Search, ShieldCheck, Sparkles, BookOpen, BadgeCheck, Award } from 'luci
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  // Vendor exam counts only count exams visible in the public catalog
-  // (i.e. published AND have at least one published question), so the
-  // "X exams" label matches what users actually see when they click in.
+  // Vendor card counts include BOTH standalone published exams AND bundles
+  // attributed to the vendor (via the first bundle item's exam vendor).
+  // That matches what users actually see on /practice-exams/[vendor].
   const vendors = await db.vendor.findMany({
     include: { _count: { select: { exams: { where: { published: true, questions: { some: { status: 'PUBLISHED' } } } } } } },
     take: 12
   });
-  const popular = await db.exam.findMany({
+  const allBundlesForCounts = await db.bundle.findMany({
+    where: { published: true },
+    select: { id: true, items: { take: 1, select: { exam: { select: { vendor: { select: { slug: true } } } } } } }
+  });
+  const bundleCountByVendor = new Map<string, number>();
+  for (const b of allBundlesForCounts) {
+    const vs = b.items[0]?.exam.vendor.slug;
+    if (vs) bundleCountByVendor.set(vs, (bundleCountByVendor.get(vs) || 0) + 1);
+  }
+
+  // Popular section mixes recent bundles + recent standalone exams (6 total)
+  // since most catalog content is now sold as bundles.
+  const recentExams = await db.exam.findMany({
     where: { published: true, questions: { some: { status: 'PUBLISHED' } } },
     include: { vendor: true, _count: { select: { questions: { where: { status: 'PUBLISHED' } } } } },
     take: 6,
     orderBy: { createdAt: 'desc' }
   });
+  const recentBundles = await db.bundle.findMany({
+    where: { published: true },
+    include: { items: { include: { exam: { include: { vendor: true } } } } },
+    take: 6,
+    orderBy: { createdAt: 'desc' }
+  });
+  type PopularCard =
+    | { kind: 'exam'; data: (typeof recentExams)[number] }
+    | { kind: 'bundle'; data: (typeof recentBundles)[number] };
+  const popular: PopularCard[] = [
+    ...recentBundles.map(b => ({ kind: 'bundle' as const, data: b })),
+    ...recentExams.map(e => ({ kind: 'exam' as const, data: e }))
+  ].slice(0, 6);
 
   return (
     <>
@@ -72,12 +97,15 @@ export default async function HomePage() {
           <Link href="/vendors" className="text-sm text-blue-600 hover:underline">View all</Link>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6">
-          {vendors.map(v => (
-            <Link key={v.id} href={`/practice-exams/${v.slug}`} className="card-hover flex flex-col items-center justify-center px-4 py-6 text-center">
-              <div className="text-sm font-medium">{v.name}</div>
-              <div className="text-xs text-slate-500 dark:text-slate-400">{v._count.exams} exam{v._count.exams === 1 ? '' : 's'}</div>
-            </Link>
-          ))}
+          {vendors.map(v => {
+            const total = v._count.exams + (bundleCountByVendor.get(v.slug) || 0);
+            return (
+              <Link key={v.id} href={`/practice-exams/${v.slug}`} className="card-hover flex flex-col items-center justify-center px-4 py-6 text-center">
+                <div className="text-sm font-medium">{v.name}</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400">{total} exam{total === 1 ? '' : 's'}</div>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
@@ -86,21 +114,44 @@ export default async function HomePage() {
         <div className="container-app py-14">
           <h2 className="mb-6 text-2xl font-semibold">Popular Practice Exams</h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {popular.map(e => (
-              <Link key={e.id} href={`/practice-exams/${e.vendor.slug}/${e.slug}`} className="card-hover p-5">
-                <div className="mb-2 flex items-center gap-2 text-xs">
-                  <span className="badge">{e.vendor.name}</span>
-                  <span className="badge">{e.code}</span>
-                  <span className="badge">{e.level}</span>
-                </div>
-                <h3 className="font-semibold">{e.title}</h3>
-                <p className="mt-1 line-clamp-2 text-sm text-slate-600 dark:text-slate-400">{e.description}</p>
-                <div className="mt-4 flex items-center justify-between text-sm">
-                  <span className="text-slate-500 dark:text-slate-400">{e._count.questions} questions</span>
-                  <span className="font-semibold text-blue-700 dark:text-blue-400">from {formatPrice(e.pricePractice)}</span>
-                </div>
-              </Link>
-            ))}
+            {popular.map(card => {
+              if (card.kind === 'bundle') {
+                const b = card.data;
+                const first = b.items[0]?.exam;
+                const totalQs = b.items.reduce((s, i) => s + i.exam.questionCount, 0);
+                return (
+                  <Link key={`b-${b.id}`} href={first ? `/practice-exams/${first.vendor.slug}/${b.slug}` : `/bundles/${b.slug}`} className="card-hover p-5">
+                    <div className="mb-2 flex items-center gap-2 text-xs">
+                      {first && <span className="badge">{first.vendor.name}</span>}
+                      {first && <span className="badge">{first.code}</span>}
+                      {first && <span className="badge">{first.level}</span>}
+                    </div>
+                    <h3 className="font-semibold">{b.title}</h3>
+                    <p className="mt-1 line-clamp-2 text-sm text-slate-600 dark:text-slate-400">{b.description}</p>
+                    <div className="mt-4 flex items-center justify-between text-sm">
+                      <span className="text-slate-500 dark:text-slate-400">{totalQs} questions · {b.items.length} practice exams</span>
+                      <span className="font-semibold text-blue-700 dark:text-blue-400">{b.price === 0 ? 'Free' : `from ${formatPrice(b.price)}`}</span>
+                    </div>
+                  </Link>
+                );
+              }
+              const e = card.data;
+              return (
+                <Link key={`e-${e.id}`} href={`/practice-exams/${e.vendor.slug}/${e.slug}`} className="card-hover p-5">
+                  <div className="mb-2 flex items-center gap-2 text-xs">
+                    <span className="badge">{e.vendor.name}</span>
+                    <span className="badge">{e.code}</span>
+                    <span className="badge">{e.level}</span>
+                  </div>
+                  <h3 className="font-semibold">{e.title}</h3>
+                  <p className="mt-1 line-clamp-2 text-sm text-slate-600 dark:text-slate-400">{e.description}</p>
+                  <div className="mt-4 flex items-center justify-between text-sm">
+                    <span className="text-slate-500 dark:text-slate-400">{e._count.questions} questions</span>
+                    <span className="font-semibold text-blue-700 dark:text-blue-400">from {formatPrice(e.pricePractice)}</span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
