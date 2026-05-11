@@ -5,10 +5,9 @@ import { ThemeToggle } from './theme-toggle';
 export function Nav() {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
-      <div className="container-app flex h-16 items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+      <div className="container-app flex h-24 items-center justify-between">
+        <Link href="/" className="flex items-center font-semibold tracking-tight" aria-label="ExamNova home">
           <Logo />
-          <span>ExamNova</span>
         </Link>
         <nav className="hidden items-center gap-1 md:flex">
           <Link href="/practice-exams" className="btn-ghost">Practice Exams</Link>
@@ -27,6 +26,17 @@ export function Nav() {
 
 function Logo() {
   return (
-    <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-blue-600 to-purple-600 text-white text-xs font-bold">CP</span>
+    <>
+      <img
+        src="/logo-light.webp"
+        alt="ExamNova"
+        className="h-20 w-auto shrink-0 object-contain dark:hidden"
+      />
+      <img
+        src="/logo-dark.webp"
+        alt="ExamNova"
+        className="hidden h-20 w-auto shrink-0 object-contain dark:block"
+      />
+    </>
   );
 }

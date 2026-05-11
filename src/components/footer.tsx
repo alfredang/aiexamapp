@@ -3,8 +3,9 @@ export function Footer() {
     <footer className="border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
       <div className="container-app py-10 grid gap-8 md:grid-cols-4">
         <div>
-          <div className="mb-3 flex items-center gap-2 font-semibold">
-            <span className="inline-block h-6 w-6 rounded-md bg-brand"></span> ExamNova
+          <div className="mb-3 flex items-center">
+            <img src="/logo-light.webp" alt="ExamNova" className="h-12 w-auto shrink-0 object-contain dark:hidden" />
+            <img src="/logo-dark.webp" alt="ExamNova" className="hidden h-12 w-auto shrink-0 object-contain dark:block" />
           </div>
           <p className="text-sm text-slate-600 dark:text-slate-400">Practice smarter for your next certification.</p>
         </div>
