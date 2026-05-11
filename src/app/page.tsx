@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { db } from '@/lib/db';
 import { formatPrice } from '@/lib/utils';
 import { DotPattern } from '@/components/dot-pattern';
-import { Search, ShieldCheck, Sparkles, BookOpen, BadgeCheck, Award } from 'lucide-react';
+import { Search, ShieldCheck, Sparkles, BookOpen, BadgeCheck, Award, ChevronDown, HelpCircle } from 'lucide-react';
 
 // Vendor + popular-exam counts come from live DB queries; without this the
 // page is statically prerendered and shows stale counts after seed updates.
@@ -195,20 +195,39 @@ export default async function HomePage() {
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="container-app py-16">
-        <h2 className="text-center text-2xl font-semibold">Frequently asked questions</h2>
-        <div className="mx-auto mt-8 max-w-3xl divide-y divide-slate-200 dark:divide-slate-800">
-          {[
-            { q: 'Are these real exam questions?', a: 'No. We only provide original practice questions for learning. We do not offer dumps.' },
-            { q: 'How does the free teaser work?', a: 'Every paid exam includes a free 10-question teaser. Registered users can retake it unlimited times.' },
-            { q: 'What is the difference between Practice Mode and Exam Mode?', a: 'Practice Mode shows answers and explanations immediately after each question. Exam Mode is timed and only reveals results at the end — like the real test.' },
-            { q: 'How do exam vouchers work?', a: 'When you buy the Exam Voucher tier, you get a real exam voucher (emailed after purchase) AND practice access for the same exam included at no extra charge.' }
-          ].map((f, i) => (
-            <details key={i} className="group py-4">
-              <summary className="flex cursor-pointer items-center justify-between font-medium">{f.q}<span className="text-slate-400 transition group-open:rotate-180">▾</span></summary>
-              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{f.a}</p>
-            </details>
-          ))}
+      <section id="faq" className="border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
+        <div className="container-app py-20">
+          <div className="mx-auto max-w-3xl text-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+              <HelpCircle className="h-3.5 w-3.5" />
+              FAQ
+            </div>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">Frequently asked questions</h2>
+            <p className="mt-3 text-slate-600 dark:text-slate-400">
+              Quick answers to common questions about how ExamNova works.
+            </p>
+          </div>
+
+          <div className="mx-auto mt-10 max-w-3xl space-y-3">
+            {[
+              { q: 'Are these real exam questions?', a: 'No — and that\'s intentional. ExamNova provides original, hand-authored practice questions modelled on each certification\'s public exam blueprint. We do not sell or distribute real exam content ("dumps"), which would violate vendor terms and undermine the value of your certification.' },
+              { q: 'How does the free teaser work?', a: 'Every exam includes a free 10-question teaser so you can sample the question quality and format before you buy. After signing in, you can retake the teaser as often as you like — there\'s no per-attempt limit.' },
+              { q: 'What is the difference between Practice Mode and Exam Mode?', a: 'Practice Mode reveals the correct answer and full explanation after each question — ideal for studying and reinforcing concepts. Exam Mode is a timed simulation: no answer feedback until you submit, auto-save every 15 seconds, and auto-submit when time runs out — mirroring the real testing experience.' },
+              { q: 'How do exam vouchers work?', a: 'Purchasing the Exam Voucher tier includes a real, vendor-issued voucher code (delivered by email within 3–5 business days) PLUS lifetime practice access to the same certification at no additional cost. Use the code to register for your official exam at the vendor\'s testing partner.' }
+            ].map((f, i) => (
+              <details key={i} className="group rounded-xl border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:shadow-sm open:border-blue-300 open:shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600 dark:open:border-blue-500/60">
+                <summary className="flex cursor-pointer list-none items-start justify-between gap-4 text-base font-semibold text-slate-900 dark:text-slate-100">
+                  <span>{f.q}</span>
+                  <ChevronDown className="mt-0.5 h-5 w-5 shrink-0 text-slate-400 transition-transform duration-200 group-open:rotate-180 group-open:text-blue-600 dark:group-open:text-blue-400" />
+                </summary>
+                <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{f.a}</p>
+              </details>
+            ))}
+          </div>
+
+          <p className="mx-auto mt-10 max-w-3xl text-center text-sm text-slate-500 dark:text-slate-400">
+            Still have questions? <a href="mailto:support@examnova.com" className="font-medium text-blue-600 hover:underline dark:text-blue-400">Email our support team</a> — we typically reply within one business day.
+          </p>
         </div>
       </section>
     </>
