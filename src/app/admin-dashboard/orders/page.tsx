@@ -7,7 +7,7 @@ async function refund(formData: FormData) {
   const id = String(formData.get('id'));
   await db.order.update({ where: { id }, data: { status: 'REFUNDED' } });
   // Real refund would call PayPal /v2/payments/captures/{capture_id}/refund here.
-  revalidatePath('/admin/orders');
+  revalidatePath('/admin-dashboard/orders');
 }
 
 export default async function AdminOrdersPage() {

@@ -6,7 +6,7 @@ import { ThemeToggle } from './theme-toggle';
 
 export function Nav() {
   const pathname = usePathname() || '/';
-  const inBackend = pathname.startsWith('/admin') || pathname.startsWith('/my-content');
+  const inBackend = pathname.startsWith('/admin-dashboard') || pathname.startsWith('/user-dashboard');
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">

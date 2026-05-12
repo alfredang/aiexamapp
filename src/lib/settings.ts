@@ -7,17 +7,22 @@ export const SETTING_KEYS = [
   'PAYPAL_CLIENT_SECRET',
   'PAYPAL_WEBHOOK_ID',
   'PAYNOW_MERCHANT_ID',
-  'PAYNOW_API_KEY',
   'HITPAY_API_KEY',
   'HITPAY_SALT',
-  'ANTHROPIC_API_KEY'
+  'ANTHROPIC_API_KEY',
+  'COMPANY_NAME',
+  'COMPANY_SHORT_NAME',
+  'COMPANY_UEN',
+  'COMPANY_ADDRESS',
+  'COMPANY_EMAIL',
+  'COMPANY_TEL',
+  'COMPANY_WEBSITE'
 ] as const;
 export type SettingKey = (typeof SETTING_KEYS)[number];
 
 export const SECRET_KEYS: ReadonlySet<SettingKey> = new Set([
   'PAYPAL_CLIENT_SECRET',
   'PAYPAL_WEBHOOK_ID',
-  'PAYNOW_API_KEY',
   'HITPAY_API_KEY',
   'HITPAY_SALT',
   'ANTHROPIC_API_KEY'
@@ -70,8 +75,48 @@ export async function setSetting(k: SettingKey, value: string): Promise<void> {
   });
 }
 
+export type CompanyInfo = {
+  name: string;
+  shortName: string;
+  uen: string;
+  address: string;
+  email: string;
+  tel: string;
+  website: string;
+};
+
+const COMPANY_DEFAULTS: CompanyInfo = {
+  name: 'Tertiary Infotech Academy Pte Ltd',
+  shortName: 'Tertiary Infotech Academy',
+  uen: '201200696W',
+  address: '12 Woodland Square #07-85/86/87 Woods Square Tower 1, Singapore 737715',
+  email: 'enquiry@tertiaryinfotech.com',
+  tel: '61000613',
+  website: 'https://www.tertiarycourses.com.sg/'
+};
+
+export async function getCompanyInfo(): Promise<CompanyInfo> {
+  const all = await getAllSettings();
+  return {
+    name: all.COMPANY_NAME || COMPANY_DEFAULTS.name,
+    shortName: all.COMPANY_SHORT_NAME || COMPANY_DEFAULTS.shortName,
+    uen: all.COMPANY_UEN || COMPANY_DEFAULTS.uen,
+    address: all.COMPANY_ADDRESS || COMPANY_DEFAULTS.address,
+    email: all.COMPANY_EMAIL || COMPANY_DEFAULTS.email,
+    tel: all.COMPANY_TEL || COMPANY_DEFAULTS.tel,
+    website: all.COMPANY_WEBSITE || COMPANY_DEFAULTS.website
+  };
+}
+
 export function mask(value: string): string {
   if (!value) return '';
-  if (value.length <= 4) return '••••';
-  return `••••${value.slice(-4)}`;
+  if (value.length <= 6) return '••••••••••••';
+  if (value.length <= 12) {
+    const dots = '•'.repeat(Math.max(8, value.length - 4));
+    return `${value.slice(0, 2)}${dots}${value.slice(-2)}`;
+  }
+  // Scale the dot count with the real string so the mask looks like a credential,
+  // not a 4-dot stub. Cap at 32 dots to keep the input from overflowing.
+  const dotCount = Math.min(32, Math.max(12, value.length - 8));
+  return `${value.slice(0, 4)}${'•'.repeat(dotCount)}${value.slice(-4)}`;
 }

@@ -4,36 +4,32 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import {
   LayoutDashboard,
-  Building2,
   BookOpen,
-  FileQuestion,
-  Users,
+  ClipboardList,
   ShoppingBag,
   Ticket,
-  Settings as SettingsIcon,
+  UserCircle,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
 
 const ITEMS: { href: string; label: string; icon: any }[] = [
-  { href: '/admin-dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/admin-dashboard/vendors', label: 'Vendors', icon: Building2 },
-  { href: '/admin-dashboard/exams', label: 'Exams', icon: BookOpen },
-  { href: '/admin-dashboard/questions', label: 'Questions', icon: FileQuestion },
-  { href: '/admin-dashboard/users', label: 'Users', icon: Users },
-  { href: '/admin-dashboard/orders', label: 'Orders', icon: ShoppingBag },
-  { href: '/admin-dashboard/vouchers', label: 'Vouchers', icon: Ticket },
-  { href: '/admin-dashboard/settings', label: 'Settings', icon: SettingsIcon }
+  { href: '/user-dashboard', label: 'Overview', icon: LayoutDashboard },
+  { href: '/user-dashboard/exams', label: 'Exams', icon: BookOpen },
+  { href: '/user-dashboard/attempts', label: 'Attempts', icon: ClipboardList },
+  { href: '/user-dashboard/orders', label: 'Orders', icon: ShoppingBag },
+  { href: '/user-dashboard/vouchers', label: 'Vouchers', icon: Ticket },
+  { href: '/user-dashboard/settings', label: 'My Profile', icon: UserCircle }
 ];
 
-export function AdminChrome({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname() || '/admin-dashboard';
+export function UserChrome({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname() || '/user-dashboard';
   const [collapsed, setCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     try {
-      const v = localStorage.getItem('adminSidebarCollapsed');
+      const v = localStorage.getItem('userSidebarCollapsed');
       setCollapsed(v === '1');
     } catch {}
     setMounted(true);
@@ -43,7 +39,7 @@ export function AdminChrome({ children }: { children: React.ReactNode }) {
     setCollapsed((c) => {
       const next = !c;
       try {
-        localStorage.setItem('adminSidebarCollapsed', next ? '1' : '0');
+        localStorage.setItem('userSidebarCollapsed', next ? '1' : '0');
       } catch {}
       return next;
     });
@@ -61,7 +57,7 @@ export function AdminChrome({ children }: { children: React.ReactNode }) {
         <div className="flex items-center justify-between px-3 py-3">
           {!collapsed && (
             <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Admin
+              My Content
             </span>
           )}
           <button
@@ -74,7 +70,7 @@ export function AdminChrome({ children }: { children: React.ReactNode }) {
         </div>
         <nav className="flex flex-col gap-0.5 px-2 pb-4">
           {ITEMS.map(({ href, label, icon: Icon }) => {
-            const active = href === '/admin-dashboard' ? pathname === '/admin-dashboard' : pathname.startsWith(href);
+            const active = href === '/user-dashboard' ? pathname === '/user-dashboard' : pathname.startsWith(href);
             return (
               <Link
                 key={href}

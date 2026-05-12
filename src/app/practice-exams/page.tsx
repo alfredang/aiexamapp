@@ -11,7 +11,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
     published: true,
     // Hide exams that don't have any published questions yet — they're
     // catalog placeholders waiting on content. Admins still see them
-    // in /admin (which doesn't apply this filter).
+    // in /admin-dashboard (which doesn't apply this filter).
     questions: { some: { status: 'PUBLISHED' as const } },
     ...(sp.vendor ? { vendor: { slug: sp.vendor } } : {}),
     ...(sp.level ? { level: sp.level } : {}),

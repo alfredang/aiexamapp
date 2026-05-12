@@ -56,14 +56,14 @@ export default async function AdminOverview() {
   const popularExamMap = new Map(popularExams.map((e) => [e.id, e]));
 
   const kpis = [
-    { label: 'Users', value: userCount.toLocaleString(), icon: Users, accent: 'blue', href: '/admin/users' },
+    { label: 'Users', value: userCount.toLocaleString(), icon: Users, accent: 'blue', href: '/admin-dashboard/users' },
     {
       label: 'Practice exams',
       value: examCount.toLocaleString(),
       sub: `${publishedExams} published`,
       icon: BookOpen,
       accent: 'purple',
-      href: '/admin/exams'
+      href: '/admin-dashboard/exams'
     },
     {
       label: 'Orders',
@@ -71,28 +71,28 @@ export default async function AdminOverview() {
       sub: `${paidCount} paid`,
       icon: ShoppingBag,
       accent: 'emerald',
-      href: '/admin/orders'
+      href: '/admin-dashboard/orders'
     },
     {
       label: 'Revenue (paid)',
       value: formatPrice(paidSum._sum.amount || 0),
       icon: DollarSign,
       accent: 'amber',
-      href: '/admin/orders'
+      href: '/admin-dashboard/orders'
     },
     {
       label: 'Questions',
       value: questionCount.toLocaleString(),
       icon: FileQuestion,
       accent: 'slate',
-      href: '/admin/questions'
+      href: '/admin-dashboard/questions'
     },
     {
       label: 'Drafts pending',
       value: draftCount.toLocaleString(),
       icon: AlertCircle,
       accent: 'rose',
-      href: '/admin/questions'
+      href: '/admin-dashboard/questions'
     }
   ];
 
@@ -120,7 +120,7 @@ export default async function AdminOverview() {
         <section className="card p-4">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-lg font-semibold">Latest users</h2>
-            <Link href="/admin/users" className="text-sm text-blue-600 hover:underline dark:text-blue-400">
+            <Link href="/admin-dashboard/users" className="text-sm text-blue-600 hover:underline dark:text-blue-400">
               View all →
             </Link>
           </div>
@@ -153,7 +153,7 @@ export default async function AdminOverview() {
         <section className="card p-4">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-lg font-semibold">Latest orders</h2>
-            <Link href="/admin/orders" className="text-sm text-blue-600 hover:underline dark:text-blue-400">
+            <Link href="/admin-dashboard/orders" className="text-sm text-blue-600 hover:underline dark:text-blue-400">
               View all →
             </Link>
           </div>
@@ -197,7 +197,7 @@ export default async function AdminOverview() {
       <section className="mt-8 card p-4">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-semibold">Popular practice exams</h2>
-          <Link href="/admin/exams" className="text-sm text-blue-600 hover:underline dark:text-blue-400">
+          <Link href="/admin-dashboard/exams" className="text-sm text-blue-600 hover:underline dark:text-blue-400">
             Manage exams →
           </Link>
         </div>

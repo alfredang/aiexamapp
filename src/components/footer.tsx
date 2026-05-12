@@ -1,4 +1,7 @@
-export function Footer() {
+import { getCompanyInfo } from '@/lib/settings';
+
+export async function Footer() {
+  const company = await getCompanyInfo();
   return (
     <footer className="border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
       <div className="container-app py-10 grid gap-8 md:grid-cols-4">
@@ -31,7 +34,7 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-slate-200 py-4 text-center text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
-        © {new Date().getFullYear()} ExamNova. All rights reserved.
+        © {new Date().getFullYear()} {company.name}. All rights reserved.
       </div>
     </footer>
   );

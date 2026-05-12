@@ -17,8 +17,8 @@ async function createVendor(formData: FormData) {
   const description = String(formData.get('description') || '').trim() || null;
   if (!name || !slug) return;
   await db.vendor.create({ data: { name, slug, logo, description } });
-  revalidatePath('/admin/vendors');
-  revalidatePath('/admin/exams');
+  revalidatePath('/admin-dashboard/vendors');
+  revalidatePath('/admin-dashboard/exams');
 }
 
 async function updateVendor(formData: FormData) {
@@ -31,8 +31,8 @@ async function updateVendor(formData: FormData) {
   const description = String(formData.get('description') || '').trim() || null;
   if (!id || !name || !slug) return;
   await db.vendor.update({ where: { id }, data: { name, slug, logo, description } });
-  revalidatePath('/admin/vendors');
-  revalidatePath('/admin/exams');
+  revalidatePath('/admin-dashboard/vendors');
+  revalidatePath('/admin-dashboard/exams');
 }
 
 async function deleteVendor(formData: FormData) {
@@ -43,8 +43,8 @@ async function deleteVendor(formData: FormData) {
   const count = await db.exam.count({ where: { vendorId: id } });
   if (count > 0) return; // refuse delete when exams still reference it
   await db.vendor.delete({ where: { id } });
-  revalidatePath('/admin/vendors');
-  revalidatePath('/admin/exams');
+  revalidatePath('/admin-dashboard/vendors');
+  revalidatePath('/admin-dashboard/exams');
 }
 
 export default async function AdminVendorsPage() {

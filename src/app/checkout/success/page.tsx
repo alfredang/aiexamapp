@@ -25,7 +25,7 @@ export default function SuccessPage() {
         </div>
 
         <div className="mt-8 flex flex-col gap-2 sm:flex-row sm:justify-center">
-          <Link href="/my-content" className="btn-primary-grad inline-flex items-center justify-center gap-1">
+          <Link href="/user-dashboard" className="btn-primary-grad inline-flex items-center justify-center gap-1">
             Go to My Content <ArrowRight className="h-4 w-4" />
           </Link>
           <Link href="/practice-exams" className="btn-outline inline-flex items-center justify-center">

@@ -13,7 +13,7 @@ async function grantAccess(formData: FormData) {
     update: {},
     create: { userId, examId, tier: 'ADMIN_GRANT' }
   });
-  revalidatePath('/admin/users');
+  revalidatePath('/admin-dashboard/users');
 }
 
 async function setActive(formData: FormData) {
@@ -34,7 +34,7 @@ async function setActive(formData: FormData) {
       targetId: userId
     }
   });
-  revalidatePath('/admin/users');
+  revalidatePath('/admin-dashboard/users');
 }
 
 async function setRole(formData: FormData) {
@@ -56,7 +56,7 @@ async function setRole(formData: FormData) {
       targetId: userId
     }
   });
-  revalidatePath('/admin/users');
+  revalidatePath('/admin-dashboard/users');
 }
 
 type Filter = 'all' | 'users' | 'admins';
@@ -115,7 +115,7 @@ export default async function AdminUsersPage({
         {tabs.map((t) => (
           <Link
             key={t.key}
-            href={t.key === 'all' ? '/admin/users' : `/admin/users?filter=${t.key}`}
+            href={t.key === 'all' ? '/admin-dashboard/users' : `/admin-dashboard/users?filter=${t.key}`}
             className={`rounded-md px-3 py-1.5 ${
               filter === t.key
                 ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'

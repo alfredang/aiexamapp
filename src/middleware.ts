@@ -7,8 +7,8 @@ const { auth } = NextAuth(authConfig);
 export default auth((req) => {
   const url = req.nextUrl;
   const user = (req.auth?.user as any) || null;
-  const isAdminPath = url.pathname.startsWith('/admin') || url.pathname.startsWith('/api/admin');
-  const isPrivate = isAdminPath || url.pathname.startsWith('/my-content');
+  const isAdminPath = url.pathname.startsWith('/admin-dashboard') || url.pathname.startsWith('/api/admin');
+  const isPrivate = isAdminPath || url.pathname.startsWith('/user-dashboard');
 
   if (isPrivate && !user) {
     const login = new URL('/login', url);
@@ -20,5 +20,5 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ['/admin/:path*', '/api/admin/:path*', '/my-content/:path*']
+  matcher: ['/admin-dashboard/:path*', '/api/admin/:path*', '/user-dashboard/:path*']
 };

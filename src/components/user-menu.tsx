@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, Eye, LogOut, Shield, User } from 'lucide-react';
+import { ChevronDown, Eye, LayoutDashboard, LogOut, Shield, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 type ViewAs = 'admin' | 'user';
@@ -38,7 +38,7 @@ export function UserMenu() {
     setViewAs(v);
     if (typeof window !== 'undefined') localStorage.setItem('viewAs', v);
     setViewOpen(false);
-    router.refresh();
+    router.push(v === 'admin' ? '/admin-dashboard' : '/user-dashboard');
   }
 
   if (status === 'loading') {
@@ -66,8 +66,6 @@ export function UserMenu() {
 
   return (
     <div className="flex items-center gap-2">
-      {!(isAdmin && viewAs === 'admin') && <Link href="/my-content" className="btn-ghost">My Content</Link>}
-
       {/* View As — admin only, top-bar pill */}
       {isAdmin && (
         <div className="relative" ref={viewRef}>
@@ -145,7 +143,14 @@ export function UserMenu() {
 
             <div className="py-1">
               <Link
-                href="/my-content/settings"
+                href={isAdmin && viewAs === 'admin' ? '/admin-dashboard' : '/user-dashboard'}
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
+              >
+                <LayoutDashboard className="h-4 w-4" /> My Dashboard
+              </Link>
+              <Link
+                href="/user-dashboard/settings"
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
               >

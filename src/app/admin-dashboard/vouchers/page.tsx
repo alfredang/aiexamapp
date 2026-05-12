@@ -39,7 +39,7 @@ async function issueVoucher(formData: FormData) {
   } catch { /* non-fatal */ }
   await sendVoucherDeliveredEmail(ent.user.email, ent.exam.title, voucher, pdf).catch(() => {});
 
-  revalidatePath('/admin/vouchers');
+  revalidatePath('/admin-dashboard/vouchers');
 }
 
 export default async function AdminVouchersPage() {

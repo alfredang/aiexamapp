@@ -5,7 +5,7 @@ import { ChevronDown, BookOpen, Ticket } from 'lucide-react';
 import { tierLabel } from '@/lib/utils';
 import type { MyExamsListItem } from '@/lib/my-exams';
 
-export function MyExamsList({ items }: { items: MyExamsListItem[] }) {
+export function MyExamsList({ items, cols = 2 }: { items: MyExamsListItem[]; cols?: 2 | 3 }) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   function toggle(id: string) {
@@ -31,8 +31,10 @@ export function MyExamsList({ items }: { items: MyExamsListItem[] }) {
     );
   }
 
+  const gridCols = cols === 3 ? 'sm:grid-cols-2 lg:grid-cols-3' : 'sm:grid-cols-2';
+  const bundleExpandedSpan = cols === 3 ? 'sm:col-span-2 lg:col-span-3' : 'sm:col-span-2';
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className={`grid gap-3 ${gridCols}`}>
       {items.map(item => {
         if (item.kind === 'bundle') {
           const b = item.data;
@@ -41,7 +43,7 @@ export function MyExamsList({ items }: { items: MyExamsListItem[] }) {
           return (
             <div
               key={`b-${b.bundleId}`}
-              className={`card flex flex-col p-4 transition ${isOpen ? 'sm:col-span-2 border-blue-300 dark:border-blue-500/60' : ''}`}
+              className={`card flex flex-col p-4 transition ${isOpen ? `${bundleExpandedSpan} border-blue-300 dark:border-blue-500/60` : ''}`}
             >
               <button
                 onClick={() => toggle(b.bundleId)}
@@ -76,7 +78,7 @@ export function MyExamsList({ items }: { items: MyExamsListItem[] }) {
                       <Ticket className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
                       <span className="text-emerald-900 dark:text-emerald-100">
                         Real {b.code} exam voucher is part of this purchase. Find your code in{' '}
-                        <Link href="/my-content/vouchers" className="font-medium underline">
+                        <Link href="/user-dashboard/vouchers" className="font-medium underline">
                           Vouchers
                         </Link>
                         .

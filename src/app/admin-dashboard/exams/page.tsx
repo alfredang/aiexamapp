@@ -26,7 +26,7 @@ async function createExam(formData: FormData) {
       published: false
     }
   });
-  revalidatePath('/admin/exams');
+  revalidatePath('/admin-dashboard/exams');
 }
 
 async function togglePublish(formData: FormData) {
@@ -34,7 +34,7 @@ async function togglePublish(formData: FormData) {
   const id = String(formData.get('id'));
   const published = formData.get('published') === 'on';
   await db.exam.update({ where: { id }, data: { published } });
-  revalidatePath('/admin/exams');
+  revalidatePath('/admin-dashboard/exams');
 }
 
 export default async function AdminExamsPage({
@@ -123,7 +123,7 @@ export default async function AdminExamsPage({
         </form>
         <div className="flex flex-wrap gap-1 text-sm">
           <Link
-            href={`/admin/exams${q ? `?q=${encodeURIComponent(q)}` : ''}`}
+            href={`/admin-dashboard/exams${q ? `?q=${encodeURIComponent(q)}` : ''}`}
             className={`rounded-md px-2.5 py-1 ${
               !vendorFilter
                 ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
@@ -135,7 +135,7 @@ export default async function AdminExamsPage({
           {vendors.map((v) => (
             <Link
               key={v.id}
-              href={`/admin/exams${qsFor(v.slug)}`}
+              href={`/admin-dashboard/exams${qsFor(v.slug)}`}
               className={`rounded-md px-2.5 py-1 ${
                 vendorFilter === v.slug
                   ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
@@ -163,7 +163,7 @@ export default async function AdminExamsPage({
                 <input type="checkbox" name="published" defaultChecked={e.published} /> published
               </label>
               <button className="btn-outline">Save</button>
-              <a href={`/admin/exams/${e.id}/generate`} className="btn-primary-grad">
+              <a href={`/admin-dashboard/exams/${e.id}/generate`} className="btn-primary-grad">
                 Generate
               </a>
             </form>
@@ -172,7 +172,7 @@ export default async function AdminExamsPage({
         {exams.length === 0 && (
           <p className="p-4 text-sm text-slate-500">
             No exams match this filter.{' '}
-            <Link href="/admin/exams" className="text-blue-600 hover:underline dark:text-blue-400">
+            <Link href="/admin-dashboard/exams" className="text-blue-600 hover:underline dark:text-blue-400">
               Clear
             </Link>
           </p>

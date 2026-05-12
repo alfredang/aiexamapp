@@ -167,7 +167,7 @@ export async function getGroupedExams(userId: string): Promise<GroupedExams> {
   }
 
   // Drop bundles where the user has NO PRACTICE-tier entitlements (only a
-  // voucher) — in that case the voucher already shows in /my-content/vouchers
+  // voucher) — in that case the voucher already shows in /user-dashboard/vouchers
   // and there's no exam content to expand.
   const finalBundles = [...bundleBuckets.values()].filter(g => g.items.length > 0);
   finalBundles.sort((a, b) => b.grantedAt.getTime() - a.grantedAt.getTime());

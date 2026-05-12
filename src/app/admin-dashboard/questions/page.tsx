@@ -4,17 +4,17 @@ import { revalidatePath } from 'next/cache';
 async function approve(formData: FormData) {
   'use server';
   await db.question.update({ where: { id: String(formData.get('id')) }, data: { status: 'PUBLISHED' } });
-  revalidatePath('/admin/questions');
+  revalidatePath('/admin-dashboard/questions');
 }
 async function archive(formData: FormData) {
   'use server';
   await db.question.update({ where: { id: String(formData.get('id')) }, data: { status: 'ARCHIVED' } });
-  revalidatePath('/admin/questions');
+  revalidatePath('/admin-dashboard/questions');
 }
 async function remove(formData: FormData) {
   'use server';
   await db.question.delete({ where: { id: String(formData.get('id')) } });
-  revalidatePath('/admin/questions');
+  revalidatePath('/admin-dashboard/questions');
 }
 
 export default async function AdminQuestionsPage({ searchParams }: { searchParams: Promise<{ status?: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED' }> }) {

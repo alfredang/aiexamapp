@@ -51,7 +51,7 @@ export async function sendPurchaseEmail(
     <h2 style="margin:0 0 12px">Purchase confirmed</h2>
     <p>Thanks for your purchase of <b>${tierLabel}</b> for <b>${examName}</b>.</p>
     ${voucherSection}
-    <p style="margin-top:24px"><a href="${process.env.APP_URL}/my-content" style="background:#2563eb;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none">Go to My Content →</a></p>
+    <p style="margin-top:24px"><a href="${process.env.APP_URL}/user-dashboard" style="background:#2563eb;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none">Go to My Content →</a></p>
   </div>`;
   const attachments = voucherPdf
     ? [{ filename: `voucher-${voucherCode}.pdf`, content: voucherPdf, contentType: 'application/pdf' }]
@@ -70,7 +70,7 @@ export async function sendVoucherDeliveredEmail(
     <p>Your <b>${examName}</b> exam voucher has been issued.</p>
     <p>Voucher code: <code style="background:#f1f5f9;padding:6px 10px;border-radius:6px;font-size:16px">${voucherCode}</code></p>
     <p style="color:#64748b;font-size:14px">Use this code on the certification vendor's exam-booking site (e.g. Pearson VUE / PSI) to schedule your exam.</p>
-    <p style="margin-top:24px"><a href="${process.env.APP_URL}/my-content/vouchers" style="background:#2563eb;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none">View in My Content →</a></p>
+    <p style="margin-top:24px"><a href="${process.env.APP_URL}/user-dashboard/vouchers" style="background:#2563eb;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none">View in My Content →</a></p>
   </div>`;
   const attachments = voucherPdf
     ? [{ filename: `voucher-${voucherCode}.pdf`, content: voucherPdf, contentType: 'application/pdf' }]

@@ -42,7 +42,7 @@ export default async function ResultsPage({ params }: { params: Promise<{ attemp
         </div>
         <p className="mt-4 text-slate-600">{correctCount} correct out of {total} · pass mark {attempt.exam.passingScore}%</p>
         <div className="mt-6 flex justify-center gap-2">
-          <Link href="/my-content" className="btn-outline">My Content</Link>
+          <Link href="/user-dashboard" className="btn-outline">My Content</Link>
           <Link href={`/practice-exams/${attempt.exam.vendor.slug}/${attempt.exam.slug}`} className="btn-primary-grad">Back to exam</Link>
         </div>
       </div>

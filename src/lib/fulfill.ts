@@ -23,7 +23,7 @@ export async function fulfillOrder(orderId: string, paypalPayload: any, paypalCa
 
     // Voucher delivery model: VOUCHER-tier entitlements are created with
     // `voucher: null` (pending). An admin issues the real code later via
-    // /admin/vouchers. The buyer is told "3-5 business days" up front.
+    // /admin-dashboard/vouchers. The buyer is told "3-5 business days" up front.
 
     // Bundle orders: write one entitlement per qualifying bundle item.
     //
