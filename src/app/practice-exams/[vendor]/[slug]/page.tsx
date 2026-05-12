@@ -17,12 +17,33 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ ven
     }
   });
 
-  // If no PUBLISHED exam matched, fall back to checking if this slug is a
-  // published Bundle. Bundles are surfaced at /practice-exams/[vendor]/[bundleSlug]
-  // (the vendor segment is derived from the bundle's first item's vendor).
-  // An unpublished exam falls through so a bundle sharing the same slug
-  // (e.g. aws-saa-c03 the bundle vs aws-saa-c03 the legacy base shell) wins.
-  if (!exam || !exam.published) {
+  // We need session info early to decide whether unpublished exams are
+  // viewable (admins can see anything; entitled users can see exams they
+  // own even when those exams are hidden from the public catalog because
+  // they're sold via a bundle).
+  const session = await auth();
+  const userId = (session?.user as any)?.id as string | undefined;
+  const role = (session?.user as any)?.role as string | undefined;
+  const isAdmin = role === 'ADMIN';
+
+  // Is the unpublished exam (if any) one this user is entitled to via a
+  // bundle purchase? If yes, they should still see the exam detail page so
+  // they can launch attempts.
+  let userIsEntitled = false;
+  if (exam && !exam.published && userId && !isAdmin) {
+    const ent = await db.entitlement.findFirst({
+      where: { userId, examId: exam.id, tier: { in: ['PRACTICE', 'BUNDLE', 'VOUCHER', 'ADMIN_GRANT'] } }
+    });
+    userIsEntitled = !!ent;
+  }
+
+  // Routing rules:
+  //   - Exam found AND (published OR admin OR entitled)  →  render exam page
+  //   - Otherwise try Bundle by the same slug (the bundle wins when an
+  //     unpublished base shell shares its slug, e.g. aws-saa-c03)
+  //   - Otherwise 404
+  const examIsViewable = !!exam && (exam.published || isAdmin || userIsEntitled);
+  if (!examIsViewable) {
     const bundle = await db.bundle.findUnique({
       where: { slug },
       include: {
@@ -36,23 +57,23 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ ven
     if (!bundle || !bundle.published || bundleVendor?.slug !== vendorSlug) {
       notFound();
     }
-    const session = await auth();
-    const userId = (session?.user as any)?.id as string | undefined;
     return <BundleAsExamView bundle={bundle} userId={userId} />;
   }
 
+  if (!exam) notFound(); // narrowing for TS — examIsViewable ⇒ exam !== null
   if (exam.vendor.slug !== vendorSlug) notFound();
 
   const teaserCount = await db.question.count({ where: { examId: exam.id, isTeaser: true, status: 'PUBLISHED' } });
   const domains = (exam.domains as any[]) || [];
 
-  const session = await auth();
-  const userId = (session?.user as any)?.id as string | undefined;
-  const entitled = userId
+  // Entitlement check for showing "You have access — Start your attempt"
+  // sidebar. userIsEntitled was already computed above for unpublished
+  // exams; re-use it for published exams too.
+  const entitled = userIsEntitled || (userId
     ? !!(await db.entitlement.findFirst({
-        where: { userId, examId: exam.id, tier: { in: ['PRACTICE', 'BUNDLE', 'ADMIN_GRANT'] } }
+        where: { userId, examId: exam.id, tier: { in: ['PRACTICE', 'BUNDLE', 'VOUCHER', 'ADMIN_GRANT'] } }
       }))
-    : false;
+    : false);
 
   return (
     <div className="container-app py-10">
