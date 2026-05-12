@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { Mail } from 'lucide-react';
+import { Mail, FileText } from 'lucide-react';
 import { auth } from '@/lib/auth';
 import { getAllSettings, SECRET_KEYS, mask } from '@/lib/settings';
 import SettingsForm from './settings-form';
@@ -37,6 +37,16 @@ export default async function AdminSettingsPage() {
           <div>
             <div className="font-medium">Email Templates</div>
             <div className="text-xs text-slate-500">Order confirmation, voucher delivery, OTP, password reset.</div>
+          </div>
+        </Link>
+        <Link
+          href="/admin-dashboard/pages"
+          className="card flex items-start gap-3 p-4 hover:border-blue-400 hover:shadow-sm"
+        >
+          <FileText className="mt-0.5 h-5 w-5 text-blue-600" />
+          <div>
+            <div className="font-medium">Pages</div>
+            <div className="text-xs text-slate-500">Terms, Privacy, Refund, FAQ, How it works — anything the footer links to.</div>
           </div>
         </Link>
       </div>
