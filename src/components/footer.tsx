@@ -3,15 +3,34 @@ import { getCompanyInfo } from '@/lib/settings';
 import { db } from '@/lib/db';
 import { getFooterPages } from '@/lib/pages';
 
-export async function Footer() {
-  const [company, vendors, footerPages] = await Promise.all([
-    getCompanyInfo(),
-    db.vendor.findMany({
+// All three sources hit the DB; during `next build` in Docker (no
+// DATABASE_URL bound) static prerendering of the root layout would
+// throw and abort the build. Each call is wrapped so the build always
+// completes with sensible empty defaults — at runtime the values are
+// fetched normally.
+async function safeCompany() {
+  try { return await getCompanyInfo(); }
+  catch { return { name: 'ExamNova', shortName: 'ExamNova', uen: '', address: '', email: '', tel: '', website: '' }; }
+}
+async function safeVendors() {
+  try {
+    return await db.vendor.findMany({
       where: { exams: { some: { published: true } } },
       orderBy: { name: 'asc' },
       select: { name: true, slug: true }
-    }),
-    getFooterPages()
+    });
+  } catch { return []; }
+}
+async function safeFooterPages() {
+  try { return await getFooterPages(); }
+  catch { return [] as Awaited<ReturnType<typeof getFooterPages>>; }
+}
+
+export async function Footer() {
+  const [company, vendors, footerPages] = await Promise.all([
+    safeCompany(),
+    safeVendors(),
+    safeFooterPages()
   ]);
 
   const companyLinks = footerPages.filter((p) => p.footerGroup === 'company');
