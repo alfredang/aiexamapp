@@ -16,7 +16,7 @@ export default async function VouchersPage() {
   return (
     <>
       <h1 className="text-2xl font-bold">My Vouchers</h1>
-      <div className="mt-4 card divide-y divide-slate-200">
+      <div className="mt-4 card divide-y divide-slate-200 dark:divide-slate-800">
         {ents.length === 0 && <p className="p-5 text-sm text-slate-500">No vouchers yet.</p>}
         {ents.map(e => (
           <div key={e.id} className="flex items-center justify-between gap-3 p-4">

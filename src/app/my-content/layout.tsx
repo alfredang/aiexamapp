@@ -8,6 +8,7 @@ export default function MyContentLayout({ children }: { children: React.ReactNod
           ['Overview', '/my-content'],
           ['Exams', '/my-content/exams'],
           ['Attempts', '/my-content/attempts'],
+          ['Orders', '/my-content/orders'],
           ['Vouchers', '/my-content/vouchers'],
           ['Settings', '/my-content/settings']
         ].map(([t, h]) => (

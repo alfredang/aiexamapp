@@ -98,7 +98,7 @@ export default async function MyContentPage() {
               </p>
             </div>
           ) : (
-            <ul className="card divide-y divide-slate-200 p-0 dark:divide-slate-700">
+            <ul className="card divide-y divide-slate-200 dark:divide-slate-800 p-0 dark:divide-slate-700">
               {recent.map(a => {
                 const pct = a.score ?? 0;
                 return (

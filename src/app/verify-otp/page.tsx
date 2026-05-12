@@ -8,7 +8,7 @@ function VerifyOtpInner() {
   const sp = useSearchParams();
   const email = sp.get('email') || '';
   const purpose = (sp.get('purpose') as 'LOGIN' | 'REGISTER' | 'TEASER_GATE') || 'LOGIN';
-  const next = sp.get('next') || '/my-content';
+  const next = sp.get('next') || '/post-login';
   const [code, setCode] = useState('');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);

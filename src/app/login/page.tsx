@@ -12,7 +12,7 @@ export default function LoginPage() {
 function LoginInner() {
   const router = useRouter();
   const sp = useSearchParams();
-  const next = sp.get('next') || '/my-content';
+  const next = sp.get('next') || '/post-login';
   const [tab, setTab] = useState<'password' | 'otp'>('password');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

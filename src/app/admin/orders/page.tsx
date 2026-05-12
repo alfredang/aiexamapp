@@ -19,7 +19,7 @@ export default async function AdminOrdersPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold">Orders</h1>
-      <div className="card mt-4 divide-y divide-slate-200">
+      <div className="card mt-4 divide-y divide-slate-200 dark:divide-slate-800">
         {orders.map(o => {
           const productLabel = o.bundle ? `${o.bundle.title} (bundle)` : o.exam?.title ?? '(unknown)';
           const tierLabelText = o.bundle ? 'Bundle' : (o.tier ? tierLabel(o.tier) : '—');

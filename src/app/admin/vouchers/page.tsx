@@ -64,7 +64,7 @@ export default async function AdminVouchersPage() {
       </p>
 
       <h2 className="mt-6 text-lg font-semibold">Pending issuance ({pending.length})</h2>
-      <div className="mt-2 card divide-y divide-slate-200">
+      <div className="mt-2 card divide-y divide-slate-200 dark:divide-slate-800">
         {pending.length === 0 && <p className="p-5 text-sm text-slate-500">No pending vouchers.</p>}
         {pending.map(e => (
           <div key={e.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
@@ -92,7 +92,7 @@ export default async function AdminVouchersPage() {
       </div>
 
       <h2 className="mt-8 text-lg font-semibold">Recently issued (last 20)</h2>
-      <div className="mt-2 card divide-y divide-slate-200">
+      <div className="mt-2 card divide-y divide-slate-200 dark:divide-slate-800">
         {recentlyIssued.length === 0 && <p className="p-5 text-sm text-slate-500">No vouchers issued yet.</p>}
         {recentlyIssued.map(e => (
           <div key={e.id} className="flex flex-wrap items-center justify-between gap-3 p-4">

@@ -1,23 +1,30 @@
+'use client';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { UserMenu } from './user-menu';
 import { ThemeToggle } from './theme-toggle';
 
 export function Nav() {
+  const pathname = usePathname() || '/';
+  const inBackend = pathname.startsWith('/admin') || pathname.startsWith('/my-content');
+
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
       <div className="container-app flex h-24 items-center justify-between">
         <Link href="/" className="flex items-center font-semibold tracking-tight" aria-label="ExamNova home">
           <Logo />
         </Link>
-        <nav className="hidden items-center gap-1 md:flex">
-          <Link href="/practice-exams" className="btn-ghost">Practice Exams</Link>
-          <Link href="/vendors" className="btn-ghost">Vendors</Link>
-          <Link href="/#pricing" className="btn-ghost">Pricing</Link>
-          <Link href="/#faq" className="btn-ghost">FAQ</Link>
-        </nav>
+        {!inBackend && (
+          <nav className="hidden items-center gap-1 md:flex">
+            <Link href="/practice-exams" className="btn-ghost">Practice Exams</Link>
+            <Link href="/vendors" className="btn-ghost">Vendors</Link>
+            <Link href="/#pricing" className="btn-ghost">Pricing</Link>
+            <Link href="/#faq" className="btn-ghost">FAQ</Link>
+          </nav>
+        )}
         <div className="flex items-center gap-2">
-          <ThemeToggle />
           <UserMenu />
+          <ThemeToggle />
         </div>
       </div>
     </header>

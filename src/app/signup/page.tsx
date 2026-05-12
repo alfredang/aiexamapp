@@ -33,7 +33,7 @@ export default function SignupPage() {
     if (password) {
       const res = await signIn('password', { email, password, redirect: false });
       setBusy(false);
-      if (!res?.error) router.push('/my-content');
+      if (!res?.error) router.push('/post-login');
       else router.push('/login');
     } else {
       // OTP-only user — sign in via OTP using a fresh login code

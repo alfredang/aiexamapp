@@ -6,6 +6,11 @@ import { db } from './db';
 import { verifyOtp } from './otp';
 import { authConfig } from './auth.config';
 
+export const SUPER_ADMIN_EMAIL = 'angch@tertiaryinfotech.com';
+export function isSuperAdmin(email?: string | null): boolean {
+  return !!email && email.toLowerCase().trim() === SUPER_ADMIN_EMAIL;
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter: PrismaAdapter(db),
@@ -20,6 +25,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!email || !password) return null;
         const user = await db.user.findUnique({ where: { email } });
         if (!user || !user.emailVerified || !user.passwordHash) return null;
+        if (!user.active) return null;
         const ok = await argon2.verify(user.passwordHash, password);
         if (!ok) return null;
         return { id: user.id, email: user.email, name: user.name ?? undefined, role: user.role } as any;
@@ -37,6 +43,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!ok) return null;
         const user = await db.user.findUnique({ where: { email } });
         if (!user) return null;
+        if (!user.active) return null;
         if (!user.emailVerified) await db.user.update({ where: { id: user.id }, data: { emailVerified: new Date() } });
         return { id: user.id, email: user.email, name: user.name ?? undefined, role: user.role } as any;
       }

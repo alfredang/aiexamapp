@@ -55,6 +55,7 @@ model User {
   passwordHash  String?
   name          String?
   role          Role      @default(USER)
+  active        Boolean   @default(true)
   emailVerified DateTime?
   createdAt     DateTime  @default(now())
   attempts      Attempt[]
@@ -226,6 +227,12 @@ model OtpCode {
   consumed  Boolean  @default(false)
   createdAt DateTime @default(now())
   @@index([email, purpose])
+}
+
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
 }
 
 model AdminLog {

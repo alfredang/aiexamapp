@@ -1,0 +1,99 @@
+'use client';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import {
+  LayoutDashboard,
+  Building2,
+  BookOpen,
+  FileQuestion,
+  Users,
+  ShoppingBag,
+  Ticket,
+  Settings as SettingsIcon,
+  ChevronLeft,
+  ChevronRight
+} from 'lucide-react';
+
+const ITEMS: { href: string; label: string; icon: any }[] = [
+  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/admin/vendors', label: 'Vendors', icon: Building2 },
+  { href: '/admin/exams', label: 'Exams', icon: BookOpen },
+  { href: '/admin/questions', label: 'Questions', icon: FileQuestion },
+  { href: '/admin/users', label: 'Users', icon: Users },
+  { href: '/admin/orders', label: 'Orders', icon: ShoppingBag },
+  { href: '/admin/vouchers', label: 'Vouchers', icon: Ticket },
+  { href: '/admin/settings', label: 'Settings', icon: SettingsIcon }
+];
+
+export function AdminChrome({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname() || '/admin';
+  const [collapsed, setCollapsed] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    try {
+      const v = localStorage.getItem('adminSidebarCollapsed');
+      setCollapsed(v === '1');
+    } catch {}
+    setMounted(true);
+  }, []);
+
+  function toggle() {
+    setCollapsed((c) => {
+      const next = !c;
+      try {
+        localStorage.setItem('adminSidebarCollapsed', next ? '1' : '0');
+      } catch {}
+      return next;
+    });
+  }
+
+  const width = collapsed ? 'w-16' : 'w-60';
+
+  return (
+    <div className="flex min-h-[calc(100vh-6rem)] w-full">
+      <aside
+        className={`relative shrink-0 border-r border-slate-200 bg-white transition-all dark:border-slate-800 dark:bg-slate-900 ${width} ${
+          mounted ? '' : 'opacity-0'
+        }`}
+      >
+        <div className="flex items-center justify-between px-3 py-3">
+          {!collapsed && (
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Admin
+            </span>
+          )}
+          <button
+            onClick={toggle}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            className="ml-auto inline-flex h-7 w-7 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+          >
+            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </button>
+        </div>
+        <nav className="flex flex-col gap-0.5 px-2 pb-4">
+          {ITEMS.map(({ href, label, icon: Icon }) => {
+            const active = href === '/admin' ? pathname === '/admin' : pathname.startsWith(href);
+            return (
+              <Link
+                key={href}
+                href={href}
+                title={collapsed ? label : undefined}
+                className={`flex items-center gap-3 rounded-md px-2.5 py-2 text-sm transition ${
+                  active
+                    ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300'
+                    : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100'
+                }`}
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+                {!collapsed && <span className="truncate">{label}</span>}
+              </Link>
+            );
+          })}
+        </nav>
+      </aside>
+      <main className="min-w-0 flex-1 p-6 lg:p-8">{children}</main>
+    </div>
+  );
+}

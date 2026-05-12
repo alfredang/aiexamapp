@@ -13,8 +13,8 @@ export const metadata: Metadata = {
 };
 
 // Runs synchronously in <head> before paint to avoid a flash of the wrong
-// theme. Reads localStorage('theme') first, falls back to OS preference.
-const themeInitScript = `(function(){try{var t=localStorage.getItem('theme');var d=t?t==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;if(d)document.documentElement.classList.add('dark');}catch(e){}})();`;
+// theme. Default is dark; respects an explicit localStorage('theme') override.
+const themeInitScript = `(function(){try{var t=localStorage.getItem('theme');var d=t?t==='dark':true;if(d)document.documentElement.classList.add('dark');}catch(e){document.documentElement.classList.add('dark');}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

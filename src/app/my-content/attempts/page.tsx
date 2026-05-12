@@ -16,7 +16,7 @@ export default async function AttemptsPage() {
   return (
     <>
       <h1 className="text-2xl font-bold">My Attempts</h1>
-      <div className="mt-4 card divide-y divide-slate-200">
+      <div className="mt-4 card divide-y divide-slate-200 dark:divide-slate-800">
         {attempts.length === 0 && <p className="p-5 text-sm text-slate-500">No attempts yet.</p>}
         {attempts.map(a => {
           const inProgress = !a.submittedAt;
