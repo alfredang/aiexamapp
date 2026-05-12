@@ -116,7 +116,7 @@ const OBSOLETE_EXAM_SLUGS = [
 // (Exam.published = false). Different from OBSOLETE — these aren't deleted;
 // they're just not surfaced until they reach a presentable question count.
 const HIDDEN_EXAM_SLUGS = [
-  'oracle-1z0-1085-25', // OCI Foundations Associate — only 6 questions; hide until ≥60
+  'oracle-oci-foundations-1z0-1085', // OCI Foundations Associate — only 6 questions; hide until ≥60
   // Hidden because they're sold via the matching bundle (same cert).
   // Bundle slug = exam slug for the AWS shells, so leaving them published
   // would shadow the bundle in /practice-exams/[vendor]/[slug] routing.
@@ -975,18 +975,77 @@ async function main() {
     console.log(`✓ Removed ${obsoleteExams.length} obsolete placeholder exam shell(s).`);
   }
 
-  // Grant the internal team test access (PRACTICE tier) on every published exam
-  // so they can dogfood the full catalog without going through checkout.
+  // Curated dogfood set — grants the team enough exams to exercise every
+  // My Exams UI path (expandable bundle card, standalone card, voucher strip)
+  // without flooding the view with the entire catalog. Add to this list if
+  // you need to smoke-test a specific exam path.
+  const TEAM_GRANTS: { examSlug: string; tier: Tier }[] = [
+    // AI-900 bundle: 6 P-variants collapse into one expandable bundle card.
+    { examSlug: 'microsoft-ai-900-p1', tier: Tier.PRACTICE },
+    { examSlug: 'microsoft-ai-900-p2', tier: Tier.PRACTICE },
+    { examSlug: 'microsoft-ai-900-p3', tier: Tier.PRACTICE },
+    { examSlug: 'microsoft-ai-900-p4', tier: Tier.PRACTICE },
+    { examSlug: 'microsoft-ai-900-p5', tier: Tier.PRACTICE },
+    { examSlug: 'microsoft-ai-900-p6', tier: Tier.PRACTICE },
+    // One VOUCHER row on the same bundle exercises the green "Voucher" strip
+    // when the bundle card is expanded, and populates /my-content/vouchers.
+    { examSlug: 'microsoft-ai-900-p1', tier: Tier.VOUCHER },
+    // Standalone exam exercises the single-card UI in My Exams.
+    { examSlug: 'anthropic-cca-foundations', tier: Tier.PRACTICE }
+  ];
+
   const teamEmails = ['angch@tertiaryinfotech.com', 'marcus@tertiaryinfotech.com'];
   const teamUsers = await db.user.findMany({ where: { email: { in: teamEmails } } });
-  const allExams = await db.exam.findMany({ where: { published: true }, select: { id: true } });
+  const grantSlugs = [...new Set(TEAM_GRANTS.map(g => g.examSlug))];
+  const grantExams = await db.exam.findMany({
+    where: { slug: { in: grantSlugs } },
+    select: { id: true, slug: true }
+  });
+  const slugToExamId = new Map(grantExams.map(e => [e.slug, e.id]));
+  const allowedExamIds = new Set(grantExams.map(e => e.id));
+
   for (const u of teamUsers) {
-    for (const e of allExams) {
+    // Upsert the curated grants.
+    for (const g of TEAM_GRANTS) {
+      const examId = slugToExamId.get(g.examSlug);
+      if (!examId) continue;
       await db.entitlement.upsert({
-        where: { userId_examId_tier: { userId: u.id, examId: e.id, tier: Tier.PRACTICE } },
+        where: { userId_examId_tier: { userId: u.id, examId, tier: g.tier } },
         update: {},
-        create: { userId: u.id, examId: e.id, tier: Tier.PRACTICE }
+        create: { userId: u.id, examId, tier: g.tier }
       });
+    }
+
+    // Revoke any previously-seeded entitlements for this user that aren't in
+    // the curated list. Real purchases (PAID Orders, real or test-payment)
+    // are preserved by deriving the (examId, tier) set from this user's PAID
+    // orders and treating those as untouchable. Voucher codes also get a
+    // pass — they're real fulfillment artefacts that the user may need.
+    const paidOrders = await db.order.findMany({
+      where: { userId: u.id, status: 'PAID' },
+      select: { examId: true, tier: true, bundleId: true }
+    });
+    const protectedExamIds = new Set<string>(allowedExamIds);
+    for (const o of paidOrders) {
+      if (o.examId) protectedExamIds.add(o.examId);
+      if (o.bundleId) {
+        const items = await db.bundleItem.findMany({
+          where: { bundleId: o.bundleId },
+          select: { examId: true }
+        });
+        for (const it of items) protectedExamIds.add(it.examId);
+      }
+    }
+    const stale = await db.entitlement.findMany({
+      where: {
+        userId: u.id,
+        examId: { notIn: [...protectedExamIds] },
+        voucher: null
+      },
+      select: { id: true }
+    });
+    if (stale.length > 0) {
+      await db.entitlement.deleteMany({ where: { id: { in: stale.map(s => s.id) } } });
     }
   }
 
