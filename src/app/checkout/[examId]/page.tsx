@@ -5,6 +5,7 @@ import { db } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { formatPrice, priceForTier, tierLabel } from '@/lib/utils';
 import { CheckoutClient } from './checkout-client';
+import { TestPaymentButton } from '@/components/test-payment-button';
 import { Check, Lock, ShieldCheck, Ticket, Zap, ArrowLeft, BookOpen, Hourglass } from 'lucide-react';
 import type { Tier } from '@prisma/client';
 
@@ -110,6 +111,7 @@ export default async function CheckoutPage({ params, searchParams }: { params: P
             <Suspense fallback={<div className="rounded-md border border-slate-200 p-4 text-sm text-slate-500 dark:border-slate-700">Loading PayPal…</div>}>
               <CheckoutClient examId={exam.id} tier={tier} />
             </Suspense>
+            <TestPaymentButton kind="exam" examId={exam.id} tier={tier as 'PRACTICE' | 'BUNDLE' | 'VOUCHER'} />
           </div>
 
           <div className="rounded-lg bg-slate-50 p-4 dark:bg-slate-900">

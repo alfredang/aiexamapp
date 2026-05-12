@@ -5,6 +5,7 @@ import { db } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { formatPrice } from '@/lib/utils';
 import { BundleCheckoutClient } from './bundle-checkout-client';
+import { TestPaymentButton } from '@/components/test-payment-button';
 import { Check, Lock, ShieldCheck, Ticket, Zap, ArrowLeft } from 'lucide-react';
 
 export default async function BundleCheckoutPage({
@@ -131,6 +132,7 @@ export default async function BundleCheckoutPage({
             <Suspense fallback={<div className="rounded-md border border-slate-200 p-4 text-sm text-slate-500 dark:border-slate-700">Loading PayPal…</div>}>
               <BundleCheckoutClient bundleId={bundle.id} tier={tier} />
             </Suspense>
+            <TestPaymentButton kind="bundle" bundleId={bundle.id} tier={tier} />
           </div>
 
           <div className="rounded-lg bg-slate-50 p-4 dark:bg-slate-900">
