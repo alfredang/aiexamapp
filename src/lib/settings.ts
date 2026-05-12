@@ -100,7 +100,7 @@ export type CompanyInfo = {
   website: string;
 };
 
-const COMPANY_DEFAULTS: CompanyInfo = {
+export const COMPANY_DEFAULTS: CompanyInfo = {
   name: 'Tertiary Infotech Academy Pte Ltd',
   shortName: 'Tertiary Infotech Academy',
   uen: '201200696W',
