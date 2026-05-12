@@ -4,6 +4,8 @@ export type TemplateDefinition = {
   subject: string;
   bodyHtml: string;
   description: string;
+  /** Friendly human-readable label shown in the admin UI. */
+  displayName: string;
   sampleVars: Record<string, unknown>;
 };
 
@@ -24,6 +26,7 @@ const sampleBrand = {
 
 export const DEFAULT_TEMPLATES: Record<EmailTemplateKey, TemplateDefinition> = {
   ORDER_CONFIRMATION: {
+    displayName: 'Order Confirmation',
     description: 'Sent immediately after a successful payment.',
     subject: 'Order confirmed — {{productName}}',
     bodyHtml: wrap(`  <h2 style="margin:0 0 12px">Purchase confirmed</h2>
@@ -50,6 +53,7 @@ export const DEFAULT_TEMPLATES: Record<EmailTemplateKey, TemplateDefinition> = {
     }
   },
   VOUCHER_DELIVERY: {
+    displayName: 'Voucher Delivery',
     description: 'Sent when a voucher code is delivered (5 days after purchase).',
     subject: 'Your {{examName}} voucher is ready',
     bodyHtml: wrap(`  <h2 style="margin:0 0 12px">Your voucher is ready</h2>
@@ -69,6 +73,7 @@ export const DEFAULT_TEMPLATES: Record<EmailTemplateKey, TemplateDefinition> = {
     }
   },
   OTP_LOGIN: {
+    displayName: 'Login OTP',
     description: 'One-time code for signing in.',
     subject: 'Your sign-in code — {{brand.name}}',
     bodyHtml: wrap(`  <h2 style="margin:0 0 12px">Your sign-in code</h2>
@@ -78,6 +83,7 @@ export const DEFAULT_TEMPLATES: Record<EmailTemplateKey, TemplateDefinition> = {
     sampleVars: { brand: sampleBrand, code: '123456', expiresInMinutes: 10 }
   },
   OTP_REGISTER: {
+    displayName: 'Registration OTP',
     description: 'One-time code for verifying email on registration.',
     subject: 'Verify your email — {{brand.name}}',
     bodyHtml: wrap(`  <h2 style="margin:0 0 12px">Verify your email</h2>
@@ -87,6 +93,7 @@ export const DEFAULT_TEMPLATES: Record<EmailTemplateKey, TemplateDefinition> = {
     sampleVars: { brand: sampleBrand, code: '123456', expiresInMinutes: 10 }
   },
   OTP_RESET: {
+    displayName: 'Password Reset OTP',
     description: 'One-time code for resetting password.',
     subject: 'Reset your password — {{brand.name}}',
     bodyHtml: wrap(`  <h2 style="margin:0 0 12px">Reset your password</h2>
@@ -96,6 +103,7 @@ export const DEFAULT_TEMPLATES: Record<EmailTemplateKey, TemplateDefinition> = {
     sampleVars: { brand: sampleBrand, code: '123456', expiresInMinutes: 10 }
   },
   OTP_TEASER_GATE: {
+    displayName: 'Teaser Gate OTP',
     description: 'One-time code shown after answering teaser questions.',
     subject: 'Continue your practice exam — {{brand.name}}',
     bodyHtml: wrap(`  <h2 style="margin:0 0 12px">Continue your practice exam</h2>
@@ -105,6 +113,7 @@ export const DEFAULT_TEMPLATES: Record<EmailTemplateKey, TemplateDefinition> = {
     sampleVars: { brand: sampleBrand, code: '123456', expiresInMinutes: 10 }
   },
   PASSWORD_RESET: {
+    displayName: 'Password Reset Link',
     description: 'Password-reset link (if/when used instead of OTP).',
     subject: 'Reset your password — {{brand.name}}',
     bodyHtml: wrap(`  <h2 style="margin:0 0 12px">Reset your password</h2>

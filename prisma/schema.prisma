@@ -318,9 +318,11 @@ model Page {
 model EmailTemplate {
   id          String           @id @default(cuid())
   key         EmailTemplateKey @unique
+  displayName String?
   subject     String
   bodyHtml    String
   bodyMjml    String?
+  ccEmails    String[]         @default([])
   enabled     Boolean          @default(true)
   updatedById String?
   updatedAt   DateTime         @updatedAt

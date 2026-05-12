@@ -9,8 +9,14 @@ const transport = nodemailer.createTransport({
 
 const FROM = process.env.SMTP_FROM || process.env.FROM_EMAIL || 'ExamNova <noreply@example.com>';
 
-export async function sendMail(to: string, subject: string, html: string, attachments?: any[]) {
-  return transport.sendMail({ from: FROM, to, subject, html, attachments });
+export async function sendMail(
+  to: string,
+  subject: string,
+  html: string,
+  attachments?: any[],
+  cc?: string | string[]
+) {
+  return transport.sendMail({ from: FROM, to, cc, subject, html, attachments });
 }
 
 export async function sendOTPEmail(

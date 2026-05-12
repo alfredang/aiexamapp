@@ -30,18 +30,29 @@ export async function getBrand(): Promise<Brand> {
 
 export type RenderedTemplate = { subject: string; html: string };
 
-async function loadSource(key: EmailTemplateKey): Promise<{ subject: string; bodyHtml: string; enabled: boolean }> {
+async function loadSource(key: EmailTemplateKey): Promise<{
+  subject: string;
+  bodyHtml: string;
+  enabled: boolean;
+  ccEmails: string[];
+}> {
   const row = await db.emailTemplate.findUnique({ where: { key } });
-  if (row && row.enabled) return { subject: row.subject, bodyHtml: row.bodyHtml, enabled: true };
-  if (row && !row.enabled) return { subject: row.subject, bodyHtml: row.bodyHtml, enabled: false };
+  if (row) {
+    return {
+      subject: row.subject,
+      bodyHtml: row.bodyHtml,
+      enabled: row.enabled,
+      ccEmails: row.ccEmails ?? []
+    };
+  }
   const def = DEFAULT_TEMPLATES[key];
-  return { subject: def.subject, bodyHtml: def.bodyHtml, enabled: true };
+  return { subject: def.subject, bodyHtml: def.bodyHtml, enabled: true, ccEmails: [] };
 }
 
 export async function renderTemplate(
   key: EmailTemplateKey,
   vars: Record<string, unknown>
-): Promise<RenderedTemplate & { enabled: boolean }> {
+): Promise<RenderedTemplate & { enabled: boolean; ccEmails: string[] }> {
   const [src, brand, company] = await Promise.all([loadSource(key), getBrand(), getCompanyInfo()]);
   const ctx = {
     brand,
@@ -53,7 +64,8 @@ export async function renderTemplate(
   return {
     subject: render(src.subject, ctx),
     html: render(src.bodyHtml, ctx),
-    enabled: src.enabled
+    enabled: src.enabled,
+    ccEmails: src.ccEmails
   };
 }
 
@@ -65,5 +77,6 @@ export async function sendTemplated(
 ) {
   const rendered = await renderTemplate(key, vars);
   if (!rendered.enabled) return null;
-  return sendMail(to, rendered.subject, rendered.html, attachments);
+  const cc = rendered.ccEmails.length > 0 ? rendered.ccEmails : undefined;
+  return sendMail(to, rendered.subject, rendered.html, attachments, cc);
 }

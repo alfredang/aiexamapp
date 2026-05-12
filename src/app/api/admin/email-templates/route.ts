@@ -16,9 +16,14 @@ export async function GET() {
     return {
       key,
       description: def.description,
+      displayName: row?.displayName ?? def.displayName,
       customized: !!row,
       enabled: row ? row.enabled : true,
       subject: row?.subject ?? def.subject,
+      bodyHtml: row?.bodyHtml ?? def.bodyHtml,
+      ccEmails: row?.ccEmails ?? [],
+      sampleVars: def.sampleVars,
+      defaults: { displayName: def.displayName, subject: def.subject, bodyHtml: def.bodyHtml },
       updatedAt: row?.updatedAt ?? null
     };
   });

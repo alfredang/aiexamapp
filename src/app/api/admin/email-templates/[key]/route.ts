@@ -44,23 +44,51 @@ export async function PUT(req: Request, { params }: { params: Promise<{ key: str
   const { key } = await params;
   if (!isKey(key)) return NextResponse.json({ error: 'unknown-key' }, { status: 404 });
   const body = (await req.json().catch(() => null)) as
-    | { subject?: string; bodyHtml?: string; enabled?: boolean }
+    | {
+        subject?: string;
+        bodyHtml?: string;
+        enabled?: boolean;
+        displayName?: string | null;
+        ccEmails?: string[] | string | null;
+      }
     | null;
   if (!body || typeof body.subject !== 'string' || typeof body.bodyHtml !== 'string') {
     return NextResponse.json({ error: 'bad-request' }, { status: 400 });
   }
+  // For ccEmails / displayName: only update when the caller explicitly
+  // sent the field. This lets the simpler editors (full-preview page)
+  // PUT just subject/bodyHtml/enabled without nuking the other values.
+  const ccEmailsProvided = body.ccEmails !== undefined;
+  const ccEmails = ccEmailsProvided
+    ? Array.isArray(body.ccEmails)
+      ? body.ccEmails
+      : typeof body.ccEmails === 'string'
+        ? body.ccEmails.split(',').map((s) => s.trim()).filter(Boolean)
+        : []
+    : undefined;
+  const displayNameProvided = body.displayName !== undefined;
+  const displayName = displayNameProvided
+    ? typeof body.displayName === 'string' && body.displayName.trim()
+      ? body.displayName.trim()
+      : null
+    : undefined;
+
   const row = await db.emailTemplate.upsert({
     where: { key },
     create: {
       key,
+      displayName: displayName ?? null,
       subject: body.subject,
       bodyHtml: body.bodyHtml,
+      ccEmails: ccEmails ?? [],
       enabled: body.enabled ?? true,
       updatedById: user.id
     },
     update: {
+      ...(displayNameProvided ? { displayName } : {}),
       subject: body.subject,
       bodyHtml: body.bodyHtml,
+      ...(ccEmailsProvided ? { ccEmails } : {}),
       enabled: body.enabled ?? true,
       updatedById: user.id
     }
