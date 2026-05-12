@@ -18,7 +18,7 @@ async function createExam(formData: FormData) {
   const priceBundle = Math.round(Number(formData.get('priceBundle') || 179) * 100);
   const priceVoucher = Math.round(Number(formData.get('priceVoucher') || 149) * 100);
   if (!vendorId || !code || !slug || !title) return;
-  await db.exam.create({
+  const created = await db.exam.create({
     data: {
       vendorId, code, title, slug, description, level,
       durationMinutes, passingScore, questionCount,
@@ -28,7 +28,7 @@ async function createExam(formData: FormData) {
     }
   });
   revalidatePath('/admin-dashboard/exams');
-  redirect('/admin-dashboard/exams');
+  redirect(`/admin-dashboard/exams/${created.id}`);
 }
 
 export default async function NewExamPage() {

@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   BookOpen,
   Users,
+  ShieldCheck,
   ShoppingBag,
   Ticket,
   Settings as SettingsIcon,
@@ -14,7 +15,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 
-type NavItem = { href: string; label: string; icon: any; children?: { href: string; label: string }[] };
+type NavItem = { href: string; label: string; icon: any; children?: { href: string; label: string; exact?: boolean }[] };
 
 const ITEMS: NavItem[] = [
   { href: '/admin-dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -23,11 +24,13 @@ const ITEMS: NavItem[] = [
     label: 'Exam Management',
     icon: BookOpen,
     children: [
+      { href: '/admin-dashboard/exams', label: 'View Exams', exact: true },
       { href: '/admin-dashboard/exams/new', label: 'Create Exam' },
       { href: '/admin-dashboard/vendors', label: 'Vendors' }
     ]
   },
   { href: '/admin-dashboard/users', label: 'Users', icon: Users },
+  { href: '/admin-dashboard/admins', label: 'Admins', icon: ShieldCheck },
   { href: '/admin-dashboard/orders', label: 'Orders', icon: ShoppingBag },
   { href: '/admin-dashboard/vouchers', label: 'Voucher Management', icon: Ticket },
   {
@@ -155,7 +158,7 @@ export function AdminChrome({ children }: { children: React.ReactNode }) {
                 {!collapsed && hasChildren && isOpen && (
                   <div className="ml-7 mt-0.5 flex flex-col gap-0.5 border-l border-slate-200 pl-2 dark:border-slate-700">
                     {subs!.map((c) => {
-                      const subActive = isPathActive(pathname, c.href, false);
+                      const subActive = isPathActive(pathname, c.href, !!c.exact);
                       return (
                         <Link
                           key={c.href}

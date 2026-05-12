@@ -1,7 +1,7 @@
 import { db } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 import Link from 'next/link';
-import { auth, SUPER_ADMIN_EMAIL, isSuperAdmin } from '@/lib/auth';
+import { auth, isSuperAdmin } from '@/lib/auth';
 
 async function grantAccess(formData: FormData) {
   'use server';
@@ -16,189 +16,97 @@ async function grantAccess(formData: FormData) {
   revalidatePath('/admin-dashboard/users');
 }
 
-async function setActive(formData: FormData) {
-  'use server';
-  const session = await auth();
-  if ((session?.user as any)?.role !== 'ADMIN') return;
-  const userId = String(formData.get('userId'));
-  const active = formData.get('active') === '1';
-  const target = await db.user.findUnique({ where: { id: userId } });
-  if (!target) return;
-  if (isSuperAdmin(target.email)) return; // never deactivate super-admin
-  await db.user.update({ where: { id: userId }, data: { active } });
-  await db.adminLog.create({
-    data: {
-      adminId: (session!.user as any).id,
-      action: active ? 'user.reactivate' : 'user.deactivate',
-      targetType: 'User',
-      targetId: userId
-    }
-  });
-  revalidatePath('/admin-dashboard/users');
-}
-
-async function setRole(formData: FormData) {
-  'use server';
-  const session = await auth();
-  const me = session?.user as any;
-  if (!isSuperAdmin(me?.email)) return; // only super-admin can change roles
-  const userId = String(formData.get('userId'));
-  const role = formData.get('role') === 'ADMIN' ? 'ADMIN' : 'USER';
-  const target = await db.user.findUnique({ where: { id: userId } });
-  if (!target) return;
-  if (isSuperAdmin(target.email)) return; // super-admin role is immutable
-  await db.user.update({ where: { id: userId }, data: { role } });
-  await db.adminLog.create({
-    data: {
-      adminId: me.id,
-      action: role === 'ADMIN' ? 'user.promote' : 'user.demote',
-      targetType: 'User',
-      targetId: userId
-    }
-  });
-  revalidatePath('/admin-dashboard/users');
-}
-
-type Filter = 'all' | 'users' | 'admins';
-
-export default async function AdminUsersPage({
-  searchParams
-}: {
-  searchParams: Promise<{ filter?: string }>;
-}) {
+export default async function AdminUsersPage() {
   const session = await auth();
   const me = session?.user as any;
   const superAdmin = isSuperAdmin(me?.email);
 
-  const sp = await searchParams;
-  const filter: Filter =
-    sp.filter === 'users' ? 'users' : sp.filter === 'admins' ? 'admins' : 'all';
-  const where =
-    filter === 'admins' ? { role: 'ADMIN' as const } : filter === 'users' ? { role: 'USER' as const } : {};
-
-  const [users, exams, counts] = await Promise.all([
+  const [users, exams] = await Promise.all([
     db.user.findMany({
-      where,
+      where: { role: 'USER' },
       orderBy: { createdAt: 'desc' },
-      take: 100,
-      include: { _count: { select: { entitlements: true, orders: true, attempts: true } } }
+      take: 200,
+      include: {
+        entitlements: { include: { exam: { select: { code: true, title: true } } } }
+      }
     }),
-    db.exam.findMany({ orderBy: { title: 'asc' } }),
-    Promise.all([
-      db.user.count(),
-      db.user.count({ where: { role: 'USER' } }),
-      db.user.count({ where: { role: 'ADMIN' } })
-    ])
+    db.exam.findMany({ orderBy: { title: 'asc' } })
   ]);
-  const [allCount, userCount, adminCount] = counts;
-
-  const tabs: { key: Filter; label: string; count: number }[] = [
-    { key: 'all', label: 'All', count: allCount },
-    { key: 'users', label: 'Users', count: userCount },
-    { key: 'admins', label: 'Admins', count: adminCount }
-  ];
 
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">Users</h1>
-        <div className="text-xs text-slate-500">
-          {superAdmin ? (
-            <span>Signed in as super admin ({SUPER_ADMIN_EMAIL})</span>
-          ) : (
-            <span>Role changes require super admin ({SUPER_ADMIN_EMAIL})</span>
-          )}
-        </div>
+        <div className="text-xs text-slate-500">{users.length} users</div>
       </div>
 
-      <div className="mt-4 flex gap-2 text-sm">
-        {tabs.map((t) => (
-          <Link
-            key={t.key}
-            href={t.key === 'all' ? '/admin-dashboard/users' : `/admin-dashboard/users?filter=${t.key}`}
-            className={`rounded-md px-3 py-1.5 ${
-              filter === t.key
-                ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-                : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
-            }`}
-          >
-            {t.label} <span className="opacity-70">({t.count})</span>
-          </Link>
-        ))}
-      </div>
-
-      <div className="card mt-4 divide-y divide-slate-200 dark:divide-slate-800">
-        {users.map((u) => {
-          const targetIsSuper = isSuperAdmin(u.email);
-          return (
-            <div key={u.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 font-medium">
-                  <Link href={`/admin-dashboard/users/${u.id}`} className="truncate hover:underline">{u.name || u.email}</Link>
-                  {targetIsSuper && (
-                    <span className="rounded bg-purple-100 px-1.5 py-0.5 text-[10px] font-semibold text-purple-800">
-                      SUPER ADMIN
-                    </span>
-                  )}
-                  {u.role === 'ADMIN' && !targetIsSuper && (
-                    <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-800">
-                      ADMIN
-                    </span>
-                  )}
-                  {!u.active && (
-                    <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-semibold text-red-800">
-                      DEACTIVATED
-                    </span>
-                  )}
-                </div>
-                <div className="text-xs text-slate-500">
-                  {u.email} · {u._count.orders} orders · {u._count.entitlements} exams ·{' '}
-                  {u._count.attempts} attempts
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2">
-                <form action={grantAccess} className="flex items-center gap-2">
-                  <input type="hidden" name="userId" value={u.id} />
-                  <select name="examId" className="input">
-                    <option value="">Grant exam access…</option>
-                    {exams.map((e) => (
-                      <option key={e.id} value={e.id}>
-                        {e.code} — {e.title}
-                      </option>
-                    ))}
-                  </select>
-                  <button className="btn-outline">Grant</button>
-                </form>
-
-                {superAdmin && !targetIsSuper && (
-                  <form action={setRole}>
-                    <input type="hidden" name="userId" value={u.id} />
-                    <input type="hidden" name="role" value={u.role === 'ADMIN' ? 'USER' : 'ADMIN'} />
-                    <button className="btn-outline text-xs">
-                      {u.role === 'ADMIN' ? 'Revoke admin' : 'Make admin'}
-                    </button>
-                  </form>
-                )}
-
-                {!targetIsSuper && (
-                  <form action={setActive}>
-                    <input type="hidden" name="userId" value={u.id} />
-                    <input type="hidden" name="active" value={u.active ? '0' : '1'} />
-                    <button
-                      className={`text-xs ${
-                        u.active ? 'btn-outline text-red-600' : 'btn-outline text-emerald-700'
-                      }`}
+      <div className="card mt-4 overflow-x-auto">
+        <table className="w-max min-w-full text-sm">
+          <thead className="border-b border-slate-200 text-left text-xs uppercase text-slate-500 dark:border-slate-800">
+            <tr>
+              <th className="px-4 py-3 font-medium">Name</th>
+              <th className="px-4 py-3 font-medium">Email</th>
+              <th className="px-4 py-3 font-medium">Exams Purchased</th>
+              <th className="px-4 py-3 font-medium">Grant Exam Access</th>
+              <th className="px-4 py-3 font-medium">Status</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+            {users.map((u) => {
+              const examList = u.entitlements
+                .map((e) => `${e.exam.code} — ${e.exam.title}`)
+                .join('\n');
+              return (
+                <tr key={u.id} className="align-top">
+                  <td className="whitespace-nowrap px-4 py-3 font-medium">
+                    <Link href={`/admin-dashboard/users/${u.id}`} className="hover:underline">
+                      {u.name || '—'}
+                    </Link>
+                    {!u.active && (
+                      <span className="ml-2 rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-semibold text-red-800">
+                        DEACTIVATED
+                      </span>
+                    )}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 text-slate-600 dark:text-slate-300">{u.email}</td>
+                  <td className="whitespace-nowrap px-4 py-3">
+                    <Link
+                      href={`/admin-dashboard/users/${u.id}`}
+                      title={examList || 'No exams'}
+                      className="rounded bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-800 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200"
                     >
-                      {u.active ? 'Deactivate' : 'Reactivate'}
-                    </button>
-                  </form>
-                )}
-              </div>
-            </div>
-          );
-        })}
-        {users.length === 0 && <p className="p-4 text-sm text-slate-500">No users match this filter.</p>}
+                      {u.entitlements.length}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3">
+                    <form action={grantAccess} className="flex items-center gap-2">
+                      <input type="hidden" name="userId" value={u.id} />
+                      <select name="examId" className="input" defaultValue="">
+                        <option value="">Select exam…</option>
+                        {exams.map((e) => (
+                          <option key={e.id} value={e.id}>
+                            {e.code} — {e.title}
+                          </option>
+                        ))}
+                      </select>
+                      <button className="btn-outline whitespace-nowrap">Grant</button>
+                    </form>
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 text-xs text-slate-500">
+                    {u.active ? 'Active' : 'Inactive'}
+                  </td>
+                </tr>
+              );
+            })}
+            {users.length === 0 && (
+              <tr>
+                <td colSpan={5} className="px-4 py-6 text-center text-sm text-slate-500">
+                  No users yet.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

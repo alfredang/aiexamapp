@@ -75,42 +75,7 @@ const CLAUDE_ARCHITECT_DESCRIPTION =
 //     the upsert loop skips them due to OBSOLETE_EXAM_SLUGS membership.
 // Note: aws-saa-c03 was previously deleted as a placeholder shell but is
 // re-added below now that the official AWS catalogue still offers it.
-const OBSOLETE_EXAM_SLUGS = [
-  'anthropic-claude-architect-foundations-1',
-  'anthropic-claude-architect-foundations-2',
-  'anthropic-claude-architect-foundations-3',
-  'aws-soa-c02',
-  'aws-scs-c02',
-  // 2026-05 catalog cleanup — placeholder shells with no questions
-  'cisco-cyberops-200-201',
-  'cisco-ccna-200-301',
-  'cisco-ccnp-encor-350-401',
-  'comptia-a-220-1101',
-  'comptia-a-220-1102',
-  'comptia-cysa-cs0-003',
-  'comptia-network-n10-009',
-  'comptia-security-sy0-701',
-  'google-cloud-digital-leader',
-  'google-professional-cloud-architect',
-  'google-professional-cloud-security',
-  'google-professional-data-engineer',
-  'google-professional-ml-engineer',
-  'microsoft-ai-900',
-  'microsoft-az-104',
-  'microsoft-az-204',
-  'microsoft-az-305',
-  'microsoft-az-400',
-  'microsoft-az-500',
-  'microsoft-dp-900',
-  'microsoft-ms-900',
-  'microsoft-sc-900',
-  'oracle-db-sql-1z0-071',
-  'oracle-oci-architect-associate-1z0-1072',
-  'oracle-genai-professional-1z0-1127',
-  'oracle-oci-architect-pro-1z0-997',
-  // PSM P6 migrated to scrum-org vendor with new slug scrum-org-psm-i-p6
-  'professional-scrum-master-practice-6'
-];
+const OBSOLETE_EXAM_SLUGS: string[] = [];
 
 // Slugs that should be kept in the DB but hidden from the public catalog
 // (Exam.published = false). Different from OBSOLETE — these aren't deleted;
@@ -881,12 +846,7 @@ const EXAMS: ExamSeed[] = [
 
 async function main() {
   const admins: { email: string; name: string; password: string }[] = [
-    {
-      email: process.env.ADMIN_EMAIL || 'admin@example.com',
-      name: 'Admin',
-      password: process.env.ADMIN_PASSWORD || 'ChangeMe!2026'
-    },
-    { email: 'angch@tertiaryinfotech.com', name: 'Alfred', password: 'password123' },
+    { email: 'angch@tertiaryinfotech.com', name: 'Alfred Ang', password: 'password123' },
     { email: 'marcus@tertiaryinfotech.com', name: 'Marcus', password: 'password123' }
   ];
   for (const a of admins) {
