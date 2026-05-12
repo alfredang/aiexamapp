@@ -1,4 +1,11 @@
-export type FieldDef = { key: string; label: string; secret?: boolean; placeholder?: string };
+export type FieldDef = {
+  key: string;
+  label: string;
+  secret?: boolean;
+  placeholder?: string;
+  /** When true, the field spans the full width of the grid row. */
+  fullWidth?: boolean;
+};
 
 export type SettingsGroup = {
   slug: string; // route slug under /admin-dashboard/settings/<slug>
@@ -64,10 +71,10 @@ export const GROUPS: SettingsGroup[] = [
       { key: 'COMPANY_NAME', label: 'Company Name', placeholder: 'Tertiary Infotech Academy Pte Ltd' },
       { key: 'COMPANY_SHORT_NAME', label: 'Company Short Name', placeholder: 'Tertiary Infotech Academy' },
       { key: 'COMPANY_UEN', label: 'UEN', placeholder: '201200696W' },
-      { key: 'COMPANY_ADDRESS', label: 'Company Address', placeholder: '12 Woodland Square …' },
+      { key: 'COMPANY_WEBSITE', label: 'Company Website', placeholder: 'https://...' },
       { key: 'COMPANY_EMAIL', label: 'Company Email', placeholder: 'enquiry@tertiaryinfotech.com' },
       { key: 'COMPANY_TEL', label: 'Company Tel', placeholder: '61000613' },
-      { key: 'COMPANY_WEBSITE', label: 'Company Website', placeholder: 'https://...' }
+      { key: 'COMPANY_ADDRESS', label: 'Company Address', placeholder: '12 Woodland Square …', fullWidth: true }
     ]
   },
   {

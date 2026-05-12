@@ -57,8 +57,15 @@ export default function SectionForm({ group, initial }: { group: SettingsGroup; 
 
             const placeholder = !hasStored ? f.placeholder || '' : '';
 
+            // Full-width fields span every column of the grid.
+            const colSpan = f.fullWidth
+              ? group.compact
+                ? 'sm:col-span-2 lg:col-span-3'
+                : 'sm:col-span-2'
+              : '';
+
             return (
-              <div key={f.key} className="text-sm">
+              <div key={f.key} className={`text-sm ${colSpan}`}>
                 <div className="mb-1 flex items-center gap-2 text-slate-600 dark:text-slate-300">
                   <span>{f.label}</span>
                   {hasStored && (

@@ -117,8 +117,10 @@ function renderField(
 
   const placeholder = !hasStored ? f.placeholder || '' : '';
 
+  const colSpan = f.fullWidth ? 'sm:col-span-2' : '';
+
   return (
-    <div key={f.key} className="text-sm">
+    <div key={f.key} className={`text-sm ${colSpan}`}>
       <div className="mb-1 flex items-center gap-2 text-slate-600 dark:text-slate-300">
         <span>{f.label}</span>
         {hasStored && (
