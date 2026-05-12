@@ -10,7 +10,7 @@ export function Nav() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
-      <div className="container-app flex h-24 items-center justify-between">
+      <div className="flex h-24 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center font-semibold tracking-tight" aria-label="ExamNova home">
           <Logo />
         </Link>
@@ -24,7 +24,9 @@ export function Nav() {
         )}
         <div className="flex items-center gap-2">
           <UserMenu />
-          <ThemeToggle />
+          <div className="ml-2 border-l border-slate-200 pl-3 dark:border-slate-800">
+            <ThemeToggle />
+          </div>
         </div>
       </div>
     </header>
