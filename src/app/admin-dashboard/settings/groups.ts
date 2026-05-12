@@ -8,6 +8,52 @@ export type SettingsGroup = {
   fields: FieldDef[];
 };
 
+// PayPal, HitPay, PayNow sub-groups shown as collapsible cards on the
+// Payment Setting page. Each group bundles enabled toggle, environment,
+// merchant identifiers AND the corresponding secrets so admins manage
+// one provider at a time without bouncing across pages.
+export const PAYMENT_SUBGROUPS: SettingsGroup[] = [
+  {
+    slug: 'paypal',
+    title: 'PayPal',
+    fields: [
+      { key: 'PAYPAL_ENABLED', label: 'Enabled (true/false)', placeholder: 'true' },
+      { key: 'PAYPAL_ENV', label: 'Environment', placeholder: 'sandbox or live' },
+      { key: 'PAYPAL_CLIENT_ID', label: 'Client ID (OAuth)' },
+      { key: 'PAYPAL_CLIENT_SECRET', label: 'Client Secret (OAuth)', secret: true },
+      { key: 'PAYPAL_WEBHOOK_ID', label: 'Webhook ID', secret: true }
+    ]
+  },
+  {
+    slug: 'hitpay',
+    title: 'HitPay',
+    fields: [
+      { key: 'HITPAY_ENABLED', label: 'Enabled (true/false)', placeholder: 'true' },
+      { key: 'HITPAY_ENV', label: 'Environment', placeholder: 'sandbox or live' },
+      { key: 'HITPAY_API_KEY', label: 'API Key', secret: true },
+      { key: 'HITPAY_SALT', label: 'Salt / Webhook Secret', secret: true }
+    ]
+  },
+  {
+    slug: 'paynow',
+    title: 'PayNow',
+    fields: [
+      { key: 'PAYNOW_ENABLED', label: 'Enabled (true/false)', placeholder: 'true' },
+      { key: 'PAYNOW_MERCHANT_ID', label: 'Merchant ID' },
+      { key: 'PAYNOW_UEN', label: 'UEN' },
+      { key: 'PAYNOW_BANK', label: 'Bank' },
+      { key: 'PAYNOW_QR_LOGO_URL', label: 'QR Logo URL' }
+    ]
+  }
+];
+
+// Fulfillment fields appear on the Payment Setting page above the
+// three provider sub-groups — they apply to all providers.
+export const PAYMENT_FULFILLMENT_FIELDS: FieldDef[] = [
+  { key: 'VOUCHER_DELAY_DAYS', label: 'Voucher delay (days)', placeholder: '5' },
+  { key: 'FULFILLMENT_TIMEZONE', label: 'Fulfillment timezone', placeholder: 'Asia/Singapore' }
+];
+
 export const GROUPS: SettingsGroup[] = [
   {
     slug: 'company',
@@ -37,33 +83,10 @@ export const GROUPS: SettingsGroup[] = [
     ]
   },
   {
-    slug: 'payment',
-    title: 'Payment Setting',
-    description: 'Enable/disable providers and configure non-secret payment options.',
-    fields: [
-      { key: 'PAYPAL_ENABLED', label: 'PayPal — Enabled (true/false)', placeholder: 'true' },
-      { key: 'PAYPAL_ENV', label: 'PayPal — Environment', placeholder: 'sandbox or live' },
-      { key: 'HITPAY_ENABLED', label: 'HitPay — Enabled (true/false)', placeholder: 'true' },
-      { key: 'HITPAY_ENV', label: 'HitPay — Environment', placeholder: 'sandbox or live' },
-      { key: 'PAYNOW_ENABLED', label: 'PayNow — Enabled (true/false)', placeholder: 'true' },
-      { key: 'PAYNOW_MERCHANT_ID', label: 'PayNow — Merchant ID' },
-      { key: 'PAYNOW_UEN', label: 'PayNow — UEN' },
-      { key: 'PAYNOW_BANK', label: 'PayNow — Bank' },
-      { key: 'PAYNOW_QR_LOGO_URL', label: 'PayNow — QR Logo URL' },
-      { key: 'VOUCHER_DELAY_DAYS', label: 'Voucher delay (days)', placeholder: '5' },
-      { key: 'FULFILLMENT_TIMEZONE', label: 'Fulfillment timezone', placeholder: 'Asia/Singapore' }
-    ]
-  },
-  {
     slug: 'credentials',
     title: 'Credentials',
-    description: 'API keys, webhook secrets and other sensitive credentials. Stored encrypted in the database.',
+    description: 'Non-payment API keys and worker secrets. Payment provider credentials live under Payment Setting.',
     fields: [
-      { key: 'PAYPAL_CLIENT_ID', label: 'PayPal — Client ID (OAuth)' },
-      { key: 'PAYPAL_CLIENT_SECRET', label: 'PayPal — Client Secret (OAuth)', secret: true },
-      { key: 'PAYPAL_WEBHOOK_ID', label: 'PayPal — Webhook ID', secret: true },
-      { key: 'HITPAY_API_KEY', label: 'HitPay — API Key', secret: true },
-      { key: 'HITPAY_SALT', label: 'HitPay — Salt / Webhook Secret', secret: true },
       { key: 'ANTHROPIC_API_KEY', label: 'Claude (Anthropic) — API Key', secret: true },
       { key: 'WORKER_SHARED_SECRET', label: 'Cron worker — shared secret', secret: true }
     ]

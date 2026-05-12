@@ -6,7 +6,9 @@ import { getGroup } from '../groups';
 
 export const dynamic = 'force-dynamic';
 
-const VALID_SLUGS = ['company', 'branding', 'payment', 'credentials'];
+// 'payment' has a dedicated route at /settings/payment with collapsible
+// provider sub-sections, so it's intentionally excluded here.
+const VALID_SLUGS = ['company', 'branding', 'credentials'];
 
 export default async function SettingsSectionPage({ params }: { params: Promise<{ slug: string }> }) {
   const session = await auth();
