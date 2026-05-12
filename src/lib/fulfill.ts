@@ -1,9 +1,24 @@
-import { Tier } from '@prisma/client';
+import { PaymentProvider, Tier } from '@prisma/client';
 import { db } from './db';
 import { sendPurchaseEmail } from './mail';
 import { tierLabel } from './utils';
+import { getDelayDays } from './scheduling/voucher-delivery';
+
+function providerLabel(p: PaymentProvider): string {
+  switch (p) {
+    case 'PAYPAL': return 'PayPal';
+    case 'PAYNOW': return 'PayNow';
+    case 'HITPAY': return 'HitPay';
+    case 'TEST': return 'Test';
+  }
+}
 
 export async function fulfillOrder(orderId: string, paypalPayload: any, paypalCaptureId: string) {
+  // Fetch the voucher delivery delay once before opening the transaction so
+  // we don't make extra DB calls per granted VOUCHER entitlement inside it.
+  const delayDays = await getDelayDays();
+  const scheduledFor = new Date(Date.now() + delayDays * 24 * 60 * 60 * 1000);
+
   return db.$transaction(async (tx) => {
     const order = await tx.order.findUnique({
       where: { id: orderId },
@@ -40,12 +55,19 @@ export async function fulfillOrder(orderId: string, paypalPayload: any, paypalCa
         : order.bundle.items.filter(i => i.tier === order.tier);
       let bundleHasVoucher = false;
       for (const item of items) {
-        await tx.entitlement.upsert({
+        const ent = await tx.entitlement.upsert({
           where: { userId_examId_tier: { userId: order.userId, examId: item.examId, tier: item.tier } },
           update: {},
           create: { userId: order.userId, examId: item.examId, tier: item.tier, voucher: null }
         });
-        if (item.tier === 'VOUCHER') bundleHasVoucher = true;
+        if (item.tier === 'VOUCHER') {
+          bundleHasVoucher = true;
+          await tx.voucherDelivery.upsert({
+            where: { entitlementId: ent.id },
+            create: { entitlementId: ent.id, orderId: order.id, scheduledFor, status: 'SCHEDULED' },
+            update: {}
+          });
+        }
       }
       await sendPurchaseEmail(
         order.user.email,
@@ -53,7 +75,12 @@ export async function fulfillOrder(orderId: string, paypalPayload: any, paypalCa
         'Bundle',
         undefined,
         undefined,
-        bundleHasVoucher
+        bundleHasVoucher,
+        {
+          order: { id: order.id, amount: order.amount, currency: order.currency },
+          user: { name: order.user.name, email: order.user.email },
+          paymentMethod: providerLabel(order.provider)
+        }
       ).catch(() => {});
       return order;
     }
@@ -72,11 +99,18 @@ export async function fulfillOrder(orderId: string, paypalPayload: any, paypalCa
         : [order.tier];
 
     for (const tier of tiersToGrant) {
-      await tx.entitlement.upsert({
+      const ent = await tx.entitlement.upsert({
         where: { userId_examId_tier: { userId: order.userId, examId: order.examId, tier } },
         update: {},
         create: { userId: order.userId, examId: order.examId, tier, voucher: null }
       });
+      if (tier === 'VOUCHER') {
+        await tx.voucherDelivery.upsert({
+          where: { entitlementId: ent.id },
+          create: { entitlementId: ent.id, orderId: order.id, scheduledFor, status: 'SCHEDULED' },
+          update: {}
+        });
+      }
     }
 
     const voucherPending = tiersToGrant.includes('VOUCHER');
@@ -86,7 +120,12 @@ export async function fulfillOrder(orderId: string, paypalPayload: any, paypalCa
       tierLabel(order.tier),
       undefined,
       undefined,
-      voucherPending
+      voucherPending,
+      {
+        order: { id: order.id, amount: order.amount, currency: order.currency },
+        user: { name: order.user.name, email: order.user.email },
+        paymentMethod: providerLabel(order.provider)
+      }
     ).catch(() => {});
     return order;
   });

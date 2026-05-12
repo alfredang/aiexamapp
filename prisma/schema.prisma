@@ -47,6 +47,31 @@ enum OrderStatus {
   REFUNDED
 }
 
+enum PaymentProvider {
+  PAYPAL
+  PAYNOW
+  HITPAY
+  TEST
+}
+
+enum DeliveryStatus {
+  SCHEDULED
+  PROCESSING
+  SENT
+  FAILED
+  CANCELED
+}
+
+enum EmailTemplateKey {
+  ORDER_CONFIRMATION
+  VOUCHER_DELIVERY
+  OTP_LOGIN
+  OTP_REGISTER
+  OTP_RESET
+  OTP_TEASER_GATE
+  PASSWORD_RESET
+}
+
 // =========== Models ===========
 
 model User {
@@ -63,6 +88,7 @@ model User {
   entitlements  Entitlement[]
   orders        Order[]
   adminLogs     AdminLog[]
+  billingAddresses BillingAddress[]
 }
 
 model Vendor {
@@ -167,6 +193,7 @@ model Entitlement {
   voucher   String?  @unique
   grantedAt DateTime @default(now())
   expiresAt DateTime?
+  delivery  VoucherDelivery?
   @@unique([userId, examId, tier])
   @@index([userId])
 }
@@ -208,15 +235,80 @@ model Order {
   tier            Tier?
   bundleId        String?
   bundle          Bundle?     @relation(fields: [bundleId], references: [id])
-  paypalOrderId   String      @unique
+  // Legacy PayPal-specific columns. Retained in Phase 0 for back-compat;
+  // new code reads/writes the provider* columns below. A later migration
+  // will drop these once PayPal paths are switched over.
+  paypalOrderId   String?     @unique
   paypalCaptureId String?     @unique
   paypalPayload   Json?
+  // Provider-agnostic identifiers.
+  provider          PaymentProvider @default(PAYPAL)
+  providerOrderId   String?
+  providerCaptureId String?
+  providerPayload   Json?
+  billingAddressId  String?
+  billingAddress    BillingAddress? @relation(fields: [billingAddressId], references: [id])
+  refundedAt        DateTime?
+  refundAmount      Int?
+  refundReason      String?
+  refundRef         String?
   amount          Int         // cents
   currency        String      @default("USD")
   status          OrderStatus @default(PENDING)
   createdAt       DateTime    @default(now())
   capturedAt      DateTime?
+  @@unique([provider, providerOrderId])
+  @@unique([provider, providerCaptureId])
   @@index([userId, status])
+  @@index([status, createdAt])
+}
+
+model BillingAddress {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName   String
+  company    String?
+  line1      String
+  line2      String?
+  city       String
+  state      String?
+  postalCode String
+  country    String   // ISO-2
+  phone      String?
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  orders     Order[]
+  @@index([userId])
+}
+
+model VoucherDelivery {
+  id            String         @id @default(cuid())
+  entitlementId String         @unique
+  entitlement   Entitlement    @relation(fields: [entitlementId], references: [id], onDelete: Cascade)
+  orderId       String?
+  scheduledFor  DateTime
+  status        DeliveryStatus @default(SCHEDULED)
+  attempts      Int            @default(0)
+  lastError     String?
+  sentAt        DateTime?
+  voucherCode   String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  @@index([status, scheduledFor])
+}
+
+model EmailTemplate {
+  id          String           @id @default(cuid())
+  key         EmailTemplateKey @unique
+  subject     String
+  bodyHtml    String
+  bodyMjml    String?
+  enabled     Boolean          @default(true)
+  updatedById String?
+  updatedAt   DateTime         @updatedAt
+  createdAt   DateTime         @default(now())
 }
 
 model OtpCode {

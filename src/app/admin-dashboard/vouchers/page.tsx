@@ -2,6 +2,7 @@ import { db } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 import { sendVoucherDeliveredEmail } from '@/lib/mail';
 import { renderVoucherPdf } from '@/lib/voucher-pdf';
+import { runDueDeliveries } from '@/lib/scheduling/voucher-delivery';
 
 async function deliverVoucher(opts: {
   userEmail: string;
@@ -50,6 +51,34 @@ async function issueExistingVoucher(formData: FormData) {
     voucher
   });
 
+  revalidatePath('/admin-dashboard/vouchers');
+}
+
+async function sendNowAction(formData: FormData) {
+  'use server';
+  const deliveryId = String(formData.get('deliveryId') || '');
+  const code = String(formData.get('voucher') || '').trim();
+  if (!deliveryId) return;
+  if (code) {
+    const collision = await db.entitlement.findFirst({ where: { voucher: code } });
+    if (collision) return;
+    await db.voucherDelivery.update({
+      where: { id: deliveryId },
+      data: { voucherCode: code, scheduledFor: new Date() }
+    });
+  } else {
+    await db.voucherDelivery.update({
+      where: { id: deliveryId },
+      data: { scheduledFor: new Date() }
+    });
+  }
+  await runDueDeliveries(1);
+  revalidatePath('/admin-dashboard/vouchers');
+}
+
+async function runDeliveriesAction() {
+  'use server';
+  await runDueDeliveries(50);
   revalidatePath('/admin-dashboard/vouchers');
 }
 
@@ -109,7 +138,7 @@ export default async function AdminVouchersPage({ searchParams }: { searchParams
   else if (vendorId) baseWhere.exam = { vendorId };
   if (q) baseWhere.user = { email: { contains: q, mode: 'insensitive' } };
 
-  const [pending, recentlyIssued] = await Promise.all([
+  const [pending, recentlyIssued, deliveries] = await Promise.all([
     db.entitlement.findMany({
       where: { ...baseWhere, voucher: null },
       include: { user: true, exam: { include: { vendor: true } } },
@@ -121,6 +150,16 @@ export default async function AdminVouchersPage({ searchParams }: { searchParams
       include: { user: true, exam: { include: { vendor: true } } },
       orderBy: { grantedAt: 'desc' },
       take: 20
+    }),
+    db.voucherDelivery.findMany({
+      where: { status: { in: ['SCHEDULED', 'PROCESSING', 'FAILED'] } },
+      include: {
+        entitlement: {
+          include: { user: true, exam: { include: { vendor: true } } }
+        }
+      },
+      orderBy: { scheduledFor: 'asc' },
+      take: 100
     })
   ]);
 
@@ -193,6 +232,59 @@ export default async function AdminVouchersPage({ searchParams }: { searchParams
             <a href="/admin-dashboard/vouchers" className="btn-ghost">Reset</a>
           </div>
         </form>
+      </section>
+
+      <section className="mt-8">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Scheduled deliveries ({deliveries.length})</h2>
+          <form action={runDeliveriesAction}>
+            <button type="submit" className="btn-ghost text-sm">Run worker now</button>
+          </form>
+        </div>
+        <p className="mt-1 text-xs text-slate-500">
+          Voucher emails are sent automatically when their scheduled time is reached. Enter a voucher code and click <b>Send now</b> to fast-track delivery.
+        </p>
+        <div className="mt-2 card divide-y divide-slate-200 dark:divide-slate-800">
+          {deliveries.length === 0 && <p className="p-5 text-sm text-slate-500">No scheduled deliveries.</p>}
+          {deliveries.map((d) => {
+            const ent = d.entitlement;
+            const due = d.scheduledFor <= new Date();
+            const statusColor =
+              d.status === 'FAILED' ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300' :
+              d.status === 'PROCESSING' ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300' :
+              due ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300' :
+              'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
+            return (
+              <div key={d.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 font-medium">
+                    {ent.user.email}
+                    <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium uppercase ${statusColor}`}>{d.status}</span>
+                    {due && d.status === 'SCHEDULED' && <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">DUE</span>}
+                  </div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400">
+                    {ent.exam.vendor.name} · <b>{ent.exam.code}</b> — {ent.exam.title}
+                    <span className="mx-2 text-slate-400">·</span>
+                    scheduled {d.scheduledFor.toLocaleString()}
+                    {d.attempts > 0 && <> · {d.attempts} attempt{d.attempts === 1 ? '' : 's'}</>}
+                  </div>
+                  {d.lastError && <div className="mt-1 text-xs text-rose-600">{d.lastError}</div>}
+                </div>
+                <form action={sendNowAction} className="flex items-center gap-2">
+                  <input type="hidden" name="deliveryId" value={d.id} />
+                  <input
+                    type="text"
+                    name="voucher"
+                    placeholder={ent.voucher ? 'Already coded' : 'Voucher code'}
+                    defaultValue={d.voucherCode ?? ''}
+                    className="input w-56"
+                  />
+                  <button type="submit" className="btn-primary-grad whitespace-nowrap">Send now</button>
+                </form>
+              </div>
+            );
+          })}
+        </div>
       </section>
 
       <h2 className="mt-8 text-lg font-semibold">Pending issuance ({pending.length})</h2>

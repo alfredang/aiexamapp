@@ -134,7 +134,7 @@ export default async function AdminUsersPage({
             <div key={u.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
               <div className="min-w-0">
                 <div className="flex items-center gap-2 font-medium">
-                  <span className="truncate">{u.name || u.email}</span>
+                  <Link href={`/admin-dashboard/users/${u.id}`} className="truncate hover:underline">{u.name || u.email}</Link>
                   {targetIsSuper && (
                     <span className="rounded bg-purple-100 px-1.5 py-0.5 text-[10px] font-semibold text-purple-800">
                       SUPER ADMIN

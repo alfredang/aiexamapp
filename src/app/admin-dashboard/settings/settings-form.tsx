@@ -22,6 +22,7 @@ const GROUPS: { title: string; fields: FieldDef[]; compact?: boolean; defaultOpe
   {
     title: 'PayPal',
     fields: [
+      { key: 'PAYPAL_ENABLED', label: 'Enabled (true/false)', placeholder: 'true' },
       { key: 'PAYPAL_ENV', label: 'Environment', placeholder: 'sandbox or live' },
       { key: 'PAYPAL_CLIENT_ID', label: 'Client ID (OAuth)' },
       { key: 'PAYPAL_CLIENT_SECRET', label: 'Client Secret (OAuth)', secret: true },
@@ -30,13 +31,33 @@ const GROUPS: { title: string; fields: FieldDef[]; compact?: boolean; defaultOpe
   },
   {
     title: 'PayNow',
-    fields: [{ key: 'PAYNOW_MERCHANT_ID', label: 'Merchant ID' }]
+    fields: [
+      { key: 'PAYNOW_ENABLED', label: 'Enabled (true/false)', placeholder: 'true' },
+      { key: 'PAYNOW_MERCHANT_ID', label: 'Merchant ID' },
+      { key: 'PAYNOW_UEN', label: 'UEN' },
+      { key: 'PAYNOW_BANK', label: 'Bank' },
+      { key: 'PAYNOW_QR_LOGO_URL', label: 'QR Logo URL' }
+    ]
   },
   {
     title: 'HitPay',
     fields: [
+      { key: 'HITPAY_ENABLED', label: 'Enabled (true/false)', placeholder: 'true' },
+      { key: 'HITPAY_ENV', label: 'Environment', placeholder: 'sandbox or live' },
       { key: 'HITPAY_API_KEY', label: 'API Key', secret: true },
       { key: 'HITPAY_SALT', label: 'Salt / Webhook Secret', secret: true }
+    ]
+  },
+  {
+    title: 'Fulfillment & Branding',
+    fields: [
+      { key: 'VOUCHER_DELAY_DAYS', label: 'Voucher delay (days)', placeholder: '5' },
+      { key: 'FULFILLMENT_TIMEZONE', label: 'Fulfillment timezone', placeholder: 'Asia/Singapore' },
+      { key: 'WORKER_SHARED_SECRET', label: 'Worker shared secret', secret: true },
+      { key: 'BRAND_NAME', label: 'Brand name (emails)' },
+      { key: 'BRAND_LOGO_URL', label: 'Brand logo URL' },
+      { key: 'BRAND_PRIMARY_COLOR', label: 'Brand primary color', placeholder: '#2563eb' },
+      { key: 'BRAND_SUPPORT_EMAIL', label: 'Brand support email' }
     ]
   },
   {

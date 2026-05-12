@@ -6,7 +6,8 @@ import { createOrder } from '@/lib/paypal';
 
 const Body = z.object({
   bundleId: z.string(),
-  tier: z.enum(['PRACTICE', 'VOUCHER']).optional()
+  tier: z.enum(['PRACTICE', 'VOUCHER']).optional(),
+  billingAddressId: z.string().optional().nullable()
 });
 
 export async function POST(req: Request) {
@@ -14,7 +15,13 @@ export async function POST(req: Request) {
   const userId = (session?.user as any)?.id;
   if (!userId) return NextResponse.json({ error: 'Sign in required' }, { status: 401 });
 
-  const { bundleId, tier } = Body.parse(await req.json());
+  const { bundleId, tier, billingAddressId } = Body.parse(await req.json());
+  if (billingAddressId) {
+    const addr = await db.billingAddress.findUnique({ where: { id: billingAddressId } });
+    if (!addr || addr.userId !== userId) {
+      return NextResponse.json({ error: 'Invalid billing address' }, { status: 400 });
+    }
+  }
   const bundle = await db.bundle.findUnique({ where: { id: bundleId } });
   if (!bundle || !bundle.published) return NextResponse.json({ error: 'Bundle not found' }, { status: 404 });
 
@@ -39,7 +46,10 @@ export async function POST(req: Request) {
       amount,
       currency: 'USD',
       status: 'PENDING',
-      paypalOrderId: paypal.id
+      provider: 'PAYPAL',
+      paypalOrderId: paypal.id,
+      providerOrderId: paypal.id,
+      billingAddressId: billingAddressId || null
     }
   });
   return NextResponse.json({ orderId: order.id, paypalOrderId: paypal.id });

@@ -39,6 +39,27 @@ export async function captureOrder(orderId: string) {
   return r.json();
 }
 
+export async function refundCapture(captureId: string, amountCents?: number, currency = 'USD', reason?: string) {
+  const t = await token();
+  const body: any = {};
+  if (amountCents !== undefined) {
+    body.amount = { value: (amountCents / 100).toFixed(2), currency_code: currency };
+  }
+  if (reason) body.note_to_payer = reason.slice(0, 255);
+  const r = await fetch(`${BASE}/v2/payments/captures/${captureId}/refund`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${t}`,
+      'Content-Type': 'application/json',
+      'PayPal-Request-Id': `refund-${captureId}-${Date.now()}`
+    },
+    body: JSON.stringify(body)
+  });
+  const json: any = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(`PayPal refund failed: ${r.status} ${json?.message ?? ''}`);
+  return json as { id: string; status: string };
+}
+
 export async function verifyWebhook(headers: Headers, body: string) {
   const t = await token();
   const r = await fetch(`${BASE}/v1/notifications/verify-webhook-signature`, {
