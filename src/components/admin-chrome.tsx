@@ -30,7 +30,19 @@ const ITEMS: NavItem[] = [
   { href: '/admin-dashboard/users', label: 'Users', icon: Users },
   { href: '/admin-dashboard/orders', label: 'Orders', icon: ShoppingBag },
   { href: '/admin-dashboard/vouchers', label: 'Voucher Management', icon: Ticket },
-  { href: '/admin-dashboard/settings', label: 'Settings', icon: SettingsIcon }
+  {
+    href: '/admin-dashboard/settings',
+    label: 'Settings',
+    icon: SettingsIcon,
+    children: [
+      { href: '/admin-dashboard/settings/company', label: 'Company Info' },
+      { href: '/admin-dashboard/settings/branding', label: 'Branding' },
+      { href: '/admin-dashboard/settings/email-templates', label: 'Email Templates' },
+      { href: '/admin-dashboard/pages', label: 'Pages' },
+      { href: '/admin-dashboard/settings/payment', label: 'Payment Setting' },
+      { href: '/admin-dashboard/settings/credentials', label: 'Credentials' }
+    ]
+  }
 ];
 
 function isPathActive(pathname: string, href: string, exact: boolean): boolean {
