@@ -82,6 +82,17 @@ async function runDeliveriesAction() {
   revalidatePath('/admin-dashboard/vouchers');
 }
 
+async function cancelDeliveryAction(formData: FormData) {
+  'use server';
+  const id = String(formData.get('id') || '');
+  if (!id) return;
+  await db.voucherDelivery.update({
+    where: { id },
+    data: { status: 'CANCELED', lastError: 'Cancelled by admin' }
+  });
+  revalidatePath('/admin-dashboard/vouchers');
+}
+
 async function grantVoucherToUser(formData: FormData) {
   'use server';
   const email = String(formData.get('email') || '').trim().toLowerCase();
@@ -165,10 +176,26 @@ export default async function AdminVouchersPage({ searchParams }: { searchParams
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Voucher Management</h1>
-      <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-        Issue real exam voucher codes. Codes are emailed to the learner once you save.
-      </p>
+      <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight">Voucher Management</h1>
+          <p className="mt-1 text-[12px] text-slate-500">
+            Issue real exam voucher codes. Codes are emailed to the learner once you save.
+            Inventory FIFO is consulted automatically when "Assign Voucher" runs from an order.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <a
+            href="/admin-dashboard/vouchers/inventory"
+            className="btn-sm bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200"
+          >
+            Inventory →
+          </a>
+          <form action={runDeliveriesAction}>
+            <button className="btn-sm bg-blue-600 text-white hover:bg-blue-700">Run deliveries now</button>
+          </form>
+        </div>
+      </div>
 
       {/* Grant new voucher */}
       <section className="card mt-6 p-4">
@@ -270,17 +297,23 @@ export default async function AdminVouchersPage({ searchParams }: { searchParams
                   </div>
                   {d.lastError && <div className="mt-1 text-xs text-rose-600">{d.lastError}</div>}
                 </div>
-                <form action={sendNowAction} className="flex items-center gap-2">
-                  <input type="hidden" name="deliveryId" value={d.id} />
-                  <input
-                    type="text"
-                    name="voucher"
-                    placeholder={ent.voucher ? 'Already coded' : 'Voucher code'}
-                    defaultValue={d.voucherCode ?? ''}
-                    className="input w-56"
-                  />
-                  <button type="submit" className="btn-primary-grad whitespace-nowrap">Send now</button>
-                </form>
+                <div className="flex items-center gap-2">
+                  <form action={sendNowAction} className="flex items-center gap-2">
+                    <input type="hidden" name="deliveryId" value={d.id} />
+                    <input
+                      type="text"
+                      name="voucher"
+                      placeholder={ent.voucher ? 'Already coded' : 'Voucher code'}
+                      defaultValue={d.voucherCode ?? ''}
+                      className="input w-56"
+                    />
+                    <button type="submit" className="btn-primary-grad whitespace-nowrap">Send now</button>
+                  </form>
+                  <form action={cancelDeliveryAction}>
+                    <input type="hidden" name="id" value={d.id} />
+                    <button className="text-xs text-slate-500 hover:text-red-600">Cancel</button>
+                  </form>
+                </div>
               </div>
             );
           })}

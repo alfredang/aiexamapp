@@ -9,6 +9,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
   const q = (sp.q || '').trim();
   const where = {
     published: true,
+    deletedAt: null,
     // Hide exams that don't have any published questions yet — they're
     // catalog placeholders waiting on content. Admins still see them
     // in /admin-dashboard (which doesn't apply this filter).

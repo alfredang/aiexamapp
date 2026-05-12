@@ -116,7 +116,7 @@ export function GeneratorClient({ examId, domains }: { examId: string; domains: 
             <p className="font-medium">{d.stem}</p>
             <ul className="mt-2 space-y-1 text-sm">
               {d.options.map(o => (
-                <li key={o.id} className={d.correct.includes(o.id) ? 'text-green-700' : 'text-slate-700'}>
+                <li key={o.id} className={d.correct.includes(o.id) ? 'text-green-700 dark:text-green-300' : 'text-slate-700 dark:text-slate-300'}>
                   {d.correct.includes(o.id) ? '✓ ' : '○ '}{o.text}
                 </li>
               ))}

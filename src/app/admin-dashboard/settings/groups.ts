@@ -61,6 +61,40 @@ export const PAYMENT_FULFILLMENT_FIELDS: FieldDef[] = [
   { key: 'FULFILLMENT_TIMEZONE', label: 'Fulfillment timezone', placeholder: 'Asia/Singapore' }
 ];
 
+// Email transport sub-groups shown as collapsible cards on the
+// Email Setting page. Mirrors the PAYMENT_SUBGROUPS pattern.
+export const EMAIL_GMAIL_FIELDS: FieldDef[] = [
+  { key: 'GMAIL_OAUTH_CLIENT_ID', label: 'Google OAuth Client ID' },
+  { key: 'GMAIL_OAUTH_CLIENT_SECRET', label: 'Google OAuth Client Secret', secret: true },
+  { key: 'GMAIL_OAUTH_SENDER_EMAIL', label: 'Sender Gmail address', placeholder: 'noreply@yourdomain.com' }
+];
+
+export const EMAIL_SMTP_FIELDS: FieldDef[] = [
+  { key: 'SMTP_HOST', label: 'SMTP host', placeholder: 'smtp.example.com' },
+  { key: 'SMTP_PORT', label: 'SMTP port', placeholder: '587' },
+  { key: 'SMTP_SECURE', label: 'Secure (true/false)', placeholder: 'false' },
+  { key: 'SMTP_USER', label: 'SMTP user' },
+  { key: 'SMTP_PASSWORD', label: 'SMTP password', secret: true }
+];
+
+export const EMAIL_COMMON_FIELDS: FieldDef[] = [
+  { key: 'EMAIL_FROM', label: 'From address', placeholder: 'ExamNova <noreply@example.com>', fullWidth: true }
+];
+
+// Social Login providers — toggled per provider on the dedicated
+// /admin-dashboard/settings/social-login page.
+export const SOCIAL_GOOGLE_FIELDS: FieldDef[] = [
+  { key: 'GOOGLE_OAUTH_ENABLED', label: 'Enabled (true/false)', placeholder: 'true' },
+  { key: 'GOOGLE_OAUTH_CLIENT_ID', label: 'Google OAuth Client ID' },
+  { key: 'GOOGLE_OAUTH_CLIENT_SECRET', label: 'Google OAuth Client Secret', secret: true }
+];
+
+export const SOCIAL_GITHUB_FIELDS: FieldDef[] = [
+  { key: 'GITHUB_OAUTH_ENABLED', label: 'Enabled (true/false)', placeholder: 'true' },
+  { key: 'GITHUB_OAUTH_CLIENT_ID', label: 'GitHub OAuth Client ID' },
+  { key: 'GITHUB_OAUTH_CLIENT_SECRET', label: 'GitHub OAuth Client Secret', secret: true }
+];
+
 export const GROUPS: SettingsGroup[] = [
   {
     slug: 'company',
@@ -90,11 +124,42 @@ export const GROUPS: SettingsGroup[] = [
     ]
   },
   {
+    slug: 'site-seo',
+    title: 'Site SEO',
+    description: 'Public homepage meta tags. Used by Google + social previews. Use the AI Assist button on individual exam pages for per-exam SEO.',
+    compact: true,
+    fields: [
+      { key: 'SITE_HOME_TITLE', label: 'Home title (50–70 chars)', placeholder: 'ExamNova — Practice Smarter for Your Next Certification' },
+      { key: 'SITE_HOME_DESCRIPTION', label: 'Home description (120–180 chars)', placeholder: 'Original practice questions for AWS, Microsoft, Cisco…', fullWidth: true },
+      { key: 'SITE_HOME_KEYWORDS', label: 'Home keywords (comma-separated)', placeholder: 'AWS practice exam, Microsoft AZ-900 practice, Cisco CCNA quiz' }
+    ]
+  },
+  {
+    slug: 'tax-invoice',
+    title: 'Tax & Invoice',
+    description: 'Tax engine, invoice numbering, and SGD-equivalent FX rates for reporting.',
+    compact: true,
+    fields: [
+      { key: 'TAX_ENABLED', label: 'Tax enabled (true/false)', placeholder: 'true' },
+      { key: 'TAX_LABEL', label: 'Tax label', placeholder: 'GST' },
+      { key: 'TAX_RATE_BPS', label: 'Tax rate (basis points, 900 = 9%)', placeholder: '900' },
+      { key: 'TAX_INCLUSIVE', label: 'Tax inclusive in price? (true/false)', placeholder: 'false' },
+      { key: 'COMPANY_GST_REG', label: 'GST registration number', placeholder: 'M2-1234567-8' },
+      { key: 'INVOICE_PREFIX', label: 'Invoice number prefix', placeholder: 'INV' },
+      { key: 'FX_TO_SGD_USD_BPS', label: 'USD → SGD FX (basis points, 13500 = 1.3500)', placeholder: '13500' },
+      { key: 'FX_TO_SGD_EUR_BPS', label: 'EUR → SGD FX (basis points)' },
+      { key: 'FX_TO_SGD_GBP_BPS', label: 'GBP → SGD FX (basis points)' },
+      { key: 'FX_TO_SGD_AUD_BPS', label: 'AUD → SGD FX (basis points)' }
+    ]
+  },
+  {
     slug: 'credentials',
     title: 'Credentials',
     description: 'Non-payment API keys and worker secrets. Payment provider credentials live under Payment Setting.',
     fields: [
       { key: 'ANTHROPIC_API_KEY', label: 'Claude (Anthropic) — API Key', secret: true },
+      { key: 'FIRECRAWL_API_KEY', label: 'Firecrawl — API Key', secret: true },
+      { key: 'TAVILY_API_KEY', label: 'Tavily — API Key', secret: true },
       { key: 'WORKER_SHARED_SECRET', label: 'Cron worker — shared secret', secret: true }
     ]
   }

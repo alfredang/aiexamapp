@@ -4,6 +4,7 @@ import { Suspense, useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
+import { SocialLoginButtons } from '@/components/social-login-buttons';
 
 export default function LoginPage() {
   return <Suspense><LoginInner /></Suspense>;
@@ -87,6 +88,8 @@ function LoginInner() {
             {err && <p className="text-sm text-red-600">{err}</p>}
           </form>
         )}
+
+        <SocialLoginButtons callbackUrl={next} />
       </div>
 
       <div className="card p-8">

@@ -13,7 +13,7 @@ export default async function HomePage() {
   // attributed to the vendor (via the first bundle item's exam vendor).
   // That matches what users actually see on /practice-exams/[vendor].
   const vendors = await db.vendor.findMany({
-    include: { _count: { select: { exams: { where: { published: true, questions: { some: { status: 'PUBLISHED' } } } } } } },
+    include: { _count: { select: { exams: { where: { published: true, deletedAt: null, questions: { some: { status: 'PUBLISHED' } } } } } } },
     take: 12
   });
   const allBundlesForCounts = await db.bundle.findMany({
@@ -29,7 +29,7 @@ export default async function HomePage() {
   // Popular section mixes recent bundles + recent standalone exams (6 total)
   // since most catalog content is now sold as bundles.
   const recentExams = await db.exam.findMany({
-    where: { published: true, questions: { some: { status: 'PUBLISHED' } } },
+    where: { published: true, deletedAt: null, questions: { some: { status: 'PUBLISHED' } } },
     include: { vendor: true, _count: { select: { questions: { where: { status: 'PUBLISHED' } } } } },
     take: 6,
     orderBy: { createdAt: 'desc' }

@@ -12,6 +12,10 @@ datasource db {
 enum Role {
   USER
   ADMIN
+  FINANCE
+  SUPPORT
+  CONTENT
+  READ_ONLY
 }
 
 enum QType {
@@ -89,6 +93,46 @@ model User {
   orders        Order[]
   adminLogs     AdminLog[]
   billingAddresses BillingAddress[]
+  invoices      Invoice[]
+  accounts      Account[]
+  refundsIssued Refund[]
+  couponRedemptions CouponRedemption[]
+  notesAbout    UserNote[]    @relation("UserNoteSubject")
+  notesAuthored UserNote[]    @relation("UserNoteAuthor")
+  tags          UserTag[]
+  examSourceImports ExamSource[]
+  voucherInventoryImports VoucherInventory[]
+  emailLogs     EmailLog[]
+  apiTokens     ApiToken[]
+  webhookSubs   WebhookSubscription[]
+  consents      ConsentLog[]
+  reportSubs    ReportSubscription[]
+  totpSecret    String?
+  // Admin metadata, written by admin actions on the user detail page.
+  anonymizedAt  DateTime?
+  // When set, the user's existing JWTs are considered invalid (force-logout).
+  sessionVersion Int          @default(0)
+}
+
+// NextAuth/Prisma adapter table used by OAuth providers (Google, GitHub, …)
+// so each external identity links to a local User. We keep using JWT
+// sessions, so no Session model is needed.
+model Account {
+  id                String   @id @default(cuid())
+  userId            String
+  type              String                                  // 'oauth' | 'oidc' | 'email'
+  provider          String                                  // 'google' | 'github' | …
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Vendor {
@@ -98,6 +142,8 @@ model Vendor {
   logo  String?
   description String?
   exams Exam[]
+  coupons Coupon[]
+  voucherInventory VoucherInventory[]
 }
 
 model Exam {
@@ -112,17 +158,31 @@ model Exam {
   durationMinutes Int
   passingScore    Int
   questionCount   Int        // questions per practice exam attempt
+  examSets        Int        @default(1) // # of distinct practice exam sets offered (1-6)
+  infoUrl         String?    // vendor's exam info page or PDF link
   domains         Json       // [{name: string, weight: number}]
   pricePractice   Int        // cents
   priceBundle     Int
   priceVoucher    Int
   published       Boolean    @default(false)
+  // SEO fields for the public catalog page
+  metaTitle       String?
+  metaDescription String?
+  metaKeywords    String?
+  ogImage         String?
+  // Soft-delete marker; rows are filtered out of public catalog + admin
+  // default list. Restorable until manually purged.
+  deletedAt       DateTime?
   createdAt       DateTime   @default(now())
   questions       Question[]
+  sources         ExamSource[]
+  versions        ExamVersion[]
   attempts        Attempt[]
   entitlements    Entitlement[]
   orders          Order[]
   bundleItems     BundleItem[]
+  coupons         Coupon[]
+  voucherInventory VoucherInventory[]
   @@index([vendorId])
 }
 
@@ -177,10 +237,196 @@ model Question {
   generatedBy String?   // "manual" | model id
   isTeaser    Boolean   @default(false)
   version     Int       @default(1)
+  sourceId    String?
+  source      ExamSource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   @@index([examId, status])
   @@index([examId, isTeaser])
+  @@index([sourceId])
+}
+
+// Provenance for a batch of generated questions: which document or set of
+// URLs they were derived from. One ExamSource per upload / scrape run.
+model ExamSource {
+  id          String           @id @default(cuid())
+  examId      String
+  exam        Exam             @relation(fields: [examId], references: [id], onDelete: Cascade)
+  kind        ExamSourceKind
+  label       String                                            // human label e.g. "AWS exam guide v3 (PDF)"
+  storagePath String?                                            // local path under /uploads when kind=PDF or EPUB
+  urls        Json?                                              // string[] when kind=URL
+  importedById String
+  importedBy  User             @relation(fields: [importedById], references: [id])
+  createdAt   DateTime         @default(now())
+  questions   Question[]
+  @@index([examId])
+}
+
+enum ExamSourceKind {
+  PDF
+  EPUB
+  URL
+}
+
+// Immutable schema snapshot of an Exam on every save, so admins can audit
+// or revert.
+model ExamVersion {
+  id        String   @id @default(cuid())
+  examId    String
+  exam      Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  snapshot  Json
+  byAdminId String?
+  createdAt DateTime @default(now())
+  @@index([examId, createdAt])
+}
+
+// Vendor-supplied voucher codes uploaded in bulk. When "Assign Voucher"
+// runs on a paid order, we first try to pull from this inventory (FIFO
+// by importedAt) before falling back to a synthetic VCH-… code.
+model VoucherInventory {
+  id           String   @id @default(cuid())
+  vendorId     String
+  vendor       Vendor   @relation(fields: [vendorId], references: [id])
+  examId       String?
+  exam         Exam?    @relation(fields: [examId], references: [id])
+  code         String   @unique
+  status       VoucherInventoryStatus @default(AVAILABLE)
+  expiresAt    DateTime?
+  assignedAt   DateTime?
+  // When claimed: the Entitlement that received this code.
+  assignedEntitlementId String? @unique
+  assignedEntitlement   Entitlement? @relation("InventoryClaim", fields: [assignedEntitlementId], references: [id])
+  importedAt   DateTime @default(now())
+  importedById String
+  importedBy   User     @relation(fields: [importedById], references: [id])
+  notes        String?
+  @@index([vendorId, status])
+  @@index([examId, status])
+  @@index([status, expiresAt])
+}
+
+enum VoucherInventoryStatus {
+  AVAILABLE
+  RESERVED
+  ASSIGNED
+  EXPIRED
+}
+
+model EmailLog {
+  id          String         @id @default(cuid())
+  to          String                                       // recipient
+  cc          String?                                      // comma-joined
+  subject     String
+  template    String?                                      // template key (or null for ad-hoc)
+  transport   String                                       // 'SMTP' | 'GMAIL_OAUTH'
+  status      EmailStatus    @default(SENT)
+  providerId  String?                                      // messageId from nodemailer
+  error       String?
+  userId      String?                                      // resolved by `to` when known
+  user        User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  payloadVars Json?                                        // template render vars (truncated)
+  sentAt      DateTime       @default(now())
+  @@index([userId, sentAt])
+  @@index([template, sentAt])
+  @@index([status, sentAt])
+}
+
+enum EmailStatus {
+  QUEUED
+  SENT
+  FAILED
+  BOUNCED
+  OPENED
+}
+
+model AdminNotification {
+  id        String   @id @default(cuid())
+  kind      String                                        // e.g. 'webhook.failed', 'order.refund', 'inventory.low'
+  title     String
+  body      String?
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+  @@index([readAt, createdAt])
+}
+
+// Long-lived API tokens for partner integrations.
+model ApiToken {
+  id           String   @id @default(cuid())
+  name         String
+  hashedToken  String   @unique
+  prefix       String                                    // first 8 chars for display ("examnova_…")
+  scopes       String[]
+  createdById  String
+  createdBy    User     @relation(fields: [createdById], references: [id])
+  lastUsedAt   DateTime?
+  expiresAt    DateTime?
+  createdAt    DateTime @default(now())
+  revokedAt    DateTime?
+}
+
+// Outbound webhook subscriptions for partner integrations.
+model WebhookSubscription {
+  id           String   @id @default(cuid())
+  url          String
+  secret       String                                    // signing key
+  events       String[]                                  // e.g. ['order.paid','order.refunded']
+  enabled      Boolean  @default(true)
+  createdById  String
+  createdBy    User     @relation(fields: [createdById], references: [id])
+  createdAt    DateTime @default(now())
+  lastDelivery DateTime?
+  lastError    String?
+}
+
+// Cookie / consent log for GDPR compliance.
+model ConsentLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  ip        String?
+  consents  Json                                         // { analytics:bool, marketing:bool, … }
+  createdAt DateTime @default(now())
+  @@index([userId, createdAt])
+}
+
+// Saved + scheduled report subscriptions (weekly digest email).
+model ReportSubscription {
+  id           String   @id @default(cuid())
+  adminId      String
+  admin        User     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  reportKey    String                                    // 'revenue', 'tax', 'exam-analytics'
+  schedule     String                                    // cron-style or simple key like 'weekly-monday-09'
+  filters      Json?
+  enabled      Boolean  @default(true)
+  lastSentAt   DateTime?
+  createdAt    DateTime @default(now())
+  @@index([enabled, schedule])
+}
+
+// Banners + FAQ — lightweight CMS.
+model Banner {
+  id        String   @id @default(cuid())
+  body      String
+  link      String?
+  theme     String   @default("info")                    // 'info' | 'warning' | 'success'
+  startsAt  DateTime?
+  endsAt    DateTime?
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Faq {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String                                        // markdown
+  position  Int      @default(0)
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([published, position])
 }
 
 model Entitlement {
@@ -194,6 +440,7 @@ model Entitlement {
   grantedAt DateTime @default(now())
   expiresAt DateTime?
   delivery  VoucherDelivery?
+  inventoryClaim VoucherInventory? @relation("InventoryClaim")
   @@unique([userId, examId, tier])
   @@index([userId])
 }
@@ -228,6 +475,7 @@ model Attempt {
 // table.
 model Order {
   id              String      @id @default(cuid())
+  number          String?     @unique  // e.g. ORD-2026-00001; assigned on create
   userId          String
   user            User        @relation(fields: [userId], references: [id])
   examId          String?
@@ -257,10 +505,202 @@ model Order {
   status          OrderStatus @default(PENDING)
   createdAt       DateTime    @default(now())
   capturedAt      DateTime?
+  // Coupon applied at order-create time. Discount is snapshotted so later
+  // edits to the Coupon row never mutate this order's accounting.
+  couponId        String?
+  coupon          Coupon?     @relation(fields: [couponId], references: [id])
+  discount        Int         @default(0)  // cents, the discount applied
+  couponRedemption CouponRedemption?
+  invoice         Invoice?
+  refunds         Refund[]
+  webhookEvents   PaymentWebhookEvent[]
   @@unique([provider, providerOrderId])
   @@unique([provider, providerCaptureId])
   @@index([userId, status])
   @@index([status, createdAt])
+}
+
+model Refund {
+  id                  String   @id @default(cuid())
+  orderId             String
+  order               Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount              Int                                // cents (positive value)
+  currency            String
+  reason              String?
+  provider            PaymentProvider
+  providerRefundId    String?  @unique                   // provider-side id (PayPal refund id, HitPay refund id, PayNow ref)
+  byAdminId           String
+  byAdmin             User     @relation(fields: [byAdminId], references: [id])
+  creditNoteInvoiceId String?  @unique                   // FK to the credit-note Invoice this refund minted
+  creditNoteInvoice   Invoice? @relation(fields: [creditNoteInvoiceId], references: [id])
+  status              RefundStatus @default(SUCCEEDED)
+  failureMessage      String?
+  createdAt           DateTime @default(now())
+  @@index([orderId])
+  @@index([status, createdAt])
+}
+
+enum RefundStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
+model PaymentWebhookEvent {
+  id          String        @id @default(cuid())
+  provider    PaymentProvider
+  eventId     String                                     // provider-supplied event id (or a synthesised hash)
+  eventType   String
+  payload     Json
+  receivedAt  DateTime      @default(now())
+  processedAt DateTime?
+  status      WebhookStatus @default(RECEIVED)
+  error       String?
+  orderId     String?
+  order       Order?        @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  @@unique([provider, eventId])
+  @@index([provider, receivedAt])
+  @@index([status])
+}
+
+enum WebhookStatus {
+  RECEIVED
+  PROCESSED
+  FAILED
+  IGNORED
+}
+
+model Coupon {
+  id             String        @id @default(cuid())
+  code           String        @unique
+  kind           CouponKind                              // PERCENT | FIXED
+  value          Int                                     // 0-100 (percent points) OR cents (fixed)
+  scope          CouponScope   @default(GLOBAL)
+  scopeExamId    String?
+  scopeExam      Exam?         @relation(fields: [scopeExamId], references: [id])
+  scopeVendorId  String?
+  scopeVendor    Vendor?       @relation(fields: [scopeVendorId], references: [id])
+  minSubtotal    Int           @default(0)                // cents
+  maxRedemptions Int?                                     // null = unlimited
+  perUserLimit   Int?          @default(1)
+  startsAt       DateTime?
+  endsAt         DateTime?
+  enabled        Boolean       @default(true)
+  notes          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  orders         Order[]
+  redemptions    CouponRedemption[]
+  @@index([enabled, startsAt, endsAt])
+  @@index([scopeExamId])
+  @@index([scopeVendorId])
+}
+
+enum CouponKind {
+  PERCENT
+  FIXED
+}
+
+enum CouponScope {
+  GLOBAL
+  EXAM
+  VENDOR
+}
+
+model UserNote {
+  id        String   @id @default(cuid())
+  userId    String                                  // subject — the user the note is about
+  user      User     @relation("UserNoteSubject", fields: [userId], references: [id], onDelete: Cascade)
+  authorId  String                                  // admin who wrote it
+  author    User     @relation("UserNoteAuthor", fields: [authorId], references: [id])
+  body      String
+  pinned    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  @@index([userId, createdAt])
+}
+
+model Tag {
+  id        String    @id @default(cuid())
+  slug      String    @unique
+  label     String
+  color     String?                                  // tailwind hue label e.g. 'emerald'
+  createdAt DateTime  @default(now())
+  users     UserTag[]
+}
+
+model UserTag {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tagId     String
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  taggedAt  DateTime @default(now())
+  @@id([userId, tagId])
+  @@index([tagId])
+}
+
+model CouponRedemption {
+  id        String   @id @default(cuid())
+  couponId  String
+  coupon    Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  orderId   String   @unique
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount    Int                                  // cents discounted
+  createdAt DateTime @default(now())
+  @@index([couponId])
+  @@index([userId])
+}
+
+model Invoice {
+  id              String        @id @default(cuid())
+  number          String        @unique         // e.g. INV-2026-00042
+  orderId         String        @unique
+  order           Order         @relation(fields: [orderId], references: [id])
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+  issueDate       DateTime      @default(now())
+  // Snapshot fields — frozen at issue so future edits don't mutate history.
+  billingName     String
+  billingEmail    String
+  billingAddress  String?
+  billingUEN      String?
+  companyName     String
+  companyAddress  String
+  companyUEN      String
+  companyGstReg   String?
+  currency        String        // matches order.currency
+  subtotal        Int           // cents
+  taxRate         Int           // basis points e.g. 900 = 9.00%
+  taxLabel        String        @default("GST")
+  taxAmount       Int           // cents
+  total           Int           // cents
+  fxRateBpsToSgd  Int?          // basis points; null when currency = SGD
+  totalSgd        Int?          // cents; for reporting only
+  status          InvoiceStatus @default(ISSUED)
+  voidedAt        DateTime?
+  voidReason      String?
+  creditNoteOfId  String?       @unique         // points back to the original invoice this credit-notes
+  creditNoteOf    Invoice?      @relation("CreditNote", fields: [creditNoteOfId], references: [id])
+  creditNoteFor   Invoice?      @relation("CreditNote")
+  pdfPath         String?       // optional cached PDF path; otherwise render on demand
+  createdAt       DateTime      @default(now())
+  refund          Refund?
+  @@index([userId])
+  @@index([issueDate])
+  @@index([status])
+}
+
+enum InvoiceStatus {
+  ISSUED
+  VOID
+  CREDIT_NOTE
+}
+
+model NumberCounter {
+  kind      String   @id   // 'INVOICE' | 'ORDER'
+  last      Int      @default(0)
+  updatedAt DateTime @updatedAt
 }
 
 model BillingAddress {
@@ -305,6 +745,9 @@ model Page {
   title       String
   bodyHtml    String
   excerpt     String?
+  metaTitle   String?
+  metaDescription String?
+  metaKeywords String?
   published   Boolean  @default(true)
   showInFooter Boolean @default(false)
   footerGroup String?  // "legal" | "company" — drives footer column placement

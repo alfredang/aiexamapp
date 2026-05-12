@@ -78,5 +78,5 @@ export async function sendTemplated(
   const rendered = await renderTemplate(key, vars);
   if (!rendered.enabled) return null;
   const cc = rendered.ccEmails.length > 0 ? rendered.ccEmails : undefined;
-  return sendMail(to, rendered.subject, rendered.html, attachments, cc);
+  return sendMail(to, rendered.subject, rendered.html, attachments, cc, { template: key, vars });
 }

@@ -1,23 +1,32 @@
 import Link from 'next/link';
 import { db } from '@/lib/db';
-import { formatPrice, tierLabel } from '@/lib/utils';
+import { formatPrice, tierLabel, genVoucherCode } from '@/lib/utils';
 import { revalidatePath } from 'next/cache';
 import { fulfillOrder } from '@/lib/fulfill';
 import { auth } from '@/lib/auth';
-import type { OrderStatus, PaymentProvider, Prisma } from '@prisma/client';
+import type { OrderStatus, Prisma } from '@prisma/client';
+import { Pencil, Trash2, Ticket, CheckCircle2, RotateCcw } from 'lucide-react';
+import { PageHeader } from '@/components/admin/page-header';
+import { FilterBar, FilterField } from '@/components/admin/filter-bar';
+import { DataTable, type Column } from '@/components/admin/data-table';
+import { Pager } from '@/components/admin/pager';
+import { StatusBadge } from '@/components/admin/badge';
+import { ConfirmButton } from '@/components/admin/confirm-button';
+import { ActionMenu, ActionItem } from '@/components/admin/action-menu';
+import { buildQS } from '@/components/admin/qs';
 
-async function refund(formData: FormData) {
-  'use server';
-  const id = String(formData.get('id'));
-  await db.order.update({ where: { id }, data: { status: 'REFUNDED', refundedAt: new Date() } });
-  revalidatePath('/admin-dashboard/orders');
+export const dynamic = 'force-dynamic';
+
+async function requireAdmin() {
+  const session = await auth();
+  const user = session?.user as any;
+  if (user?.role !== 'ADMIN') throw new Error('forbidden');
+  return user as { id: string };
 }
 
 async function markPaid(formData: FormData) {
   'use server';
-  const session = await auth();
-  const user = session?.user as any;
-  if (user?.role !== 'ADMIN') return;
+  const user = await requireAdmin();
   const id = String(formData.get('id'));
   const reference = String(formData.get('reference') || '').trim() || null;
   const order = await db.order.findUnique({ where: { id } });
@@ -29,137 +38,443 @@ async function markPaid(formData: FormData) {
   revalidatePath('/admin-dashboard/orders');
 }
 
-const PAGE_SIZE = 25;
+async function refund(formData: FormData) {
+  'use server';
+  const user = await requireAdmin();
+  const id = String(formData.get('id'));
+  const order = await db.order.findUnique({ where: { id }, include: { refunds: true } });
+  if (!order || order.status !== 'PAID') return;
+  const already = order.refunds
+    .filter((r) => r.status === 'SUCCEEDED')
+    .reduce((sum, r) => sum + r.amount, 0);
+  const remaining = order.amount - already;
+  if (remaining <= 0) return;
+  const { refundOrder } = await import('@/lib/payments/refund');
+  await refundOrder({
+    orderId: id,
+    amountCents: remaining,
+    reason: 'Full refund',
+    byAdminId: user.id
+  });
+  revalidatePath('/admin-dashboard/orders');
+  revalidatePath(`/admin-dashboard/orders/${id}`);
+}
 
-type SearchParams = Promise<{ q?: string; status?: string; provider?: string; page?: string }>;
+async function deleteOrder(formData: FormData) {
+  'use server';
+  const user = await requireAdmin();
+  const id = String(formData.get('id'));
+  const order = await db.order.findUnique({ where: { id } });
+  if (!order) return;
+  if (order.status === 'PAID') return; // refuse: keeps fulfilment history
+  await db.order.delete({ where: { id } });
+  await db.adminLog.create({
+    data: { adminId: user.id, action: 'order.delete', targetType: 'Order', targetId: id, metadata: { status: order.status } }
+  });
+  revalidatePath('/admin-dashboard/orders');
+}
+
+async function assignVoucher(formData: FormData) {
+  'use server';
+  const user = await requireAdmin();
+  const orderId = String(formData.get('orderId'));
+  const order = await db.order.findUnique({
+    where: { id: orderId },
+    include: { exam: { select: { vendorId: true } } }
+  });
+  if (!order || order.status !== 'PAID' || !order.examId || !order.userId) return;
+  let ent = await db.entitlement.findFirst({
+    where: { userId: order.userId, examId: order.examId, tier: 'VOUCHER' }
+  });
+  if (!ent) {
+    ent = await db.entitlement.create({
+      data: { userId: order.userId, examId: order.examId, tier: 'VOUCHER' }
+    });
+  }
+  if (ent.voucher) {
+    await db.adminLog.create({
+      data: { adminId: user.id, action: 'order.assign-voucher.noop', targetType: 'Order', targetId: orderId, metadata: { reason: 'already-assigned', voucher: ent.voucher } }
+    });
+    revalidatePath('/admin-dashboard/orders');
+    return;
+  }
+  // 1) Try vendor inventory FIFO. Falls through to synthetic on miss.
+  let code: string | null = null;
+  let source: 'inventory' | 'synthetic' = 'synthetic';
+  if (order.exam?.vendorId) {
+    code = await (await import('@/lib/voucher-inventory')).claimNextInventoryCode(
+      { vendorId: order.exam.vendorId, examId: order.examId },
+      ent.id
+    );
+    if (code) source = 'inventory';
+  }
+  if (!code) {
+    let attempt = genVoucherCode();
+    for (let i = 0; i < 5; i++) {
+      const exists = await db.entitlement.findFirst({ where: { voucher: attempt } });
+      if (!exists) break;
+      attempt = genVoucherCode();
+    }
+    code = attempt;
+  }
+  await db.entitlement.update({ where: { id: ent.id }, data: { voucher: code } });
+  await db.adminLog.create({
+    data: { adminId: user.id, action: 'order.assign-voucher', targetType: 'Order', targetId: orderId, metadata: { voucher: code, entitlementId: ent.id, source } }
+  });
+  revalidatePath('/admin-dashboard/orders');
+  revalidatePath('/admin-dashboard/vouchers');
+  revalidatePath('/admin-dashboard/vouchers/inventory');
+}
+
+const PAGE_SIZE = 50;
+
+type SearchParams = Promise<{
+  q?: string;
+  status?: string;
+  examId?: string;
+  vendorId?: string;
+  from?: string;
+  to?: string;
+  page?: string;
+}>;
+
+type OrderRow = Awaited<ReturnType<typeof loadOrders>>[number];
+
+async function loadOrders(where: Prisma.OrderWhereInput, skip: number, take: number) {
+  return db.order.findMany({
+    where,
+    include: { user: true, exam: { include: { vendor: true } }, bundle: true },
+    orderBy: { createdAt: 'desc' },
+    skip,
+    take
+  });
+}
 
 export default async function AdminOrdersPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
   const q = (sp.q || '').trim();
   const status = sp.status as OrderStatus | undefined;
-  const provider = sp.provider as PaymentProvider | undefined;
+  const examId = (sp.examId || '').trim();
+  const vendorId = (sp.vendorId || '').trim();
+  const fromStr = (sp.from || '').trim();
+  const toStr = (sp.to || '').trim();
   const page = Math.max(1, Number(sp.page) || 1);
 
   const where: Prisma.OrderWhereInput = {};
   if (status && ['PENDING', 'PAID', 'FAILED', 'REFUNDED'].includes(status)) where.status = status;
-  if (provider && ['PAYPAL', 'PAYNOW', 'HITPAY', 'TEST'].includes(provider)) where.provider = provider;
+  if (examId) where.examId = examId;
+  if (vendorId) where.exam = { vendorId };
+
+  const fromDate = fromStr ? new Date(fromStr) : null;
+  const toDate = toStr ? new Date(toStr) : null;
+  if (toDate) toDate.setHours(23, 59, 59, 999);
+  if ((fromDate && !isNaN(fromDate.getTime())) || (toDate && !isNaN(toDate.getTime()))) {
+    where.createdAt = {
+      ...(fromDate && !isNaN(fromDate.getTime()) ? { gte: fromDate } : {}),
+      ...(toDate && !isNaN(toDate.getTime()) ? { lte: toDate } : {})
+    };
+  }
   if (q) {
     where.OR = [
       { id: { contains: q } },
-      { user: { email: { contains: q, mode: 'insensitive' } } }
+      { number: { contains: q, mode: 'insensitive' } },
+      { user: { email: { contains: q, mode: 'insensitive' } } },
+      { user: { name: { contains: q, mode: 'insensitive' } } }
     ];
   }
 
-  const [total, orders] = await Promise.all([
+  const [total, orders, vendors, exams] = await Promise.all([
     db.order.count({ where }),
-    db.order.findMany({
-      where,
-      include: { user: true, exam: true, bundle: true },
-      orderBy: { createdAt: 'desc' },
-      skip: (page - 1) * PAGE_SIZE,
-      take: PAGE_SIZE
+    loadOrders(where, (page - 1) * PAGE_SIZE, PAGE_SIZE),
+    db.vendor.findMany({ orderBy: { name: 'asc' } }),
+    db.exam.findMany({
+      where: vendorId ? { vendorId } : undefined,
+      orderBy: [{ vendor: { name: 'asc' } }, { title: 'asc' }],
+      select: { id: true, code: true, title: true, vendor: { select: { name: true } } }
     })
   ]);
 
+  const orFilters = orders
+    .filter((o) => o.userId && o.examId)
+    .map((o) => ({ userId: o.userId!, examId: o.examId! }));
+  const voucherEnts = orFilters.length
+    ? await db.entitlement.findMany({
+        where: { tier: 'VOUCHER', OR: orFilters },
+        select: { userId: true, examId: true, voucher: true }
+      })
+    : [];
+  const voucherByKey = new Map<string, string | null>();
+  for (const e of voucherEnts) voucherByKey.set(`${e.userId}::${e.examId}`, e.voucher);
+
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  function qs(overrides: Record<string, string | undefined>) {
-    const p = new URLSearchParams();
-    if (q) p.set('q', q);
-    if (status) p.set('status', status);
-    if (provider) p.set('provider', provider);
-    for (const [k, v] of Object.entries(overrides)) {
-      if (v) p.set(k, v); else p.delete(k);
+  const baseParams = { q, status, examId, vendorId, from: fromStr, to: toStr };
+  const buildHref = (p: number) =>
+    `/admin-dashboard/orders${buildQS({ ...baseParams, page: p === 1 ? undefined : p })}`;
+
+  const activeFilters = [
+    q && {
+      key: 'search',
+      label: q,
+      clearHref: `/admin-dashboard/orders${buildQS({ ...baseParams, q: undefined })}`
+    },
+    status && {
+      key: 'status',
+      label: status,
+      clearHref: `/admin-dashboard/orders${buildQS({ ...baseParams, status: undefined })}`
+    },
+    vendorId && {
+      key: 'vendor',
+      label: vendors.find((v) => v.id === vendorId)?.name ?? vendorId,
+      clearHref: `/admin-dashboard/orders${buildQS({ ...baseParams, vendorId: undefined, examId: undefined })}`
+    },
+    examId && {
+      key: 'exam',
+      label: exams.find((e) => e.id === examId)?.code ?? examId,
+      clearHref: `/admin-dashboard/orders${buildQS({ ...baseParams, examId: undefined })}`
+    },
+    fromStr && {
+      key: 'from',
+      label: fromStr,
+      clearHref: `/admin-dashboard/orders${buildQS({ ...baseParams, from: undefined })}`
+    },
+    toStr && {
+      key: 'to',
+      label: toStr,
+      clearHref: `/admin-dashboard/orders${buildQS({ ...baseParams, to: undefined })}`
     }
-    const s = p.toString();
-    return s ? `?${s}` : '';
-  }
+  ].filter(Boolean) as { key: string; label: string; clearHref: string }[];
+
+  const columns: Column<OrderRow>[] = [
+    {
+      key: 'number',
+      header: 'Order No.',
+      cell: (o) => (
+        <Link
+          href={`/admin-dashboard/orders/${o.id}`}
+          className="font-mono text-[12px] font-semibold text-slate-900 hover:underline dark:text-slate-100"
+          title={o.id}
+        >
+          {o.number ?? o.id.slice(0, 10)}
+        </Link>
+      )
+    },
+    {
+      key: 'name',
+      header: 'Name',
+      cell: (o) => (
+        <span className="text-slate-900 dark:text-slate-100">
+          {o.user.name || <span className="text-slate-400">—</span>}
+        </span>
+      )
+    },
+    {
+      key: 'email',
+      header: 'Email',
+      cell: (o) => <span className="text-[12px] text-slate-700 dark:text-slate-200">{o.user.email}</span>
+    },
+    {
+      key: 'product',
+      header: 'Exam Purchased',
+      cell: (o) => {
+        const productLabel = o.bundle ? `${o.bundle.title} (bundle)` : o.exam?.title ?? '(unknown)';
+        const tierLabelText = o.bundle ? 'Bundle' : (o.tier ? tierLabel(o.tier) : '—');
+        return (
+          <div>
+            <div className="font-medium text-slate-900 dark:text-slate-100">{productLabel}</div>
+            <div className="text-[11px] text-slate-500">{tierLabelText}</div>
+          </div>
+        );
+      }
+    },
+    {
+      key: 'amount',
+      header: 'Amount',
+      align: 'right',
+      cell: (o) => (
+        <span className="font-semibold text-slate-900 dark:text-slate-100">
+          {formatPrice(o.amount, o.currency)}
+        </span>
+      )
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      cell: (o) => (
+        <div>
+          <StatusBadge status={o.status} />
+          <div className="mt-0.5 text-[10px] text-slate-500">{o.provider}</div>
+        </div>
+      )
+    },
+    {
+      key: 'date',
+      header: 'Purchased',
+      cell: (o) => <span className="text-[12px] text-slate-700 dark:text-slate-200">{o.createdAt.toLocaleString()}</span>
+    },
+    {
+      key: 'voucher',
+      header: 'Voucher',
+      cell: (o) => {
+        const isVoucherTier = o.tier === 'VOUCHER' || o.tier === 'BUNDLE';
+        const voucherKey = o.userId && o.examId ? `${o.userId}::${o.examId}` : null;
+        const existing = voucherKey ? voucherByKey.get(voucherKey) ?? null : null;
+        if (!isVoucherTier || !o.userId || !o.examId) return <span className="text-slate-400">—</span>;
+        if (existing) {
+          return (
+            <span className="rounded bg-violet-100 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-violet-800 dark:bg-violet-950/40 dark:text-violet-200">
+              {existing}
+            </span>
+          );
+        }
+        if (o.status !== 'PAID') return <span className="text-slate-400">—</span>;
+        return (
+          <form action={assignVoucher} className="inline-flex">
+            <input type="hidden" name="orderId" value={o.id} />
+            <button
+              type="submit"
+              title="Generate and assign a voucher code"
+              className="inline-flex h-6 items-center gap-1 rounded bg-violet-600 px-2 text-[11px] font-medium text-white hover:bg-violet-700"
+            >
+              <Ticket className="h-3 w-3" />
+              Assign
+            </button>
+          </form>
+        );
+      }
+    },
+    {
+      key: 'actions',
+      header: '',
+      align: 'right',
+      headerClassName: 'w-20',
+      cell: (o) => {
+        const canDelete = o.status !== 'PAID';
+        return (
+          <div className="flex items-center justify-end gap-0.5">
+            <Link
+              href={`/admin-dashboard/orders/${o.id}`}
+              title="Edit order"
+              className="icon-btn"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </Link>
+            <ActionMenu>
+              {o.status === 'PENDING' && o.provider === 'PAYNOW' && (
+                <ActionItem asChild>
+                  <form action={markPaid} className="flex items-center gap-1 p-1">
+                    <input type="hidden" name="id" value={o.id} />
+                    <input
+                      type="text"
+                      name="reference"
+                      placeholder="Bank ref"
+                      className="h-7 w-24 rounded border border-slate-200 px-1 text-[11px] dark:border-slate-700 dark:bg-slate-900"
+                    />
+                    <button
+                      type="submit"
+                      className="inline-flex h-7 items-center gap-1 rounded bg-emerald-600 px-2 text-[11px] font-medium text-white hover:bg-emerald-700"
+                    >
+                      <CheckCircle2 className="h-3 w-3" />
+                      Paid
+                    </button>
+                  </form>
+                </ActionItem>
+              )}
+              {o.status === 'PAID' && (
+                <ActionItem asChild>
+                  <form action={refund}>
+                    <input type="hidden" name="id" value={o.id} />
+                    <button type="submit" className="flex w-full items-center gap-2">
+                      <RotateCcw className="h-3 w-3" />
+                      Mark refunded
+                    </button>
+                  </form>
+                </ActionItem>
+              )}
+              <ActionItem asChild destructive>
+                <form action={deleteOrder}>
+                  <input type="hidden" name="id" value={o.id} />
+                  <ConfirmButton
+                    message="Delete this order? Only allowed when not PAID."
+                    disabled={!canDelete}
+                    title={canDelete ? 'Delete order' : 'Cannot delete a PAID order'}
+                    className="w-full justify-start gap-2 px-0"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    Delete
+                  </ConfirmButton>
+                </form>
+              </ActionItem>
+            </ActionMenu>
+          </div>
+        );
+      }
+    }
+  ];
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Orders</h1>
-      <p className="mt-1 text-sm text-slate-500">{total} order{total === 1 ? '' : 's'} total.</p>
+      <PageHeader
+        title="View Orders"
+        subtitle={`${total} order${total === 1 ? '' : 's'}${pages > 1 ? ` · page ${page} of ${pages}` : ''}`}
+      />
 
-      <form method="get" className="card mt-4 grid gap-3 p-4 sm:grid-cols-4">
-        <input name="q" defaultValue={q} placeholder="Search email or order id…" className="input sm:col-span-2" />
-        <select name="status" defaultValue={status ?? ''} className="input">
-          <option value="">All statuses</option>
-          <option>PENDING</option>
-          <option>PAID</option>
-          <option>FAILED</option>
-          <option>REFUNDED</option>
-        </select>
-        <select name="provider" defaultValue={provider ?? ''} className="input">
-          <option value="">All providers</option>
-          <option>PAYPAL</option>
-          <option>HITPAY</option>
-          <option>PAYNOW</option>
-          <option>TEST</option>
-        </select>
-        <div className="sm:col-span-4 flex gap-2">
-          <button type="submit" className="btn-primary">Apply</button>
-          <Link href="/admin-dashboard/orders" className="btn-ghost">Reset</Link>
-        </div>
-      </form>
+      <FilterBar
+        resetHref={activeFilters.length > 0 ? '/admin-dashboard/orders' : undefined}
+        activeFilters={activeFilters}
+      >
+        <FilterField label="Search" className="min-w-[14rem] flex-1">
+          <input
+            name="q"
+            defaultValue={q}
+            placeholder="Email, name, or order id…"
+            className="input-sm"
+          />
+        </FilterField>
+        <FilterField label="Vendor">
+          <select name="vendorId" defaultValue={vendorId} className="input-sm">
+            <option value="">All vendors</option>
+            {vendors.map((v) => (
+              <option key={v.id} value={v.id}>
+                {v.name}
+              </option>
+            ))}
+          </select>
+        </FilterField>
+        <FilterField label="Exam">
+          <select name="examId" defaultValue={examId} className="input-sm">
+            <option value="">All exams</option>
+            {exams.map((e) => (
+              <option key={e.id} value={e.id}>
+                {e.vendor.name} — {e.code}
+              </option>
+            ))}
+          </select>
+        </FilterField>
+        <FilterField label="Status">
+          <select name="status" defaultValue={status ?? ''} className="input-sm">
+            <option value="">All statuses</option>
+            <option>PENDING</option>
+            <option>PAID</option>
+            <option>FAILED</option>
+            <option>REFUNDED</option>
+          </select>
+        </FilterField>
+        <FilterField label="From">
+          <input type="date" name="from" defaultValue={fromStr} className="input-sm" />
+        </FilterField>
+        <FilterField label="To">
+          <input type="date" name="to" defaultValue={toStr} className="input-sm" />
+        </FilterField>
+      </FilterBar>
 
-      <div className="card mt-4 divide-y divide-slate-200 dark:divide-slate-800">
-        {orders.map((o) => {
-          const productLabel = o.bundle ? `${o.bundle.title} (bundle)` : o.exam?.title ?? '(unknown)';
-          const tierLabelText = o.bundle ? 'Bundle' : (o.tier ? tierLabel(o.tier) : '—');
-          return (
-            <div key={o.id} className="flex items-center justify-between gap-3 p-4">
-              <div className="min-w-0 flex-1">
-                <div className="font-medium">
-                  <Link href={`/admin-dashboard/orders/${o.id}`} className="hover:underline">
-                    {o.user.email}
-                  </Link>{' '}· {productLabel}
-                </div>
-                <div className="text-xs text-slate-500">
-                  <code className="mr-2">{o.id.slice(0, 8)}</code>
-                  {tierLabelText} · {o.createdAt.toLocaleString()}
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="font-semibold">{formatPrice(o.amount, o.currency)}</div>
-                <span className="badge bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200">{o.provider}</span>
-                <span
-                  className={`badge ${
-                    o.status === 'PAID' ? 'bg-green-100 text-green-800' :
-                    o.status === 'FAILED' ? 'bg-red-100 text-red-800' :
-                    o.status === 'REFUNDED' ? 'bg-amber-100 text-amber-800' : ''
-                  }`}
-                >
-                  {o.status}
-                </span>
-                {o.status === 'PENDING' && o.provider === 'PAYNOW' && (
-                  <form action={markPaid} className="flex items-center gap-1">
-                    <input type="hidden" name="id" value={o.id} />
-                    <input type="text" name="reference" placeholder="Bank ref" className="input w-32 text-xs" />
-                    <button className="btn-primary-grad text-xs">Mark paid</button>
-                  </form>
-                )}
-                {o.status === 'PAID' && (
-                  <form action={refund}>
-                    <input type="hidden" name="id" value={o.id} />
-                    <button className="btn-outline text-xs">Mark refunded</button>
-                  </form>
-                )}
-                <Link href={`/admin-dashboard/orders/${o.id}`} className="text-xs text-blue-600 hover:underline">View →</Link>
-              </div>
-            </div>
-          );
-        })}
-        {orders.length === 0 && <p className="p-4 text-slate-500">No orders match the filters.</p>}
-      </div>
+      <DataTable
+        columns={columns}
+        rows={orders}
+        rowKey={(o) => o.id}
+        empty="No orders match the filters."
+      />
 
-      {pages > 1 && (
-        <div className="mt-4 flex items-center justify-between text-sm">
-          <div>Page {page} of {pages}</div>
-          <div className="flex gap-2">
-            {page > 1 && <Link href={`/admin-dashboard/orders${qs({ page: String(page - 1) })}`} className="btn-ghost">← Prev</Link>}
-            {page < pages && <Link href={`/admin-dashboard/orders${qs({ page: String(page + 1) })}`} className="btn-ghost">Next →</Link>}
-          </div>
-        </div>
-      )}
+      <Pager page={page} pages={pages} buildHref={buildHref} />
     </div>
   );
 }

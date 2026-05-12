@@ -4,6 +4,8 @@ import { db } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { priceForTier } from '@/lib/utils';
 import { buildSgqrPayload, getMerchantConfig, isEnabled, renderQrDataUrl } from '@/lib/payments/paynow';
+import { nextNumber } from '@/lib/numbering';
+import { evaluateCoupon, recordCouponRedemption } from '@/lib/coupons';
 
 export const runtime = 'nodejs';
 
@@ -11,7 +13,8 @@ const Body = z.object({
   examId: z.string().optional(),
   bundleId: z.string().optional(),
   tier: z.enum(['PRACTICE', 'BUNDLE', 'VOUCHER']).optional(),
-  billingAddressId: z.string().optional().nullable()
+  billingAddressId: z.string().optional().nullable(),
+  couponCode: z.string().optional().nullable()
 });
 
 export async function POST(req: Request) {
@@ -20,7 +23,7 @@ export async function POST(req: Request) {
   const user = session?.user as any;
   if (!user?.id) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
 
-  const { examId, bundleId, tier, billingAddressId } = Body.parse(await req.json());
+  const { examId, bundleId, tier, billingAddressId, couponCode } = Body.parse(await req.json());
   if (!examId && !bundleId) return NextResponse.json({ error: 'product-required' }, { status: 400 });
 
   if (billingAddressId) {
@@ -30,6 +33,7 @@ export async function POST(req: Request) {
 
   let amount: number;
   let orderTier: 'PRACTICE' | 'BUNDLE' | 'VOUCHER' | null = null;
+  let vendorIdForCoupon: string | null = null;
 
   if (examId) {
     const exam = await db.exam.findUnique({ where: { id: examId } });
@@ -38,6 +42,7 @@ export async function POST(req: Request) {
     amount = priceForTier(exam, t);
     if (!amount) return NextResponse.json({ error: 'invalid-tier' }, { status: 400 });
     orderTier = t;
+    vendorIdForCoupon = exam.vendorId;
   } else {
     const bundle = await db.bundle.findUnique({ where: { id: bundleId! } });
     if (!bundle || !bundle.published) return NextResponse.json({ error: 'not-found' }, { status: 404 });
@@ -51,18 +56,45 @@ export async function POST(req: Request) {
   const merchant = await getMerchantConfig();
   if (!merchant.uen) return NextResponse.json({ error: 'paynow-uen-not-configured' }, { status: 500 });
 
-  const order = await db.order.create({
-    data: {
+  // Server-side coupon evaluation
+  let couponId: string | null = null;
+  let discount = 0;
+  if (couponCode) {
+    const result = await evaluateCoupon({
+      code: couponCode,
       userId: user.id,
       examId: examId ?? null,
-      bundleId: bundleId ?? null,
-      tier: orderTier,
-      amount,
-      currency: 'SGD',
-      status: 'PENDING',
-      provider: 'PAYNOW',
-      billingAddressId: billingAddressId || null
+      vendorId: vendorIdForCoupon,
+      subtotalCents: amount
+    });
+    if (!result.ok) return NextResponse.json({ error: 'coupon_invalid', reason: result.reason, message: result.message }, { status: 400 });
+    couponId = result.couponId;
+    discount = result.discountCents;
+    amount = Math.max(0, amount - discount);
+  }
+
+  const number = await nextNumber('ORDER', 'ORD');
+  const order = await db.$transaction(async (tx) => {
+    const created = await tx.order.create({
+      data: {
+        number,
+        userId: user.id,
+        examId: examId ?? null,
+        bundleId: bundleId ?? null,
+        tier: orderTier,
+        amount,
+        currency: 'SGD',
+        status: 'PENDING',
+        provider: 'PAYNOW',
+        billingAddressId: billingAddressId || null,
+        couponId,
+        discount
+      }
+    });
+    if (couponId && discount > 0) {
+      await recordCouponRedemption({ couponId, userId: user.id, orderId: created.id, amountCents: discount }, tx);
     }
+    return created;
   });
 
   const payload = buildSgqrPayload({

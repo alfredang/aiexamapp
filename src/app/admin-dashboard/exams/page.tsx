@@ -2,11 +2,22 @@ import Link from 'next/link';
 import { db } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/lib/auth';
+import { Eye, Pencil, Trash2, BookOpenCheck, Archive, ArchiveRestore, Copy } from 'lucide-react';
+import { PageHeader } from '@/components/admin/page-header';
+import { FilterBar, FilterField } from '@/components/admin/filter-bar';
+import { DataTable, type Column } from '@/components/admin/data-table';
+import { Pager } from '@/components/admin/pager';
+import { StatusBadge } from '@/components/admin/badge';
+import { ConfirmButton } from '@/components/admin/confirm-button';
+import { buildQS } from '@/components/admin/qs';
+
+export const dynamic = 'force-dynamic';
 
 async function deleteExam(formData: FormData) {
   'use server';
   const session = await auth();
-  if ((session?.user as any)?.role !== 'ADMIN') return;
+  const user = session?.user as any;
+  if (user?.role !== 'ADMIN') return;
   const id = String(formData.get('id'));
   if (!id) return;
   const [attempts, orders] = await Promise.all([
@@ -17,45 +28,127 @@ async function deleteExam(formData: FormData) {
   await db.question.deleteMany({ where: { examId: id } });
   await db.entitlement.deleteMany({ where: { examId: id } });
   await db.exam.delete({ where: { id } });
+  await db.adminLog.create({
+    data: { adminId: user.id, action: 'exam.delete', targetType: 'Exam', targetId: id, metadata: {} }
+  });
+  revalidatePath('/admin-dashboard/exams');
+}
+
+async function archiveExam(formData: FormData) {
+  'use server';
+  const session = await auth();
+  const user = session?.user as any;
+  if (user?.role !== 'ADMIN') return;
+  const id = String(formData.get('id'));
+  if (!id) return;
+  await db.exam.update({ where: { id }, data: { deletedAt: new Date(), published: false } });
+  await db.adminLog.create({
+    data: { adminId: user.id, action: 'exam.archive', targetType: 'Exam', targetId: id, metadata: {} }
+  });
+  revalidatePath('/admin-dashboard/exams');
+}
+
+async function restoreExam(formData: FormData) {
+  'use server';
+  const session = await auth();
+  const user = session?.user as any;
+  if (user?.role !== 'ADMIN') return;
+  const id = String(formData.get('id'));
+  if (!id) return;
+  await db.exam.update({ where: { id }, data: { deletedAt: null } });
+  await db.adminLog.create({
+    data: { adminId: user.id, action: 'exam.restore', targetType: 'Exam', targetId: id, metadata: {} }
+  });
+  revalidatePath('/admin-dashboard/exams');
+}
+
+async function duplicateExam(formData: FormData) {
+  'use server';
+  const session = await auth();
+  const user = session?.user as any;
+  if (user?.role !== 'ADMIN') return;
+  const id = String(formData.get('id'));
+  if (!id) return;
+  const orig = await db.exam.findUnique({ where: { id }, include: { questions: true } });
+  if (!orig) return;
+  // Append a copy suffix to code+slug; admin can rename after.
+  const suffix = `-copy-${Date.now().toString(36).slice(-4)}`;
+  const cloned = await db.exam.create({
+    data: {
+      vendorId: orig.vendorId,
+      code: `${orig.code}${suffix}`,
+      slug: `${orig.slug}${suffix}`,
+      title: `${orig.title} (copy)`,
+      description: orig.description,
+      level: orig.level,
+      durationMinutes: orig.durationMinutes,
+      passingScore: orig.passingScore,
+      questionCount: orig.questionCount,
+      examSets: orig.examSets,
+      infoUrl: orig.infoUrl,
+      domains: orig.domains as any,
+      pricePractice: orig.pricePractice,
+      priceBundle: orig.priceBundle,
+      priceVoucher: orig.priceVoucher,
+      published: false
+    }
+  });
+  if (orig.questions.length) {
+    await db.question.createMany({
+      data: orig.questions.map((q) => ({
+        examId: cloned.id,
+        stem: q.stem,
+        type: q.type,
+        domain: q.domain,
+        difficulty: q.difficulty,
+        explanation: q.explanation,
+        options: q.options as any,
+        correct: q.correct as any,
+        references: q.references as any,
+        status: 'DRAFT',
+        generatedBy: q.generatedBy,
+        isTeaser: false
+      }))
+    });
+  }
+  await db.adminLog.create({
+    data: { adminId: user.id, action: 'exam.duplicate', targetType: 'Exam', targetId: id, metadata: { newExamId: cloned.id } }
+  });
   revalidatePath('/admin-dashboard/exams');
 }
 
 const LEVELS = ['Foundational', 'Associate', 'Professional', 'Specialty'];
-
 const PAGE_SIZE = 50;
 
-function buildQS(params: Record<string, string | number | undefined>) {
-  const sp = new URLSearchParams();
-  for (const [k, v] of Object.entries(params)) {
-    if (v !== undefined && v !== '' && v !== 0) sp.set(k, String(v));
-  }
-  const s = sp.toString();
-  return s ? `?${s}` : '';
-}
+type ExamRow = Awaited<ReturnType<typeof loadExams>>[number];
 
-function pageWindow(current: number, total: number): (number | 'ellipsis')[] {
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
-  const out: (number | 'ellipsis')[] = [];
-  const around = new Set([1, total, current - 1, current, current + 1]);
-  for (let i = 1; i <= total; i++) {
-    if (around.has(i)) out.push(i);
-    else if (out[out.length - 1] !== 'ellipsis') out.push('ellipsis');
-  }
-  return out;
+async function loadExams(where: any, skip: number, take: number) {
+  return db.exam.findMany({
+    where,
+    include: {
+      vendor: true,
+      _count: { select: { questions: true, attempts: true, orders: true } }
+    },
+    orderBy: [{ vendor: { name: 'asc' } }, { title: 'asc' }],
+    skip,
+    take
+  });
 }
 
 export default async function AdminExamsPage({
   searchParams
 }: {
-  searchParams: Promise<{ vendor?: string; level?: string; q?: string; page?: string }>;
+  searchParams: Promise<{ vendor?: string; level?: string; q?: string; archived?: string; page?: string }>;
 }) {
   const sp = await searchParams;
   const vendorFilter = sp.vendor || '';
   const levelFilter = sp.level || '';
   const q = (sp.q || '').trim();
+  const archived = sp.archived === '1';
   const requestedPage = Math.max(1, Number(sp.page || 1) || 1);
 
   const where = {
+    ...(archived ? { deletedAt: { not: null } } : { deletedAt: null }),
     ...(vendorFilter ? { vendor: { slug: vendorFilter } } : {}),
     ...(levelFilter ? { level: levelFilter } : {}),
     ...(q
@@ -75,187 +168,197 @@ export default async function AdminExamsPage({
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
   const page = Math.min(requestedPage, totalPages);
-  const exams = await db.exam.findMany({
-    where,
-    include: {
-      vendor: true,
-      _count: { select: { questions: true, attempts: true, orders: true } }
+  const exams = await loadExams(where, (page - 1) * PAGE_SIZE, PAGE_SIZE);
+
+  const baseParams = { vendor: vendorFilter, level: levelFilter, q };
+  const buildHref = (p: number) =>
+    `/admin-dashboard/exams${buildQS({ ...baseParams, page: p === 1 ? undefined : p })}`;
+
+  const activeFilters = [
+    vendorFilter && {
+      key: 'vendor',
+      label: vendors.find((v) => v.slug === vendorFilter)?.name ?? vendorFilter,
+      clearHref: `/admin-dashboard/exams${buildQS({ level: levelFilter, q })}`
     },
-    orderBy: [{ vendor: { name: 'asc' } }, { title: 'asc' }],
-    skip: (page - 1) * PAGE_SIZE,
-    take: PAGE_SIZE
-  });
+    levelFilter && {
+      key: 'level',
+      label: levelFilter,
+      clearHref: `/admin-dashboard/exams${buildQS({ vendor: vendorFilter, q })}`
+    },
+    q && {
+      key: 'search',
+      label: q,
+      clearHref: `/admin-dashboard/exams${buildQS({ vendor: vendorFilter, level: levelFilter })}`
+    }
+  ].filter(Boolean) as { key: string; label: string; clearHref: string }[];
+
+  const columns: Column<ExamRow>[] = [
+    {
+      key: 'vendor',
+      header: 'Vendor',
+      cell: (e) => <span className="text-slate-700 dark:text-slate-200">{e.vendor.name}</span>
+    },
+    {
+      key: 'title',
+      header: 'Exam Name',
+      cell: (e) => (
+        <Link
+          href={`/admin-dashboard/exams/${e.id}`}
+          className="font-medium text-slate-900 hover:underline dark:text-slate-100"
+        >
+          {e.title.split(' — ')[0]}
+        </Link>
+      )
+    },
+    { key: 'code', header: 'Code', cell: (e) => <span className="font-mono text-[12px]">{e.code}</span> },
+    { key: 'level', header: 'Level', cell: (e) => e.level },
+    {
+      key: 'status',
+      header: 'Status',
+      cell: (e) => <StatusBadge status={e.published ? 'PUBLISHED' : 'DRAFT'} />
+    },
+    { key: 'examSets', header: '# Exams', cell: (e) => e.examSets, align: 'right' },
+    { key: 'qPerExam', header: 'Q / Exam', cell: (e) => e.questionCount, align: 'right' },
+    { key: 'duration', header: 'Duration', cell: (e) => `${e.durationMinutes} min`, align: 'right' },
+    {
+      key: 'infoUrl',
+      header: 'Info',
+      cell: (e) =>
+        e.infoUrl ? (
+          <a
+            href={e.infoUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="text-blue-600 hover:underline dark:text-blue-400"
+          >
+            Open
+          </a>
+        ) : (
+          <span className="text-slate-400">—</span>
+        )
+    },
+    {
+      key: 'actions',
+      header: '',
+      align: 'right',
+      headerClassName: 'w-36',
+      cell: (e) => {
+        const canHardDelete = e._count.attempts === 0 && e._count.orders === 0;
+        const isArchived = !!e.deletedAt;
+        return (
+          <div className="flex items-center justify-end gap-0.5">
+            {!isArchived && (
+              <Link href={`/admin-dashboard/exams/${e.id}/test`} title="Test exam as candidate" className="icon-btn">
+                <BookOpenCheck className="h-3.5 w-3.5" />
+              </Link>
+            )}
+            <Link href={`/admin-dashboard/exams/${e.id}`} title="Edit exam" className="icon-btn">
+              <Pencil className="h-3.5 w-3.5" />
+            </Link>
+            <form action={duplicateExam} className="inline-flex">
+              <input type="hidden" name="id" value={e.id} />
+              <button title="Duplicate exam (questions copy as DRAFT)" className="icon-btn">
+                <Copy className="h-3.5 w-3.5" />
+              </button>
+            </form>
+            {isArchived ? (
+              <form action={restoreExam} className="inline-flex">
+                <input type="hidden" name="id" value={e.id} />
+                <button title="Restore from archive" className="icon-btn text-emerald-600 dark:text-emerald-400">
+                  <ArchiveRestore className="h-3.5 w-3.5" />
+                </button>
+              </form>
+            ) : (
+              <form action={archiveExam} className="inline-flex">
+                <input type="hidden" name="id" value={e.id} />
+                <ConfirmButton
+                  message={`Archive exam "${e.code}"? It will be hidden from the public catalog but data is preserved.`}
+                  className="h-6 w-6 p-0"
+                  variant="neutral"
+                >
+                  <Archive className="h-3.5 w-3.5" />
+                </ConfirmButton>
+              </form>
+            )}
+            <form action={deleteExam} className="inline-flex">
+              <input type="hidden" name="id" value={e.id} />
+              <ConfirmButton
+                message={`Hard-delete "${e.code}"? Permanent. Allowed only when there are no attempts or orders.`}
+                disabled={!canHardDelete}
+                title={canHardDelete ? 'Hard delete (no attempts/orders)' : 'Cannot hard delete — use Archive'}
+                className="h-6 w-6 p-0"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </ConfirmButton>
+            </form>
+          </div>
+        );
+      }
+    }
+  ];
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Exam Management</h1>
-        <Link href="/admin-dashboard/exams/new" className="btn-primary-grad">+ Create Exam</Link>
-      </div>
+      <PageHeader
+        title="Exam Management"
+        subtitle={`${totalCount} exam${totalCount === 1 ? '' : 's'}${totalPages > 1 ? ` · page ${page} of ${totalPages}` : ''}`}
+        actions={
+          <Link href="/admin-dashboard/exams/new" className="btn-sm bg-blue-600 text-white hover:bg-blue-700">
+            + Create Exam
+          </Link>
+        }
+      />
 
-      <form method="get" className="mt-6 flex flex-wrap items-center gap-2">
-        <select name="vendor" defaultValue={vendorFilter} className="input w-44">
-          <option value="">All vendors</option>
-          {vendors.map((v) => (
-            <option key={v.id} value={v.slug}>{v.name}</option>
-          ))}
-        </select>
-        <select name="level" defaultValue={levelFilter} className="input w-40">
-          <option value="">All levels</option>
-          {LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
-        </select>
-        <input
-          name="q"
-          defaultValue={q}
-          placeholder="Search title or code…"
-          className="input w-64"
-        />
-        <button className="btn-primary text-sm">Apply</button>
-        {(vendorFilter || levelFilter || q) && (
-          <Link href="/admin-dashboard/exams" className="btn-ghost text-sm">Reset</Link>
-        )}
-        <span className="ml-auto text-xs text-slate-500">
-          {totalCount} result{totalCount === 1 ? '' : 's'}
-          {totalPages > 1 && ` · page ${page} of ${totalPages}`}
-        </span>
-      </form>
+      <FilterBar
+        resetHref={activeFilters.length > 0 ? '/admin-dashboard/exams' : undefined}
+        activeFilters={activeFilters}
+      >
+        <FilterField label="Vendor">
+          <select name="vendor" defaultValue={vendorFilter} className="input-sm">
+            <option value="">All vendors</option>
+            {vendors.map((v) => (
+              <option key={v.id} value={v.slug}>
+                {v.name}
+              </option>
+            ))}
+          </select>
+        </FilterField>
+        <FilterField label="Level">
+          <select name="level" defaultValue={levelFilter} className="input-sm">
+            <option value="">All levels</option>
+            {LEVELS.map((l) => (
+              <option key={l} value={l}>
+                {l}
+              </option>
+            ))}
+          </select>
+        </FilterField>
+        <FilterField label="Search" className="min-w-[14rem] flex-1">
+          <input name="q" defaultValue={q} placeholder="Title or code…" className="input-sm" />
+        </FilterField>
+        <FilterField label="View">
+          <select name="archived" defaultValue={archived ? '1' : ''} className="input-sm">
+            <option value="">Active</option>
+            <option value="1">Archived</option>
+          </select>
+        </FilterField>
+      </FilterBar>
 
-      <div className="card mt-4 overflow-x-auto">
-        <table className="w-max min-w-full text-sm">
-          <thead className="border-b border-slate-200 text-left text-xs uppercase text-slate-500 dark:border-slate-800">
-            <tr>
-              <th className="w-48 px-2 py-2 font-medium">Vendor</th>
-              <th className="w-[28rem] px-2 py-2 font-medium">Exam Name</th>
-              <th className="w-32 px-2 py-2 font-medium">Code</th>
-              <th className="w-36 px-2 py-2 font-medium">Level</th>
-              <th className="w-24 px-2 py-2 font-medium">Status</th>
-              <th className="w-24 px-2 py-2 font-medium">Questions</th>
-              <th className="w-40 px-2 py-2 font-medium">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-            {exams.map((e) => {
-              const canDelete = e._count.attempts === 0 && e._count.orders === 0;
-              return (
-                <tr key={e.id}>
-                  <td className="whitespace-nowrap px-2 py-1.5 text-slate-700 dark:text-slate-300">
-                    {e.vendor.name}
-                  </td>
-                  <td className="px-2 py-1.5 font-medium">
-                    <Link href={`/admin-dashboard/exams/${e.id}`} className="hover:underline">
-                      {e.title.split(' — ')[0]}
-                    </Link>
-                  </td>
-                  <td className="whitespace-nowrap px-2 py-1.5 text-slate-500">{e.code}</td>
-                  <td className="whitespace-nowrap px-2 py-1.5 text-slate-500">{e.level}</td>
-                  <td className="whitespace-nowrap px-2 py-1.5">
-                    {e.published ? (
-                      <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800">
-                        PUBLISHED
-                      </span>
-                    ) : (
-                      <span className="rounded bg-slate-200 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700 dark:bg-slate-700 dark:text-slate-200">
-                        DRAFT
-                      </span>
-                    )}
-                  </td>
-                  <td className="whitespace-nowrap px-2 py-1.5 text-slate-500">{e._count.questions}</td>
-                  <td className="whitespace-nowrap px-2 py-1.5">
-                    <div className="flex items-center gap-3">
-                      <Link
-                        href={`/admin-dashboard/exams/${e.id}`}
-                        className="text-xs text-blue-600 hover:underline dark:text-blue-400"
-                      >
-                        Edit
-                      </Link>
-                      <form action={deleteExam}>
-                        <input type="hidden" name="id" value={e.id} />
-                        <button
-                          disabled={!canDelete}
-                          title={
-                            canDelete
-                              ? 'Delete exam'
-                              : 'Cannot delete: exam has attempts or orders'
-                          }
-                          className="text-xs text-red-600 hover:underline disabled:cursor-not-allowed disabled:text-slate-400"
-                        >
-                          Delete
-                        </button>
-                      </form>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-            {exams.length === 0 && (
-              <tr>
-                <td colSpan={7} className="px-2 py-6 text-center text-sm text-slate-500">
-                  No exams match this filter.{' '}
-                  <Link
-                    href="/admin-dashboard/exams"
-                    className="text-blue-600 hover:underline dark:text-blue-400"
-                  >
-                    Clear
-                  </Link>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={columns}
+        rows={exams}
+        rowKey={(e) => e.id}
+        empty={
+          <>
+            No exams match this filter.{' '}
+            <Link href="/admin-dashboard/exams" className="text-blue-600 hover:underline dark:text-blue-400">
+              Clear
+            </Link>
+          </>
+        }
+      />
 
-      {totalPages > 1 && (
-        <nav className="mt-4 flex flex-wrap items-center justify-center gap-1 text-sm">
-          {(() => {
-            const baseParams = { vendor: vendorFilter, level: levelFilter, q };
-            const linkFor = (p: number) =>
-              `/admin-dashboard/exams${buildQS({ ...baseParams, page: p === 1 ? undefined : p })}`;
-            const PageLink = ({
-              p,
-              label,
-              disabled,
-              active
-            }: {
-              p: number;
-              label: string;
-              disabled?: boolean;
-              active?: boolean;
-            }) => {
-              const cls = `rounded px-2.5 py-1 text-xs ${
-                active
-                  ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-                  : disabled
-                  ? 'cursor-not-allowed bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-600'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
-              }`;
-              if (disabled) return <span className={cls}>{label}</span>;
-              return (
-                <Link href={linkFor(p)} className={cls}>
-                  {label}
-                </Link>
-              );
-            };
-            const win = pageWindow(page, totalPages);
-            return (
-              <>
-                <PageLink p={1} label="First" disabled={page === 1} />
-                <PageLink p={page - 1} label="Prev" disabled={page === 1} />
-                {win.map((w, i) =>
-                  w === 'ellipsis' ? (
-                    <span key={`e${i}`} className="px-1 text-slate-500">
-                      …
-                    </span>
-                  ) : (
-                    <PageLink key={w} p={w} label={String(w)} active={w === page} />
-                  )
-                )}
-                <PageLink p={page + 1} label="Next" disabled={page === totalPages} />
-                <PageLink p={totalPages} label="Last" disabled={page === totalPages} />
-              </>
-            );
-          })()}
-        </nav>
-      )}
+      <Pager page={page} pages={totalPages} buildHref={buildHref} />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import {
   BookOpen,
   ClipboardList,
   ShoppingBag,
+  Receipt,
   Ticket,
   UserCircle,
   ChevronLeft,
@@ -18,6 +19,7 @@ const ITEMS: { href: string; label: string; icon: any }[] = [
   { href: '/user-dashboard/exams', label: 'Exams', icon: BookOpen },
   { href: '/user-dashboard/attempts', label: 'Attempts', icon: ClipboardList },
   { href: '/user-dashboard/orders', label: 'Orders', icon: ShoppingBag },
+  { href: '/user-dashboard/invoices', label: 'Invoices', icon: Receipt },
   { href: '/user-dashboard/vouchers', label: 'Vouchers', icon: Ticket },
   { href: '/user-dashboard/settings', label: 'My Profile', icon: UserCircle }
 ];

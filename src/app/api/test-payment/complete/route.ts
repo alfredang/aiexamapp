@@ -14,6 +14,7 @@ import { db } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { fulfillOrder } from '@/lib/fulfill';
 import { priceForTier } from '@/lib/utils';
+import { nextNumber } from '@/lib/numbering';
 import type { Tier } from '@prisma/client';
 
 const Body = z.discriminatedUnion('kind', [
@@ -46,8 +47,10 @@ export async function POST(req: Request) {
     const exam = await db.exam.findUnique({ where: { id: body.examId } });
     if (!exam) return NextResponse.json({ error: 'Exam not found' }, { status: 404 });
     const amount = priceForTier(exam, body.tier as Tier);
+    const number = await nextNumber('ORDER', 'ORD');
     order = await db.order.create({
       data: {
+        number,
         userId,
         examId: body.examId,
         tier: body.tier as Tier,
@@ -64,8 +67,10 @@ export async function POST(req: Request) {
     }
     const tier = body.tier === 'VOUCHER' && bundle.priceVoucher != null ? 'VOUCHER' : 'PRACTICE';
     const amount = tier === 'VOUCHER' ? bundle.priceVoucher! : bundle.price;
+    const number = await nextNumber('ORDER', 'ORD');
     order = await db.order.create({
       data: {
+        number,
         userId,
         bundleId: body.bundleId,
         tier: tier as Tier,

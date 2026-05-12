@@ -40,7 +40,7 @@ export default async function MyOrdersPage() {
               <div className="min-w-0">
                 <div className="font-medium">{product}</div>
                 <div className="text-xs text-slate-500">
-                  {tier} · {o.createdAt.toLocaleString()} · Order {o.id.slice(0, 10)}
+                  {tier} · {o.createdAt.toLocaleString()} · Order <span className="font-mono">{o.number ?? o.id.slice(0, 10)}</span>
                 </div>
                 {voucher?.voucher && (
                   <div className="mt-1 text-xs">

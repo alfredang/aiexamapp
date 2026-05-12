@@ -29,7 +29,7 @@ export function TeaserGate({ count, examSlug, vendorSlug, onClose }: { count: nu
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
       <div className="card w-full max-w-md p-8">
-        <div className="mb-2 text-xs font-semibold uppercase text-blue-700">Great progress!</div>
+        <div className="mb-2 text-xs font-semibold uppercase text-blue-700 dark:text-blue-300">Great progress!</div>
         <h2 className="text-xl font-bold">You've completed {count} questions</h2>
         <p className="mt-1 text-sm text-slate-600">
           {count >= 30

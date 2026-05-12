@@ -3,6 +3,9 @@ import { db } from './db';
 import { sendPurchaseEmail } from './mail';
 import { tierLabel } from './utils';
 import { getDelayDays } from './scheduling/voucher-delivery';
+import { issueInvoiceForOrder } from './invoice/issue';
+import { renderInvoicePdf } from './invoice/render-invoice-pdf';
+import { buildInvoiceLines } from './invoice/build-lines';
 
 function providerLabel(p: PaymentProvider): string {
   switch (p) {
@@ -13,13 +16,27 @@ function providerLabel(p: PaymentProvider): string {
   }
 }
 
+type EmailSpec = {
+  to: string;
+  productName: string;
+  tier: string;
+  voucherPending: boolean;
+  invoiceId: string;
+  invoiceNumber: string;
+  extras: {
+    order: { id: string; amount: number; currency: string };
+    user: { name: string | null; email: string };
+    paymentMethod: string;
+  };
+};
+
 export async function fulfillOrder(orderId: string, paypalPayload: any, paypalCaptureId: string) {
   // Fetch the voucher delivery delay once before opening the transaction so
   // we don't make extra DB calls per granted VOUCHER entitlement inside it.
   const delayDays = await getDelayDays();
   const scheduledFor = new Date(Date.now() + delayDays * 24 * 60 * 60 * 1000);
 
-  return db.$transaction(async (tx) => {
+  const result = await db.$transaction(async (tx) => {
     const order = await tx.order.findUnique({
       where: { id: orderId },
       include: {
@@ -29,7 +46,7 @@ export async function fulfillOrder(orderId: string, paypalPayload: any, paypalCa
       }
     });
     if (!order) throw new Error('Order missing');
-    if (order.status === 'PAID') return order;
+    if (order.status === 'PAID') return { order, emailSpec: null as EmailSpec | null };
 
     await tx.order.update({
       where: { id: orderId },
@@ -41,19 +58,15 @@ export async function fulfillOrder(orderId: string, paypalPayload: any, paypalCa
     // /admin-dashboard/vouchers. The buyer is told "3-5 business days" up front.
 
     // Bundle orders: write one entitlement per qualifying bundle item.
-    //
-    // Tier filter: when a bundle ships both PRACTICE and VOUCHER items
-    // (e.g. the AI-900 bundle), the buyer picks a tier at checkout. The
-    // tier on the Order tells us which items to grant:
-    //   - PRACTICE buyer → only items where item.tier === 'PRACTICE'
-    //   - VOUCHER  buyer → ALL items (practice access + the voucher)
-    //   - tier == null   → grant all items (legacy single-price bundles)
+    let voucherPending = false;
+    let productName = '';
+    let tierText = '';
+
     if (order.bundleId && order.bundle) {
       const grantAllItems = !order.tier || order.tier === 'VOUCHER';
       const items = grantAllItems
         ? order.bundle.items
-        : order.bundle.items.filter(i => i.tier === order.tier);
-      let bundleHasVoucher = false;
+        : order.bundle.items.filter((i) => i.tier === order.tier);
       for (const item of items) {
         const ent = await tx.entitlement.upsert({
           where: { userId_examId_tier: { userId: order.userId, examId: item.examId, tier: item.tier } },
@@ -61,7 +74,7 @@ export async function fulfillOrder(orderId: string, paypalPayload: any, paypalCa
           create: { userId: order.userId, examId: item.examId, tier: item.tier, voucher: null }
         });
         if (item.tier === 'VOUCHER') {
-          bundleHasVoucher = true;
+          voucherPending = true;
           await tx.voucherDelivery.upsert({
             where: { entitlementId: ent.id },
             create: { entitlementId: ent.id, orderId: order.id, scheduledFor, status: 'SCHEDULED' },
@@ -69,64 +82,85 @@ export async function fulfillOrder(orderId: string, paypalPayload: any, paypalCa
           });
         }
       }
-      await sendPurchaseEmail(
-        order.user.email,
-        order.bundle.title,
-        'Bundle',
-        undefined,
-        undefined,
-        bundleHasVoucher,
-        {
-          order: { id: order.id, amount: order.amount, currency: order.currency },
-          user: { name: order.user.name, email: order.user.email },
-          paymentMethod: providerLabel(order.provider)
-        }
-      ).catch(() => {});
-      return order;
-    }
-
-    // Single-exam order.
-    if (!order.examId || !order.tier || !order.exam) {
-      throw new Error('Order has neither bundleId nor examId+tier');
-    }
-    // Tier → entitlements granted on fulfillment:
-    //   PRACTICE  → PRACTICE only
-    //   BUNDLE    → PRACTICE + VOUCHER (legacy combined product)
-    //   VOUCHER   → PRACTICE + VOUCHER (per the "voucher includes practice" rule)
-    const tiersToGrant: Tier[] =
-      order.tier === 'BUNDLE' || order.tier === 'VOUCHER'
-        ? ['PRACTICE', 'VOUCHER']
-        : [order.tier];
-
-    for (const tier of tiersToGrant) {
-      const ent = await tx.entitlement.upsert({
-        where: { userId_examId_tier: { userId: order.userId, examId: order.examId, tier } },
-        update: {},
-        create: { userId: order.userId, examId: order.examId, tier, voucher: null }
-      });
-      if (tier === 'VOUCHER') {
-        await tx.voucherDelivery.upsert({
-          where: { entitlementId: ent.id },
-          create: { entitlementId: ent.id, orderId: order.id, scheduledFor, status: 'SCHEDULED' },
-          update: {}
-        });
+      productName = order.bundle.title;
+      tierText = 'Bundle';
+    } else {
+      // Single-exam order.
+      if (!order.examId || !order.tier || !order.exam) {
+        throw new Error('Order has neither bundleId nor examId+tier');
       }
+      const tiersToGrant: Tier[] =
+        order.tier === 'BUNDLE' || order.tier === 'VOUCHER'
+          ? ['PRACTICE', 'VOUCHER']
+          : [order.tier];
+      for (const tier of tiersToGrant) {
+        const ent = await tx.entitlement.upsert({
+          where: { userId_examId_tier: { userId: order.userId, examId: order.examId, tier } },
+          update: {},
+          create: { userId: order.userId, examId: order.examId, tier, voucher: null }
+        });
+        if (tier === 'VOUCHER') {
+          await tx.voucherDelivery.upsert({
+            where: { entitlementId: ent.id },
+            create: { entitlementId: ent.id, orderId: order.id, scheduledFor, status: 'SCHEDULED' },
+            update: {}
+          });
+        }
+      }
+      voucherPending = tiersToGrant.includes('VOUCHER');
+      productName = order.exam.title;
+      tierText = tierLabel(order.tier);
     }
 
-    const voucherPending = tiersToGrant.includes('VOUCHER');
-    await sendPurchaseEmail(
-      order.user.email,
-      order.exam.title,
-      tierLabel(order.tier),
-      undefined,
-      undefined,
+    // Issue invoice inside the same transaction so the row exists atomically
+    // with the PAID flip. Idempotent via Invoice.orderId uniqueness.
+    const invoice = await issueInvoiceForOrder(order.id, tx);
+
+    const emailSpec: EmailSpec = {
+      to: order.user.email,
+      productName,
+      tier: tierText,
       voucherPending,
-      {
+      invoiceId: invoice.id,
+      invoiceNumber: invoice.number,
+      extras: {
         order: { id: order.id, amount: order.amount, currency: order.currency },
         user: { name: order.user.name, email: order.user.email },
         paymentMethod: providerLabel(order.provider)
       }
-    ).catch(() => {});
-    return order;
+    };
+    return { order, emailSpec };
   });
+
+  // Render the invoice PDF + send the purchase email *after* the transaction
+  // commits so a slow PDF render or SMTP hop never holds DB locks.
+  const { order, emailSpec } = result;
+  if (emailSpec) {
+    try {
+      const invoice = await db.invoice.findUnique({
+        where: { id: emailSpec.invoiceId },
+        include: { order: { select: { number: true } } }
+      });
+      let invoicePdf: Buffer | undefined;
+      if (invoice) {
+        const lines = await buildInvoiceLines(invoice);
+        invoicePdf = await renderInvoicePdf({ invoice, lines, orderNumber: invoice.order.number });
+      }
+      await sendPurchaseEmail(
+        emailSpec.to,
+        emailSpec.productName,
+        emailSpec.tier,
+        undefined,
+        undefined,
+        emailSpec.voucherPending,
+        emailSpec.extras,
+        invoicePdf && invoice
+          ? { invoicePdf, invoiceNumber: invoice.number }
+          : undefined
+      );
+    } catch {
+      // Email + PDF must never break fulfilment.
+    }
+  }
+  return order;
 }

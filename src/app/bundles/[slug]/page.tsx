@@ -38,7 +38,7 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ s
         <span className="text-slate-400"> / </span>
         <span>Bundle</span>
       </div>
-      <div className="mb-1 inline-flex items-center gap-2 rounded-full bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700">
+      <div className="mb-1 inline-flex items-center gap-2 rounded-full bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700 dark:bg-purple-950/40 dark:text-purple-300">
         <Package className="h-3.5 w-3.5" />
         Bundle
       </div>
@@ -62,7 +62,7 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ s
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="badge">{item.exam.vendor.name}</span>
                     <span className="badge">{item.exam.code}</span>
-                    <span className={`badge ${item.tier === 'VOUCHER' ? 'bg-emerald-50 text-emerald-700' : 'bg-blue-50 text-blue-700'}`}>
+                    <span className={`badge ${item.tier === 'VOUCHER' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300' : 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300'}`}>
                       {item.tier === 'VOUCHER' ? 'Real exam voucher' : 'Practice access'}
                     </span>
                   </div>
@@ -80,19 +80,19 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ s
 
         <aside className="space-y-4">
           <div className="card p-5">
-            <div className="text-xs font-semibold uppercase text-purple-700">
+            <div className="text-xs font-semibold uppercase text-purple-700 dark:text-purple-300">
               {isFree ? 'Free for a limited time' : 'Bundle price'}
             </div>
-            <div className="mt-1 text-3xl font-bold text-slate-900">
+            <div className="mt-1 text-3xl font-bold text-slate-900 dark:text-slate-100">
               {isFree ? 'Free' : formatPrice(bundle.price)}
             </div>
             {!isFree && savings > 0 && (
-              <div className="mt-1 text-sm text-emerald-700">
+              <div className="mt-1 text-sm text-emerald-700 dark:text-emerald-300">
                 You save {formatPrice(savings)} vs buying separately
               </div>
             )}
             {isFree && (
-              <div className="mt-1 text-sm text-emerald-700">
+              <div className="mt-1 text-sm text-emerald-700 dark:text-emerald-300">
                 Worth {formatPrice(individualTotal)} — claim it at no charge
               </div>
             )}
@@ -108,8 +108,8 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ s
               </Link>
             )}
           </div>
-          <div className="card p-5 text-xs text-slate-500">
-            <p className="font-semibold text-slate-700">What happens after purchase</p>
+          <div className="card p-5 text-xs text-slate-500 dark:text-slate-400">
+            <p className="font-semibold text-slate-700 dark:text-slate-200">What happens after purchase</p>
             <ul className="mt-2 space-y-1">
               <li>• Each practice access is granted instantly to your account.</li>
               <li>• Voucher codes (if any) are emailed and visible under My Content → Vouchers.</li>

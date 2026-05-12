@@ -14,6 +14,10 @@ async function createExam(formData: FormData) {
   const durationMinutes = Number(formData.get('durationMinutes') || 90);
   const passingScore = Number(formData.get('passingScore') || 70);
   const questionCount = Number(formData.get('questionCount') || 60);
+  const examSetsRaw = Number(formData.get('examSets') || 1);
+  const examSets = Math.min(6, Math.max(1, Number.isFinite(examSetsRaw) ? examSetsRaw : 1));
+  const infoUrlRaw = String(formData.get('infoUrl') || '').trim();
+  const infoUrl = infoUrlRaw ? infoUrlRaw : null;
   const pricePractice = Math.round(Number(formData.get('pricePractice') || 29) * 100);
   const priceBundle = Math.round(Number(formData.get('priceBundle') || 179) * 100);
   const priceVoucher = Math.round(Number(formData.get('priceVoucher') || 149) * 100);
@@ -21,7 +25,7 @@ async function createExam(formData: FormData) {
   const created = await db.exam.create({
     data: {
       vendorId, code, title, slug, description, level,
-      durationMinutes, passingScore, questionCount,
+      durationMinutes, passingScore, questionCount, examSets, infoUrl,
       pricePractice, priceBundle, priceVoucher,
       domains: [],
       published: false
@@ -78,6 +82,12 @@ export default async function NewExamPage() {
 
         <Field label="Questions per exam">
           <input name="questionCount" type="number" defaultValue={60} className="input" />
+        </Field>
+        <Field label="# of Exams (1-6)">
+          <input name="examSets" type="number" min={1} max={6} defaultValue={1} className="input" />
+        </Field>
+        <Field label="Exam Info URL (vendor page or PDF)" className="md:col-span-3">
+          <input name="infoUrl" type="url" placeholder="https://vendor.example.com/exam-info" className="input" />
         </Field>
         <Field label="Practice price ($)">
           <input name="pricePractice" type="number" step="0.01" defaultValue={29} className="input" />

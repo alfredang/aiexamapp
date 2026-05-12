@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
+import { SocialLoginButtons } from '@/components/social-login-buttons';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -65,6 +66,8 @@ export default function SignupPage() {
             <button className="btn-primary w-full" disabled={busy}>{busy ? 'Verifying…' : 'Create account'}</button>
           </form>
         )}
+
+        <SocialLoginButtons callbackUrl="/post-login" />
       </div>
 
       <div className="card p-8">

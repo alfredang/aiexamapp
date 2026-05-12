@@ -6,6 +6,7 @@ import type { Tier } from '@prisma/client';
 import { BillingAddressCard } from '@/components/checkout/billing-address-card';
 import { PaymentMethodsPicker, usePaymentMethods, type MethodId } from '@/components/checkout/payment-methods';
 import { PayNowModal } from '@/components/checkout/paynow-modal';
+import { PromoCodeInput, type PromoApplied } from '@/components/checkout/promo-code';
 
 export function CheckoutClient({ examId, tier }: { examId: string; tier: Tier }) {
   const router = useRouter();
@@ -15,6 +16,8 @@ export function CheckoutClient({ examId, tier }: { examId: string; tier: Tier })
   const [hitpayBusy, setHitpayBusy] = useState(false);
   const [paynowBusy, setPaynowBusy] = useState(false);
   const [paynowSession, setPaynowSession] = useState<{ orderId: string; qrDataUrl: string; reference: string; amount: number; currency: string } | null>(null);
+  const [promo, setPromo] = useState<PromoApplied | null>(null);
+  const couponCode = promo?.code ?? undefined;
   const methods = usePaymentMethods();
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'sb';
 
@@ -31,7 +34,7 @@ export function CheckoutClient({ examId, tier }: { examId: string; tier: Tier })
     const r = await fetch('/api/paynow/create-order', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ examId, tier, billingAddressId: addressId })
+      body: JSON.stringify({ examId, tier, billingAddressId: addressId, couponCode })
     });
     setPaynowBusy(false);
     if (!r.ok) { setErr('Could not start PayNow checkout.'); return; }
@@ -44,7 +47,7 @@ export function CheckoutClient({ examId, tier }: { examId: string; tier: Tier })
     const r = await fetch('/api/hitpay/create-order', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ examId, tier, billingAddressId: addressId })
+      body: JSON.stringify({ examId, tier, billingAddressId: addressId, couponCode })
     });
     setHitpayBusy(false);
     if (!r.ok) { setErr('Could not start HitPay checkout.'); return; }
@@ -55,6 +58,28 @@ export function CheckoutClient({ examId, tier }: { examId: string; tier: Tier })
   return (
     <div className="space-y-4">
       <BillingAddressCard selectedId={addressId} onSelect={setAddressId} />
+
+      <div className="card p-3">
+        <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Promo code</div>
+        <PromoCodeInput
+          examId={examId}
+          tier={tier}
+          onApply={(p) => setPromo(p)}
+          onClear={() => setPromo(null)}
+        />
+        {promo && (
+          <div className="mt-2 flex items-center justify-between text-[12px] text-slate-700 dark:text-slate-200">
+            <span>Subtotal</span>
+            <span className="line-through opacity-60">${(promo.subtotalCents / 100).toFixed(2)}</span>
+          </div>
+        )}
+        {promo && (
+          <div className="mt-0.5 flex items-center justify-between text-[12px] font-semibold text-emerald-700 dark:text-emerald-400">
+            <span>You pay</span>
+            <span>${(promo.totalCents / 100).toFixed(2)}</span>
+          </div>
+        )}
+      </div>
 
       {methods && <PaymentMethodsPicker methods={methods} selected={method} onSelect={setMethod} />}
 
@@ -75,7 +100,7 @@ export function CheckoutClient({ examId, tier }: { examId: string; tier: Tier })
                 const r = await fetch('/api/paypal/create-order', {
                   method: 'POST',
                   headers: { 'content-type': 'application/json' },
-                  body: JSON.stringify({ examId, tier, billingAddressId: addressId })
+                  body: JSON.stringify({ examId, tier, billingAddressId: addressId, couponCode })
                 });
                 if (!r.ok) { setErr('Could not create order.'); throw new Error('create-order failed'); }
                 return (await r.json()).paypalOrderId;

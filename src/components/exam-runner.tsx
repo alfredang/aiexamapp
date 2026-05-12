@@ -182,9 +182,9 @@ export function ExamRunner(props: ExamRunnerProps) {
         </div>
         <div className="flex items-center gap-2">
           {props.mode === 'EXAM' && props.remainingSec > 0 && (
-            <span className={`badge ${remaining < 60 ? 'bg-red-50 text-red-700' : ''}`}>⏱ {fmt(remaining)}</span>
+            <span className={`badge ${remaining < 60 ? 'bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300' : ''}`}>⏱ {fmt(remaining)}</span>
           )}
-          <button onClick={toggleFlag} className={`btn-outline ${a.flagged ? 'border-amber-400 text-amber-700' : ''}`}><Flag className="mr-1 h-4 w-4 inline" />{a.flagged ? 'Flagged' : 'Flag'}</button>
+          <button onClick={toggleFlag} className={`btn-outline ${a.flagged ? 'border-amber-400 text-amber-700 dark:text-amber-300' : ''}`}><Flag className="mr-1 h-4 w-4 inline" />{a.flagged ? 'Flagged' : 'Flag'}</button>
           <button onClick={() => submitAttempt()} className="btn-primary-grad">Submit exam</button>
         </div>
       </div>
@@ -204,9 +204,9 @@ export function ExamRunner(props: ExamRunnerProps) {
                   onClick={() => toggle(o.id)}
                   disabled={a.submitted && props.mode === 'PRACTICE'}
                   className={`flex w-full items-start justify-between gap-3 rounded-md border px-4 py-3 text-left text-sm transition ${
-                    isAnswered && correct ? 'border-green-500 bg-green-50' :
-                    wrong ? 'border-red-500 bg-red-50' :
-                    sel ? 'border-blue-500 bg-blue-50' : 'border-slate-200 hover:border-slate-300'
+                    isAnswered && correct ? 'border-green-500 bg-green-50 dark:bg-green-950/40' :
+                    wrong ? 'border-red-500 bg-red-50 dark:bg-red-950/40' :
+                    sel ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/40' : 'border-slate-200 hover:border-slate-300 dark:border-slate-700 dark:hover:border-slate-600'
                   }`}
                 >
                   <span>{o.text}</span>
@@ -232,9 +232,9 @@ export function ExamRunner(props: ExamRunnerProps) {
             <p className="mt-4 text-xs text-slate-500">Pick an option to reveal the answer.</p>
           )}
           {a.submitted && a.explanation && (
-            <div className="mt-4 rounded-md border border-slate-200 bg-slate-50 p-4 text-sm">
+            <div className="mt-4 rounded-md border border-slate-200 bg-slate-50 p-4 text-sm dark:border-slate-700 dark:bg-slate-800/60">
               <div className="mb-1 font-semibold">{a.isCorrect ? '✓ Correct' : '✗ Incorrect'}</div>
-              <p className="text-slate-700">{a.explanation}</p>
+              <p className="text-slate-700 dark:text-slate-300">{a.explanation}</p>
             </div>
           )}
           {props.mode === 'EXAM' && a.answer.length > 0 && (
@@ -249,7 +249,7 @@ export function ExamRunner(props: ExamRunnerProps) {
         <aside className="card h-fit p-4">
           <div className="mb-3 flex flex-wrap gap-1 text-xs">
             {(['all', 'unanswered', 'incorrect', 'flagged'] as const).map(f => (
-              <button key={f} onClick={() => setFilter(f)} className={`badge ${filter === f ? 'bg-blue-50 text-blue-700' : ''}`}>{f}</button>
+              <button key={f} onClick={() => setFilter(f)} className={`badge ${filter === f ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300' : ''}`}>{f}</button>
             ))}
           </div>
           <div className="grid grid-cols-6 gap-1">

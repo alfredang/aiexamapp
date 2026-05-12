@@ -9,6 +9,50 @@ async function requireAdmin() {
   if ((session?.user as any)?.role !== 'ADMIN') throw new Error('forbidden');
 }
 
+async function autoFillFromWeb(formData: FormData) {
+  'use server';
+  const session = await auth();
+  if ((session?.user as any)?.role !== 'ADMIN') throw new Error('forbidden');
+  const adminId = (session!.user as any).id as string;
+  const id = String(formData.get('id'));
+  if (!id) return;
+  const exam = await db.exam.findUnique({ where: { id }, include: { vendor: true } });
+  if (!exam) return;
+  const { lookupExamInfo } = await import('@/lib/exam-info-lookup');
+  try {
+    const res = await lookupExamInfo({
+      vendor: exam.vendor.name,
+      title: exam.title,
+      code: exam.code
+    });
+    await db.exam.update({
+      where: { id },
+      data: { infoUrl: res.infoUrl, examSets: res.examSets }
+    });
+    await db.adminLog.create({
+      data: {
+        adminId,
+        action: 'exam.auto_fill_info',
+        targetType: 'Exam',
+        targetId: id,
+        metadata: { infoUrl: res.infoUrl, examSets: res.examSets, notes: res.notes ?? '' }
+      }
+    });
+  } catch (err: any) {
+    await db.adminLog.create({
+      data: {
+        adminId,
+        action: 'exam.auto_fill_info_failed',
+        targetType: 'Exam',
+        targetId: id,
+        metadata: { error: String(err?.message || err) }
+      }
+    });
+  }
+  revalidatePath(`/admin-dashboard/exams/${id}`);
+  revalidatePath('/admin-dashboard/exams');
+}
+
 async function updateExam(formData: FormData) {
   'use server';
   await requireAdmin();
@@ -21,14 +65,57 @@ async function updateExam(formData: FormData) {
   const durationMinutes = Number(formData.get('durationMinutes') || 90);
   const passingScore = Number(formData.get('passingScore') || 70);
   const questionCount = Number(formData.get('questionCount') || 60);
+  const examSetsRaw = Number(formData.get('examSets') || 1);
+  const examSets = Math.min(6, Math.max(1, Number.isFinite(examSetsRaw) ? examSetsRaw : 1));
+  const infoUrlRaw = String(formData.get('infoUrl') || '').trim();
+  const infoUrl = infoUrlRaw ? infoUrlRaw : null;
+  const metaTitle = String(formData.get('metaTitle') || '').trim() || null;
+  const metaDescription = String(formData.get('metaDescription') || '').trim() || null;
+  const metaKeywords = String(formData.get('metaKeywords') || '').trim() || null;
+  const ogImage = String(formData.get('ogImage') || '').trim() || null;
   const published = formData.get('published') === 'on';
   if (!id || !title || !code || !slug) return;
   await db.exam.update({
     where: { id },
-    data: { title, code, slug, level, description, durationMinutes, passingScore, questionCount, published }
+    data: {
+      title, code, slug, level, description, durationMinutes, passingScore, questionCount, examSets, infoUrl, published,
+      metaTitle, metaDescription, metaKeywords, ogImage
+    }
   });
   revalidatePath(`/admin-dashboard/exams/${id}`);
   revalidatePath('/admin-dashboard/exams');
+}
+
+async function runSeoAssist(formData: FormData) {
+  'use server';
+  const session = await auth();
+  const user = session?.user as any;
+  if (user?.role !== 'ADMIN') return;
+  const id = String(formData.get('id'));
+  const exam = await db.exam.findUnique({ where: { id }, include: { vendor: true } });
+  if (!exam) return;
+  try {
+    const { generateSeoForExam } = await import('@/lib/seo-assist');
+    const seo = await generateSeoForExam({
+      vendor: exam.vendor.name,
+      code: exam.code,
+      title: exam.title,
+      description: exam.description,
+      domains: (exam.domains as any[]) || []
+    });
+    await db.exam.update({
+      where: { id },
+      data: { metaTitle: seo.title, metaDescription: seo.description, metaKeywords: seo.keywords }
+    });
+    await db.adminLog.create({
+      data: { adminId: user.id, action: 'exam.seo.assist', targetType: 'Exam', targetId: id, metadata: { ...seo } }
+    });
+  } catch (err: any) {
+    await db.adminLog.create({
+      data: { adminId: user.id, action: 'exam.seo.assist.failed', targetType: 'Exam', targetId: id, metadata: { error: String(err?.message ?? err) } }
+    });
+  }
+  revalidatePath(`/admin-dashboard/exams/${id}`);
 }
 
 async function addQuestion(formData: FormData) {
@@ -118,12 +205,20 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
           <h1 className="text-2xl font-bold">Edit Exam</h1>
           <div className="text-sm text-slate-500">{exam.vendor.name} · {exam.code}</div>
         </div>
-        <Link
-          href={`/admin-dashboard/exams/${exam.id}/generate`}
-          className="btn-outline text-sm"
-        >
-          AI Generate
-        </Link>
+        <div className="flex items-center gap-2">
+          <a
+            href={`/api/admin/exams/${exam.id}/questions/export`}
+            className="btn-outline text-sm"
+          >
+            Export CSV
+          </a>
+          <Link
+            href={`/admin-dashboard/exams/${exam.id}/author`}
+            className="btn-outline text-sm"
+          >
+            Author questions →
+          </Link>
+        </div>
       </div>
 
       <form action={updateExam} className="card grid gap-3 p-4 md:grid-cols-3">
@@ -151,6 +246,12 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
         <Field label="Questions per exam">
           <input name="questionCount" type="number" min={1} defaultValue={exam.questionCount} className="input" />
         </Field>
+        <Field label="# of Exams (1-6)">
+          <input name="examSets" type="number" min={1} max={6} defaultValue={exam.examSets} className="input" />
+        </Field>
+        <Field label="Exam Info URL (vendor page or PDF)" className="md:col-span-2">
+          <input name="infoUrl" type="url" placeholder="https://aws.amazon.com/certification/..." defaultValue={exam.infoUrl ?? ''} className="input" />
+        </Field>
         <Field label="Description" className="md:col-span-3">
           <input name="description" defaultValue={exam.description ?? ''} className="input" />
         </Field>
@@ -162,6 +263,60 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
           <button className="btn-primary">Save exam</button>
         </div>
       </form>
+
+      <form action={autoFillFromWeb} className="flex flex-wrap items-center gap-3 rounded-md border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-900/40">
+        <input type="hidden" name="id" value={exam.id} />
+        <div className="flex-1">
+          <div className="font-medium">Auto-fill from vendor site</div>
+          <div className="text-xs text-slate-500">
+            Uses Claude (web search) to find the official exam page and the typical # of practice exams.
+            Overwrites <span className="font-medium">Exam Info URL</span> and <span className="font-medium"># of Exams</span>.
+          </div>
+        </div>
+        <button className="btn-outline text-sm">Look up via Claude</button>
+      </form>
+
+      <section className="card p-4">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-[13px] font-semibold text-slate-800 dark:text-slate-100">SEO meta</h2>
+          <form action={runSeoAssist}>
+            <input type="hidden" name="id" value={exam.id} />
+            <button className="inline-flex h-7 items-center rounded-md bg-violet-600 px-2.5 text-[11px] font-medium text-white hover:bg-violet-700">
+              AI Assist — generate now
+            </button>
+          </form>
+        </div>
+        <form action={updateExam} className="grid gap-3 md:grid-cols-2">
+          <input type="hidden" name="id" value={exam.id} />
+          {/* Required dupes so the form re-saves all other fields untouched */}
+          <input type="hidden" name="title" value={exam.title} />
+          <input type="hidden" name="code" value={exam.code} />
+          <input type="hidden" name="slug" value={exam.slug} />
+          <input type="hidden" name="level" value={exam.level} />
+          <input type="hidden" name="description" value={exam.description ?? ''} />
+          <input type="hidden" name="durationMinutes" value={exam.durationMinutes} />
+          <input type="hidden" name="passingScore" value={exam.passingScore} />
+          <input type="hidden" name="questionCount" value={exam.questionCount} />
+          <input type="hidden" name="examSets" value={exam.examSets} />
+          <input type="hidden" name="infoUrl" value={exam.infoUrl ?? ''} />
+          {exam.published && <input type="hidden" name="published" value="on" />}
+          <Field label="Meta title (≤70 chars)" className="md:col-span-2">
+            <input name="metaTitle" defaultValue={exam.metaTitle ?? ''} className="input" placeholder="AWS SAA-C03 Practice Exam | ExamNova" />
+          </Field>
+          <Field label="Meta description (120–180 chars)" className="md:col-span-2">
+            <textarea name="metaDescription" defaultValue={exam.metaDescription ?? ''} rows={2} className="input" />
+          </Field>
+          <Field label="Meta keywords (comma-separated)">
+            <input name="metaKeywords" defaultValue={exam.metaKeywords ?? ''} className="input" />
+          </Field>
+          <Field label="OG image URL (optional)">
+            <input name="ogImage" defaultValue={exam.ogImage ?? ''} className="input" />
+          </Field>
+          <div className="md:col-span-2 flex justify-end">
+            <button className="btn-primary">Save SEO</button>
+          </div>
+        </form>
+      </section>
 
       <section className="card p-4">
         <h2 className="text-lg font-semibold">Add MCQ question</h2>

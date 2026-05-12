@@ -24,6 +24,11 @@ export type GenerateInput = {
   difficulty: 1 | 2 | 3 | 4 | 5;
   type: 'SINGLE' | 'MULTI' | 'TRUE_FALSE';
   examGuideUrl?: string;
+  /** Optional source text extracted from a PDF or scraped URLs. When
+   * present, the model is instructed to ground each question in this
+   * text and cite specific passages in the explanation/reference. */
+  sourceExcerpt?: string;
+  sourceLabel?: string;
 };
 
 const SYSTEM = `You are an expert practice-exam author for industry IT certifications.
@@ -56,6 +61,9 @@ function userPrompt(input: GenerateInput) {
   const weights = input.domainWeights?.length
     ? `Full exam blueprint (for context):\n${input.domainWeights.map(d => `- ${d.name}: ${d.weight}%`).join('\n')}\n\n`
     : '';
+  const source = input.sourceExcerpt
+    ? `--- SOURCE MATERIAL (${input.sourceLabel ?? 'document'}) ---\n${input.sourceExcerpt}\n--- END SOURCE ---\n\nGround EVERY question in the source material above. Cite a specific passage in the explanation. If the source is insufficient to author ${input.count} solid questions, generate as many as you can faithfully and stop — quality beats quota.\n\n`
+    : '';
   return `Generate exactly ${input.count} ${input.type} practice questions in JSON.
 
 Vendor: ${input.vendor}
@@ -63,7 +71,7 @@ Certification: ${input.certification}
 Exam code: ${input.examCode}
 Focus domain (every question must cover this domain): ${input.domain}
 Difficulty target: ${input.difficulty}/5
-${weights}${input.examGuideUrl ? `Official exam guide: ${input.examGuideUrl}\n\n` : ''}Respond with the JSON array only.`;
+${weights}${input.examGuideUrl ? `Official exam guide: ${input.examGuideUrl}\n\n` : ''}${source}Respond with the JSON array only.`;
 }
 
 function extractJsonArray(text: string): unknown[] | null {

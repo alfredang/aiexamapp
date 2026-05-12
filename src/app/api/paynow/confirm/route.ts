@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { fulfillOrder } from '@/lib/fulfill';
+import { logWebhookReceived, markWebhookProcessed, markWebhookFailed } from '@/lib/payments/webhook-log';
 
 export const runtime = 'nodejs';
 
@@ -21,15 +22,32 @@ export async function POST(req: Request) {
   if (order.provider !== 'PAYNOW') return NextResponse.json({ error: 'wrong-provider' }, { status: 400 });
   if (order.status === 'PAID') return NextResponse.json({ ok: true, already: true });
 
-  await fulfillOrder(order.id, { manualConfirm: true, reference: reference ?? null, byAdminId: user.id }, reference || order.id);
-  await db.adminLog.create({
-    data: {
-      adminId: user.id,
-      action: 'paynow.confirm',
-      targetType: 'Order',
-      targetId: order.id,
-      metadata: { reference: reference ?? null }
-    }
+  const log = await logWebhookReceived({
+    provider: 'PAYNOW',
+    eventId: `manual-${order.id}-${Date.now()}`,
+    eventType: 'manual.confirm',
+    payload: { orderId: order.id, reference: reference ?? null, byAdminId: user.id },
+    orderId: order.id
   });
-  return NextResponse.json({ ok: true });
+  try {
+    await fulfillOrder(
+      order.id,
+      { manualConfirm: true, reference: reference ?? null, byAdminId: user.id },
+      reference || order.id
+    );
+    await db.adminLog.create({
+      data: {
+        adminId: user.id,
+        action: 'paynow.confirm',
+        targetType: 'Order',
+        targetId: order.id,
+        metadata: { reference: reference ?? null }
+      }
+    });
+    await markWebhookProcessed(log.id, { orderId: order.id });
+    return NextResponse.json({ ok: true });
+  } catch (err: any) {
+    await markWebhookFailed(log.id, String(err?.message ?? err));
+    return NextResponse.json({ error: 'processing_failed' }, { status: 500 });
+  }
 }

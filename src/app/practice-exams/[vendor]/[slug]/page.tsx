@@ -7,6 +7,24 @@ import { Check, Timer, BookOpen, Award, BookOpenCheck, Hourglass } from 'lucide-
 import { BuyTierForm } from './buy-tier-form';
 import { BundleAsExamView } from './bundle-as-exam-view';
 
+export async function generateMetadata({ params }: { params: Promise<{ vendor: string; slug: string }> }) {
+  const { slug } = await params;
+  const exam = await db.exam.findUnique({
+    where: { slug },
+    select: { title: true, code: true, description: true, metaTitle: true, metaDescription: true, metaKeywords: true, ogImage: true, vendor: { select: { name: true } } }
+  });
+  if (!exam) return {};
+  const title = exam.metaTitle || `${exam.vendor.name} ${exam.code} — ${exam.title} | ExamNova`;
+  const description = exam.metaDescription || (exam.description ? exam.description.slice(0, 170) : `Practice questions and exam voucher for ${exam.code}.`);
+  return {
+    title,
+    description,
+    keywords: exam.metaKeywords ?? undefined,
+    openGraph: { title, description, images: exam.ogImage ? [exam.ogImage] : undefined },
+    alternates: { canonical: `/practice-exams/${(await params).vendor}/${slug}` }
+  };
+}
+
 export default async function ExamDetailPage({ params }: { params: Promise<{ vendor: string; slug: string }> }) {
   const { vendor: vendorSlug, slug } = await params;
   const exam = await db.exam.findUnique({
@@ -160,7 +178,7 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ ven
 
           {entitled && (
             <div className="card p-5">
-              <div className="mb-1 text-xs font-semibold uppercase text-emerald-700">You have access</div>
+              <div className="mb-1 text-xs font-semibold uppercase text-emerald-700 dark:text-emerald-300">You have access</div>
               <div className="font-semibold">Start your attempt</div>
               <p className="mt-1 text-sm text-slate-600 dark:text-slate-100">Pick a mode below.</p>
               <div className="mt-3 flex flex-col gap-2">
@@ -171,7 +189,7 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ ven
           )}
           {!entitled && teaserCount > 0 && (
             <Link href={`/practice-exams/${exam.vendor.slug}/${exam.slug}/teaser`} className="card-hover block p-5">
-              <div className="mb-1 text-xs font-semibold uppercase text-blue-700">Free</div>
+              <div className="mb-1 text-xs font-semibold uppercase text-blue-700 dark:text-blue-300">Free</div>
               <div className="font-semibold">Try 10 questions for free</div>
               <p className="mt-1 text-sm text-slate-600 dark:text-slate-100">No credit card required.</p>
               <div className="btn-outline mt-3 w-full">Start free practice exam</div>

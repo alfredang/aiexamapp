@@ -34,9 +34,11 @@ export const DEFAULT_TEMPLATES: Record<EmailTemplateKey, TemplateDefinition> = {
   <p>Thanks for your purchase of <b>{{tierLabel}}</b> for <b>{{productName}}</b>.</p>
   <table style="width:100%;border-collapse:collapse;margin:16px 0">
     <tr><td style="padding:6px 0;color:#64748b">Order</td><td style="padding:6px 0;text-align:right"><code>{{order.id}}</code></td></tr>
+    {{#if invoiceNumber}}<tr><td style="padding:6px 0;color:#64748b">Invoice</td><td style="padding:6px 0;text-align:right"><code>{{invoiceNumber}}</code></td></tr>{{/if}}
     <tr><td style="padding:6px 0;color:#64748b">Payment method</td><td style="padding:6px 0;text-align:right">{{paymentMethod}}</td></tr>
     <tr><td style="padding:6px 0;color:#64748b">Amount</td><td style="padding:6px 0;text-align:right">{{money order.amount order.currency}}</td></tr>
   </table>
+  {{#if invoiceNumber}}<p style="color:#64748b;font-size:13px">Your tax invoice is attached to this email and also available under <a href="{{appUrl}}/user-dashboard/invoices" style="color:{{brand.primaryColor}}">Invoices</a>.</p>{{/if}}
   {{#if voucherPending}}
   <p style="background:#fef3c7;border-left:4px solid #f59e0b;padding:12px 14px;border-radius:6px;color:#78350f"><b>Your exam voucher is on the way.</b><br>We'll email it to you within <b>3–5 business days</b>. Your practice access is already active.</p>
   {{/if}}
@@ -48,6 +50,7 @@ export const DEFAULT_TEMPLATES: Record<EmailTemplateKey, TemplateDefinition> = {
       tierLabel: 'Practice + Voucher Bundle',
       paymentMethod: 'PayPal',
       voucherPending: true,
+      invoiceNumber: 'INV-2026-00042',
       user: { name: 'Alex', email: 'alex@example.com' },
       order: { id: 'ord_abc123', amount: 9900, currency: 'USD' }
     }

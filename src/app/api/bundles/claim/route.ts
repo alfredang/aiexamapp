@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { db } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { fulfillOrder } from '@/lib/fulfill';
+import { nextNumber } from '@/lib/numbering';
 
 const Body = z.object({ bundleId: z.string() });
 
@@ -28,8 +29,10 @@ export async function POST(req: Request) {
   // are independent events (a user can re-claim and the upserts in
   // fulfillOrder no-op on existing entitlements).
   const syntheticPaypalId = `free-${userId}-${bundleId}-${Date.now()}`;
+  const number = await nextNumber('ORDER', 'ORD');
   const order = await db.order.create({
     data: {
+      number,
       userId,
       bundleId,
       amount: 0,

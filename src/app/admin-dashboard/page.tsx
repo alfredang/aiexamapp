@@ -1,41 +1,48 @@
 import Link from 'next/link';
 import { db } from '@/lib/db';
 import { formatPrice, tierLabel } from '@/lib/utils';
-import { Users, BookOpen, ShoppingBag, FileQuestion, DollarSign, AlertCircle } from 'lucide-react';
+import { PageHeader } from '@/components/admin/page-header';
+import { StatusBadge } from '@/components/admin/badge';
+import { paidOrdersIn, signupsIn, activeLearnersIn, taxCollectedIn, Ranges } from '@/lib/analytics';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminOverview() {
+  const today = Ranges.today();
+  const last7 = Ranges.lastNDays(7);
+  const last30 = Ranges.lastNDays(30);
+  const mtd = Ranges.mtd();
+
   const [
-    userCount,
-    examCount,
-    publishedExams,
-    questionCount,
-    draftCount,
-    orderCount,
-    paidCount,
-    paidSum,
+    todayStats,
+    last7Stats,
+    last30Stats,
+    mtdStats,
+    signups30,
+    activeLearners30,
+    taxMtd,
     latestUsers,
     latestOrders,
-    popularOrders
+    popularOrders,
+    questionDrafts
   ] = await Promise.all([
-    db.user.count(),
-    db.exam.count(),
-    db.exam.count({ where: { published: true } }),
-    db.question.count(),
-    db.question.count({ where: { status: 'DRAFT' } }),
-    db.order.count(),
-    db.order.count({ where: { status: 'PAID' } }),
-    db.order.aggregate({ where: { status: 'PAID' }, _sum: { amount: true } }),
+    paidOrdersIn(today),
+    paidOrdersIn(last7),
+    paidOrdersIn(last30),
+    paidOrdersIn(mtd),
+    signupsIn(last30),
+    activeLearnersIn(last30),
+    taxCollectedIn(mtd),
     db.user.findMany({
+      where: { role: 'USER' },
       orderBy: { createdAt: 'desc' },
-      take: 10,
-      select: { id: true, email: true, name: true, role: true, active: true, createdAt: true }
+      take: 8,
+      select: { id: true, email: true, name: true, active: true, createdAt: true }
     }),
     db.order.findMany({
       orderBy: { createdAt: 'desc' },
-      take: 10,
-      include: { user: true, exam: true, bundle: true }
+      take: 8,
+      include: { user: { select: { email: true } }, exam: { select: { title: true, code: true } }, bundle: { select: { title: true } } }
     }),
     db.order.groupBy({
       by: ['examId'],
@@ -43,7 +50,8 @@ export default async function AdminOverview() {
       _count: { examId: true },
       orderBy: { _count: { examId: 'desc' } },
       take: 5
-    })
+    }),
+    db.question.count({ where: { status: 'DRAFT' } })
   ]);
 
   const popularExamIds = popularOrders.map((p) => p.examId!).filter(Boolean);
@@ -55,200 +63,152 @@ export default async function AdminOverview() {
     : [];
   const popularExamMap = new Map(popularExams.map((e) => [e.id, e]));
 
-  const kpis = [
-    { label: 'Users', value: userCount.toLocaleString(), icon: Users, accent: 'blue', href: '/admin-dashboard/users' },
-    {
-      label: 'Practice exams',
-      value: examCount.toLocaleString(),
-      sub: `${publishedExams} published`,
-      icon: BookOpen,
-      accent: 'purple',
-      href: '/admin-dashboard/exams'
-    },
-    {
-      label: 'Orders',
-      value: orderCount.toLocaleString(),
-      sub: `${paidCount} paid`,
-      icon: ShoppingBag,
-      accent: 'emerald',
-      href: '/admin-dashboard/orders'
-    },
-    {
-      label: 'Revenue (paid)',
-      value: formatPrice(paidSum._sum.amount || 0),
-      icon: DollarSign,
-      accent: 'amber',
-      href: '/admin-dashboard/orders'
-    },
-    {
-      label: 'Questions',
-      value: questionCount.toLocaleString(),
-      icon: FileQuestion,
-      accent: 'slate',
-      href: '/admin-dashboard/questions'
-    },
-    {
-      label: 'Drafts pending',
-      value: draftCount.toLocaleString(),
-      icon: AlertCircle,
-      accent: 'rose',
-      href: '/admin-dashboard/questions'
-    }
-  ];
+  const refundRate30 = last30Stats.ordersCount
+    ? (last30Stats.refundCount / last30Stats.ordersCount)
+    : 0;
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Dashboard</h1>
-      <p className="mt-1 text-sm text-slate-500">Activity across the platform.</p>
+      <PageHeader title="Dashboard" subtitle="Operational health at a glance. Click any card to drill into the report." />
 
-      {/* KPI cards */}
-      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {kpis.map((k) => (
-          <Link key={k.label} href={k.href} className="card flex items-center gap-4 p-4 hover:shadow-md">
-            <KpiIcon icon={k.icon} accent={k.accent as any} />
-            <div className="min-w-0">
-              <div className="text-xs font-medium uppercase tracking-wide text-slate-500">{k.label}</div>
-              <div className="text-2xl font-bold tracking-tight">{k.value}</div>
-              {k.sub && <div className="text-xs text-slate-500">{k.sub}</div>}
-            </div>
-          </Link>
-        ))}
+      {/* Revenue KPI row */}
+      <div className="mb-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        <Kpi label="Revenue today" value={formatPrice(todayStats.grossCents, 'USD')} sub={`${todayStats.ordersCount} order${todayStats.ordersCount === 1 ? '' : 's'}`} accent="emerald" href="/admin-dashboard/reports/revenue?range=today" />
+        <Kpi label="Revenue · 7d" value={formatPrice(last7Stats.grossCents, 'USD')} sub={`AOV ${formatPrice(last7Stats.aovCents, 'USD')}`} accent="emerald" href="/admin-dashboard/reports/revenue?range=7d" />
+        <Kpi label="Revenue · 30d" value={formatPrice(last30Stats.grossCents, 'USD')} sub={`Net ${formatPrice(last30Stats.netCents, 'USD')}`} accent="emerald" href="/admin-dashboard/reports/revenue?range=30d" />
+        <Kpi label="Revenue · MTD" value={formatPrice(mtdStats.grossCents, 'USD')} sub={`${mtdStats.ordersCount} order${mtdStats.ordersCount === 1 ? '' : 's'}`} accent="emerald" href="/admin-dashboard/reports/revenue?range=mtd" />
       </div>
 
-      {/* Two-column lists */}
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        <section className="card p-4">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Latest users</h2>
-            <Link href="/admin-dashboard/users" className="text-sm text-blue-600 hover:underline dark:text-blue-400">
-              View all →
-            </Link>
+      {/* Operational KPI row */}
+      <div className="mb-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        <Kpi label="Refund rate · 30d" value={`${(refundRate30 * 100).toFixed(1)}%`} sub={`${last30Stats.refundCount} refunds`} accent="amber" href="/admin-dashboard/orders?status=REFUNDED" />
+        <Kpi label="Signups · 30d" value={signups30.toLocaleString()} sub="new users" accent="blue" href="/admin-dashboard/users" />
+        <Kpi label="Active learners · 30d" value={activeLearners30.toLocaleString()} sub="unique attempts" accent="blue" href="/admin-dashboard/users" />
+        <Kpi label="DRAFT questions" value={questionDrafts.toLocaleString()} sub="awaiting review" accent={questionDrafts > 0 ? 'rose' : 'slate'} href="/admin-dashboard/exams" />
+      </div>
+
+      {/* Tax (MTD) helper */}
+      <div className="card mb-4 p-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Tax collected · MTD</div>
+            <div className="mt-0.5 text-lg font-semibold">{formatPrice(taxMtd.taxSgdTotal, 'SGD')}</div>
+            <div className="text-[11px] text-slate-500">{taxMtd.invoiceCount} invoice{taxMtd.invoiceCount === 1 ? '' : 's'} · SGD-equivalent total {formatPrice(taxMtd.totalSgd, 'SGD')}</div>
           </div>
-          <ul className="divide-y divide-slate-200 dark:divide-slate-800">
+          <Link href="/admin-dashboard/reports/tax" className="btn-sm bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200">
+            GST report →
+          </Link>
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <section className="card p-4">
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Latest users</h2>
+            <Link href="/admin-dashboard/users" className="text-[11px] text-blue-600 hover:underline dark:text-blue-400">View all →</Link>
+          </div>
+          <ul className="divide-y divide-slate-100 text-[12px] dark:divide-slate-800/70">
             {latestUsers.map((u) => (
-              <li key={u.id} className="flex items-center justify-between py-2.5 text-sm">
+              <li key={u.id} className="flex items-center justify-between py-1.5">
                 <div className="min-w-0">
                   <div className="truncate font-medium">{u.name || u.email}</div>
-                  <div className="truncate text-xs text-slate-500">{u.email}</div>
+                  <div className="truncate text-[11px] text-slate-500">{u.email}</div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {u.role === 'ADMIN' && (
-                    <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-800">
-                      ADMIN
-                    </span>
-                  )}
-                  {!u.active && (
-                    <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-semibold text-red-800">
-                      OFF
-                    </span>
-                  )}
-                  <span className="text-xs text-slate-500">{u.createdAt.toLocaleDateString()}</span>
+                  {!u.active && <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-semibold text-red-800">OFF</span>}
+                  <span className="text-[10px] text-slate-500">{u.createdAt.toLocaleDateString()}</span>
                 </div>
               </li>
             ))}
-            {latestUsers.length === 0 && <li className="py-4 text-sm text-slate-500">No users yet.</li>}
+            {latestUsers.length === 0 && <li className="py-3 text-[12px] text-slate-500">No users yet.</li>}
           </ul>
         </section>
 
         <section className="card p-4">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Latest orders</h2>
-            <Link href="/admin-dashboard/orders" className="text-sm text-blue-600 hover:underline dark:text-blue-400">
-              View all →
-            </Link>
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Latest orders</h2>
+            <Link href="/admin-dashboard/orders" className="text-[11px] text-blue-600 hover:underline dark:text-blue-400">View all →</Link>
           </div>
-          <ul className="divide-y divide-slate-200 dark:divide-slate-800">
+          <ul className="divide-y divide-slate-100 text-[12px] dark:divide-slate-800/70">
             {latestOrders.map((o) => {
-              const product = o.bundle ? `${o.bundle.title} (bundle)` : o.exam?.title ?? '(unknown)';
+              const product = o.bundle ? `${o.bundle.title} (bundle)` : o.exam?.title ?? '—';
               const tier = o.bundle ? 'Bundle' : o.tier ? tierLabel(o.tier) : '—';
               return (
-                <li key={o.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
+                <li key={o.id} className="flex items-center justify-between gap-2 py-1.5">
                   <div className="min-w-0">
                     <div className="truncate font-medium">{product}</div>
-                    <div className="truncate text-xs text-slate-500">
-                      {o.user.email} · {tier}
-                    </div>
+                    <div className="truncate text-[11px] text-slate-500">{o.user.email} · {tier}</div>
                   </div>
-                  <div className="flex items-center gap-2 text-right">
+                  <div className="flex items-center gap-2">
                     <span className="font-semibold">{formatPrice(o.amount, o.currency)}</span>
-                    <span
-                      className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
-                        o.status === 'PAID'
-                          ? 'bg-emerald-100 text-emerald-800'
-                          : o.status === 'FAILED'
-                          ? 'bg-red-100 text-red-800'
-                          : o.status === 'REFUNDED'
-                          ? 'bg-amber-100 text-amber-800'
-                          : 'bg-slate-100 text-slate-700'
-                      }`}
-                    >
-                      {o.status}
-                    </span>
+                    <StatusBadge status={o.status} />
                   </div>
                 </li>
               );
             })}
-            {latestOrders.length === 0 && <li className="py-4 text-sm text-slate-500">No orders yet.</li>}
+            {latestOrders.length === 0 && <li className="py-3 text-[12px] text-slate-500">No orders yet.</li>}
           </ul>
         </section>
       </div>
 
-      {/* Popular practice exams */}
-      <section className="mt-8 card p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Popular practice exams</h2>
-          <Link href="/admin-dashboard/exams" className="text-sm text-blue-600 hover:underline dark:text-blue-400">
-            Manage exams →
-          </Link>
+      <section className="mt-4 card p-4">
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Popular practice exams (paid orders)</h2>
+          <Link href="/admin-dashboard/reports/exams" className="text-[11px] text-blue-600 hover:underline dark:text-blue-400">Full exam report →</Link>
         </div>
-        <ul className="divide-y divide-slate-200 dark:divide-slate-800">
+        <ul className="divide-y divide-slate-100 text-[12px] dark:divide-slate-800/70">
           {popularOrders.map((p, i) => {
             const exam = popularExamMap.get(p.examId!);
             if (!exam) return null;
             return (
-              <li key={p.examId} className="flex items-center justify-between py-2.5 text-sm">
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+              <li key={p.examId} className="flex items-center justify-between py-1.5">
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-[10px] font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
                     {i + 1}
                   </span>
-                  <div className="min-w-0">
-                    <div className="truncate font-medium">{exam.title}</div>
-                    <div className="truncate text-xs text-slate-500">
+                  <div>
+                    <Link href={`/admin-dashboard/exams/${exam.id}`} className="font-medium text-blue-600 hover:underline dark:text-blue-400">
                       {exam.vendor.name} · {exam.code}
-                    </div>
+                    </Link>
+                    <div className="text-[11px] text-slate-500">{exam.title}</div>
                   </div>
                 </div>
-                <div className="text-xs text-slate-500">{p._count.examId} paid orders</div>
+                <div className="text-[11px] text-slate-500">{p._count.examId} paid order{p._count.examId === 1 ? '' : 's'}</div>
               </li>
             );
           })}
-          {popularOrders.length === 0 && (
-            <li className="py-4 text-sm text-slate-500">No paid orders yet.</li>
-          )}
+          {popularOrders.length === 0 && <li className="py-3 text-[12px] text-slate-500">No paid orders yet.</li>}
         </ul>
       </section>
     </div>
   );
 }
 
-function KpiIcon({
-  icon: Icon,
-  accent
+function Kpi({
+  label,
+  value,
+  sub,
+  accent,
+  href
 }: {
-  icon: any;
-  accent: 'blue' | 'purple' | 'emerald' | 'amber' | 'slate' | 'rose';
+  label: string;
+  value: string;
+  sub?: string;
+  accent: 'emerald' | 'blue' | 'amber' | 'rose' | 'slate';
+  href: string;
 }) {
-  const accents: Record<string, string> = {
-    blue: 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400',
-    purple: 'bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-400',
-    emerald: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400',
-    amber: 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400',
-    slate: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
-    rose: 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400'
+  const colors: Record<string, string> = {
+    emerald: 'border-l-emerald-500',
+    blue: 'border-l-blue-500',
+    amber: 'border-l-amber-500',
+    rose: 'border-l-rose-500',
+    slate: 'border-l-slate-400'
   };
   return (
-    <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg ${accents[accent]}`}>
-      <Icon className="h-6 w-6" />
-    </div>
+    <Link href={href} className={`card flex flex-col gap-0.5 border-l-2 p-3 transition hover:bg-slate-50/60 dark:hover:bg-slate-800/40 ${colors[accent]}`}>
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{label}</div>
+      <div className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">{value}</div>
+      {sub && <div className="text-[10px] text-slate-500">{sub}</div>}
+    </Link>
   );
 }
