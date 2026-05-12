@@ -30,10 +30,12 @@ EXPOSE 3000
 #   1) apply DB schema migrations (fatal if it fails — schema must match)
 #   2) run prisma/seed.ts to ensure the catalog (vendors, exams, admins,
 #      team entitlements) is in sync with the latest seed
-#   3) run scripts/seed-all-content.ts which idempotently fills CCA-F,
-#      AZ-900, ACE, and (for AWS SAA-C03) leaves the prisma-seeded
-#      placeholders in place
-#   4) start the Next.js server
-# Steps 2 and 3 are idempotent — re-running on every boot is a no-op
-# once data exists. If either fails, deploy fails fast (visible in logs).
-CMD ["sh", "-c", "node ./node_modules/prisma/build/index.js migrate deploy && npx tsx prisma/seed.ts && npx tsx scripts/seed-all-content.ts && node server.js"]
+#   3) start the Next.js server
+# Step 2 is idempotent — re-running on every boot is a no-op once data exists.
+#
+# scripts/seed-all-content.ts is intentionally NOT in the boot chain. It
+# runs dozens of question-seeding scripts which are slow and brittle in
+# aggregate; if any one fails the whole boot fails and Coolify serves 502.
+# Run it manually when you need to refill question content:
+#   docker exec <container> npx tsx scripts/seed-all-content.ts
+CMD ["sh", "-c", "node ./node_modules/prisma/build/index.js migrate deploy && npx tsx prisma/seed.ts && node server.js"]

@@ -41,17 +41,23 @@ export type MyExamsListItem =
   | { kind: 'standalone'; data: ExamRow };
 
 /**
- * Interleave bundles + standalones into a single newest-first list for
- * display. Server-safe (no React imports) so server pages can call it
- * directly before passing the result to <MyExamsList>.
+ * Group items by kind for the My Exams display: bundle cards first, then
+ * standalone cards. Within each group, items are sorted newest-first by
+ * grantedAt. Bundles lead because they can expand to span two columns —
+ * mixing them with single-column standalones broke the grid visually.
+ * Server-safe (no React imports) so server pages can call it directly
+ * before passing the result to <MyExamsList>.
  */
 export function toListItems(grouped: GroupedExams): MyExamsListItem[] {
-  const items: MyExamsListItem[] = [
-    ...grouped.bundles.map(b => ({ kind: 'bundle' as const, data: b })),
-    ...grouped.standalone.map(s => ({ kind: 'standalone' as const, data: s }))
-  ];
-  items.sort((a, b) => b.data.grantedAt.getTime() - a.data.grantedAt.getTime());
-  return items;
+  const bundleItems: MyExamsListItem[] = grouped.bundles
+    .slice()
+    .sort((a, b) => b.grantedAt.getTime() - a.grantedAt.getTime())
+    .map(b => ({ kind: 'bundle' as const, data: b }));
+  const standaloneItems: MyExamsListItem[] = grouped.standalone
+    .slice()
+    .sort((a, b) => b.grantedAt.getTime() - a.grantedAt.getTime())
+    .map(s => ({ kind: 'standalone' as const, data: s }));
+  return [...bundleItems, ...standaloneItems];
 }
 
 /**
