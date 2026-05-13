@@ -31,6 +31,7 @@ const VENDORS = [
   { slug: 'scrum-org', name: 'Scrum.org', description: 'Agile and Scrum certifications including Professional Scrum Master.' },
   { slug: 'github', name: 'GitHub', description: 'GitHub developer and platform certifications.' },
   { slug: 'axelos', name: 'AXELOS', description: 'ITIL, PRINCE2, and IT service management certifications.' },
+  { slug: 'linuxfoundation', name: 'Linux Foundation', description: 'CNCF / Linux Foundation certifications — CKAD, CKA, CKS, and other open-source ecosystem credentials.' },
   { slug: 'tableau', name: 'Tableau', description: 'Tableau certifications for data visualization and analytics.' },
   { slug: 'iassc', name: 'IASSC', description: 'Lean Six Sigma certifications.' }
 ];
@@ -86,7 +87,7 @@ const HIDDEN_EXAM_SLUGS = [
 // in this list is force-hidden (published = false), regardless of question
 // count. Used to launch with AWS only and roll out other vendors gradually.
 // Flip a single string to re-enable a vendor.
-const VISIBLE_VENDOR_SLUGS = ['aws', 'microsoft', 'google', 'anthropic', 'cisco', 'comptia', 'oracle'];
+const VISIBLE_VENDOR_SLUGS = ['aws', 'microsoft', 'google', 'anthropic', 'cisco', 'comptia', 'oracle', 'linuxfoundation'];
 
 // Curated bundles — multi-exam products defined declaratively here.
 // Each item references an exam by slug + the tier the buyer receives.
@@ -205,7 +206,8 @@ function buildMultiVariantBundles(): BundleSeed[] {
     { slug: 'google-ace', title: 'Google Associate Cloud Engineer', description: 'All 2 Associate Cloud Engineer practice exams in one bundle — covering setting up a cloud environment, planning and configuring solutions, deploying and implementing, and ensuring successful operation on Google Cloud.', variants: 2, price: 2000, priceVoucher: 12500 },
     { slug: 'github-foundations', title: 'GitHub Foundations', description: 'All 4 GitHub Foundations practice exams in one bundle — covering GitHub features, repository management, collaboration, GitHub workflows, and GitHub administration.', variants: 4, price: 2000, priceVoucher: 9900 },
     { slug: 'isc2-cissp', title: 'ISC2 CISSP', description: 'All 6 CISSP practice exams in one bundle — covering security & risk management, asset security, security architecture & engineering, communication & network security, identity & access management, security assessment & testing, security operations, and software development security.', variants: 6, price: 2000, priceVoucher: 74900 },
-    { slug: 'pmi-pmp', title: 'PMI PMP', description: 'All 6 PMP practice exams in one bundle — covering people, process, and business environment domains of the PMP examination content outline.', variants: 6, price: 2000, priceVoucher: 55500 }
+    { slug: 'pmi-pmp', title: 'PMI PMP', description: 'All 6 PMP practice exams in one bundle — covering people, process, and business environment domains of the PMP examination content outline.', variants: 6, price: 2000, priceVoucher: 55500 },
+    { slug: 'linuxfoundation-ckad', title: 'Certified Kubernetes Application Developer (CKAD)', description: 'All 3 CKAD practice exams in one bundle — covering application design & build, deployment, observability & maintenance, environment/configuration/security, and services & networking, aligned to CNCF CKAD v1.35.', variants: 3, price: 2000, priceVoucher: 39500 }
   ];
 
   const out: BundleSeed[] = specs.map(s => {
@@ -815,6 +817,51 @@ const EXAMS: ExamSeed[] = [
       { name: 'Serving and scaling models', weight: 19 },
       { name: 'Automating and orchestrating ML pipelines', weight: 21 },
       { name: 'Monitoring AI solutions', weight: 14 }
+    ]
+  },
+
+  // ───── Linux Foundation / CNCF ─────
+  // CKAD v1.35: 5 domains, 2 hours, 66% to pass. Real exam is performance-
+  // based (~15-20 hands-on tasks). Our practice variant uses multiple-choice
+  // / multi-select questions whose distribution matches the published
+  // blueprint weights. Real exam fee is USD 395 (voucher).
+  {
+    vendorSlug: 'linuxfoundation', slug: 'linuxfoundation-ckad-p1', code: 'CKAD-P1',
+    title: 'Certified Kubernetes Application Developer (CKAD) — Practice Exam 1',
+    description: 'Practice exam 1 of 3 for the CNCF Certified Kubernetes Application Developer (CKAD) certification — full 120-minute, 20-question, blueprint-weighted set covering Pods, Deployments, Jobs, ConfigMaps/Secrets, SecurityContexts, ServiceAccounts, probes, multi-container patterns, Services, NetworkPolicies, and Ingress. Aligned to CNCF CKAD v1.35.',
+    level: 'Associate', durationMinutes: 120, passingScore: 66, questionCount: 20,
+    domains: [
+      { name: 'Application Design and Build', weight: 20 },
+      { name: 'Application Deployment', weight: 20 },
+      { name: 'Application Observability and Maintenance', weight: 15 },
+      { name: 'Application Environment, Configuration and Security', weight: 25 },
+      { name: 'Services and Networking', weight: 20 }
+    ]
+  },
+  {
+    vendorSlug: 'linuxfoundation', slug: 'linuxfoundation-ckad-p2', code: 'CKAD-P2',
+    title: 'Certified Kubernetes Application Developer (CKAD) — Practice Exam 2',
+    description: 'Practice exam 2 of 3 for the CNCF Certified Kubernetes Application Developer (CKAD) certification — a second 120-minute, 20-question, blueprint-weighted set. Aligned to CNCF CKAD v1.35.',
+    level: 'Associate', durationMinutes: 120, passingScore: 66, questionCount: 20,
+    domains: [
+      { name: 'Application Design and Build', weight: 20 },
+      { name: 'Application Deployment', weight: 20 },
+      { name: 'Application Observability and Maintenance', weight: 15 },
+      { name: 'Application Environment, Configuration and Security', weight: 25 },
+      { name: 'Services and Networking', weight: 20 }
+    ]
+  },
+  {
+    vendorSlug: 'linuxfoundation', slug: 'linuxfoundation-ckad-p3', code: 'CKAD-P3',
+    title: 'Certified Kubernetes Application Developer (CKAD) — Practice Exam 3',
+    description: 'Practice exam 3 of 3 for the CNCF Certified Kubernetes Application Developer (CKAD) certification — a third 120-minute, 20-question, blueprint-weighted set. Aligned to CNCF CKAD v1.35.',
+    level: 'Associate', durationMinutes: 120, passingScore: 66, questionCount: 20,
+    domains: [
+      { name: 'Application Design and Build', weight: 20 },
+      { name: 'Application Deployment', weight: 20 },
+      { name: 'Application Observability and Maintenance', weight: 15 },
+      { name: 'Application Environment, Configuration and Security', weight: 25 },
+      { name: 'Services and Networking', weight: 20 }
     ]
   }
 ];
