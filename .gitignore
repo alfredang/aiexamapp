@@ -13,12 +13,14 @@ dist
 # Source PDFs and any artifacts under those folders — never commit
 practice-exams-pdfs-*/
 
-# Selectively commit .claude/skills + agents (project context). Ignore the rest.
+# Selectively commit .claude/skills + agents + commands (project context). Ignore the rest.
 .claude/*
 !.claude/skills/
 !.claude/agents/
+!.claude/commands/
 !.claude/skills/**
 !.claude/agents/**
+!.claude/commands/**
 
 # Local debug screenshots from playwright-mcp runs
 /ai-assist-before.png
