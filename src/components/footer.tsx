@@ -46,8 +46,8 @@ export async function Footer() {
 
   return (
     <footer className="border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
-      <div className="container-app grid gap-8 py-10 md:grid-cols-4">
-        <div>
+      <div className="container-app grid gap-8 py-10 md:grid-cols-12">
+        <div className="md:col-span-3">
           <div className="mb-3 flex items-center">
             <img src="/logo-light.webp" alt="ExamNova" className="h-12 w-auto shrink-0 object-contain dark:hidden" />
             <img src="/logo-dark.webp" alt="ExamNova" className="hidden h-12 w-auto shrink-0 object-contain dark:block" />
@@ -61,7 +61,7 @@ export async function Footer() {
           </p>
         </div>
 
-        <div>
+        <div className="md:col-span-3">
           <h4 className="text-sm font-semibold">Vendors</h4>
           {vendors.length === 0 ? (
             <ul className="mt-2 space-y-1 text-sm text-slate-600 dark:text-slate-400">
@@ -83,7 +83,7 @@ export async function Footer() {
           )}
         </div>
 
-        <div>
+        <div className="md:col-span-4">
           <h4 className="text-sm font-semibold">Company</h4>
           <ul className="mt-2 space-y-1 text-sm text-slate-600 dark:text-slate-400">
             <li className="font-medium text-slate-700 dark:text-slate-300">{company.name}</li>
@@ -107,9 +107,14 @@ export async function Footer() {
               </li>
             )}
           </ul>
+          <h4 className="mt-4 text-sm font-semibold">Legal</h4>
+          <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+            Original practice questions for learning and exam preparation. Not affiliated with AWS, Microsoft, Cisco, CompTIA,
+            Google Cloud, or other certification owners unless explicitly stated. We do not provide real exam dumps.
+          </p>
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <h4 className="text-sm font-semibold">Useful Links</h4>
           <ul className="mt-2 space-y-1 text-sm text-slate-600 dark:text-slate-400">
             <li>
@@ -140,10 +145,6 @@ export async function Footer() {
               });
             })()}
           </ul>
-          <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-            Original practice questions for learning and exam preparation. Not affiliated with AWS, Microsoft, Cisco, CompTIA,
-            Google Cloud, or other certification owners unless explicitly stated. We do not provide real exam dumps.
-          </p>
         </div>
       </div>
     </footer>
