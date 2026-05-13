@@ -26,3 +26,9 @@ practice-exams-pdfs-*/
 /page-editor.png
 /page-editor-v2.png
 /faq-admin.png
+/admin-ckad.png
+/ckad-page.png
+/screenshot.png
+
+# Reference repositories cloned locally for question authoring
+/ckad-prep-master/
