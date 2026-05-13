@@ -94,3 +94,42 @@ Single Next.js 15 App Router app — server logic (PayPal webhooks, Auth.js, Cla
 ## Deployment
 
 Coolify-ready via [Dockerfile](Dockerfile) (multi-stage, Next standalone). Container runs `prisma migrate deploy` before `node server.js` on boot. See [README.md](README.md) for env var checklist.
+
+## Seeding a new exam bundle to production
+
+CKAD and CKA are the canonical templates. Coolify auto-deploys on push to `main`; there is no SSH/exec to the container — production seeding goes through a one-shot admin API endpoint.
+
+For every new bundle `xyz` (mirror [src/lib/seed/ckad-questions.ts](src/lib/seed/ckad-questions.ts) and friends):
+
+1. **Idempotent seed module** `src/lib/seed/xyz-questions.ts` — upserts vendor/exams/bundle; deletes + recreates questions tagged `generatedBy: 'manual:xyz-seed'`.
+2. **CLI shim** `prisma/seeds/xyz.ts` — invokes `seedXyz(db)` for local runs (`npx tsx prisma/seeds/xyz.ts`).
+3. **Admin endpoint** `src/app/api/admin/seed-xyz/route.ts` — admin-gated, writes an `AdminLog` entry (clone [src/app/api/admin/seed-ckad/route.ts](src/app/api/admin/seed-ckad/route.ts)).
+4. **Catalog entries** in [prisma/seed.ts](prisma/seed.ts) (`bundleSpecs` + `EXAM_SEEDS`) so `npm run db:seed` on a fresh DB also registers the rows.
+5. `git push origin main` and wait ~1–2 min for Coolify to redeploy.
+6. Seed production from this machine:
+
+```bash
+# 1. CSRF
+curl -sS -c /tmp/cookies.txt https://ai-exams.tertiaryinfo.tech/api/auth/csrf -o /tmp/csrf.json
+CSRF=$(jq -r .csrfToken /tmp/csrf.json)
+
+# 2. Admin login via NextAuth credentials provider id `password`
+curl -sS -c /tmp/cookies.txt -b /tmp/cookies.txt \
+  -X POST https://ai-exams.tertiaryinfo.tech/api/auth/callback/password \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  --data-urlencode "csrfToken=$CSRF" \
+  --data-urlencode "email=angch@tertiaryinfotech.com" \
+  --data-urlencode "password=password123" \
+  --data-urlencode "callbackUrl=https://ai-exams.tertiaryinfo.tech/admin-dashboard"
+
+# 3. Fire the seed (idempotent)
+curl -sS -b /tmp/cookies.txt -X POST \
+  https://ai-exams.tertiaryinfo.tech/api/admin/seed-xyz \
+  -w "\nHTTP_STATUS=%{http_code}\n"
+```
+
+Notes:
+- The session cookie is `__Secure-authjs.session-token` (NextAuth v5 / authjs).
+- The credentials provider id is **`password`** — POST to `/api/auth/callback/password`, NOT `/api/auth/signin/password` (that's the form page). The `otp` provider only accepts one-time codes.
+- A 404 right after push means the new route hasn't rolled out yet — retry after the deploy completes. A 200 with `{ ok: true, exams: [...] }` confirms the seed ran.
+- Seeds are idempotent (delete-and-recreate by `generatedBy` tag); safe to re-run.
