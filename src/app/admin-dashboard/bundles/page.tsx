@@ -124,6 +124,16 @@ function fmtDate(d: Date | null | undefined): string {
   return new Date(d).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
+/**
+ * The bundle's "exam code" should be the underlying certification code
+ * (e.g. SAA-C03), not a per-variant suffix (SAA-C03-P1). Strip any -PN or
+ * -PRACTICE-N suffix from the first item's exam code.
+ */
+function bundleBaseCode(code: string | undefined): string | null {
+  if (!code) return null;
+  return code.replace(/-(?:P|PRACTICE-)\d+$/i, '');
+}
+
 const LEVELS = ['Foundational', 'Associate', 'Professional', 'Specialty'];
 
 export default async function AdminBundlesPage({ searchParams }: { searchParams: SearchParams }) {
@@ -203,36 +213,49 @@ export default async function AdminBundlesPage({ searchParams }: { searchParams:
       key: 'title',
       header: 'Bundle Name',
       cell: (b) => (
-        <div className="max-w-[28rem]">
-          <Link href={`/admin-dashboard/bundles/${b.id}`} className="font-medium text-slate-900 hover:underline dark:text-slate-100">
-            {b.title}
-          </Link>
-          {b.items.length > 0 && (
-            <div className="mt-0.5 flex flex-wrap gap-1">
-              {b.items.map((it) => (
-                <span
-                  key={it.id}
-                  title={`${it.exam.vendor.name} ${it.exam.code} [${it.tier}]`}
-                  className={`inline-flex items-center rounded px-1.5 py-0.5 font-mono text-[10px] ${
-                    it.tier === 'VOUCHER'
-                      ? 'bg-violet-50 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300'
-                      : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
-                  }`}
-                >
-                  {it.exam.code}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
+        <Link
+          href={`/admin-dashboard/bundles/${b.id}`}
+          className="block max-w-[24rem] truncate font-medium text-slate-900 hover:underline dark:text-slate-100"
+          title={b.title}
+        >
+          {b.title}
+        </Link>
       )
     },
     {
       key: 'code',
       header: 'Exam Code',
+      cell: (b) => {
+        const code = bundleBaseCode(b.items[0]?.exam.code);
+        return code ? (
+          <span className="font-mono text-[12px]">{code}</span>
+        ) : (
+          <span className="text-slate-400">—</span>
+        );
+      }
+    },
+    {
+      key: 'practiceExams',
+      header: 'Practice Exams',
       cell: (b) =>
-        b.items[0]?.exam.code ? (
-          <span className="font-mono text-[12px]">{b.items[0].exam.code}</span>
+        b.items.length > 0 ? (
+          <div
+            className="flex max-w-[22rem] flex-nowrap items-center gap-1 overflow-x-auto"
+            title={b.items.map((i) => `${i.exam.vendor.name} ${i.exam.code} [${i.tier}]`).join('\n')}
+          >
+            {b.items.map((it) => (
+              <span
+                key={it.id}
+                className={`inline-flex shrink-0 items-center rounded px-1.5 py-0.5 font-mono text-[10px] ${
+                  it.tier === 'VOUCHER'
+                    ? 'bg-violet-50 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300'
+                    : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                }`}
+              >
+                {it.exam.code}
+              </span>
+            ))}
+          </div>
         ) : (
           <span className="text-slate-400">—</span>
         )

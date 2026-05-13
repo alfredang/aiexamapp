@@ -1005,14 +1005,47 @@ async function main() {
     }
     return null;
   }
+
+  // Map of bundle base slugs whose underlying certification has an opaque
+  // vendor exam code that can't be derived from the slug. Verified against
+  // the vendor sites in May 2026 — update when CompTIA/Cisco refresh codes.
+  const VENDOR_EXAM_CODE_OVERRIDES: Record<string, string> = {
+    'comptia-cloud-plus': 'CV0-004',
+    'comptia-server-plus': 'SK0-005',
+    'comptia-linux-plus': 'XK0-005',
+    'comptia-data-plus': 'DA0-001',
+    'comptia-network-plus': 'N10-009',
+    'comptia-security-plus': 'SY0-701',
+    'cisco-ccna': '200-301',
+    'cisco-ccnp-encor': '350-401'
+  };
+  function vendorExamCodeFor(baseSlug: string): string {
+    if (VENDOR_EXAM_CODE_OVERRIDES[baseSlug]) return VENDOR_EXAM_CODE_OVERRIDES[baseSlug];
+    const vendorSlug = VENDOR_SLUGS_BY_LENGTH.find((vs) => baseSlug === vs || baseSlug.startsWith(`${vs}-`)) ?? '';
+    return (vendorSlug ? baseSlug.slice(vendorSlug.length + 1) : baseSlug).toUpperCase();
+  }
+
   let variantsCreated = 0;
+  let variantsRecoded = 0;
   for (const b of BUNDLES) {
     for (const item of b.items) {
-      if (examMap[item.examSlug]) continue;
       const m = item.examSlug.match(/^(.+?)-(?:p|practice-)(\d+)$/);
       if (!m) continue;
       const baseSlug = m[1];
       const idx = Number(m[2]);
+      const expectedCode = `${vendorExamCodeFor(baseSlug)}-P${idx}`;
+
+      // If the variant already exists, just fix its code if needed — this
+      // recodes the existing CLOUD-PLUS-P1 → CV0-004-P1 etc. on re-seed.
+      if (examMap[item.examSlug]) {
+        const existing = await db.exam.findUnique({ where: { id: examMap[item.examSlug] }, select: { code: true } });
+        if (existing && existing.code !== expectedCode) {
+          await db.exam.update({ where: { id: examMap[item.examSlug] }, data: { code: expectedCode } });
+          variantsRecoded++;
+        }
+        continue;
+      }
+
       const baseId = examMap[baseSlug];
       let data: any;
       if (baseId) {
@@ -1020,7 +1053,7 @@ async function main() {
         if (!base) continue;
         data = {
           vendorId: base.vendorId,
-          code: `${base.code}-P${idx}`,
+          code: expectedCode,
           slug: item.examSlug,
           title: `${base.title} (Practice Exam ${idx})`,
           description: base.description,
@@ -1037,12 +1070,9 @@ async function main() {
       } else {
         const vendorId = inferVendorId(item.examSlug);
         if (!vendorId) continue;
-        // Derive a code from the base slug — strip the vendor prefix, uppercase remainder.
-        const vendorSlug = VENDOR_SLUGS_BY_LENGTH.find((vs) => baseSlug === vs || baseSlug.startsWith(`${vs}-`)) ?? '';
-        const codeBody = (vendorSlug ? baseSlug.slice(vendorSlug.length + 1) : baseSlug).toUpperCase();
         data = {
           vendorId,
-          code: `${codeBody}-P${idx}`,
+          code: expectedCode,
           slug: item.examSlug,
           title: `${b.title} (Practice Exam ${idx})`,
           description: b.description,
@@ -1062,6 +1092,7 @@ async function main() {
     }
   }
   if (variantsCreated > 0) console.log(`✓ Auto-created ${variantsCreated} variant exams from bundle references`);
+  if (variantsRecoded > 0) console.log(`✓ Recoded ${variantsRecoded} existing variant exams to current vendor exam codes`);
 
   for (const b of BUNDLES) {
     const bundle = await db.bundle.upsert({
