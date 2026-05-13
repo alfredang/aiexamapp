@@ -1061,7 +1061,6 @@ async function main() {
           durationMinutes: base.durationMinutes,
           passingScore: base.passingScore,
           questionCount: base.questionCount,
-          examSets: 1,
           infoUrl: base.infoUrl,
           label: `Practice Exam ${idx}`,
           domains: base.domains as any,
@@ -1080,7 +1079,6 @@ async function main() {
           durationMinutes: 90,
           passingScore: 70,
           questionCount: 60,
-          examSets: 1,
           label: `Practice Exam ${idx}`,
           domains: [],
           published: true

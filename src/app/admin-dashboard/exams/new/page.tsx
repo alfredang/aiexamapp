@@ -18,8 +18,6 @@ async function createExam(formData: FormData) {
   const durationMinutes = Number(formData.get('durationMinutes') || 90);
   const passingScore = Number(formData.get('passingScore') || 70);
   const questionCount = Number(formData.get('questionCount') || 60);
-  const examSetsRaw = Number(formData.get('examSets') || 1);
-  const examSets = Math.min(6, Math.max(1, Number.isFinite(examSetsRaw) ? examSetsRaw : 1));
   const infoUrlRaw = String(formData.get('infoUrl') || '').trim();
   const infoUrl = infoUrlRaw ? infoUrlRaw : null;
   const labelRaw = String(formData.get('label') || '').trim();
@@ -39,7 +37,7 @@ async function createExam(formData: FormData) {
   const created = await db.exam.create({
     data: {
       vendorId, code, title, slug, description, level,
-      durationMinutes, passingScore, questionCount, examSets, infoUrl, label,
+      durationMinutes, passingScore, questionCount, infoUrl, label,
       domains,
       published: false,
       createdById
@@ -98,9 +96,6 @@ export default async function NewExamPage() {
 
         <Field label="Questions per exam">
           <input name="questionCount" type="number" defaultValue={60} className="input" />
-        </Field>
-        <Field label="# of Exams (1-6)">
-          <input name="examSets" type="number" min={1} max={6} defaultValue={1} className="input" />
         </Field>
         <Field label="Exam Info URL (vendor page or PDF)" className="md:col-span-2">
           <input name="infoUrl" type="url" placeholder="https://vendor.example.com/exam-info" className="input" />

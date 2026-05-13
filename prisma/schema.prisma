@@ -167,7 +167,6 @@ model Exam {
   durationMinutes Int
   passingScore    Int
   questionCount   Int        // questions per practice exam attempt
-  examSets        Int        @default(1) // # of distinct practice exam sets offered (1-6)
   infoUrl         String?    // vendor's exam info page or PDF link
   label           String?    // free-form admin label, e.g. "Practice Exam 1"
   domains         Json       // [{name: string, weight: number}]

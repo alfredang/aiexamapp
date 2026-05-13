@@ -29,7 +29,7 @@ async function autoFillFromWeb(formData: FormData) {
     });
     await db.exam.update({
       where: { id },
-      data: { infoUrl: res.infoUrl, examSets: res.examSets }
+      data: { infoUrl: res.infoUrl }
     });
     await db.adminLog.create({
       data: {
@@ -37,7 +37,7 @@ async function autoFillFromWeb(formData: FormData) {
         action: 'exam.auto_fill_info',
         targetType: 'Exam',
         targetId: id,
-        metadata: { infoUrl: res.infoUrl, examSets: res.examSets, notes: res.notes ?? '' }
+        metadata: { infoUrl: res.infoUrl, notes: res.notes ?? '' }
       }
     });
   } catch (err: any) {
@@ -67,8 +67,6 @@ async function updateExam(formData: FormData) {
   const durationMinutes = Number(formData.get('durationMinutes') || 90);
   const passingScore = Number(formData.get('passingScore') || 70);
   const questionCount = Number(formData.get('questionCount') || 60);
-  const examSetsRaw = Number(formData.get('examSets') || 1);
-  const examSets = Math.min(6, Math.max(1, Number.isFinite(examSetsRaw) ? examSetsRaw : 1));
   const infoUrlRaw = String(formData.get('infoUrl') || '').trim();
   const infoUrl = infoUrlRaw ? infoUrlRaw : null;
   const labelRaw = String(formData.get('label') || '').trim();
@@ -82,7 +80,7 @@ async function updateExam(formData: FormData) {
   await db.exam.update({
     where: { id },
     data: {
-      title, code, slug, level, description, durationMinutes, passingScore, questionCount, examSets, infoUrl, label, published,
+      title, code, slug, level, description, durationMinutes, passingScore, questionCount, infoUrl, label, published,
       metaTitle, metaDescription, metaKeywords, ogImage
     }
   });
@@ -312,9 +310,6 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
         <Field label="Questions per exam">
           <input name="questionCount" type="number" min={1} defaultValue={exam.questionCount} className="input" />
         </Field>
-        <Field label="# of Exams (1-6)">
-          <input name="examSets" type="number" min={1} max={6} defaultValue={exam.examSets} className="input" />
-        </Field>
         <Field label="Exam Info URL (vendor page or PDF)" className="md:col-span-2">
           <input name="infoUrl" type="url" placeholder="https://aws.amazon.com/certification/..." defaultValue={exam.infoUrl ?? ''} className="input" />
         </Field>
@@ -356,7 +351,6 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
           <input type="hidden" name="durationMinutes" value={exam.durationMinutes} />
           <input type="hidden" name="passingScore" value={exam.passingScore} />
           <input type="hidden" name="questionCount" value={exam.questionCount} />
-          <input type="hidden" name="examSets" value={exam.examSets} />
           <input type="hidden" name="infoUrl" value={exam.infoUrl ?? ''} />
           <input type="hidden" name="label" value={exam.label ?? ''} />
           {exam.published && <input type="hidden" name="published" value="on" />}

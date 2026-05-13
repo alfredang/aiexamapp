@@ -8,7 +8,6 @@ const ResultSchema = z.object({
   infoUrl: z.string().url(),
   title: z.string().min(3).max(200).optional(),
   slug: z.string().min(2).max(80).optional(),
-  examSets: z.number().int().min(1).max(6).default(1),
   notes: z.string().optional(),
   description: z.string().min(20).max(600).optional(),
   durationMinutes: z.number().int().min(15).max(360).optional(),
@@ -191,7 +190,6 @@ Fields:
 - questionCount: total questions in one sitting (integer)
 - domains: array of { name, weight } from the published blueprint, weights as
   percentages summing to ~100. Use the exact domain names from the page.
-- examSets: 1 unless the vendor explicitly publishes multiple variants.
 
 Omit any field you cannot verify from the page. Do not invent numbers.`;
 
@@ -335,7 +333,6 @@ export async function lookupExamInfo(input: {
       }
       const merged: Record<string, any> = { ...extracted, infoUrl: url };
       if (!merged.slug) merged.slug = slugify(`${input.vendor} ${input.code}`);
-      if (!merged.examSets) merged.examSets = 1;
       const parsed = ResultSchema.safeParse(merged);
       if (!parsed.success) {
         errors.push(`${url}: ${parsed.error.issues[0]?.message}`);
@@ -362,8 +359,7 @@ export async function lookupExamInfo(input: {
         );
         const merged: Record<string, any> = { ...extracted, infoUrl: agentUrl };
         if (!merged.slug) merged.slug = slugify(`${input.vendor} ${input.code}`);
-        if (!merged.examSets) merged.examSets = 1;
-        const parsed = ResultSchema.safeParse(merged);
+          const parsed = ResultSchema.safeParse(merged);
         if (parsed.success) return parsed.data;
         errors.push(`agent ${agentUrl}: ${parsed.error.issues[0]?.message}`);
       } else {

@@ -121,7 +121,6 @@ async function duplicateExam(formData: FormData) {
       durationMinutes: orig.durationMinutes,
       passingScore: orig.passingScore,
       questionCount: orig.questionCount,
-      examSets: orig.examSets,
       infoUrl: orig.infoUrl,
       label: orig.label,
       domains: orig.domains as any,
@@ -295,7 +294,6 @@ export default async function AdminExamsPage({
       header: 'Status',
       cell: (e) => <StatusBadge status={e.published ? 'ACTIVE' : 'INACTIVE'} />
     },
-    { key: 'examSets', header: '# Exams', cell: (e) => e.examSets, align: 'right' },
     { key: 'qPerExam', header: 'Q / Exam', cell: (e) => e.questionCount, align: 'right' },
     { key: 'duration', header: 'Duration', cell: (e) => `${e.durationMinutes} min`, align: 'right' },
     {
