@@ -54,19 +54,11 @@ export async function Footer() {
           </div>
           <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Practice smarter for your next certification.</p>
           <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-            Our mission is to help working professionals pass their next IT certification with confidence — without resorting to brain dumps. Every question on ExamNova is an original, blueprint-aligned practice item written by domain experts, paired with a clear explanation and a citation so you learn the <em>why</em>, not just the answer.
+            Original, blueprint-aligned practice questions — written by domain experts, with explanations and citations. No brain dumps.
           </p>
           <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-            We bundle multiple full-length practice exams with an optional discounted real-exam voucher, so one purchase covers your full prep journey from first attempt to test day.
+            Bundle multiple full-length practice exams with an optional discounted real-exam voucher — one purchase, full prep to test day.
           </p>
-          {company.address && (
-            <p className="mt-4 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-              {company.name}
-              {company.uen ? ` · ${company.uen}` : ''}
-              <br />
-              {company.address}
-            </p>
-          )}
         </div>
 
         <div>
@@ -114,28 +106,24 @@ export async function Footer() {
                 </a>
               </li>
             )}
-            <li className="pt-2">
-              <Link href="/practice-exams" className="hover:text-slate-900 hover:underline dark:hover:text-slate-100">
-                Browse exams
-              </Link>
-            </li>
-            {companyLinks.map((p) => (
-              <li key={p.slug}>
-                <Link href={`/p/${p.slug}`} className="hover:text-slate-900 hover:underline dark:hover:text-slate-100">
-                  {p.title}
-                </Link>
-              </li>
-            ))}
           </ul>
         </div>
 
         <div>
           <h4 className="text-sm font-semibold">Useful Links</h4>
           <ul className="mt-2 space-y-1 text-sm text-slate-600 dark:text-slate-400">
+            <li>
+              <Link href="/practice-exams" className="hover:text-slate-900 hover:underline dark:hover:text-slate-100">
+                Browse exams
+              </Link>
+            </li>
             {(() => {
-              const wanted = ['about-us', 'privacy-policy', 'refund-policy'];
-              const bySlug = new Map(legalLinks.map((p) => [p.slug, p]));
+              const wanted = ['how-it-works', 'about-us', 'privacy-policy', 'refund-policy'];
+              const bySlug = new Map(
+                [...legalLinks, ...companyLinks].map((p) => [p.slug, p])
+              );
               const fallbackTitles: Record<string, string> = {
+                'how-it-works': 'How it works',
                 'about-us': 'About Us',
                 'privacy-policy': 'Privacy',
                 'refund-policy': 'Refund Policy'

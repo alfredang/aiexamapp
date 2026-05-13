@@ -3,12 +3,28 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
 import { getSetting } from '@/lib/settings';
+import { DEFAULT_PAGES } from '@/lib/pages';
 
 export const dynamic = 'force-dynamic';
 
+// Falls back to the DEFAULT_PAGES seed content when a page hasn't been
+// materialized into the DB yet — avoids a 404 on first visit before an
+// admin has opened /admin-dashboard/pages (which triggers seedDefaultPages).
+async function loadPage(slug: string) {
+  const row = await db.page.findUnique({ where: { slug } });
+  if (row && row.published) {
+    return { title: row.title, excerpt: row.excerpt, bodyHtml: row.bodyHtml };
+  }
+  const def = DEFAULT_PAGES.find((p) => p.slug === slug);
+  if (def) {
+    return { title: def.title, excerpt: def.excerpt, bodyHtml: def.bodyHtml };
+  }
+  return null;
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const page = await db.page.findUnique({ where: { slug } });
+  const page = await loadPage(slug);
   if (!page) return { title: 'Not found' };
   return { title: page.title, description: page.excerpt ?? undefined };
 }
@@ -28,8 +44,8 @@ async function renderPlaceholders(html: string): Promise<string> {
 
 export default async function PublicPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const page = await db.page.findUnique({ where: { slug } });
-  if (!page || !page.published) return notFound();
+  const page = await loadPage(slug);
+  if (!page) return notFound();
   const bodyHtml = await renderPlaceholders(page.bodyHtml);
 
   return (
