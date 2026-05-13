@@ -237,20 +237,17 @@ export default async function AdminBundlesPage({ searchParams }: { searchParams:
     {
       key: 'practiceExams',
       header: 'Practice Exams',
-      cell: (b) =>
-        b.items.length > 0 ? (
+      cell: (b) => {
+        const practiceItems = b.items.filter((it) => it.tier === 'PRACTICE');
+        return practiceItems.length > 0 ? (
           <div
             className="flex max-w-[22rem] flex-nowrap items-center gap-1 overflow-x-auto"
-            title={b.items.map((i) => `${i.exam.vendor.name} ${i.exam.code} [${i.tier}]`).join('\n')}
+            title={practiceItems.map((i) => `${i.exam.vendor.name} ${i.exam.code}`).join('\n')}
           >
-            {b.items.map((it) => (
+            {practiceItems.map((it) => (
               <span
                 key={it.id}
-                className={`inline-flex shrink-0 items-center rounded px-1.5 py-0.5 font-mono text-[10px] ${
-                  it.tier === 'VOUCHER'
-                    ? 'bg-violet-50 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300'
-                    : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
-                }`}
+                className="inline-flex shrink-0 items-center rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-700 dark:bg-slate-800 dark:text-slate-300"
               >
                 {it.exam.code}
               </span>
@@ -258,7 +255,8 @@ export default async function AdminBundlesPage({ searchParams }: { searchParams:
           </div>
         ) : (
           <span className="text-slate-400">—</span>
-        )
+        );
+      }
     },
     { key: 'level', header: 'Level', cell: (b) => b.items[0]?.exam.level ?? '—' },
     {
