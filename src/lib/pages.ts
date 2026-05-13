@@ -15,6 +15,25 @@ const HEADING = (s: string) => `<h2 style="margin:24px 0 8px;font-size:1.25rem;f
 
 export const DEFAULT_PAGES: PageDefault[] = [
   {
+    slug: 'about-us',
+    title: 'About Us',
+    excerpt: 'About ExamNova and Tertiary Infotech Academy.',
+    showInFooter: true,
+    footerGroup: 'legal',
+    position: 5,
+    bodyHtml: [
+      PARA('ExamNova is the certification-practice arm of <strong>Tertiary Infotech Academy Pte Ltd</strong>, a Singapore-registered training provider (UEN 201200696W) that has been helping IT professionals grow their careers for over a decade.'),
+      HEADING('What we do'),
+      PARA('We build original, blueprint-aligned practice exams for the certifications our learners care about most — AWS, Microsoft Azure, Google Cloud, CompTIA, Cisco, PMI, ISC2, and more. Every question is written by domain experts and paired with a clear explanation and a reference link, so you learn the why, not just the answer.'),
+      HEADING('How we are different'),
+      PARA('We are not a brain-dump site. Every question is original, mapped to the published exam blueprint, and reviewed before release. You get bundle pricing that includes multiple full-length practice exams plus an optional discounted real-exam voucher — everything you need to sit the test with confidence.'),
+      HEADING('Who we are'),
+      PARA('Our parent company, Tertiary Infotech Academy, has trained thousands of working professionals across Southeast Asia in classroom and online courses on cloud, data, AI, cybersecurity, and project management. ExamNova brings that same rigour to self-paced exam preparation.'),
+      HEADING('Get in touch'),
+      PARA('Email: <a href="mailto:sales@tertiarycourses.com.sg" style="color:#2563eb;text-decoration:underline">sales@tertiarycourses.com.sg</a><br>Tel: +65 6100 0613<br>Address: 12 Woodland Square #07-85/86/87 Woods Square Tower 1, Singapore 737715')
+    ].join('')
+  },
+  {
     slug: 'how-it-works',
     title: 'How it works',
     excerpt: 'How to study with our practice exams.',

@@ -224,12 +224,11 @@ export default async function AdminBundlesPage({ searchParams }: { searchParams:
     },
     {
       key: 'code',
-      header: 'Exam Code',
-      headerClassName: 'w-24',
+      header: <span className="block w-20">Code</span>,
       cell: (b) => {
         const code = bundleBaseCode(b.items[0]?.exam.code);
         return code ? (
-          <span className="whitespace-nowrap font-mono text-[12px]">{code}</span>
+          <span className="block w-20 truncate font-mono text-[11px]" title={code}>{code}</span>
         ) : (
           <span className="text-slate-400">—</span>
         );

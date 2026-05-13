@@ -271,7 +271,7 @@ export default async function AdminExamsPage({
           href={`/admin-dashboard/exams/${e.id}`}
           className="font-medium text-slate-900 hover:underline dark:text-slate-100"
         >
-          {e.title.split(' — ')[0]}
+          {e.title.split(' — ')[0].replace(/\s*\(Practice Exam\s+\d+\)\s*$/i, '')}
         </Link>
       )
     },

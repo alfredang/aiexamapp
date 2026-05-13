@@ -154,8 +154,8 @@ export const COMPANY_DEFAULTS: CompanyInfo = {
   shortName: 'Tertiary Infotech Academy',
   uen: '201200696W',
   address: '12 Woodland Square #07-85/86/87 Woods Square Tower 1, Singapore 737715',
-  email: 'enquiry@tertiaryinfotech.com',
-  tel: '61000613',
+  email: 'sales@tertiarycourses.com.sg',
+  tel: '+6561000613',
   website: 'https://www.tertiarycourses.com.sg/'
 };
 

@@ -19,7 +19,7 @@ Practice smarter for your next certification. End-to-end e-commerce admin + AI-a
 
 ExamNova is a full-stack practice-exam platform with a production-grade admin backend:
 
-- **Customer surface** — vendor catalog, free teaser, paid practice exams + voucher delivery, multi-provider checkout (PayPal · HitPay · PayNow), invoices.
+- **Customer surface** — vendor catalog, free teaser, **bundle-only purchases** (multiple practice exams + optional real-exam voucher, sold together — no per-exam SKUs), multi-provider checkout (PayPal · HitPay · PayNow), invoices.
 - **Admin backend** — compact dashboard with KPI cards, drill-down reports, RBAC, audit log, notifications bell, ⌘K global search.
 - **AI-assisted authoring** — four modes to create exam questions (Manual · Blueprint · PDF · Web-scrape) using Claude Agent SDK + Firecrawl.
 - **Money layer** — sequential invoice + order numbering, tax (GST) engine, multi-currency display, refunds with provider APIs + auto credit-note minting, coupon engine.
@@ -39,21 +39,21 @@ npm run dev -- -p 3040 -H 127.0.0.1
 ## Key routes
 
 ### Public marketing
-- `/` — homepage with hero, vendor grid, popular exams, FAQ
-- `/practice-exams` — catalog (vendors, levels, search, pagination)
-- `/practice-exams/[vendor]/[slug]` — exam detail with per-domain blueprint + Practice/Voucher tier prices
+- `/` — homepage with hero, vendor grid, popular bundles, FAQ
+- `/practice-exams` — bundle catalog (vendors, levels, search, pagination — auto-filters on vendor/level change)
+- `/practice-exams/[vendor]/[slug]` — **bundle detail** with per-domain blueprint + PRACTICE / PRACTICE+VOUCHER prices (bundles are the only thing you can buy)
 - `/practice-exams/[vendor]/[slug]/teaser` — free practice teaser (count configurable via admin)
 - `/exam/[attemptId]` — unified runner for Practice + Exam modes (questions always shuffled)
 - `/results/[attemptId]` — per-domain breakdown + review
-- `/checkout/[examId]?tier=...` — checkout with PayPal · HitPay · PayNow + promo code input
-- `/sitemap.xml` — auto-generated from published exams + pages
+- `/checkout/[bundleId]?tier=PRACTICE|VOUCHER` — checkout with PayPal · HitPay · PayNow + promo code input
+- `/sitemap.xml` — auto-generated from published bundles + pages
 
 ### Authenticated user
 - `/user-dashboard` — overview · exams · attempts · orders · invoices · vouchers · settings (theme picker)
 
 ### Admin (`/admin-dashboard`)
 - **Overview** — KPI dashboard (revenue today/7d/30d/MTD · refund rate · signups · active learners · tax MTD)
-- **Catalog** — View Exams · Create Exam (with AI Assist to populate description/duration/passing/questionCount/domains) · Bundles · Vendors
+- **Catalog** — Vendors · Exams (questions live here, but exams are not directly sold) · **Bundles** (the unit of sale — group multiple practice exams ± a real-exam voucher into one product, set bundle price + optional voucher price)
 - **Money** — Orders · Invoices · Vouchers (Deliveries + Inventory) · Coupons · Webhook Events
 - **Reports** — Revenue · Tax (GST) · Exam analytics — all with date-range pickers + CSV exports
 - **People** — Users (detail tabs, tags, notes, impersonate, GDPR export) · Admins

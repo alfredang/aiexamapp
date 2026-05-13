@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { db } from '@/lib/db';
 import { formatPrice } from '@/lib/utils';
+import { CatalogFilters } from './filters';
 
 const PAGE_SIZE = 9;
 
@@ -72,18 +73,13 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
         <p className="mt-1 text-slate-600">Browse certifications across leading vendors. Try our free practice teaser on every exam.</p>
       </div>
 
-      <form className="mb-6 flex flex-wrap gap-2">
-        <input name="q" defaultValue={q} placeholder="Search by name or code" className="input max-w-md" />
-        <select name="vendor" defaultValue={sp.vendor || ''} className="input max-w-[180px]">
-          <option value="">All vendors</option>
-          {vendors.map(v => <option key={v.id} value={v.slug}>{v.name}</option>)}
-        </select>
-        <select name="level" defaultValue={sp.level || ''} className="input max-w-[160px]">
-          <option value="">All levels</option>
-          {levels.map(l => <option key={l} value={l}>{l}</option>)}
-        </select>
-        <button className="btn-primary">Filter</button>
-      </form>
+      <CatalogFilters
+        q={q}
+        vendor={sp.vendor || ''}
+        level={sp.level || ''}
+        vendors={vendors.map(v => ({ id: v.id, slug: v.slug, name: v.name }))}
+        levels={levels}
+      />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {pageCards.map(card => {
