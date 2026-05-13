@@ -1,25 +1,22 @@
 /**
- * Seeds CKAD practice questions for the three Linux Foundation CKAD
- * practice-exam variants (linuxfoundation-ckad-p1/p2/p3). Each variant
- * gets 20 PUBLISHED questions whose domain distribution matches the
- * CNCF CKAD v1.35 blueprint:
+ * CKAD bundle seed — vendor, three practice-exam variants, bundle,
+ * and 60 blueprint-aligned questions. Idempotent: replaces rows
+ * tagged `generatedBy: 'manual:ckad-seed'` and upserts catalog rows.
+ *
+ * Exported as `seedCkad(db)` so the same code path is reachable from
+ * the standalone CLI shim (`prisma/seeds/ckad.ts`) and the protected
+ * admin API (`/api/admin/seed-ckad`) — letting us bootstrap the
+ * production database without redeploying.
+ *
+ * Question content is authored against the public ckad-prep-master
+ * labs and the CNCF CKAD v1.35 blueprint:
  *   - Application Design and Build                       — 20% (4)
  *   - Application Deployment                             — 20% (4)
  *   - Application Observability and Maintenance          — 15% (3)
  *   - Application Environment, Configuration and Security— 25% (5)
  *   - Services and Networking                            — 20% (4)
- *
- * Question content references the public ckad-prep-master lab notes
- * (commands, manifests, troubleshooting patterns).
- *
- * Idempotent: deletes existing questions for these exam slugs before
- * inserting, so re-running this script replaces the question set.
- *
- *   npx tsx prisma/seeds/ckad-questions.ts
  */
 import { PrismaClient, QStatus, QType } from '@prisma/client';
-
-const db = new PrismaClient();
 
 type Opt = { id: string; text: string };
 type Q = {
@@ -883,25 +880,95 @@ const P3: Q[] = [
   }
 ];
 
-const EXAM_SLUGS = [
-  { slug: 'linuxfoundation-ckad-p1', questions: P1 },
-  { slug: 'linuxfoundation-ckad-p2', questions: P2 },
-  { slug: 'linuxfoundation-ckad-p3', questions: P3 }
+const CKAD_DOMAINS = [
+  { name: DESIGN, weight: 20 },
+  { name: DEPLOY, weight: 20 },
+  { name: OBSERV, weight: 15 },
+  { name: CONFIG, weight: 25 },
+  { name: NET, weight: 20 }
 ];
 
-async function main() {
-  for (const { slug, questions } of EXAM_SLUGS) {
-    const exam = await db.exam.findUnique({ where: { slug } });
-    if (!exam) {
-      console.error(`✗ Exam not found: ${slug}. Run \`npm run db:seed\` first.`);
-      process.exit(1);
-    }
-    if (questions.length !== exam.questionCount) {
-      console.warn(`⚠ ${slug}: authored ${questions.length} questions but exam.questionCount = ${exam.questionCount}`);
-    }
+const CKAD_EXAMS: { slug: string; code: string; titleSuffix: string; descriptionSuffix: string; questions: Q[] }[] = [
+  {
+    slug: 'linuxfoundation-ckad-p1',
+    code: 'CKAD-P1',
+    titleSuffix: 'Practice Exam 1',
+    descriptionSuffix: 'Practice exam 1 of 3 — full 120-minute, 20-question, blueprint-weighted set covering Pods, Deployments, Jobs, ConfigMaps/Secrets, SecurityContexts, ServiceAccounts, probes, multi-container patterns, Services, NetworkPolicies, and Ingress.',
+    questions: P1
+  },
+  {
+    slug: 'linuxfoundation-ckad-p2',
+    code: 'CKAD-P2',
+    titleSuffix: 'Practice Exam 2',
+    descriptionSuffix: 'Practice exam 2 of 3 — a second 120-minute, 20-question, blueprint-weighted set.',
+    questions: P2
+  },
+  {
+    slug: 'linuxfoundation-ckad-p3',
+    code: 'CKAD-P3',
+    titleSuffix: 'Practice Exam 3',
+    descriptionSuffix: 'Practice exam 3 of 3 — a third 120-minute, 20-question, blueprint-weighted set.',
+    questions: P3
+  }
+];
+
+const CKAD_BUNDLE = {
+  slug: 'linuxfoundation-ckad',
+  title: 'Certified Kubernetes Application Developer (CKAD)',
+  description: 'All 3 CKAD practice exams in one bundle — covering application design & build, deployment, observability & maintenance, environment/configuration/security, and services & networking, aligned to CNCF CKAD v1.35.',
+  price: 2000, // USD 20 — PRACTICE tier
+  priceVoucher: 39500 // USD 395 — VOUCHER tier (matches CKAD real-exam fee)
+};
+
+type SeedResult = {
+  vendor: 'created' | 'updated';
+  exams: { slug: string; questionCount: number; teaserCount: number }[];
+  bundle: 'created' | 'updated';
+};
+
+/**
+ * Idempotent seed for the CKAD bundle. Safe to call repeatedly — vendor /
+ * exam / bundle rows are upserted, and questions tagged
+ * `generatedBy: 'manual:ckad-seed'` are deleted and re-created.
+ *
+ * Pass an existing PrismaClient (lifecycle managed by caller).
+ */
+export async function seedCkad(db: PrismaClient): Promise<SeedResult> {
+  const existingVendor = await db.vendor.findUnique({ where: { slug: 'linuxfoundation' } });
+  await db.vendor.upsert({
+    where: { slug: 'linuxfoundation' },
+    update: { name: 'Linux Foundation', description: 'CNCF / Linux Foundation certifications — CKAD, CKA, CKS, and other open-source ecosystem credentials.' },
+    create: { slug: 'linuxfoundation', name: 'Linux Foundation', description: 'CNCF / Linux Foundation certifications — CKAD, CKA, CKS, and other open-source ecosystem credentials.' }
+  });
+  const vendor = await db.vendor.findUniqueOrThrow({ where: { slug: 'linuxfoundation' } });
+
+  const examResults: SeedResult['exams'] = [];
+  const examIds: Record<string, string> = {};
+
+  for (const e of CKAD_EXAMS) {
+    const title = `Certified Kubernetes Application Developer (CKAD) — ${e.titleSuffix}`;
+    const description = `${e.descriptionSuffix} Aligned to CNCF CKAD v1.35.`;
+    const examData = {
+      title,
+      code: e.code,
+      description,
+      level: 'Associate',
+      durationMinutes: 120,
+      passingScore: 66,
+      questionCount: e.questions.length,
+      domains: CKAD_DOMAINS,
+      published: true
+    };
+    const exam = await db.exam.upsert({
+      where: { slug: e.slug },
+      update: examData,
+      create: { ...examData, slug: e.slug, vendorId: vendor.id }
+    });
+    examIds[e.slug] = exam.id;
+
     await db.question.deleteMany({ where: { examId: exam.id, generatedBy: 'manual:ckad-seed' } });
     let teaserCount = 0;
-    for (const q of questions) {
+    for (const q of e.questions) {
       await db.question.create({
         data: {
           examId: exam.id,
@@ -920,8 +987,46 @@ async function main() {
       });
       if (q.isTeaser) teaserCount++;
     }
-    console.log(`✓ ${slug}: ${questions.length} questions seeded (${teaserCount} teaser).`);
+    examResults.push({ slug: e.slug, questionCount: e.questions.length, teaserCount });
   }
-}
 
-main().catch((e) => { console.error(e); process.exit(1); }).finally(async () => { await db.$disconnect(); });
+  const existingBundle = await db.bundle.findUnique({ where: { slug: CKAD_BUNDLE.slug } });
+  const bundle = await db.bundle.upsert({
+    where: { slug: CKAD_BUNDLE.slug },
+    update: {
+      title: CKAD_BUNDLE.title,
+      description: CKAD_BUNDLE.description,
+      price: CKAD_BUNDLE.price,
+      priceVoucher: CKAD_BUNDLE.priceVoucher,
+      published: true
+    },
+    create: {
+      slug: CKAD_BUNDLE.slug,
+      title: CKAD_BUNDLE.title,
+      description: CKAD_BUNDLE.description,
+      price: CKAD_BUNDLE.price,
+      priceVoucher: CKAD_BUNDLE.priceVoucher,
+      published: true
+    }
+  });
+
+  // Replace bundle items deterministically: drop existing, recreate.
+  await db.bundleItem.deleteMany({ where: { bundleId: bundle.id } });
+  const items = [
+    { examSlug: 'linuxfoundation-ckad-p1', tier: 'PRACTICE' as const, position: 1 },
+    { examSlug: 'linuxfoundation-ckad-p2', tier: 'PRACTICE' as const, position: 2 },
+    { examSlug: 'linuxfoundation-ckad-p3', tier: 'PRACTICE' as const, position: 3 },
+    { examSlug: 'linuxfoundation-ckad-p1', tier: 'VOUCHER' as const, position: 4 }
+  ];
+  for (const it of items) {
+    await db.bundleItem.create({
+      data: { bundleId: bundle.id, examId: examIds[it.examSlug], tier: it.tier, position: it.position }
+    });
+  }
+
+  return {
+    vendor: existingVendor ? 'updated' : 'created',
+    exams: examResults,
+    bundle: existingBundle ? 'updated' : 'created'
+  };
+}
