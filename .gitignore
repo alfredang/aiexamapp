@@ -19,3 +19,9 @@ practice-exams-pdfs-*/
 !.claude/agents/
 !.claude/skills/**
 !.claude/agents/**
+
+# Local debug screenshots from playwright-mcp runs
+/ai-assist-before.png
+/edit-ai-assist.png
+/page-editor.png
+/page-editor-v2.png

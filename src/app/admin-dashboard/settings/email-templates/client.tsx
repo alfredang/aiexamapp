@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ChevronDown, ExternalLink } from 'lucide-react';
+import { RichHtmlEditor } from '@/components/admin/rich-html-editor';
 
 export type TemplateRow = {
   key: string;
@@ -240,15 +241,18 @@ function ExpandedEditor({
         />
       </label>
 
-      <label className="block text-sm sm:col-span-2">
-        <span className="mb-1 block text-slate-600 dark:text-slate-300">Body (Handlebars HTML)</span>
-        <textarea
+      <div className="block text-sm sm:col-span-2">
+        <span className="mb-1 block text-slate-600 dark:text-slate-300">Body</span>
+        <span className="mb-1 block text-[11px] text-slate-500">
+          Toggle Source to edit Handlebars HTML directly, or use the toolbar for rich text. Click AI Assist to draft.
+        </span>
+        <RichHtmlEditor
           value={bodyHtml}
-          onChange={(e) => setBodyHtml(e.target.value)}
-          spellCheck={false}
-          className="h-56 w-full rounded border border-slate-300 bg-white px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-900"
+          onChange={setBodyHtml}
+          aiContext={{ kind: 'email', subject }}
+          className="h-56"
         />
-      </label>
+      </div>
 
       <div className="sm:col-span-2 flex flex-wrap items-center gap-3">
         <label className="flex items-center gap-2 text-sm">

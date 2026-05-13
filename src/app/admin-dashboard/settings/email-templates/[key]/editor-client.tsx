@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
+import { RichHtmlEditor } from '@/components/admin/rich-html-editor';
 
 type Props = {
   templateKey: string;
@@ -84,13 +85,17 @@ export default function EditorClient({ templateKey, initial, defaults, sampleVar
             onChange={(e) => setSubject(e.target.value)}
             className="mt-1 w-full rounded border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
           />
-          <label className="mt-3 block text-sm font-medium">Body (Handlebars HTML)</label>
-          <textarea
-            value={bodyHtml}
-            onChange={(e) => setBodyHtml(e.target.value)}
-            spellCheck={false}
-            className="mt-1 h-72 w-full rounded border border-slate-300 bg-white px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-900"
-          />
+          <label className="mt-3 block text-sm font-medium">Body</label>
+          <p className="mt-0.5 text-[11px] text-slate-500">
+            Toggle Source to edit Handlebars HTML directly, or use the toolbar for rich text. Click AI Assist to draft or rewrite the body.
+          </p>
+          <div className="mt-1">
+            <RichHtmlEditor
+              value={bodyHtml}
+              onChange={setBodyHtml}
+              aiContext={{ kind: 'email', subject }}
+            />
+          </div>
           <div className="mt-3 flex items-center gap-3">
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />

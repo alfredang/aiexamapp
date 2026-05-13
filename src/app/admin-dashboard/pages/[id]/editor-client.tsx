@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { RichHtmlEditor } from '@/components/admin/rich-html-editor';
 
 type Props = {
   id: string | null;
@@ -75,13 +76,17 @@ export default function PageEditorClient({ id, initial }: Props) {
           <label className="mt-3 block text-sm font-medium">Excerpt (optional)</label>
           <input value={excerpt} onChange={(e) => setExcerpt(e.target.value)} className="mt-1 input" />
 
-          <label className="mt-3 block text-sm font-medium">Body (HTML)</label>
-          <textarea
-            value={bodyHtml}
-            onChange={(e) => setBodyHtml(e.target.value)}
-            spellCheck={false}
-            className="mt-1 h-72 w-full rounded border border-slate-300 bg-white px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-900"
-          />
+          <label className="mt-3 block text-sm font-medium">Body</label>
+          <p className="mt-0.5 text-[11px] text-slate-500">
+            Use the toolbar for rich text, or toggle Source to edit HTML. <code>{'{{TEASER_N}}'}</code> is substituted with the live teaser size at render time. Click AI Assist to draft.
+          </p>
+          <div className="mt-1">
+            <RichHtmlEditor
+              value={bodyHtml}
+              onChange={setBodyHtml}
+              aiContext={{ kind: 'page', title }}
+            />
+          </div>
         </div>
 
         <div className="card p-4 space-y-3 text-sm">
