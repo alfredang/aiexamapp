@@ -88,7 +88,7 @@ export async function Footer() {
           <ul className="mt-2 space-y-1 text-sm text-slate-600 dark:text-slate-400">
             <li className="font-medium text-slate-700 dark:text-slate-300">{company.name}</li>
             {company.address && (
-              <li className="text-xs leading-relaxed">{company.address}</li>
+              <li className="leading-relaxed">Address: {company.address}</li>
             )}
             {company.email && (
               <li>
