@@ -3,9 +3,9 @@ import { z } from 'zod';
 import { getSetting } from '@/lib/settings';
 
 const Schema = z.object({
-  title: z.string().min(10).max(70),
-  description: z.string().min(50).max(180),
-  keywords: z.string().min(5).max(200)
+  title: z.string().min(10).max(120),
+  description: z.string().min(40).max(320),
+  keywords: z.string().min(5).max(500)
 });
 export type SeoMeta = z.infer<typeof Schema>;
 
@@ -49,5 +49,12 @@ Return JSON only.`;
   if (start === -1 || end === -1) throw new Error('No JSON returned');
   const parsed = Schema.safeParse(JSON.parse(cleaned.slice(start, end + 1)));
   if (!parsed.success) throw new Error(`Invalid SEO payload: ${parsed.error.issues[0]?.message}`);
-  return parsed.data;
+  // Trim to recommended SEO limits AFTER parsing — preserves the AI output
+  // intent while keeping stored values within search-engine display caps.
+  const data = parsed.data;
+  return {
+    title: data.title.slice(0, 70).trim(),
+    description: data.description.slice(0, 180).trim(),
+    keywords: data.keywords.slice(0, 200).trim()
+  };
 }

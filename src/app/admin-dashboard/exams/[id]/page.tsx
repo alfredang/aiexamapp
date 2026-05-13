@@ -3,6 +3,8 @@ import { notFound, redirect } from 'next/navigation';
 import { db } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/lib/auth';
+import { Sparkles } from 'lucide-react';
+import { SubmitBusyButton } from '@/components/admin/submit-busy-button';
 
 async function requireAdmin() {
   const session = await auth();
@@ -281,9 +283,11 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
           <h2 className="text-[13px] font-semibold text-slate-800 dark:text-slate-100">SEO meta</h2>
           <form action={runSeoAssist}>
             <input type="hidden" name="id" value={exam.id} />
-            <button className="inline-flex h-7 items-center rounded-md bg-violet-600 px-2.5 text-[11px] font-medium text-white hover:bg-violet-700">
-              AI Assist — generate now
-            </button>
+            <SubmitBusyButton
+              idleLabel={<><Sparkles className="mr-1 h-3 w-3" /> AI Assist — generate now</>}
+              busyLabel={<>Generating with Claude…</>}
+              className="inline-flex h-7 items-center rounded-md bg-violet-600 px-2.5 text-[11px] font-medium text-white hover:bg-violet-700 disabled:cursor-wait disabled:bg-violet-400"
+            />
           </form>
         </div>
         <form action={updateExam} className="grid gap-3 md:grid-cols-2">
