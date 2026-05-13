@@ -8,7 +8,7 @@
 }
 
 @layer components {
-  .container-app { @apply mx-auto w-full max-w-6xl px-4 sm:px-6; }
+  .container-app { @apply mx-auto w-full px-4 sm:px-6 lg:px-10 xl:px-16; }
   .btn { @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition; }
   .btn-primary { @apply btn bg-brand text-white hover:bg-brand-700; }
   .btn-primary-grad { @apply btn rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-sm hover:from-blue-700 hover:to-purple-700; }

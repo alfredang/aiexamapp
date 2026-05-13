@@ -1,6 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import Script from 'next/script';
 import { Nav } from '@/components/nav';
 import { Footer, PersistentCopyright } from '@/components/footer';
 import { FooterGate } from '@/components/footer-gate';
@@ -44,10 +45,8 @@ const themeInitScript = `(function(){try{
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-      </head>
       <body className="min-h-screen flex flex-col bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+        <Script id="theme-init" strategy="beforeInteractive">{themeInitScript}</Script>
         <AuthProvider>
           <Nav />
           <main className="flex-1">{children}</main>

@@ -8,6 +8,7 @@ import { BuyTierForm } from './buy-tier-form';
 import { BundleAsExamView } from './bundle-as-exam-view';
 import { ExamReviews } from '@/components/exam-reviews';
 import { getExamRatingSummary } from '@/lib/reviews';
+import { ShareExam } from '@/components/share-exam';
 
 export async function generateMetadata({ params }: { params: Promise<{ vendor: string; slug: string }> }) {
   const { slug } = await params;
@@ -179,6 +180,8 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ ven
               ))}
             </ul>
           </div>
+
+          <ShareExam vendorSlug={exam.vendor.slug} examSlug={exam.slug} title={`${exam.vendor.name} ${exam.code} — ${exam.title}`} />
 
           <ExamReviews examId={exam.id} examTitle={exam.title} />
 
