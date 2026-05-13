@@ -15,7 +15,6 @@ type BundleItem = {
     questionCount: number;
     durationMinutes: number;
     passingScore: number;
-    pricePractice: number;
     domains: any;
     vendor: { slug: string; name: string };
   };

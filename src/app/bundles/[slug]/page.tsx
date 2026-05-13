@@ -23,14 +23,6 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ s
   const userId = (session?.user as any)?.id as string | undefined;
   const isFree = bundle.price === 0;
 
-  // Compute "you save" — sum of individual prices vs bundle price
-  const individualTotal = bundle.items.reduce((sum, item) => {
-    if (item.tier === 'PRACTICE') return sum + item.exam.pricePractice;
-    if (item.tier === 'VOUCHER') return sum + item.exam.priceVoucher;
-    return sum;
-  }, 0);
-  const savings = Math.max(0, individualTotal - bundle.price);
-
   return (
     <div className="container-app max-w-4xl py-10">
       <div className="mb-2 text-sm">
@@ -86,14 +78,9 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ s
             <div className="mt-1 text-3xl font-bold text-slate-900 dark:text-slate-100">
               {isFree ? 'Free' : formatPrice(bundle.price)}
             </div>
-            {!isFree && savings > 0 && (
-              <div className="mt-1 text-sm text-emerald-700 dark:text-emerald-300">
-                You save {formatPrice(savings)} vs buying separately
-              </div>
-            )}
-            {isFree && (
-              <div className="mt-1 text-sm text-emerald-700 dark:text-emerald-300">
-                Worth {formatPrice(individualTotal)} — claim it at no charge
+            {bundle.priceVoucher != null && !isFree && (
+              <div className="mt-1 text-sm text-slate-500 dark:text-slate-300">
+                Practice + Exam voucher · {formatPrice(bundle.priceVoucher)}
               </div>
             )}
             {!userId ? (

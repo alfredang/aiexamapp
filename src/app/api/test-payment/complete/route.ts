@@ -13,22 +13,14 @@ import { z } from 'zod';
 import { db } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { fulfillOrder } from '@/lib/fulfill';
-import { priceForTier } from '@/lib/utils';
 import { nextNumber } from '@/lib/numbering';
 import type { Tier } from '@prisma/client';
 
-const Body = z.discriminatedUnion('kind', [
-  z.object({
-    kind: z.literal('exam'),
-    examId: z.string(),
-    tier: z.enum(['PRACTICE', 'BUNDLE', 'VOUCHER'])
-  }),
-  z.object({
-    kind: z.literal('bundle'),
-    bundleId: z.string(),
-    tier: z.enum(['PRACTICE', 'VOUCHER']).optional()
-  })
-]);
+const Body = z.object({
+  kind: z.literal('bundle'),
+  bundleId: z.string().min(1),
+  tier: z.enum(['PRACTICE', 'VOUCHER']).optional()
+});
 
 export async function POST(req: Request) {
   if (process.env.NEXT_PUBLIC_TEST_PAYMENTS !== 'true') {
@@ -42,45 +34,25 @@ export async function POST(req: Request) {
   const body = Body.parse(await req.json());
   const testId = `TEST_${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
 
-  let order;
-  if (body.kind === 'exam') {
-    const exam = await db.exam.findUnique({ where: { id: body.examId } });
-    if (!exam) return NextResponse.json({ error: 'Exam not found' }, { status: 404 });
-    const amount = priceForTier(exam, body.tier as Tier);
-    const number = await nextNumber('ORDER', 'ORD');
-    order = await db.order.create({
-      data: {
-        number,
-        userId,
-        examId: body.examId,
-        tier: body.tier as Tier,
-        amount,
-        currency: 'USD',
-        status: 'PENDING',
-        paypalOrderId: testId
-      }
-    });
-  } else {
-    const bundle = await db.bundle.findUnique({ where: { id: body.bundleId } });
-    if (!bundle || !bundle.published) {
-      return NextResponse.json({ error: 'Bundle not found' }, { status: 404 });
-    }
-    const tier = body.tier === 'VOUCHER' && bundle.priceVoucher != null ? 'VOUCHER' : 'PRACTICE';
-    const amount = tier === 'VOUCHER' ? bundle.priceVoucher! : bundle.price;
-    const number = await nextNumber('ORDER', 'ORD');
-    order = await db.order.create({
-      data: {
-        number,
-        userId,
-        bundleId: body.bundleId,
-        tier: tier as Tier,
-        amount,
-        currency: 'USD',
-        status: 'PENDING',
-        paypalOrderId: testId
-      }
-    });
+  const bundle = await db.bundle.findUnique({ where: { id: body.bundleId } });
+  if (!bundle || !bundle.published) {
+    return NextResponse.json({ error: 'Bundle not found' }, { status: 404 });
   }
+  const tier = body.tier === 'VOUCHER' && bundle.priceVoucher != null ? 'VOUCHER' : 'PRACTICE';
+  const amount = tier === 'VOUCHER' ? bundle.priceVoucher! : bundle.price;
+  const number = await nextNumber('ORDER', 'ORD');
+  const order = await db.order.create({
+    data: {
+      number,
+      userId,
+      bundleId: body.bundleId,
+      tier: tier as Tier,
+      amount,
+      currency: 'USD',
+      status: 'PENDING',
+      paypalOrderId: testId
+    }
+  });
 
   await fulfillOrder(order.id, { test: true }, `${testId}_CAP`);
   return NextResponse.json({ ok: true, orderId: order.id, test: true });

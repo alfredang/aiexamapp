@@ -123,11 +123,10 @@ async function duplicateExam(formData: FormData) {
       questionCount: orig.questionCount,
       examSets: orig.examSets,
       infoUrl: orig.infoUrl,
+      label: orig.label,
       domains: orig.domains as any,
-      pricePractice: orig.pricePractice,
-      priceBundle: orig.priceBundle,
-      priceVoucher: orig.priceVoucher,
-      published: false
+      published: false,
+      createdById: user.id
     }
   });
   if (orig.questions.length) {
@@ -164,6 +163,7 @@ async function loadExams(where: any, skip: number, take: number) {
     where,
     include: {
       vendor: true,
+      createdBy: { select: { id: true, name: true, email: true } },
       _count: { select: { questions: true, attempts: true, orders: true } }
     },
     orderBy: [{ vendor: { name: 'asc' } }, { title: 'asc' }],
@@ -172,14 +172,20 @@ async function loadExams(where: any, skip: number, take: number) {
   });
 }
 
+function fmtDate(d: Date | null | undefined): string {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
 export default async function AdminExamsPage({
   searchParams
 }: {
-  searchParams: Promise<{ vendor?: string; level?: string; q?: string; archived?: string; page?: string }>;
+  searchParams: Promise<{ vendor?: string; level?: string; q?: string; archived?: string; status?: string; page?: string }>;
 }) {
   const sp = await searchParams;
   const vendorFilter = sp.vendor || '';
   const levelFilter = sp.level || '';
+  const status = sp.status || '';
   const q = (sp.q || '').trim();
   const archived = sp.archived === '1';
   const requestedPage = Math.max(1, Number(sp.page || 1) || 1);
@@ -188,6 +194,7 @@ export default async function AdminExamsPage({
     ...(archived ? { deletedAt: { not: null } } : { deletedAt: null }),
     ...(vendorFilter ? { vendor: { slug: vendorFilter } } : {}),
     ...(levelFilter ? { level: levelFilter } : {}),
+    ...(status === 'active' ? { published: true } : status === 'inactive' ? { published: false } : {}),
     ...(q
       ? {
           OR: [
@@ -207,7 +214,7 @@ export default async function AdminExamsPage({
   const page = Math.min(requestedPage, totalPages);
   const exams = await loadExams(where, (page - 1) * PAGE_SIZE, PAGE_SIZE);
 
-  const baseParams = { vendor: vendorFilter, level: levelFilter, q };
+  const baseParams = { vendor: vendorFilter, level: levelFilter, q, status };
   const buildHref = (p: number) =>
     `/admin-dashboard/exams${buildQS({ ...baseParams, page: p === 1 ? undefined : p })}`;
 
@@ -225,7 +232,12 @@ export default async function AdminExamsPage({
     q && {
       key: 'search',
       label: q,
-      clearHref: `/admin-dashboard/exams${buildQS({ vendor: vendorFilter, level: levelFilter })}`
+      clearHref: `/admin-dashboard/exams${buildQS({ vendor: vendorFilter, level: levelFilter, status })}`
+    },
+    status && {
+      key: 'status',
+      label: status,
+      clearHref: `/admin-dashboard/exams${buildQS({ vendor: vendorFilter, level: levelFilter, q })}`
     }
   ].filter(Boolean) as { key: string; label: string; clearHref: string }[];
 
@@ -265,15 +277,47 @@ export default async function AdminExamsPage({
       )
     },
     { key: 'code', header: 'Code', cell: (e) => <span className="font-mono text-[12px]">{e.code}</span> },
+    {
+      key: 'label',
+      header: 'Label',
+      cell: (e) =>
+        e.label ? (
+          <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
+            {e.label}
+          </span>
+        ) : (
+          <span className="text-slate-400">—</span>
+        )
+    },
     { key: 'level', header: 'Level', cell: (e) => e.level },
     {
       key: 'status',
       header: 'Status',
-      cell: (e) => <StatusBadge status={e.published ? 'PUBLISHED' : 'DRAFT'} />
+      cell: (e) => <StatusBadge status={e.published ? 'ACTIVE' : 'INACTIVE'} />
     },
     { key: 'examSets', header: '# Exams', cell: (e) => e.examSets, align: 'right' },
     { key: 'qPerExam', header: 'Q / Exam', cell: (e) => e.questionCount, align: 'right' },
     { key: 'duration', header: 'Duration', cell: (e) => `${e.durationMinutes} min`, align: 'right' },
+    {
+      key: 'createdAt',
+      header: 'Created',
+      cell: (e) => <span className="whitespace-nowrap text-[12px] text-slate-600 dark:text-slate-300">{fmtDate(e.createdAt)}</span>
+    },
+    {
+      key: 'updatedAt',
+      header: 'Edited',
+      cell: (e) => <span className="whitespace-nowrap text-[12px] text-slate-600 dark:text-slate-300">{fmtDate(e.updatedAt)}</span>
+    },
+    {
+      key: 'createdBy',
+      header: 'Created by',
+      cell: (e) =>
+        e.createdBy ? (
+          <span className="whitespace-nowrap text-[12px] text-slate-700 dark:text-slate-200">{e.createdBy.name || e.createdBy.email}</span>
+        ) : (
+          <span className="text-slate-400">—</span>
+        )
+    },
     {
       key: 'infoUrl',
       header: 'Info',
@@ -354,7 +398,7 @@ export default async function AdminExamsPage({
   return (
     <div>
       <PageHeader
-        title="Exam Management"
+        title="View Exams"
         subtitle={`${totalCount} exam${totalCount === 1 ? '' : 's'}${totalPages > 1 ? ` · page ${page} of ${totalPages}` : ''}`}
         actions={
           <Link href="/admin-dashboard/exams/new" className="btn-sm bg-blue-600 text-white hover:bg-blue-700">
@@ -390,6 +434,13 @@ export default async function AdminExamsPage({
         <FilterField label="Search" className="min-w-[14rem] flex-1">
           <input name="q" defaultValue={q} placeholder="Title or code…" className="input-sm" />
         </FilterField>
+        <FilterField label="Status">
+          <select name="status" defaultValue={status} className="input-sm">
+            <option value="">All</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </FilterField>
         <FilterField label="View">
           <select name="archived" defaultValue={archived ? '1' : ''} className="input-sm">
             <option value="">Active</option>
@@ -420,7 +471,7 @@ export default async function AdminExamsPage({
             value="publish"
             className="btn-sm bg-emerald-600 text-white hover:bg-emerald-700"
           >
-            Publish
+            Activate
           </button>
           <button
             type="submit"
@@ -428,7 +479,7 @@ export default async function AdminExamsPage({
             value="unpublish"
             className="btn-sm border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
           >
-            Unpublish
+            Deactivate
           </button>
           <button
             type="submit"

@@ -22,7 +22,7 @@ async function create(formData: FormData) {
   if (!title || !slug || !price) return;
 
   const created = await db.bundle.create({
-    data: { title, slug, description, price, priceVoucher, published: false }
+    data: { title, slug, description, price, priceVoucher, published: false, createdById: user.id }
   });
   await db.adminLog.create({
     data: { adminId: user.id, action: 'bundle.create', targetType: 'Bundle', targetId: created.id, metadata: { slug } }

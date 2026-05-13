@@ -5,14 +5,6 @@ const db = new PrismaClient();
 
 type Level = 'Foundational' | 'Associate' | 'Professional' | 'Expert' | 'Specialty';
 
-const PRICING: Record<Level, { practice: number; bundle: number; voucher: number }> = {
-  Foundational: { practice: 2000, bundle: 11900, voucher: 9900 },
-  Associate: { practice: 2000, bundle: 17900, voucher: 14900 },
-  Professional: { practice: 2000, bundle: 24900, voucher: 19900 },
-  Expert: { practice: 2000, bundle: 34900, voucher: 27900 },
-  Specialty: { practice: 2000, bundle: 19900, voucher: 16900 }
-};
-
 type ExamSeed = {
   vendorSlug: string;
   slug: string;
@@ -24,13 +16,6 @@ type ExamSeed = {
   passingScore: number;
   questionCount: number;
   domains: { name: string; weight: number }[];
-  // Optional per-exam pricing overrides (cents). When omitted, the loop
-  // falls back to PRICING[level] defaults. Use these when an exam's real
-  // vendor fee diverges from the level default — e.g. AWS CLF-C02's
-  // $100 voucher vs the Foundational tier default.
-  pricePractice?: number;
-  priceBundle?: number;
-  priceVoucher?: number;
 };
 
 const VENDORS = [
@@ -294,7 +279,6 @@ const EXAMS: ExamSeed[] = [
     title: 'AWS Certified Cloud Practitioner',
     description: 'Foundational AWS certification covering the value of the AWS Cloud, the shared responsibility model, the Well-Architected Framework, security best practices, AWS pricing and billing economics, and core services across compute, networking, database, and storage. Available in-person at AWS-authorized testing centers or online via remote proctoring. Real exam fee is USD 100 (voucher).',
     level: 'Foundational', durationMinutes: 90, passingScore: 70, questionCount: 65,
-    pricePractice: 2000, priceBundle: 10000, priceVoucher: 10000,
     domains: [
       { name: 'Cloud Concepts', weight: 24 },
       { name: 'Security and Compliance', weight: 30 },
@@ -307,7 +291,6 @@ const EXAMS: ExamSeed[] = [
     title: 'AWS Certified Developer — Associate',
     description: 'Develop, deploy, and debug cloud-based applications using AWS services. Real exam fee is USD 150 (voucher).',
     level: 'Associate', durationMinutes: 130, passingScore: 72, questionCount: 65,
-    priceVoucher: 15000,
     domains: [
       { name: 'Development with AWS Services', weight: 32 },
       { name: 'Security', weight: 26 },
@@ -320,7 +303,6 @@ const EXAMS: ExamSeed[] = [
     title: 'AWS Certified CloudOps Engineer — Associate',
     description: 'Deploy, manage, and operate workloads on AWS following the Well-Architected Framework. Covers monitoring, logging, remediation, performance optimisation, reliability and business continuity, deployment provisioning and automation, security and compliance, and networking. Replaces the SysOps Administrator (SOA-C02) exam. Real exam fee is USD 150 (voucher).',
     level: 'Associate', durationMinutes: 180, passingScore: 72, questionCount: 65,
-    priceVoucher: 15000,
     domains: [
       { name: 'Monitoring, Logging, Analysis, Remediation, and Performance Optimization', weight: 22 },
       { name: 'Reliability and Business Continuity', weight: 22 },
@@ -334,7 +316,6 @@ const EXAMS: ExamSeed[] = [
     title: 'AWS Certified Data Engineer — Associate',
     description: 'Build and maintain data pipelines, manage data stores, and operate, monitor, and secure data workloads on AWS. Covers Kinesis, Glue, EMR, Redshift, DynamoDB, Lake Formation, and the broader analytics stack. Real exam fee is USD 150 (voucher).',
     level: 'Associate', durationMinutes: 130, passingScore: 72, questionCount: 65,
-    priceVoucher: 15000,
     domains: [
       { name: 'Data Ingestion and Transformation', weight: 34 },
       { name: 'Data Store Management', weight: 26 },
@@ -359,7 +340,6 @@ const EXAMS: ExamSeed[] = [
     title: 'AWS Certified DevOps Engineer — Professional',
     description: 'Implement and manage continuous delivery systems and methodologies on AWS — CI/CD pipelines, infrastructure as code, monitoring, incident response, and security automation. Real exam fee is USD 300 (voucher).',
     level: 'Professional', durationMinutes: 180, passingScore: 75, questionCount: 75,
-    priceVoucher: 30000,
     domains: [
       { name: 'SDLC Automation', weight: 22 },
       { name: 'Configuration Management and IaC', weight: 17 },
@@ -374,7 +354,6 @@ const EXAMS: ExamSeed[] = [
     title: 'AWS Certified Security — Specialty',
     description: 'Validate expertise in securing AWS workloads — detection, incident response, infrastructure security, identity and access management, data protection, and security governance. Targets candidates with 3–5 years of cloud security experience. Real exam fee is USD 300 (voucher).',
     level: 'Specialty', durationMinutes: 170, passingScore: 75, questionCount: 65,
-    priceVoucher: 30000,
     domains: [
       { name: 'Detection', weight: 16 },
       { name: 'Incident Response', weight: 14 },
@@ -402,7 +381,6 @@ const EXAMS: ExamSeed[] = [
     title: 'AWS Certified Solutions Architect — Associate',
     description: 'Design solutions on AWS based on the Well-Architected Framework — secure, resilient, high-performing, and cost-optimised architectures. Targets candidates with at least 1 year of hands-on AWS design experience. Real exam fee is USD 150 (voucher).',
     level: 'Associate', durationMinutes: 130, passingScore: 72, questionCount: 65,
-    priceVoucher: 15000,
     domains: [
       { name: 'Design Secure Architectures', weight: 30 },
       { name: 'Design Resilient Architectures', weight: 26 },
@@ -415,7 +393,6 @@ const EXAMS: ExamSeed[] = [
     title: 'AWS Certified Machine Learning Engineer — Associate',
     description: 'Build, operationalise, deploy, and maintain ML solutions and pipelines on AWS — data preparation, model development, deployment and orchestration, monitoring, maintenance, and security. Targets ML engineers with at least 1 year of hands-on SageMaker experience. Real exam fee is USD 150 (voucher).',
     level: 'Associate', durationMinutes: 130, passingScore: 72, questionCount: 65,
-    priceVoucher: 15000,
     domains: [
       { name: 'Data Preparation for Machine Learning (ML)', weight: 28 },
       { name: 'ML Model Development', weight: 26 },
@@ -428,7 +405,6 @@ const EXAMS: ExamSeed[] = [
     title: 'AWS Certified Generative AI Developer — Professional',
     description: 'Integrate foundation models into applications and business workflows on AWS — vector stores, RAG, agentic AI, prompt engineering, AI safety and governance, performance and cost optimisation. Targets GenAI developers with 1+ year hands-on GenAI experience. Real exam fee is USD 300 (voucher).',
     level: 'Professional', durationMinutes: 180, passingScore: 75, questionCount: 75,
-    priceVoucher: 30000,
     domains: [
       { name: 'Foundation Model Integration, Data Management, and Compliance', weight: 31 },
       { name: 'Implementation and Integration', weight: 26 },
@@ -442,7 +418,6 @@ const EXAMS: ExamSeed[] = [
     title: 'AWS Certified Advanced Networking — Specialty',
     description: 'Design, implement, manage, and secure AWS and hybrid network architectures at scale. Targets candidates with 5+ years of networking experience and 2+ years cloud/hybrid networking. Real exam fee is USD 300 (voucher).',
     level: 'Specialty', durationMinutes: 170, passingScore: 70, questionCount: 65,
-    priceVoucher: 30000,
     domains: [
       { name: 'Network Design', weight: 30 },
       { name: 'Network Implementation', weight: 26 },
@@ -881,10 +856,6 @@ async function main() {
     // existing rows. Keeping the catalog entry in the source file (rather
     // than deleting it) preserves history and makes revival straightforward.
     if (OBSOLETE_EXAM_SLUGS.includes(e.slug)) continue;
-    const defaults = PRICING[e.level];
-    const pricePractice = e.pricePractice ?? defaults.practice;
-    const priceBundle   = e.priceBundle   ?? defaults.bundle;
-    const priceVoucher  = e.priceVoucher  ?? defaults.voucher;
     const isPublished = !HIDDEN_EXAM_SLUGS.includes(e.slug)
       && VISIBLE_VENDOR_SLUGS.includes(e.vendorSlug);
     await db.exam.upsert({
@@ -897,9 +868,6 @@ async function main() {
         passingScore: e.passingScore,
         questionCount: e.questionCount,
         domains: e.domains,
-        // Push pricing on update too so per-exam overrides reach existing
-        // rows when seed is re-run, not just on first create.
-        pricePractice, priceBundle, priceVoucher,
         published: isPublished
       },
       create: {
@@ -913,7 +881,6 @@ async function main() {
         passingScore: e.passingScore,
         questionCount: e.questionCount,
         domains: e.domains,
-        pricePractice, priceBundle, priceVoucher,
         published: isPublished
       }
     });
@@ -1020,6 +987,82 @@ async function main() {
     where: { slug: { notIn: [...seededSlugs] }, published: true },
     data: { published: false }
   });
+  // Auto-create variant exams (e.g. aws-aif-c01-p1, comptia-cloud-plus-practice-3)
+  // when a Bundle references a slug that doesn't yet exist. Two paths:
+  //   1. If the base exam exists (slug with the -pN / -practice-N suffix stripped)
+  //      → clone it so the variant inherits pricing, level, duration, etc.
+  //   2. If neither variant nor base exists → infer vendor from the variant
+  //      slug's prefix and build a stub exam using the parent bundle's metadata.
+  // Stamps the per-variant `label` field so the View Exams table shows
+  // e.g. "Practice Exam 3".
+  const vendorSlugBySlug: Record<string, string> = Object.fromEntries(
+    (await db.vendor.findMany({ select: { id: true, slug: true } })).map((v) => [v.slug, v.id])
+  );
+  const VENDOR_SLUGS_BY_LENGTH = Object.keys(vendorSlugBySlug).sort((a, b) => b.length - a.length);
+  function inferVendorId(slug: string): string | null {
+    for (const vs of VENDOR_SLUGS_BY_LENGTH) {
+      if (slug === vs || slug.startsWith(`${vs}-`)) return vendorSlugBySlug[vs];
+    }
+    return null;
+  }
+  let variantsCreated = 0;
+  for (const b of BUNDLES) {
+    for (const item of b.items) {
+      if (examMap[item.examSlug]) continue;
+      const m = item.examSlug.match(/^(.+?)-(?:p|practice-)(\d+)$/);
+      if (!m) continue;
+      const baseSlug = m[1];
+      const idx = Number(m[2]);
+      const baseId = examMap[baseSlug];
+      let data: any;
+      if (baseId) {
+        const base = await db.exam.findUnique({ where: { id: baseId } });
+        if (!base) continue;
+        data = {
+          vendorId: base.vendorId,
+          code: `${base.code}-P${idx}`,
+          slug: item.examSlug,
+          title: `${base.title} (Practice Exam ${idx})`,
+          description: base.description,
+          level: base.level,
+          durationMinutes: base.durationMinutes,
+          passingScore: base.passingScore,
+          questionCount: base.questionCount,
+          examSets: 1,
+          infoUrl: base.infoUrl,
+          label: `Practice Exam ${idx}`,
+          domains: base.domains as any,
+          published: base.published
+        };
+      } else {
+        const vendorId = inferVendorId(item.examSlug);
+        if (!vendorId) continue;
+        // Derive a code from the base slug — strip the vendor prefix, uppercase remainder.
+        const vendorSlug = VENDOR_SLUGS_BY_LENGTH.find((vs) => baseSlug === vs || baseSlug.startsWith(`${vs}-`)) ?? '';
+        const codeBody = (vendorSlug ? baseSlug.slice(vendorSlug.length + 1) : baseSlug).toUpperCase();
+        data = {
+          vendorId,
+          code: `${codeBody}-P${idx}`,
+          slug: item.examSlug,
+          title: `${b.title} (Practice Exam ${idx})`,
+          description: b.description,
+          level: 'Associate',
+          durationMinutes: 90,
+          passingScore: 70,
+          questionCount: 60,
+          examSets: 1,
+          label: `Practice Exam ${idx}`,
+          domains: [],
+          published: true
+        };
+      }
+      const created = await db.exam.create({ data });
+      examMap[item.examSlug] = created.id;
+      variantsCreated++;
+    }
+  }
+  if (variantsCreated > 0) console.log(`✓ Auto-created ${variantsCreated} variant exams from bundle references`);
+
   for (const b of BUNDLES) {
     const bundle = await db.bundle.upsert({
       where: { slug: b.slug },

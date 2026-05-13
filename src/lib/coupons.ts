@@ -6,7 +6,10 @@ type DbClient = PrismaClient | Prisma.TransactionClient;
 export type EvaluateInput = {
   code: string;
   userId?: string | null;
+  /** Pre-cutover single-exam purchase context. New orders should use bundleId. */
   examId?: string | null;
+  /** Bundle being purchased (used for EXAM-scope coupons via BundleItem lookup). */
+  bundleId?: string | null;
   vendorId?: string | null;
   /** Cents — the order price BEFORE discount. */
   subtotalCents: number;
@@ -72,7 +75,17 @@ export async function evaluateCoupon(input: EvaluateInput, dbc?: DbClient): Prom
     return { ok: false, reason: 'max_redemptions', message: 'This promo code has reached its redemption limit.' };
   }
   if (coupon.scope === 'EXAM') {
-    if (!input.examId || coupon.scopeExamId !== input.examId) {
+    // Direct match for legacy single-exam orders, or match if the scoped exam
+    // is part of the bundle being purchased.
+    let examMatches = !!(input.examId && coupon.scopeExamId === input.examId);
+    if (!examMatches && input.bundleId && coupon.scopeExamId) {
+      const hit = await client.bundleItem.findFirst({
+        where: { bundleId: input.bundleId, examId: coupon.scopeExamId },
+        select: { id: true }
+      });
+      examMatches = !!hit;
+    }
+    if (!examMatches) {
       return { ok: false, reason: 'wrong_scope', message: 'This promo code does not apply to this exam.' };
     }
   } else if (coupon.scope === 'VENDOR') {

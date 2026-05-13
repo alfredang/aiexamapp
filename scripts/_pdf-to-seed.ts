@@ -11,7 +11,7 @@
  *   {
  *     pdfPath, vendorSlug, examSlug, examCode, examTitle, examDescription,
  *     level, durationMinutes, passingScore, domains: [{name, weight}, ...],
- *     pricePractice, priceBundle, priceVoucher, ref: {label, url}, tag,
+ *     ref: {label, url}, tag,
  *     outputPath
  *   }
  */
@@ -29,9 +29,6 @@ type Config = {
   durationMinutes: number;
   passingScore: number;
   domains: { name: string; weight: number }[];
-  pricePractice: number;
-  priceBundle: number;
-  priceVoucher: number;
   ref: { label: string; url: string };
   tag: string;
   outputPath: string;
@@ -405,9 +402,6 @@ async function main() {
       passingScore: ${cfg.passingScore},
       questionCount: ${questions.length},
       domains: DOMAINS,
-      pricePractice: ${cfg.pricePractice},
-      priceBundle: ${cfg.priceBundle},
-      priceVoucher: ${cfg.priceVoucher},
       published: true
     }
   });

@@ -847,9 +847,6 @@ async function main() {
       passingScore: 83,
       questionCount: 60,
       domains: DOMAINS,
-      pricePractice: 2000,
-      priceBundle: 17900,
-      priceVoucher: 14900,
       published: true
     }
   });

@@ -9,6 +9,7 @@ import { StatusBadge } from '@/components/admin/badge';
 import { Trash2, ArrowDown, ArrowUp } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
 import type { Tier } from '@prisma/client';
+import { ExamPicker } from '@/components/admin/exam-picker';
 
 export const dynamic = 'force-dynamic';
 
@@ -67,22 +68,25 @@ async function addItem(formData: FormData) {
   'use server';
   const user = await requireAdmin();
   const bundleId = String(formData.get('bundleId'));
-  const examId = String(formData.get('examId'));
+  const examIds = formData.getAll('examId').map(String).filter(Boolean);
   const tier = (formData.get('tier') as Tier) ?? 'PRACTICE';
-  if (!bundleId || !examId) return;
+  if (!bundleId || examIds.length === 0) return;
   const last = await db.bundleItem.findFirst({
     where: { bundleId },
     orderBy: { position: 'desc' },
     select: { position: true }
   });
-  const position = (last?.position ?? -1) + 1;
-  await db.bundleItem.upsert({
-    where: { bundleId_examId_tier: { bundleId, examId, tier } },
-    create: { bundleId, examId, tier, position },
-    update: {}
-  });
+  let nextPosition = (last?.position ?? -1) + 1;
+  for (const examId of examIds) {
+    await db.bundleItem.upsert({
+      where: { bundleId_examId_tier: { bundleId, examId, tier } },
+      create: { bundleId, examId, tier, position: nextPosition },
+      update: {}
+    });
+    nextPosition += 1;
+  }
   await db.adminLog.create({
-    data: { adminId: user.id, action: 'bundle.item.add', targetType: 'Bundle', targetId: bundleId, metadata: { examId, tier } }
+    data: { adminId: user.id, action: 'bundle.item.add', targetType: 'Bundle', targetId: bundleId, metadata: { examIds, tier } }
   });
   revalidatePath(`/admin-dashboard/bundles/${bundleId}`);
 }
@@ -137,11 +141,13 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
     }
   });
   if (!bundle) notFound();
-  const exams = await db.exam.findMany({
+  const examRows = await db.exam.findMany({
     where: { deletedAt: null },
     orderBy: [{ vendor: { name: 'asc' } }, { code: 'asc' }],
-    select: { id: true, code: true, title: true, vendor: { select: { name: true } } }
+    select: { id: true, code: true, title: true, label: true, vendor: { select: { name: true } } }
   });
+  const examOptions = examRows.map((e) => ({ id: e.id, code: e.code, title: e.title, vendor: e.vendor.name, label: e.label }));
+  const alreadyAddedIds = bundle.items.map((it) => it.examId);
 
   return (
     <div>
@@ -211,10 +217,22 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
 
       <section className="card mt-4 p-4">
         <h2 className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Items ({bundle.items.length})</h2>
+
+        <form action={addItem} className="mt-2 flex flex-wrap items-end gap-2 border-b border-slate-200 pb-3 dark:border-slate-700">
+          <input type="hidden" name="bundleId" value={bundle.id} />
+          <input type="hidden" name="tier" value="PRACTICE" />
+          <Field label="Add exam" className="min-w-[24rem] flex-1">
+            <ExamPicker name="examId" options={examOptions} excludeIds={alreadyAddedIds} placeholder="Search by code, title, or label…" />
+          </Field>
+          <button className="inline-flex h-8 items-center rounded-md bg-emerald-600 px-3 text-[12px] font-medium text-white hover:bg-emerald-700">
+            Add item
+          </button>
+        </form>
+
         {bundle.items.length === 0 ? (
-          <p className="mt-1 text-[12px] text-slate-500">No items. Add an exam below to start the bundle.</p>
+          <p className="mt-3 text-[12px] text-slate-500">No items yet. Use the search above to add an exam to this bundle.</p>
         ) : (
-          <table className="mt-2 w-full text-[12px]">
+          <table className="mt-3 w-full text-[12px]">
             <thead>
               <tr className="text-left text-[10px] uppercase tracking-wider text-slate-500">
                 <th className="py-1 w-10"></th>
@@ -264,27 +282,6 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
             </tbody>
           </table>
         )}
-
-        <form action={addItem} className="mt-3 flex flex-wrap items-end gap-2 border-t border-slate-200 pt-3 dark:border-slate-700">
-          <input type="hidden" name="bundleId" value={bundle.id} />
-          <Field label="Add exam" className="min-w-[20rem] flex-1">
-            <select name="examId" className="input-sm" required defaultValue="">
-              <option value="">Select an exam…</option>
-              {exams.map((e) => (
-                <option key={e.id} value={e.id}>{e.vendor.name} · {e.code} — {e.title}</option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Tier">
-            <select name="tier" className="input-sm" defaultValue="PRACTICE">
-              <option value="PRACTICE">Practice</option>
-              <option value="VOUCHER">Voucher</option>
-            </select>
-          </Field>
-          <button className="inline-flex h-8 items-center rounded-md bg-emerald-600 px-3 text-[12px] font-medium text-white hover:bg-emerald-700">
-            Add item
-          </button>
-        </form>
       </section>
     </div>
   );

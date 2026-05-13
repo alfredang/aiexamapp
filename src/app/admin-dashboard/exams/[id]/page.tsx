@@ -71,6 +71,8 @@ async function updateExam(formData: FormData) {
   const examSets = Math.min(6, Math.max(1, Number.isFinite(examSetsRaw) ? examSetsRaw : 1));
   const infoUrlRaw = String(formData.get('infoUrl') || '').trim();
   const infoUrl = infoUrlRaw ? infoUrlRaw : null;
+  const labelRaw = String(formData.get('label') || '').trim();
+  const label = labelRaw ? labelRaw : null;
   const metaTitle = String(formData.get('metaTitle') || '').trim() || null;
   const metaDescription = String(formData.get('metaDescription') || '').trim() || null;
   const metaKeywords = String(formData.get('metaKeywords') || '').trim() || null;
@@ -80,7 +82,7 @@ async function updateExam(formData: FormData) {
   await db.exam.update({
     where: { id },
     data: {
-      title, code, slug, level, description, durationMinutes, passingScore, questionCount, examSets, infoUrl, published,
+      title, code, slug, level, description, durationMinutes, passingScore, questionCount, examSets, infoUrl, label, published,
       metaTitle, metaDescription, metaKeywords, ogImage
     }
   });
@@ -316,12 +318,15 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
         <Field label="Exam Info URL (vendor page or PDF)" className="md:col-span-2">
           <input name="infoUrl" type="url" placeholder="https://aws.amazon.com/certification/..." defaultValue={exam.infoUrl ?? ''} className="input" />
         </Field>
+        <Field label="Label (optional)" className="md:col-span-1">
+          <input name="label" placeholder="e.g. Practice Exam 1" defaultValue={exam.label ?? ''} className="input" />
+        </Field>
         <Field label="Description" className="md:col-span-3">
           <input name="description" defaultValue={exam.description ?? ''} className="input" />
         </Field>
         <label className="md:col-span-2 flex items-center gap-2 text-sm">
           <input type="checkbox" name="published" defaultChecked={exam.published} />
-          Published (visible to users)
+          Active (visible to users)
         </label>
         <div className="md:col-span-1 flex justify-end">
           <button className="btn-primary">Save exam</button>
@@ -353,6 +358,7 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
           <input type="hidden" name="questionCount" value={exam.questionCount} />
           <input type="hidden" name="examSets" value={exam.examSets} />
           <input type="hidden" name="infoUrl" value={exam.infoUrl ?? ''} />
+          <input type="hidden" name="label" value={exam.label ?? ''} />
           {exam.published && <input type="hidden" name="published" value="on" />}
           <Field label="Meta title (≤70 chars)" className="md:col-span-2">
             <input name="metaTitle" defaultValue={exam.metaTitle ?? ''} className="input" placeholder="AWS SAA-C03 Practice Exam | ExamNova" />

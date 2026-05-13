@@ -119,6 +119,8 @@ model User {
   // When set, the user's existing JWTs are considered invalid (force-logout).
   sessionVersion Int          @default(0)
   reviews       Review[]
+  examsCreated  Exam[]        @relation("ExamCreatedBy")
+  bundlesCreated Bundle[]     @relation("BundleCreatedBy")
 }
 
 // NextAuth/Prisma adapter table used by OAuth providers (Google, GitHub, …)
@@ -167,10 +169,8 @@ model Exam {
   questionCount   Int        // questions per practice exam attempt
   examSets        Int        @default(1) // # of distinct practice exam sets offered (1-6)
   infoUrl         String?    // vendor's exam info page or PDF link
+  label           String?    // free-form admin label, e.g. "Practice Exam 1"
   domains         Json       // [{name: string, weight: number}]
-  pricePractice   Int        // cents
-  priceBundle     Int
-  priceVoucher    Int
   published       Boolean    @default(false)
   // SEO fields for the public catalog page
   metaTitle       String?
@@ -181,6 +181,9 @@ model Exam {
   // default list. Restorable until manually purged.
   deletedAt       DateTime?
   createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  createdById     String?
+  createdBy       User?      @relation("ExamCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   questions       Question[]
   sources         ExamSource[]
   versions        ExamVersion[]
@@ -209,6 +212,8 @@ model Bundle {
                             // offers a Voucher upgrade (real exam voucher +
                             // practice access). null = practice-only bundle.
   published    Boolean      @default(false)
+  createdById  String?
+  createdBy    User?        @relation("BundleCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
   items        BundleItem[]

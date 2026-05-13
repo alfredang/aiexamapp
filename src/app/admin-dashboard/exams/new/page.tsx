@@ -2,10 +2,13 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { db } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
+import { auth } from '@/lib/auth';
 import { CreateExamAiAssist } from './ai-assist';
 
 async function createExam(formData: FormData) {
   'use server';
+  const session = await auth();
+  const createdById = (session?.user as any)?.id as string | undefined;
   const vendorId = String(formData.get('vendorId'));
   const code = String(formData.get('code') || '').trim();
   const title = String(formData.get('title') || '').trim();
@@ -19,9 +22,8 @@ async function createExam(formData: FormData) {
   const examSets = Math.min(6, Math.max(1, Number.isFinite(examSetsRaw) ? examSetsRaw : 1));
   const infoUrlRaw = String(formData.get('infoUrl') || '').trim();
   const infoUrl = infoUrlRaw ? infoUrlRaw : null;
-  const pricePractice = Math.round(Number(formData.get('pricePractice') || 29) * 100);
-  const priceBundle = Math.round(Number(formData.get('priceBundle') || 179) * 100);
-  const priceVoucher = Math.round(Number(formData.get('priceVoucher') || 149) * 100);
+  const labelRaw = String(formData.get('label') || '').trim();
+  const label = labelRaw ? labelRaw : null;
   // AI Assist drops the JSON blueprint into a hidden input.
   let domains: { name: string; weight: number }[] = [];
   const domainsJson = String(formData.get('domainsJson') || '').trim();
@@ -37,10 +39,10 @@ async function createExam(formData: FormData) {
   const created = await db.exam.create({
     data: {
       vendorId, code, title, slug, description, level,
-      durationMinutes, passingScore, questionCount, examSets, infoUrl,
-      pricePractice, priceBundle, priceVoucher,
+      durationMinutes, passingScore, questionCount, examSets, infoUrl, label,
       domains,
-      published: false
+      published: false,
+      createdById
     }
   });
   revalidatePath('/admin-dashboard/exams');
@@ -100,17 +102,11 @@ export default async function NewExamPage() {
         <Field label="# of Exams (1-6)">
           <input name="examSets" type="number" min={1} max={6} defaultValue={1} className="input" />
         </Field>
-        <Field label="Exam Info URL (vendor page or PDF)" className="md:col-span-3">
+        <Field label="Exam Info URL (vendor page or PDF)" className="md:col-span-2">
           <input name="infoUrl" type="url" placeholder="https://vendor.example.com/exam-info" className="input" />
         </Field>
-        <Field label="Practice price ($)">
-          <input name="pricePractice" type="number" step="0.01" defaultValue={29} className="input" />
-        </Field>
-        <Field label="Bundle price ($)">
-          <input name="priceBundle" type="number" step="0.01" defaultValue={179} className="input" />
-        </Field>
-        <Field label="Voucher price ($)" className="md:col-span-1">
-          <input name="priceVoucher" type="number" step="0.01" defaultValue={149} className="input" />
+        <Field label="Label (optional)">
+          <input name="label" placeholder="e.g. Practice Exam 1" className="input" />
         </Field>
         <Field label="Description" className="md:col-span-3">
           <input name="description" placeholder="Description" className="input" />

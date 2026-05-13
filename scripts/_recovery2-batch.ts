@@ -133,7 +133,7 @@ function fullCfg(c: Cfg) {
     examTitle: c.examTitle, examDescription: c.examDescription,
     level: c.level, durationMinutes: c.durationMinutes,
     passingScore: c.passingScore, domains: c.domains,
-    pricePractice: PRICING.practice, priceBundle: PRICING.bundle, priceVoucher: PRICING.voucher,
+
     ref: c.ref, tag: `manual:${c.examSlug}`,
     outputPath: `scripts/seed-${c.examSlug}.ts`, defaultDomain: c.defaultDomain
   };

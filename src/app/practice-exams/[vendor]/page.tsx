@@ -78,7 +78,7 @@ export default async function VendorCatalogPage({ params }: { params: Promise<{ 
               <p className="mt-1 line-clamp-2 text-sm text-slate-600 dark:text-slate-300">{e.description}</p>
               <div className="mt-4 flex items-center justify-between text-sm">
                 <span className="text-slate-500 dark:text-slate-400">{e._count.questions} questions</span>
-                <span className="font-semibold text-blue-700 dark:text-blue-300">from {formatPrice(e.pricePractice)}</span>
+                <span className="text-blue-700 dark:text-blue-300">View details →</span>
               </div>
             </Link>
           );

@@ -34,6 +34,7 @@ const STATUS_VARIANTS: Record<string, BadgeVariant> = {
   SUCCEEDED: 'success',
   SENT: 'success',
   ACTIVE: 'success',
+  INACTIVE: 'muted',
   PENDING: 'muted',
   DRAFT: 'muted',
   SCHEDULED: 'info',

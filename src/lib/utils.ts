@@ -22,24 +22,6 @@ export function tierLabel(t: Tier) {
   } as const)[t];
 }
 
-export function priceForTier(exam: { pricePractice: number; priceBundle: number; priceVoucher: number }, tier: Tier) {
-  if (tier === 'PRACTICE') return exam.pricePractice;
-  if (tier === 'BUNDLE') return exam.priceBundle;
-  if (tier === 'VOUCHER') return exam.priceVoucher;
-  return 0;
-}
-
-// Public catalogue offers two tiers per exam: PRACTICE alone, and VOUCHER
-// (which now bundles practice access in). The legacy BUNDLE tier is no
-// longer surfaced — kept in the Tier enum so existing orders/entitlements
-// still typecheck.
-export function tiersForExam(exam: { pricePractice: number; priceBundle: number; priceVoucher: number }): { tier: Tier; price: number }[] {
-  return [
-    { tier: 'PRACTICE', price: exam.pricePractice },
-    { tier: 'VOUCHER',  price: exam.priceVoucher }
-  ];
-}
-
 export function genVoucherCode() {
   const part = () => Math.random().toString(36).slice(2, 6).toUpperCase();
   return `VCH-${part()}${part()}`;

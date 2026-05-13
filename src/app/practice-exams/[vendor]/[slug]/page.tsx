@@ -2,13 +2,12 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
 import { auth } from '@/lib/auth';
-import { formatPrice, tiersForExam, tierLabel } from '@/lib/utils';
 import { Check, Timer, BookOpen, Award, BookOpenCheck, Hourglass } from 'lucide-react';
-import { BuyTierForm } from './buy-tier-form';
 import { BundleAsExamView } from './bundle-as-exam-view';
 import { ExamReviews } from '@/components/exam-reviews';
 import { getExamRatingSummary } from '@/lib/reviews';
 import { ShareExam } from '@/components/share-exam';
+import { ExamBundleCTA } from '@/components/exam-bundle-cta';
 
 export async function generateMetadata({ params }: { params: Promise<{ vendor: string; slug: string }> }) {
   const { slug } = await params;
@@ -221,15 +220,7 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ ven
               <div className="btn-outline mt-3 w-full">Start free practice exam</div>
             </Link>
           )}
-          {!entitled && (
-            <BuyTierForm
-              examId={exam.id}
-              vendorSlug={exam.vendor.slug}
-              examSlug={exam.slug}
-              isSignedIn={!!userId}
-              options={tiersForExam(exam).map(t => ({ tier: t.tier, label: tierLabel(t.tier), price: t.price }))}
-            />
-          )}
+          {!entitled && <ExamBundleCTA examId={exam.id} />}
         </aside>
       </div>
     </div>

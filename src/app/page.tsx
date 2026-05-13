@@ -30,27 +30,17 @@ export default async function HomePage() {
     if (vs) bundleCountByVendor.set(vs, (bundleCountByVendor.get(vs) || 0) + 1);
   }
 
-  // Popular section mixes recent bundles + recent standalone exams (6 total)
-  // since most catalog content is now sold as bundles.
-  const recentExams = await db.exam.findMany({
-    where: { published: true, deletedAt: null, questions: { some: { status: 'PUBLISHED' } } },
-    include: { vendor: true, _count: { select: { questions: { where: { status: 'PUBLISHED' } } } } },
-    take: 6,
-    orderBy: { createdAt: 'desc' }
-  });
+  // Popular section lists recent published bundles only — bundles are the
+  // sole purchase entry point in the app.
   const recentBundles = await db.bundle.findMany({
     where: { published: true },
-    include: { items: { include: { exam: { include: { vendor: true } } } } },
+    include: {
+      items: { orderBy: { position: 'asc' }, include: { exam: { include: { vendor: true } } } },
+      _count: { select: { items: true } }
+    },
     take: 6,
     orderBy: { createdAt: 'desc' }
   });
-  type PopularCard =
-    | { kind: 'exam'; data: (typeof recentExams)[number] }
-    | { kind: 'bundle'; data: (typeof recentBundles)[number] };
-  const popular: PopularCard[] = [
-    ...recentBundles.map(b => ({ kind: 'bundle' as const, data: b })),
-    ...recentExams.map(e => ({ kind: 'exam' as const, data: e }))
-  ].slice(0, 6);
 
   // FAQ entries are managed in /admin-dashboard/faq. The homepage falls
   // back to a built-in list when no published entries exist yet so a fresh
@@ -131,49 +121,31 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Popular exams */}
+      {/* Popular bundles — the only thing the app sells. */}
       <section className="border-y border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
         <div className="container-app py-14">
-          <h2 className="mb-6 text-2xl font-semibold">Popular Practice Exams</h2>
+          <h2 className="mb-6 text-2xl font-semibold">Popular Bundled Exams</h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {popular.map(card => {
-              if (card.kind === 'bundle') {
-                const b = card.data;
-                const first = b.items[0]?.exam;
-                const totalQs = b.items.reduce((s, i) => s + i.exam.questionCount, 0);
-                return (
-                  <Link key={`b-${b.id}`} href={first ? `/practice-exams/${first.vendor.slug}/${b.slug}` : `/bundles/${b.slug}`} className="card-hover p-5">
-                    <div className="mb-2 flex items-center gap-2 text-xs">
-                      {first && <span className="badge">{first.vendor.name}</span>}
-                      {first && <span className="badge">{first.code}</span>}
-                      {first && <span className="badge">{first.level}</span>}
-                    </div>
-                    <h3 className="font-semibold">{b.title}</h3>
-                    <p className="mt-1 line-clamp-2 text-sm text-slate-600 dark:text-slate-400">{b.description}</p>
-                    <div className="mt-4 flex items-center justify-between text-sm">
-                      <span className="text-slate-500 dark:text-slate-400">{totalQs} questions · {b.items.length} practice exams</span>
-                      <span className="font-semibold text-blue-700 dark:text-blue-400">{b.price === 0 ? 'Free' : `from ${formatPrice(b.price)}`}</span>
-                    </div>
-                  </Link>
-                );
-              }
-              const e = card.data;
+            {recentBundles.map((b) => {
+              const first = b.items[0]?.exam;
+              const totalQs = b.items.reduce((s, i) => s + i.exam.questionCount, 0);
               return (
-                <Link key={`e-${e.id}`} href={`/practice-exams/${e.vendor.slug}/${e.slug}`} className="card-hover p-5">
+                <Link key={b.id} href={`/bundles/${b.slug}`} className="card-hover p-5">
                   <div className="mb-2 flex items-center gap-2 text-xs">
-                    <span className="badge">{e.vendor.name}</span>
-                    <span className="badge">{e.code}</span>
-                    <span className="badge">{e.level}</span>
+                    {first && <span className="badge">{first.vendor.name}</span>}
+                    {first && <span className="badge">{first.code}</span>}
+                    {first && <span className="badge">{first.level}</span>}
                   </div>
-                  <h3 className="font-semibold">{e.title}</h3>
-                  <p className="mt-1 line-clamp-2 text-sm text-slate-600 dark:text-slate-400">{e.description}</p>
+                  <h3 className="font-semibold">{b.title}</h3>
+                  <p className="mt-1 line-clamp-2 text-sm text-slate-600 dark:text-slate-400">{b.description}</p>
                   <div className="mt-4 flex items-center justify-between text-sm">
-                    <span className="text-slate-500 dark:text-slate-400">{e._count.questions} questions</span>
-                    <span className="font-semibold text-blue-700 dark:text-blue-400">from {formatPrice(e.pricePractice)}</span>
+                    <span className="text-slate-500 dark:text-slate-400">{totalQs} questions · {b._count.items} practice exams</span>
+                    <span className="font-semibold text-blue-700 dark:text-blue-400">{b.price === 0 ? 'Free' : `from ${formatPrice(b.price)}`}</span>
                   </div>
                 </Link>
               );
             })}
+            {recentBundles.length === 0 && <p className="text-sm text-slate-500">No bundled exams published yet.</p>}
           </div>
         </div>
       </section>
