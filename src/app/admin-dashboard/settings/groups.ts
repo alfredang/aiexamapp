@@ -96,6 +96,19 @@ export const SOCIAL_GITHUB_FIELDS: FieldDef[] = [
   { key: 'GITHUB_OAUTH_CLIENT_SECRET', label: 'GitHub OAuth Client Secret', secret: true }
 ];
 
+export const SOCIAL_LINKEDIN_FIELDS: FieldDef[] = [
+  { key: 'LINKEDIN_OAUTH_ENABLED', label: 'Enabled (true/false)', placeholder: 'true' },
+  { key: 'LINKEDIN_OAUTH_CLIENT_ID', label: 'LinkedIn OAuth Client ID' },
+  { key: 'LINKEDIN_OAUTH_CLIENT_SECRET', label: 'LinkedIn OAuth Client Secret', secret: true }
+];
+
+export const SOCIAL_MICROSOFT_FIELDS: FieldDef[] = [
+  { key: 'MICROSOFT_OAUTH_ENABLED', label: 'Enabled (true/false)', placeholder: 'true' },
+  { key: 'MICROSOFT_OAUTH_CLIENT_ID', label: 'Microsoft (Entra) Client ID' },
+  { key: 'MICROSOFT_OAUTH_CLIENT_SECRET', label: 'Microsoft (Entra) Client Secret', secret: true },
+  { key: 'MICROSOFT_OAUTH_TENANT_ID', label: 'Tenant ID', placeholder: 'common' }
+];
+
 export const GROUPS: SettingsGroup[] = [
   {
     slug: 'company',

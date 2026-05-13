@@ -2,6 +2,8 @@ import NextAuth, { type NextAuthConfig } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
 import GitHub from 'next-auth/providers/github';
+import LinkedIn from 'next-auth/providers/linkedin';
+import MicrosoftEntraID from 'next-auth/providers/microsoft-entra-id';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import argon2 from 'argon2';
 import { db } from './db';
@@ -16,19 +18,36 @@ export function isSuperAdmin(email?: string | null): boolean {
 
 // Build the provider list synchronously from the env. Settings DB is read
 // asynchronously inside a process-local cache so we don't block NextAuth.
-let socialEnv: { google?: { id: string; secret: string }; github?: { id: string; secret: string } } | null = null;
+let socialEnv: {
+  google?: { id: string; secret: string };
+  github?: { id: string; secret: string };
+  linkedin?: { id: string; secret: string };
+  microsoft?: { id: string; secret: string; tenant: string };
+} | null = null;
 async function ensureSocialEnv() {
   if (socialEnv) return socialEnv;
   try {
     const s = await getAllSettings();
     const googleOn = (s.GOOGLE_OAUTH_ENABLED || '').toLowerCase() === 'true';
     const githubOn = (s.GITHUB_OAUTH_ENABLED || '').toLowerCase() === 'true';
+    const linkedinOn = (s.LINKEDIN_OAUTH_ENABLED || '').toLowerCase() === 'true';
+    const microsoftOn = (s.MICROSOFT_OAUTH_ENABLED || '').toLowerCase() === 'true';
     socialEnv = {
       google: googleOn && s.GOOGLE_OAUTH_CLIENT_ID && s.GOOGLE_OAUTH_CLIENT_SECRET
         ? { id: s.GOOGLE_OAUTH_CLIENT_ID, secret: s.GOOGLE_OAUTH_CLIENT_SECRET }
         : undefined,
       github: githubOn && s.GITHUB_OAUTH_CLIENT_ID && s.GITHUB_OAUTH_CLIENT_SECRET
         ? { id: s.GITHUB_OAUTH_CLIENT_ID, secret: s.GITHUB_OAUTH_CLIENT_SECRET }
+        : undefined,
+      linkedin: linkedinOn && s.LINKEDIN_OAUTH_CLIENT_ID && s.LINKEDIN_OAUTH_CLIENT_SECRET
+        ? { id: s.LINKEDIN_OAUTH_CLIENT_ID, secret: s.LINKEDIN_OAUTH_CLIENT_SECRET }
+        : undefined,
+      microsoft: microsoftOn && s.MICROSOFT_OAUTH_CLIENT_ID && s.MICROSOFT_OAUTH_CLIENT_SECRET
+        ? {
+            id: s.MICROSOFT_OAUTH_CLIENT_ID,
+            secret: s.MICROSOFT_OAUTH_CLIENT_SECRET,
+            tenant: s.MICROSOFT_OAUTH_TENANT_ID || 'common'
+          }
         : undefined
     };
   } catch {
@@ -106,6 +125,25 @@ if (initialEnv.github) {
     })
   );
 }
+if (initialEnv.linkedin) {
+  providers.push(
+    LinkedIn({
+      clientId: initialEnv.linkedin.id,
+      clientSecret: initialEnv.linkedin.secret,
+      allowDangerousEmailAccountLinking: true
+    })
+  );
+}
+if (initialEnv.microsoft) {
+  providers.push(
+    MicrosoftEntraID({
+      clientId: initialEnv.microsoft.id,
+      clientSecret: initialEnv.microsoft.secret,
+      issuer: `https://login.microsoftonline.com/${initialEnv.microsoft.tenant}/v2.0`,
+      allowDangerousEmailAccountLinking: true
+    })
+  );
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -166,7 +204,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // First-time OAuth sign-in: mark email verified (the upstream provider
       // already did) so the user can use the password OTP fallback later
       // without re-verifying.
-      if (isNewUser && account && (account.provider === 'google' || account.provider === 'github')) {
+      if (
+        isNewUser &&
+        account &&
+        (account.provider === 'google' ||
+          account.provider === 'github' ||
+          account.provider === 'linkedin' ||
+          account.provider === 'microsoft-entra-id')
+      ) {
         await db.user
           .update({ where: { id: user.id! }, data: { emailVerified: new Date() } })
           .catch(() => {});
@@ -191,7 +236,17 @@ export async function requireAdmin() {
  * Lightweight settings probe for UI — does NOT load full provider modules.
  * Used by login/signup pages to decide whether to render the social buttons.
  */
-export async function getSocialLoginEnabled(): Promise<{ google: boolean; github: boolean }> {
+export async function getSocialLoginEnabled(): Promise<{
+  google: boolean;
+  github: boolean;
+  linkedin: boolean;
+  microsoft: boolean;
+}> {
   const env = await ensureSocialEnv();
-  return { google: !!env.google, github: !!env.github };
+  return {
+    google: !!env.google,
+    github: !!env.github,
+    linkedin: !!env.linkedin,
+    microsoft: !!env.microsoft
+  };
 }

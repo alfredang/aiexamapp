@@ -28,8 +28,8 @@ export function CreateExamAiAssist({ vendorMap }: { vendorMap: Record<string, st
       const code = (form.querySelector('[name="code"]') as HTMLInputElement | null)?.value || '';
       const title = (form.querySelector('[name="title"]') as HTMLInputElement | null)?.value || '';
       const vendor = vendorMap[vendorId];
-      if (!vendor || !code || !title) {
-        setErr('Pick a vendor and fill in code + title first.');
+      if (!vendor || !code) {
+        setErr('Pick a vendor and enter the exam code first.');
         return;
       }
       const res = await fetch('/api/admin/exams/lookup', {
@@ -47,10 +47,13 @@ export function CreateExamAiAssist({ vendorMap }: { vendorMap: Record<string, st
         const el = form.querySelector(`[name="${name}"]`) as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null;
         if (el && value !== undefined && value !== null) el.value = String(value);
       };
+      if (d.title) set('title', d.title);
+      if (d.slug) set('slug', d.slug);
       if (d.description) set('description', d.description);
       if (d.durationMinutes) set('durationMinutes', d.durationMinutes);
       if (d.passingScore) set('passingScore', d.passingScore);
       if (d.questionCount) set('questionCount', d.questionCount);
+      if (d.infoUrl) set('infoUrl', d.infoUrl);
       // Domains: we'll surface via a hidden input the server action reads.
       if (d.domains) {
         let hidden = form.querySelector('[name="domainsJson"]') as HTMLInputElement | null;
@@ -84,10 +87,10 @@ export function CreateExamAiAssist({ vendorMap }: { vendorMap: Record<string, st
         <div>
           <div className="font-medium">AI Assist — auto-fill from official vendor page</div>
           <div className="text-xs text-slate-500">
-            After picking a vendor + code + title, click below. Firecrawl scrapes the canonical exam page; Claude returns description, duration, pass %, question count, and the domain blueprint.
+            Pick a vendor + enter the exam code, then click. Tavily/Firecrawl find the canonical vendor page (with a Claude Agent fallback that uses WebSearch); Firecrawl scrapes it; Claude returns title, info URL, description, duration, pass %, question count, and the domain blueprint.
           </div>
         </div>
-        <button type="button" onClick={fill} disabled={busy} className="inline-flex h-8 items-center gap-1.5 rounded-md bg-violet-600 px-3 text-[12px] font-medium text-white hover:bg-violet-700 disabled:opacity-50">
+        <button type="button" onClick={fill} disabled={busy} className="inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md bg-violet-600 px-4 text-[13px] font-medium text-white hover:bg-violet-700 disabled:opacity-50">
           {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
           {busy ? 'Looking up…' : 'AI Assist'}
         </button>

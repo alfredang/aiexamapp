@@ -9,11 +9,15 @@ export default function SocialLoginForm({
   initial,
   googleFields,
   githubFields,
+  linkedinFields,
+  microsoftFields,
   callbackBase
 }: {
   initial: Initial;
   googleFields: FieldDef[];
   githubFields: FieldDef[];
+  linkedinFields: FieldDef[];
+  microsoftFields: FieldDef[];
   callbackBase: string;
 }) {
   const [values, setValues] = useState<Record<string, string>>({});
@@ -59,6 +63,28 @@ export default function SocialLoginForm({
         callbackUri={`${callbackBase}/api/auth/callback/github`}
         helpUrl="https://github.com/settings/developers"
         fields={githubFields}
+        initial={initial}
+        values={values}
+        setValues={setValues}
+        revealed={revealed}
+        setRevealed={setRevealed}
+      />
+      <ProviderCard
+        title="LinkedIn"
+        callbackUri={`${callbackBase}/api/auth/callback/linkedin`}
+        helpUrl="https://www.linkedin.com/developers/apps"
+        fields={linkedinFields}
+        initial={initial}
+        values={values}
+        setValues={setValues}
+        revealed={revealed}
+        setRevealed={setRevealed}
+      />
+      <ProviderCard
+        title="Microsoft"
+        callbackUri={`${callbackBase}/api/auth/callback/microsoft-entra-id`}
+        helpUrl="https://entra.microsoft.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade"
+        fields={microsoftFields}
         initial={initial}
         values={values}
         setValues={setValues}

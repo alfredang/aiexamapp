@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 const Body = z.object({
   vendor: z.string().min(2),
   code: z.string().min(2),
-  title: z.string().min(3)
+  title: z.string().optional().default('')
 });
 
 /**

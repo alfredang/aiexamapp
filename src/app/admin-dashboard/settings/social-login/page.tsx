@@ -3,7 +3,13 @@ import { auth } from '@/lib/auth';
 import { getAllSettings, SECRET_KEYS, mask } from '@/lib/settings';
 import { PageHeader } from '@/components/admin/page-header';
 import SocialLoginForm from './social-login-form';
-import { SOCIAL_GOOGLE_FIELDS, SOCIAL_GITHUB_FIELDS, type FieldDef } from '../groups';
+import {
+  SOCIAL_GOOGLE_FIELDS,
+  SOCIAL_GITHUB_FIELDS,
+  SOCIAL_LINKEDIN_FIELDS,
+  SOCIAL_MICROSOFT_FIELDS,
+  type FieldDef
+} from '../groups';
 import { headers } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
@@ -13,7 +19,12 @@ export default async function SocialLoginSettingsPage() {
   if ((session?.user as any)?.role !== 'ADMIN') redirect('/');
 
   const values = await getAllSettings();
-  const allFields: FieldDef[] = [...SOCIAL_GOOGLE_FIELDS, ...SOCIAL_GITHUB_FIELDS];
+  const allFields: FieldDef[] = [
+    ...SOCIAL_GOOGLE_FIELDS,
+    ...SOCIAL_GITHUB_FIELDS,
+    ...SOCIAL_LINKEDIN_FIELDS,
+    ...SOCIAL_MICROSOFT_FIELDS
+  ];
   const initial: Record<string, { configured: boolean; preview: string; current: string }> = {};
   for (const f of allFields) {
     const stored = (values as any)[f.key] || '';
@@ -36,12 +47,14 @@ export default async function SocialLoginSettingsPage() {
     <div>
       <PageHeader
         title="Social Login"
-        subtitle="Enable Google and GitHub sign-in. Buttons appear on the login + signup pages only when the provider is enabled and credentials are saved."
+        subtitle="Enable Google, GitHub, LinkedIn, and Microsoft sign-in. Buttons appear on the login + signup pages only when the provider is enabled and credentials are saved."
       />
       <SocialLoginForm
         initial={initial}
         googleFields={SOCIAL_GOOGLE_FIELDS}
         githubFields={SOCIAL_GITHUB_FIELDS}
+        linkedinFields={SOCIAL_LINKEDIN_FIELDS}
+        microsoftFields={SOCIAL_MICROSOFT_FIELDS}
         callbackBase={callbackBase}
       />
     </div>
