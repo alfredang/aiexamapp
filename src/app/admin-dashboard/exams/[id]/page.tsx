@@ -223,6 +223,22 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
         </div>
       </div>
 
+      <form action={autoFillFromWeb} className="mb-3 flex flex-wrap items-center gap-3 rounded-md border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-900/40">
+        <input type="hidden" name="id" value={exam.id} />
+        <div className="flex-1 min-w-[260px]">
+          <div className="font-medium">AI Assist — auto-fill from official vendor page</div>
+          <div className="text-xs text-slate-500">
+            Tavily/Firecrawl find the canonical vendor page (with a Claude Agent fallback that uses WebSearch);
+            Firecrawl scrapes it and Claude returns the metadata. Overwrites <span className="font-medium">Exam Info URL</span> and <span className="font-medium"># of Exams</span>.
+          </div>
+        </div>
+        <SubmitBusyButton
+          idleLabel={<><Sparkles className="mr-1 h-3.5 w-3.5" /> AI Assist</>}
+          busyLabel={<>Looking up…</>}
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md bg-violet-600 px-4 text-[13px] font-medium text-white hover:bg-violet-700 disabled:cursor-wait disabled:bg-violet-400"
+        />
+      </form>
+
       <form action={updateExam} className="card grid gap-3 p-4 md:grid-cols-3">
         <input type="hidden" name="id" value={exam.id} />
         <Field label="Exam title" className="md:col-span-3">
@@ -266,26 +282,14 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
         </div>
       </form>
 
-      <form action={autoFillFromWeb} className="flex flex-wrap items-center gap-3 rounded-md border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-900/40">
-        <input type="hidden" name="id" value={exam.id} />
-        <div className="flex-1">
-          <div className="font-medium">Auto-fill from vendor site</div>
-          <div className="text-xs text-slate-500">
-            Uses Claude (web search) to find the official exam page and the typical # of practice exams.
-            Overwrites <span className="font-medium">Exam Info URL</span> and <span className="font-medium"># of Exams</span>.
-          </div>
-        </div>
-        <button className="btn-outline text-sm">Look up via Claude</button>
-      </form>
-
       <section className="card p-4">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-[13px] font-semibold text-slate-800 dark:text-slate-100">SEO meta</h2>
           <form action={runSeoAssist}>
             <input type="hidden" name="id" value={exam.id} />
             <SubmitBusyButton
-              idleLabel={<><Sparkles className="mr-1 h-3 w-3" /> AI Assist — generate now</>}
-              busyLabel={<>Generating with Claude…</>}
+              idleLabel={<><Sparkles className="mr-1 h-3 w-3" /> AI Assist</>}
+              busyLabel={<>Generating…</>}
               className="inline-flex h-7 items-center rounded-md bg-violet-600 px-2.5 text-[11px] font-medium text-white hover:bg-violet-700 disabled:cursor-wait disabled:bg-violet-400"
             />
           </form>
