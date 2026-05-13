@@ -165,7 +165,7 @@ export default async function HomePage() {
         <div className="mt-8 grid gap-6 md:grid-cols-3">
           {[
             { icon: BookOpen, t: 'Choose an exam', d: 'Pick from 100+ vendors and certifications.' },
-            { icon: Sparkles, t: 'Try 30 questions free', d: 'Get a feel for our practice content before you buy.' },
+            { icon: Sparkles, t: `Try ${TEASER_N} questions free`, d: 'Get a feel for our practice content before you buy.' },
             { icon: BadgeCheck, t: 'Pass with confidence', d: 'Practice + Exam modes simulate the real test.' }
           ].map((s, i) => (
             <div key={i} className="card p-6 text-center">

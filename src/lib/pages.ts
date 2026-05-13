@@ -23,7 +23,7 @@ export const DEFAULT_PAGES: PageDefault[] = [
     position: 10,
     bodyHtml: [
       PARA('Our practice exams are designed to mirror the structure, difficulty, and topic weighting of the real certification.'),
-      HEADING('1. Try 10 questions free'),
+      HEADING('1. Try {{TEASER_N}} questions free'),
       PARA('Every exam ships with a free teaser. No credit card required.'),
       HEADING('2. Practice mode'),
       PARA('See the correct answer and an explanation immediately after each question. Build your understanding.'),
@@ -98,9 +98,9 @@ export const DEFAULT_PAGES: PageDefault[] = [
     bodyHtml: [
       PARA('We want you to be confident in your purchase.'),
       HEADING('Practice exams'),
-      PARA('Full refund within 7 days of purchase if you have answered fewer than 20 questions across all attempts. Email support with your order id.'),
+      PARA('Full refund within 7 days of purchase if you have answered fewer than {{TEASER_N}} questions across all attempts. Email support with your order id.'),
       HEADING('Voucher bundles'),
-      PARA('Once a voucher code has been issued and delivered to you, the voucher portion is non-refundable (we have already paid the certification vendor). The practice-exam portion remains refundable under the 7-day / 20-question rule.'),
+      PARA('Once a voucher code has been issued and delivered to you, the voucher portion is non-refundable (we have already paid the certification vendor). The practice-exam portion remains refundable under the 7-day / {{TEASER_N}}-question rule.'),
       HEADING('How to request'),
       PARA('Reply to your order confirmation email or contact support directly. Approved refunds are returned to the original payment method within 5-10 business days.')
     ].join('')

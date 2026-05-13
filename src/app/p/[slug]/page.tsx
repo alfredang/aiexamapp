@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
+import { getSetting } from '@/lib/settings';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,10 +13,24 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return { title: page.title, description: page.excerpt ?? undefined };
 }
 
+/**
+ * Substitutes admin-content placeholders so pages can reference live config
+ * without hardcoding numbers. Supported tokens:
+ *   {{TEASER_N}}        → TEASER_QUESTION_COUNT (default 20)
+ *   {{REFUND_DAYS}}     → fixed at 7 for now
+ */
+async function renderPlaceholders(html: string): Promise<string> {
+  if (!/\{\{[A-Z_]+\}\}/.test(html)) return html;
+  const teaserRaw = await getSetting('TEASER_QUESTION_COUNT');
+  const teaserN = String(Math.max(1, Math.min(50, Number(teaserRaw) || 20)));
+  return html.replace(/\{\{TEASER_N\}\}/g, teaserN).replace(/\{\{REFUND_DAYS\}\}/g, '7');
+}
+
 export default async function PublicPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const page = await db.page.findUnique({ where: { slug } });
   if (!page || !page.published) return notFound();
+  const bodyHtml = await renderPlaceholders(page.bodyHtml);
 
   return (
     <div className="container-app max-w-3xl py-12">
@@ -29,7 +44,7 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
         )}
         <div
           className="mt-6 text-[0.95rem] leading-7 text-slate-700 dark:text-slate-200"
-          dangerouslySetInnerHTML={{ __html: page.bodyHtml }}
+          dangerouslySetInnerHTML={{ __html: bodyHtml }}
         />
       </article>
     </div>
