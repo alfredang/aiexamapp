@@ -12,4 +12,10 @@ dist
 *.pdf
 # Source PDFs and any artifacts under those folders — never commit
 practice-exams-pdfs-*/
-.claude/
+
+# Selectively commit .claude/skills + agents (project context). Ignore the rest.
+.claude/*
+!.claude/skills/
+!.claude/agents/
+!.claude/skills/**
+!.claude/agents/**

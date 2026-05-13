@@ -26,8 +26,11 @@ export default async function TeaserStartPage({ params }: { params: Promise<{ ve
   if (teaserQuestions.length === 0) {
     return <div className="container-app py-16 text-center"><h1 className="text-xl font-semibold">Teaser not yet available</h1></div>;
   }
-  // Cap teaser attempts at 10 questions per the simplified product model.
-  const ids = teaserQuestions.map(q => q.id).sort(() => Math.random() - 0.5).slice(0, 10);
+  // Admin-configurable teaser size (Settings → TEASER_QUESTION_COUNT, default 20).
+  const { getSetting } = await import('@/lib/settings');
+  const sizeRaw = await getSetting('TEASER_QUESTION_COUNT');
+  const teaserSize = Math.max(1, Math.min(50, Number(sizeRaw) || 20));
+  const ids = teaserQuestions.map(q => q.id).sort(() => Math.random() - 0.5).slice(0, teaserSize);
 
   const attempt = await db.attempt.create({
     data: {

@@ -4,6 +4,7 @@ import argon2 from 'argon2';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { NATIONALITIES, NATIONALITY_CODES } from '@/lib/nationalities';
+import { ThemePreferenceSelect } from '@/components/theme-preference-select';
 
 async function updateProfile(formData: FormData) {
   'use server';
@@ -45,7 +46,16 @@ export default async function MyProfilePage() {
   return (
     <>
       <h1 className="text-2xl font-bold">My Profile</h1>
-      <p className="mt-1 text-sm text-slate-500">Manage your account details and password.</p>
+      <p className="mt-1 text-sm text-slate-500">Manage your account details, password, and appearance.</p>
+
+      {/* Theme preference */}
+      <div className="card mt-6 flex flex-wrap items-center justify-between gap-3 p-4">
+        <div>
+          <h2 className="text-sm font-semibold">Theme</h2>
+          <p className="mt-0.5 text-xs text-slate-500">System follows your OS. Light/Dark force the choice.</p>
+        </div>
+        <ThemePreferenceSelect />
+      </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         {/* Profile details */}

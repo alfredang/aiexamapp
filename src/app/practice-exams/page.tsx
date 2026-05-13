@@ -69,7 +69,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
     <div className="container-app py-10">
       <div className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight">Practice exams</h1>
-        <p className="mt-1 text-slate-600">Browse certifications across leading vendors. Try 10 questions for free on every exam.</p>
+        <p className="mt-1 text-slate-600">Browse certifications across leading vendors. Try our free practice teaser on every exam.</p>
       </div>
 
       <form className="mb-6 flex flex-wrap gap-2">

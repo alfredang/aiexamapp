@@ -2,27 +2,55 @@ import { query } from '@anthropic-ai/claude-agent-sdk';
 import { z } from 'zod';
 import { getSetting } from '@/lib/settings';
 
+const DomainSchema = z.object({ name: z.string().min(1), weight: z.number().min(0).max(100) });
+
 const ResultSchema = z.object({
   infoUrl: z.string().url(),
   examSets: z.number().int().min(1).max(6),
-  notes: z.string().optional()
+  notes: z.string().optional(),
+  description: z.string().min(20).max(500).optional(),
+  durationMinutes: z.number().int().min(15).max(360).optional(),
+  passingScore: z.number().int().min(40).max(100).optional(),
+  questionCount: z.number().int().min(10).max(120).optional(),
+  domains: z.array(DomainSchema).optional()
 });
 export type ExamInfoLookup = z.infer<typeof ResultSchema>;
 
 const SYSTEM = `You research IT certification exams on the open web.
 Your job: given a vendor name, exam title, and exam code, find the OFFICIAL vendor page
-that describes the certification (overview, blueprint, or exam guide PDF).
+that describes the certification (overview, blueprint, or exam guide PDF), and return
+structured metadata about the exam.
 
-Use the WebSearch tool to find candidate URLs, then prefer the canonical vendor
-domain (aws.amazon.com, learn.microsoft.com, cloud.google.com, comptia.org,
-isc2.org, cisco.com, etc.) over third-party sites.
+Use the WebSearch + WebFetch tools to find the canonical vendor page (aws.amazon.com,
+learn.microsoft.com, cloud.google.com, comptia.org, isc2.org, cisco.com, etc.).
 
-Also estimate how many distinct full-length practice exam variants are typically
-offered by the vendor for this certification on its official site or its first-party
-training platform. Constrain to an integer between 1 and 6. If unknown, use 1.
+Then extract:
+- infoUrl: the canonical vendor page URL
+- examSets: number of distinct practice exam variants (1-6, default 1)
+- description: 1-3 sentence exam overview, 100-400 chars
+- durationMinutes: exam length in minutes (typically 60-240)
+- passingScore: passing percentage (typically 65-75)
+- questionCount: number of questions in a full exam sitting (typically 40-90)
+- domains: array of { name, weight } from the published blueprint. Weights as
+  percentages summing to ~100. Use the exact domain names from the vendor page.
 
-When you're done, output ONLY a single JSON object (no prose, no fences) of shape:
-{ "infoUrl": "<full https URL>", "examSets": <1-6>, "notes": "<one short sentence>" }`;
+Output ONLY a single JSON object (no prose, no fences) with all fields you can fill
+confidently. Omit fields you cannot verify from the vendor page rather than guessing.
+
+Example shape:
+{
+  "infoUrl": "https://aws.amazon.com/certification/...",
+  "examSets": 1,
+  "description": "...",
+  "durationMinutes": 130,
+  "passingScore": 72,
+  "questionCount": 65,
+  "domains": [
+    { "name": "Design Secure Architectures", "weight": 30 },
+    { "name": "Design Resilient Architectures", "weight": 26 }
+  ],
+  "notes": "..."
+}`;
 
 function extractJsonObject(text: string): unknown | null {
   const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
@@ -42,16 +70,14 @@ export async function lookupExamInfo(input: {
   code: string;
 }): Promise<ExamInfoLookup> {
   const storedKey = await getSetting('ANTHROPIC_API_KEY');
-  if (storedKey && !process.env.ANTHROPIC_API_KEY) {
-    process.env.ANTHROPIC_API_KEY = storedKey;
-  }
+  if (storedKey && !process.env.ANTHROPIC_API_KEY) process.env.ANTHROPIC_API_KEY = storedKey;
 
   const prompt = `Vendor: ${input.vendor}
 Certification title: ${input.title}
 Exam code: ${input.code}
 
-Search the web and return the official vendor URL plus the typical number of
-full-length practice exam variants offered for this certification.`;
+Find the official vendor page and extract: infoUrl, examSets, description,
+durationMinutes, passingScore, questionCount, and the domain blueprint with weights.`;
 
   const result = query({
     prompt,
@@ -59,7 +85,7 @@ full-length practice exam variants offered for this certification.`;
       systemPrompt: SYSTEM,
       model: 'claude-sonnet-4-6',
       allowedTools: ['WebSearch', 'WebFetch'],
-      maxTurns: 6
+      maxTurns: 8
     } as any
   });
 

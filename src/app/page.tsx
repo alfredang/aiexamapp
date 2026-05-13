@@ -9,6 +9,9 @@ import { Search, ShieldCheck, Sparkles, BookOpen, BadgeCheck, Award, ChevronDown
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
+  const { getSetting } = await import('@/lib/settings');
+  const teaserSizeRaw = await getSetting('TEASER_QUESTION_COUNT');
+  const TEASER_N = Math.max(1, Math.min(50, Number(teaserSizeRaw) || 20));
   // Vendor card counts include BOTH standalone published exams AND bundles
   // attributed to the vendor (via the first bundle item's exam vendor).
   // That matches what users actually see on /practice-exams/[vendor].
@@ -62,7 +65,7 @@ export default async function HomePage() {
               Practice Smarter <br />for Your <span className="gradient-text">Next Certification</span>
             </h1>
             <p className="mt-5 max-w-xl text-lg text-slate-600 dark:text-slate-300">
-              Realistic practice exams across AWS, Microsoft, Cisco, CompTIA, Google Cloud and more. Try 10 questions for free on any exam.
+              Realistic practice exams across AWS, Microsoft, Cisco, CompTIA, Google Cloud and more. Try {TEASER_N} questions for free on any exam.
             </p>
             <form action="/practice-exams" className="mt-8 flex max-w-lg items-center gap-2 rounded-full border border-slate-200 bg-white p-1.5 shadow-card dark:border-slate-700 dark:bg-slate-900">
               <Search className="ml-3 h-5 w-5 text-slate-400" />
@@ -180,7 +183,7 @@ export default async function HomePage() {
           <h2 className="text-center text-2xl font-semibold">Three ways to prepare</h2>
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {[
-              { t: 'Try 10 questions for free', d: 'Free teaser on every exam — no credit card required. Get a feel for our content before you buy.', cta: 'Browse exams' },
+              { t: `Try ${TEASER_N} questions for free`, d: 'Free teaser on every exam — no credit card required. Get a feel for our content before you buy.', cta: 'Browse exams' },
               { t: 'Practice Exam', d: 'Full access to the practice question bank with detailed explanations. Practice Mode and Exam Mode included.', cta: 'Browse' },
               { t: 'Exam Voucher (practice included)', d: 'A real exam voucher PLUS full practice access for the same exam — no separate practice purchase needed.', cta: 'Browse' }
             ].map((p, i) => (
@@ -211,7 +214,7 @@ export default async function HomePage() {
           <div className="mx-auto mt-10 max-w-3xl space-y-3">
             {[
               { q: 'Are these real exam questions?', a: 'No — and that\'s intentional. ExamNova provides original, hand-authored practice questions modelled on each certification\'s public exam blueprint. We do not sell or distribute real exam content ("dumps"), which would violate vendor terms and undermine the value of your certification.' },
-              { q: 'How does the free teaser work?', a: 'Every exam includes a free 10-question teaser so you can sample the question quality and format before you buy. After signing in, you can retake the teaser as often as you like — there\'s no per-attempt limit.' },
+              { q: 'How does the free teaser work?', a: `Every exam includes a free ${TEASER_N}-question teaser so you can sample the question quality and format before you buy. After signing in, you can retake the teaser as often as you like — there's no per-attempt limit.` },
               { q: 'What is the difference between Practice Mode and Exam Mode?', a: 'Practice Mode reveals the correct answer and full explanation after each question — ideal for studying and reinforcing concepts. Exam Mode is a timed simulation: no answer feedback until you submit, auto-save every 15 seconds, and auto-submit when time runs out — mirroring the real testing experience.' },
               { q: 'How do exam vouchers work?', a: 'Purchasing the Exam Voucher tier includes a real, vendor-issued voucher code (delivered by email within 3–5 business days) PLUS lifetime practice access to the same certification at no additional cost. Use the code to register for your official exam at the vendor\'s testing partner.' }
             ].map((f, i) => (

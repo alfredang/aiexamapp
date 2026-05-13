@@ -82,6 +82,9 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ ven
   if (exam.vendor.slug !== vendorSlug) notFound();
 
   const teaserCount = await db.question.count({ where: { examId: exam.id, isTeaser: true, status: 'PUBLISHED' } });
+  const { getSetting } = await import('@/lib/settings');
+  const teaserSizeRaw = await getSetting('TEASER_QUESTION_COUNT');
+  const teaserN = Math.max(1, Math.min(50, Number(teaserSizeRaw) || 20));
   const domains = (exam.domains as any[]) || [];
 
   // Entitlement check for showing "You have access — Start your attempt"
@@ -190,7 +193,7 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ ven
           {!entitled && teaserCount > 0 && (
             <Link href={`/practice-exams/${exam.vendor.slug}/${exam.slug}/teaser`} className="card-hover block p-5">
               <div className="mb-1 text-xs font-semibold uppercase text-blue-700 dark:text-blue-300">Free</div>
-              <div className="font-semibold">Try 10 questions for free</div>
+              <div className="font-semibold">Try {teaserN} questions for free</div>
               <p className="mt-1 text-sm text-slate-600 dark:text-slate-100">No credit card required.</p>
               <div className="btn-outline mt-3 w-full">Start free practice exam</div>
             </Link>

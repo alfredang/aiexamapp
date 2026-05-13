@@ -32,8 +32,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 // Runs synchronously in <head> before paint to avoid a flash of the wrong
-// theme. Default is dark; respects an explicit localStorage('theme') override.
-const themeInitScript = `(function(){try{var t=localStorage.getItem('theme');var d=t?t==='dark':true;if(d)document.documentElement.classList.add('dark');}catch(e){document.documentElement.classList.add('dark');}})();`;
+// theme. Respects (1) explicit localStorage('theme'), then (2) the OS
+// prefers-color-scheme media query. Falls back to light when neither is set.
+const themeInitScript = `(function(){try{
+  var t=localStorage.getItem('theme');
+  var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var d = t ? (t==='dark') : prefersDark;
+  if (d) document.documentElement.classList.add('dark');
+} catch(e) {}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

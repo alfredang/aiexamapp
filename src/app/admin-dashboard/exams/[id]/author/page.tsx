@@ -21,26 +21,26 @@ export default async function AuthorChooserPage({ params }: { params: Promise<{ 
     {
       href: `/admin-dashboard/exams/${id}/author/manual`,
       icon: Pencil,
-      title: 'Manual',
-      desc: 'Type questions yourself in a batch form. Best when you have a small handful of questions to enter or need full control over wording.'
+      title: '1. Manual',
+      desc: 'Type questions yourself in a batch form (5 at a time). Full control over wording, options, per-answer explanations, and difficulty.'
+    },
+    {
+      href: `/admin-dashboard/exams/${id}/author/blueprint`,
+      icon: Sparkles,
+      title: '2. AI Assist (Blueprint)',
+      desc: 'Generate a full exam (e.g. 60 questions) automatically. Firecrawl scrapes the official exam objectives from this exam’s Info URL, then Claude authors questions whose distribution matches the published domain weights.'
     },
     {
       href: `/admin-dashboard/exams/${id}/author/pdf`,
       icon: FileText,
-      title: 'From PDF / e-book',
-      desc: 'Upload an exam guide or study PDF. We extract the text and ask Claude to generate questions grounded in it. Approve each question before it lands in your bank.'
+      title: '3. From PDF / e-book',
+      desc: 'Upload a vendor study guide or e-book. We extract the text and Claude authors questions grounded in it. Each question links back to the source for audit.'
     },
     {
       href: `/admin-dashboard/exams/${id}/author/web`,
       icon: Globe2,
-      title: 'From web pages',
-      desc: 'Paste one or more URLs (vendor exam guides, blog posts, study sites). Firecrawl scrapes the content to clean markdown, then Claude authors questions from it. Approve each one before it ships.'
-    },
-    {
-      href: `/admin-dashboard/exams/${id}/generate`,
-      icon: Sparkles,
-      title: 'From scratch (Claude)',
-      desc: 'Generate questions purely from the exam blueprint with no source document. Useful when you don’t have a study source handy and want broad coverage.'
+      title: '4. From web pages (Firecrawl + Tavily)',
+      desc: 'Paste one or more URLs (vendor docs, blog posts, study sites). Firecrawl scrapes to clean markdown, then Claude authors questions grounded in the scraped content.'
     }
   ];
 

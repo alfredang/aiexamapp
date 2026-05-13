@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { db } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
+import { CreateExamAiAssist } from './ai-assist';
 
 async function createExam(formData: FormData) {
   'use server';
@@ -21,22 +22,34 @@ async function createExam(formData: FormData) {
   const pricePractice = Math.round(Number(formData.get('pricePractice') || 29) * 100);
   const priceBundle = Math.round(Number(formData.get('priceBundle') || 179) * 100);
   const priceVoucher = Math.round(Number(formData.get('priceVoucher') || 149) * 100);
+  // AI Assist drops the JSON blueprint into a hidden input.
+  let domains: { name: string; weight: number }[] = [];
+  const domainsJson = String(formData.get('domainsJson') || '').trim();
+  if (domainsJson) {
+    try {
+      const parsed = JSON.parse(domainsJson);
+      if (Array.isArray(parsed)) domains = parsed;
+    } catch {
+      /* ignore — keep empty */
+    }
+  }
   if (!vendorId || !code || !slug || !title) return;
   const created = await db.exam.create({
     data: {
       vendorId, code, title, slug, description, level,
       durationMinutes, passingScore, questionCount, examSets, infoUrl,
       pricePractice, priceBundle, priceVoucher,
-      domains: [],
+      domains,
       published: false
     }
   });
   revalidatePath('/admin-dashboard/exams');
-  redirect(`/admin-dashboard/exams/${created.id}`);
+  redirect(`/admin-dashboard/exams/${created.id}/author`);
 }
 
 export default async function NewExamPage() {
   const vendors = await db.vendor.findMany({ orderBy: { name: 'asc' } });
+  const vendorMap: Record<string, string> = Object.fromEntries(vendors.map((v) => [v.id, v.name]));
 
   return (
     <div className="max-w-4xl">
@@ -45,7 +58,8 @@ export default async function NewExamPage() {
         <Link href="/admin-dashboard/exams" className="btn-ghost text-sm">← Back to list</Link>
       </div>
 
-      <form action={createExam} className="card grid gap-3 p-4 md:grid-cols-3">
+      <form data-create-exam action={createExam} className="card grid gap-3 p-4 md:grid-cols-3">
+        <CreateExamAiAssist vendorMap={vendorMap} />
         <Field label="Vendor" className="md:col-span-1">
           <select name="vendorId" required className="input">
             <option value="">Vendor…</option>

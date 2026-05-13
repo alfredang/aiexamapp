@@ -58,7 +58,8 @@ export const PAYMENT_SUBGROUPS: SettingsGroup[] = [
 // three provider sub-groups — they apply to all providers.
 export const PAYMENT_FULFILLMENT_FIELDS: FieldDef[] = [
   { key: 'VOUCHER_DELAY_DAYS', label: 'Voucher delay (days)', placeholder: '5' },
-  { key: 'FULFILLMENT_TIMEZONE', label: 'Fulfillment timezone', placeholder: 'Asia/Singapore' }
+  { key: 'FULFILLMENT_TIMEZONE', label: 'Fulfillment timezone', placeholder: 'Asia/Singapore' },
+  { key: 'TEASER_QUESTION_COUNT', label: 'Free teaser questions (per exam)', placeholder: '20' }
 ];
 
 // Email transport sub-groups shown as collapsible cards on the

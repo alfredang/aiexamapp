@@ -8,258 +8,150 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Auth.js](https://img.shields.io/badge/Auth.js-v5-green)](https://authjs.dev/)
-[![Claude Agent SDK](https://img.shields.io/badge/Claude%20Agent%20SDK-Anthropic-orange)](https://docs.anthropic.com/)
-[![PayPal](https://img.shields.io/badge/PayPal-Checkout-003087?logo=paypal&logoColor=white)](https://developer.paypal.com/)
-[![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
-[![Coolify](https://img.shields.io/badge/Coolify-deployable-7c3aed)](https://coolify.io/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](#license)
 
-**Modern multi-vendor certification practice exam platform — AI-curated questions, two exam modes, PayPal checkout, and a Coolify-ready Docker stack.**
-
-[Demo](https://ai-exams.tertiaryinfo.tech) · [Report Bug](https://github.com/alfredang/ai-exams/issues) · [Request Feature](https://github.com/alfredang/ai-exams/issues)
+Practice smarter for your next certification. End-to-end e-commerce admin + AI-assisted question authoring on Next.js 15.
 
 </div>
 
-## Screenshot
+---
 
-![Screenshot](screenshot.png)
+## What it does
 
-<details>
-<summary>More screenshots</summary>
+ExamNova is a full-stack practice-exam platform with a production-grade admin backend:
 
-**Practice exam catalog**
-![Catalog](screenshot-catalog.png)
+- **Customer surface** — vendor catalog, free teaser, paid practice exams + voucher delivery, multi-provider checkout (PayPal · HitPay · PayNow), invoices.
+- **Admin backend** — compact dashboard with KPI cards, drill-down reports, RBAC, audit log, notifications bell, ⌘K global search.
+- **AI-assisted authoring** — four modes to create exam questions (Manual · Blueprint · PDF · Web-scrape) using Claude Agent SDK + Firecrawl.
+- **Money layer** — sequential invoice + order numbering, tax (GST) engine, multi-currency display, refunds with provider APIs + auto credit-note minting, coupon engine.
+- **Operations** — voucher inventory (CSV bulk upload, FIFO claim), webhook event log, GDPR data export, API tokens for partners, cron workers (delivery, expiry, scheduled reports).
 
-**Exam detail with tier pricing**
-![Exam detail](screenshot-exam-detail.png)
-
-</details>
-
-## About
-
-ExamNova is a production-ready web application for selling and delivering practice exams across industry certifications (AWS, Microsoft Azure / 365, Cisco CCNA, CompTIA, Google Cloud, Linux Foundation, Anthropic, and more). Candidates browse a catalog, try a free 30-question teaser on any exam, then purchase access in three tiers — practice only, practice + voucher, or voucher only. Admins build the question bank manually or by streaming generation through the Claude Agent SDK.
-
-### Key features
-
-| Area | Highlights |
-|------|-----------|
-| **Catalog** | `/practice-exams` with vendor + level + search filters, vendor-scoped landing pages, detail pages with 3-tier pricing |
-| **Exam runtime** | One unified runner for **Practice** (immediate explanations) and **Exam** (timed, server-enforced) modes — autosave every 15s, refresh-safe resume |
-| **Free teaser** | 30 questions per exam, gate at Q20 + Q30 capturing email → OTP → seamless guest-to-user migration |
-| **Auth** | Email + password **and** email + 6-digit OTP via Auth.js v5; 30-day rolling JWT |
-| **Payments** | PayPal Smart Buttons + REST Orders v2 + signature-verified webhook backup; idempotent fulfillment writes `Entitlement` rows and a downloadable PDF voucher |
-| **AI generation** | Admin streams questions live from Claude using a `submit_question` tool, validates with Zod, persists as `DRAFT` for per-row approve/discard |
-| **Admin** | Vendors, exams, questions (DRAFT → PUBLISHED → ARCHIVED), users with manual exam grants, orders with refund stub |
-| **Compliance** | Original questions only — never real exam dumps. Disclaimer baked into footer, exam pages, and the AI generator system prompt |
-
-## Tech Stack
-
-| Category | Stack |
-|----------|-------|
-| **Framework** | Next.js 15 (App Router) + TypeScript (strict) |
-| **Styling** | Tailwind CSS 3, lucide-react, Radix primitives |
-| **Database** | PostgreSQL 16 + Prisma 6 |
-| **Auth** | Auth.js (NextAuth v5) — Credentials providers (password + OTP), edge-safe split config |
-| **Payments** | `@paypal/react-paypal-js` (client) + REST Orders v2 (server) + webhook signature verification |
-| **AI / LLM** | `@anthropic-ai/claude-agent-sdk` with tool use + SSE streaming |
-| **PDF** | `pdf-lib` for voucher generation |
-| **Email** | `nodemailer` (SMTP); MailHog for local dev |
-| **Validation** | Zod everywhere |
-| **Hashing** | argon2id (OWASP-recommended) |
-| **Deployment** | Multi-stage Dockerfile + docker-compose, Coolify-ready |
-
-## Architecture
-
-```
-┌──────────────────────────────────────────────────────────────────────┐
-│                      Browser (React Client)                           │
-│   Hero · Catalog · Exam Runner · Teaser Gate · Admin SSE Viewer       │
-└─────────────┬──────────────────────────────┬─────────────────────────┘
-              │                              │ SSE (admin generator)
-              │ App Router routes            │
-┌─────────────▼──────────────────────────────▼─────────────────────────┐
-│                       Next.js 15 (App Router)                         │
-│  ┌──────────────┐   ┌──────────────┐   ┌──────────────────────────┐  │
-│  │  Server      │   │  Route       │   │  Middleware              │  │
-│  │  Components  │   │  Handlers    │   │  (edge-safe Auth.js)     │  │
-│  │  + Actions   │   │              │   │  RBAC: /admin /my-content│  │
-│  └──────┬───────┘   └──────┬───────┘   └──────────────────────────┘  │
-└─────────┼──────────────────┼──────────────────────────────────────────┘
-          │                  │
-          │  Prisma          │  REST/Webhook                External
-          ▼                  ▼                              Services
-┌─────────────────┐  ┌──────────────────┐  ┌──────────────────────────┐
-│  PostgreSQL 16  │  │  PayPal Orders v2│  │  Claude Agent SDK         │
-│  • User         │  │  + Webhooks      │  │  (submit_question tool)   │
-│  • Exam/Question│  │                  │  └──────────────────────────┘
-│  • Attempt JSON │  └──────────────────┘  ┌──────────────────────────┐
-│  • Entitlement  │  ┌──────────────────┐  │  SMTP (nodemailer)        │
-│  • OtpCode      │  │  pdf-lib voucher │  │  • OTP codes              │
-│  • Order/Log    │  │  generator       │  │  • Order confirmations    │
-└─────────────────┘  └──────────────────┘  └──────────────────────────┘
-```
-
-## Project Structure
-
-```
-ai-exams/
-├── prisma/
-│   ├── schema.prisma                # Postgres schema (Entitlement, Attempt JSON, OtpCode…)
-│   └── seed.ts                      # admin + 3 vendors + 2 exams + 60 questions
-├── src/
-│   ├── app/
-│   │   ├── page.tsx                 # gradient hero
-│   │   ├── practice-exams/          # catalog → vendor → detail → teaser
-│   │   ├── login/, signup/          # two-card layout, password + OTP tabs
-│   │   ├── verify-otp/, forgot-password/
-│   │   ├── exam/[attemptId]/        # unified Practice / Exam runner
-│   │   ├── results/[attemptId]/     # per-domain breakdown + review
-│   │   ├── checkout/[examId]/       # ?tier=PRACTICE|BUNDLE|VOUCHER
-│   │   ├── my-content/              # user dashboard
-│   │   ├── admin/                   # role-gated console
-│   │   └── api/
-│   │       ├── auth/[...nextauth]/  # Auth.js handler
-│   │       ├── otp/{request,verify}/
-│   │       ├── attempts/{start,answer,autosave,mark,submit}/
-│   │       ├── paypal/{create-order,capture,webhook}/
-│   │       ├── admin/generate-questions/   # SSE streaming
-│   │       └── vouchers/[id]/pdf/
-│   ├── components/                  # nav, footer, exam-runner, teaser-gate, dot-pattern
-│   └── lib/                         # auth, claude, fulfill, paypal, mail, voucher-pdf, …
-├── Dockerfile                       # multi-stage standalone build
-├── docker-compose.yml               # postgres (host :55432) + mailhog + app
-├── .env.example
-├── CLAUDE.md                        # architecture notes for AI assistants
-└── README.md
-```
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 20+
-- Docker (for Postgres + MailHog)
-- A PayPal sandbox app (optional — required for checkout flows)
-- An Anthropic API key (optional — required for AI question generation)
-
-### 1. Clone and install
+## Quick start
 
 ```bash
-git clone https://github.com/alfredang/ai-exams.git
-cd ai-exams
+docker compose up -d postgres mailhog     # Postgres on :55432, MailHog on :8025
 npm install --legacy-peer-deps
-```
-
-> `--legacy-peer-deps` is required because `next-auth@5.0.0-beta.25` and a few Radix peers don't yet declare React 19 in their peer ranges.
-
-### 2. Environment
-
-```bash
-cp .env.example .env
-# edit .env — DATABASE_URL is preconfigured for the docker-compose Postgres on host port 55432
-```
-
-### 3. Boot infra and seed
-
-```bash
-docker compose up -d postgres mailhog
+cp .env.example .env                       # set DATABASE_URL host port to 55432
 npx prisma migrate dev --name init
-npm run db:seed     # admin + 3 vendors + AWS SAA-C03 (60q, 30 teaser) + Azure AZ-900
-```
-
-### 4. Run
-
-```bash
+npm run db:seed                            # admin + sample exams
 npm run dev -- -p 3040 -H 127.0.0.1
 ```
 
-- App → <http://127.0.0.1:3040>
-- MailHog (catches OTP + purchase emails) → <http://127.0.0.1:8025>
-- Admin login → `ADMIN_EMAIL` / `ADMIN_PASSWORD` from `.env` (defaults: `admin@example.com` / `ChangeMe!2026`)
+## Key routes
 
-> **Postgres host port is 55432, not 5432**, to avoid colliding with a system Postgres. Keep `DATABASE_URL` and `docker-compose.yml` in sync.
+### Public marketing
+- `/` — homepage with hero, vendor grid, popular exams, FAQ
+- `/practice-exams` — catalog (vendors, levels, search, pagination)
+- `/practice-exams/[vendor]/[slug]` — exam detail with per-domain blueprint + Practice/Voucher tier prices
+- `/practice-exams/[vendor]/[slug]/teaser` — free practice teaser (count configurable via admin)
+- `/exam/[attemptId]` — unified runner for Practice + Exam modes (questions always shuffled)
+- `/results/[attemptId]` — per-domain breakdown + review
+- `/checkout/[examId]?tier=...` — checkout with PayPal · HitPay · PayNow + promo code input
+- `/sitemap.xml` — auto-generated from published exams + pages
 
-### Useful scripts
+### Authenticated user
+- `/user-dashboard` — overview · exams · attempts · orders · invoices · vouchers · settings (theme picker)
 
-| Script | What it does |
-|--------|--------------|
-| `npm run dev` | Next dev server |
-| `npm run build` | `prisma generate && next build` |
-| `npm run typecheck` | `tsc --noEmit` |
-| `npm run lint` | Next ESLint |
-| `npm run db:migrate` | Prisma migrate dev |
-| `npm run db:deploy` | Prisma migrate deploy (prod) |
-| `npm run db:seed` | Run `prisma/seed.ts` |
-| `npm run db:studio` | Prisma Studio UI |
+### Admin (`/admin-dashboard`)
+- **Overview** — KPI dashboard (revenue today/7d/30d/MTD · refund rate · signups · active learners · tax MTD)
+- **Catalog** — View Exams · Create Exam (with AI Assist to populate description/duration/passing/questionCount/domains) · Bundles · Vendors
+- **Money** — Orders · Invoices · Vouchers (Deliveries + Inventory) · Coupons · Webhook Events
+- **Reports** — Revenue · Tax (GST) · Exam analytics — all with date-range pickers + CSV exports
+- **People** — Users (detail tabs, tags, notes, impersonate, GDPR export) · Admins
+- **Content** — Email Templates · Pages · FAQ · Banners
+- **System** — Notifications · Logs (Email + Audit) · API Tokens · Settings · Site SEO
 
-## Deployment
+## Four ways to author questions
 
-### Docker (local production build)
+After creating an exam, the **Author questions** chooser at `/admin-dashboard/exams/[id]/author` offers four modes:
 
-```bash
-docker compose up --build
+1. **Manual** — type 5 questions at a time with per-answer explanations
+2. **AI Assist (Blueprint)** — auto-generate the full exam (e.g. 60 questions) where domain distribution matches the published blueprint percentages. Uses Firecrawl to scrape the official exam objectives, then Claude generates questions per domain quota.
+3. **From PDF / e-book** — upload a vendor study guide; pdf-parse extracts text, Claude grounds questions in it.
+4. **From web pages (Firecrawl + Claude)** — paste URLs, Firecrawl scrapes to markdown, Claude authors questions.
+
+Approve/Discard each generated question before it lands in the bank.
+
+## Architecture
+
+Single Next.js 15 (App Router) app — server actions, edge-safe middleware split, SSE streaming for AI generation.
+
+- **Auth** — Auth.js v5 with three providers: password (argon2id), OTP, Google + GitHub OAuth (configurable from admin Settings → Social Login)
+- **DB** — Prisma + Postgres (`models`: User, Exam, Vendor, Question, Bundle, Order, Invoice, Refund, Coupon, Entitlement, VoucherInventory, VoucherDelivery, EmailLog, AdminLog, AdminNotification, ApiToken, …)
+- **Payments** — PayPal Orders v2, HitPay, PayNow (manual SGQR + admin confirm); all webhooks log to `PaymentWebhookEvent` first to preserve payloads
+- **PDF** — `pdf-lib` for invoice + voucher rendering (shared layout helpers in `src/lib/pdf/layout.ts`)
+- **AI** — `@anthropic-ai/claude-agent-sdk` for streaming generation; Firecrawl for web scraping
+- **Email** — Nodemailer with Gmail OAuth (preferred) or SMTP transport; every send logged to `EmailLog`
+- **Cron** — three worker routes auth'd via `WORKER_SHARED_SECRET`: `/api/worker/voucher-delivery`, `/api/worker/voucher-expiry`, `/api/worker/reports`
+
+## Configurable from admin Settings
+
+No hardcoded constants — everything below is editable at runtime under `/admin-dashboard/settings`:
+
+| Group | Keys |
+|---|---|
+| Company Info | name, short name, UEN, address, website, email, tel |
+| Branding | brand name, logo URL, primary color, support email |
+| Site SEO | home title, description, keywords |
+| Tax & Invoice | TAX_ENABLED, TAX_RATE_BPS, TAX_LABEL, TAX_INCLUSIVE, COMPANY_GST_REG, INVOICE_PREFIX, FX_TO_SGD_*_BPS |
+| Payment | PayPal · HitPay · PayNow credentials + enabled flags, voucher delay days, fulfilment TZ, **free teaser question count** |
+| Email | EMAIL_TRANSPORT (Gmail OAuth · SMTP), credentials, EMAIL_FROM |
+| Social Login | Google + GitHub OAuth client IDs + secrets |
+| Credentials | Anthropic, Firecrawl, Tavily, worker shared secret |
+
+## Claude skills + agents
+
+Project-level [.claude/skills/](.claude/skills/) and [.claude/agents/](.claude/agents/):
+
+- `custom-practice-exam` — generate one full blueprint-aligned exam
+- `seo-audit` — audit and improve marketing-page SEO
+- `exam-batch-generator` (agent) — generate practice exams for many certifications in parallel using the skill above
+
+## Repo layout
+
+```
+prisma/
+  schema.prisma                # full data model (25+ models)
+  migrations/                  # all reversible Prisma migrations
+src/
+  app/
+    admin-dashboard/           # admin backend — see route list above
+    practice-exams/            # public catalog + detail + teaser
+    user-dashboard/            # authenticated user surface
+    checkout/, exam/, results/ # purchase + practice runner + results
+    api/
+      admin/                   # admin-only endpoints (gated)
+      worker/                  # cron-triggered jobs
+      paypal/, hitpay/, paynow/ # payment webhooks + capture
+    sitemap.xml/, icon.svg     # SEO + favicon
+  components/
+    admin/                     # dense data-table, pager, filter-bar, badge, cmdk, …
+    checkout/                  # billing card, paynow modal, promo code
+  lib/
+    analytics.ts               # revenue, tax, exam, cohort, per-question stats
+    invoice/                   # issue + render-invoice-pdf + build-lines
+    payments/                  # refund, hitpay, webhook-log
+    sources/                   # PDF + URL extraction + chunking
+    claude.ts                  # Claude streaming question generator
+    coupons.ts, numbering.ts, permissions.ts, voucher-inventory.ts,
+    api-tokens.ts, admin-notifications.ts, seo-assist.ts, …
+.claude/
+  skills/                      # project skills (committed)
+  agents/                      # batch automation agents (committed)
 ```
 
-### Coolify (recommended)
+## Testing
 
-1. Point Coolify at this repo. The included [Dockerfile](Dockerfile) is auto-detected (multi-stage, Next.js standalone output, runs `prisma migrate deploy` before `node server.js`).
-2. Provision a Postgres service via Coolify's Services panel.
-3. Set environment variables (see `.env.example`):
-   - `DATABASE_URL`
-   - `NEXTAUTH_SECRET` (generate via `openssl rand -base64 32`)
-   - `NEXTAUTH_URL` and `APP_URL` (e.g. `https://ai-exams.tertiaryinfo.tech`)
-   - `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `PAYPAL_WEBHOOK_ID`, `PAYPAL_ENV`
-   - `NEXT_PUBLIC_PAYPAL_CLIENT_ID`
-   - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`
-   - `ANTHROPIC_API_KEY`
-   - `ADMIN_EMAIL`, `ADMIN_PASSWORD`
-4. Expose port `3000`. Configure your domain + TLS in Coolify.
-5. After first deploy: `docker exec <container> npm run db:seed`.
+There is no automated test runner. Manual verification flows:
 
-### PayPal webhook
+- Local dev server `npm run dev -- -p 3040 -H 127.0.0.1`
+- Playwright MCP for E2E smoke (homepage / catalog / exam detail / sitemap / login)
+- Mailhog at `http://127.0.0.1:8025` for outbound emails
+- Stripe / PayPal sandbox for payment flows
 
-Create a webhook for `PAYMENT.CAPTURE.COMPLETED` (and optionally `CHECKOUT.ORDER.APPROVED`) pointing at:
+## Deploy
 
-```
-https://<your-domain>/api/paypal/webhook
-```
-
-Copy the Webhook ID into `PAYPAL_WEBHOOK_ID`. The capture endpoint also fulfills inline; the webhook is an idempotent backup for closed-tab cases.
-
-## Compliance
-
-> This platform provides **original** practice questions for learning and exam preparation. It is not affiliated with AWS, Microsoft, Cisco, CompTIA, Linux Foundation, or other certification owners unless explicitly stated. **We do not provide real exam dumps.** The Claude Agent SDK system prompt explicitly forbids real-exam claims and requires reference URLs in every generated question.
-
-## Contributing
-
-Contributions are welcome. To propose a change:
-
-1. Fork the repo
-2. Create a feature branch (`git checkout -b feat/your-feature`)
-3. Make your changes — keep type-check + build clean (`npm run typecheck && npm run build`)
-4. Commit with conventional-style messages
-5. Open a Pull Request
-
-For larger changes, please open an issue first to discuss the approach.
-
-## Developed By
-
-**Tertiary Infotech Academy Pte. Ltd.**
-
-## Acknowledgements
-
-- Visual reference: [certificationpractice.com](https://certificationpractice.com/) — clean white-minimalist certification-training aesthetic
-- [Next.js](https://nextjs.org/) and the App Router
-- [Prisma](https://www.prisma.io/) for the ORM
-- [Auth.js](https://authjs.dev/) for the auth primitives
-- [Anthropic](https://www.anthropic.com/) for the Claude Agent SDK
-- [PayPal Developer](https://developer.paypal.com/) for sandbox/live REST APIs
-- [Coolify](https://coolify.io/) for the self-hosted PaaS
-
-## License
-
-MIT — see [LICENSE](LICENSE) if present, otherwise treat as MIT-licensed for now.
+Coolify-ready via [Dockerfile](Dockerfile) (multi-stage, Next standalone). Container runs `prisma migrate deploy` before `node server.js`. Set `NEXTAUTH_URL`, `DATABASE_URL`, and the worker secret as env vars; all other configuration is admin-managed.
 
 ---
 
-⭐ **If you find this useful, please consider starring the repo.**
+© Tertiary Infotech Academy Pte Ltd

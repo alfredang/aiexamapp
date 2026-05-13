@@ -52,7 +52,16 @@ export async function POST(req: Request) {
     : { examId: exam.id, status: 'PUBLISHED' as const };
   const all = await db.question.findMany({ where, select: { id: true } });
   if (all.length === 0) return NextResponse.json({ error: 'No questions available' }, { status: 400 });
-  const limit = data.teaser ? 30 : exam.questionCount;
+  let teaserLimit = 20;
+  if (data.teaser) {
+    const { getSetting } = await import('@/lib/settings');
+    const raw = await getSetting('TEASER_QUESTION_COUNT');
+    teaserLimit = Math.max(1, Math.min(50, Number(raw) || 20));
+  }
+  const limit = data.teaser ? teaserLimit : exam.questionCount;
+  // Questions are always shuffled — both practice and exam mode get a
+  // randomized order; option ordering is preserved at the Question level
+  // (admins author them in a deliberate order for explanation clarity).
   const ids = shuffle(all.map(q => q.id)).slice(0, limit);
 
   const attempt = await db.attempt.create({
