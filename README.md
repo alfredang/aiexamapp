@@ -15,6 +15,12 @@ Practice smarter for your next certification. End-to-end e-commerce admin + AI-a
 
 ---
 
+## Screenshot
+
+![Screenshot](screenshot.png)
+
+---
+
 ## What it does
 
 ExamNova is a full-stack practice-exam platform with a production-grade admin backend:
