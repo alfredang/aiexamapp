@@ -34,24 +34,6 @@ export const DEFAULT_PAGES: PageDefault[] = [
     ].join('')
   },
   {
-    slug: 'faq',
-    title: 'FAQ',
-    excerpt: 'Common questions about our practice exams.',
-    showInFooter: true,
-    footerGroup: 'company',
-    position: 20,
-    bodyHtml: [
-      HEADING('Are these real exam questions?'),
-      PARA('No. We write original practice questions aligned to each certification\'s published blueprint. We do not provide real exam dumps.'),
-      HEADING('How long do I have access?'),
-      PARA('Lifetime access. No subscription, no expiry.'),
-      HEADING('When does my voucher arrive?'),
-      PARA('Voucher codes are emailed within 3-5 business days of purchase. Practice access activates immediately.'),
-      HEADING('What if I fail my real exam?'),
-      PARA('Reach out to support@yourdomain.com — we\'ll work with you on a plan to retake.')
-    ].join('')
-  },
-  {
     slug: 'terms-of-service',
     title: 'Terms of Service',
     excerpt: 'Terms governing use of our service.',

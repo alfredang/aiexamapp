@@ -51,6 +51,24 @@ export default async function HomePage() {
     ...recentExams.map(e => ({ kind: 'exam' as const, data: e }))
   ].slice(0, 6);
 
+  // FAQ entries are managed in /admin-dashboard/faq. The homepage falls
+  // back to a built-in list when no published entries exist yet so a fresh
+  // install still shows something useful.
+  const faqRows = await db.faq.findMany({
+    where: { published: true },
+    orderBy: { position: 'asc' },
+    take: 12
+  });
+  const sub = (s: string) => s.replace(/\{\{TEASER_N\}\}/g, String(TEASER_N));
+  const FAQS: { q: string; a: string }[] = faqRows.length
+    ? faqRows.map((f) => ({ q: sub(f.question), a: sub(f.answer) }))
+    : [
+        { q: 'Are these real exam questions?', a: 'No — and that\'s intentional. ExamNova provides original, hand-authored practice questions modelled on each certification\'s public exam blueprint. We do not sell or distribute real exam content ("dumps"), which would violate vendor terms and undermine the value of your certification.' },
+        { q: 'How does the free teaser work?', a: `Every exam includes a free ${TEASER_N}-question teaser so you can sample the question quality and format before you buy. After signing in, you can retake the teaser as often as you like — there's no per-attempt limit.` },
+        { q: 'What is the difference between Practice Mode and Exam Mode?', a: 'Practice Mode reveals the correct answer and full explanation after each question — ideal for studying and reinforcing concepts. Exam Mode is a timed simulation: no answer feedback until you submit, auto-save every 15 seconds, and auto-submit when time runs out — mirroring the real testing experience.' },
+        { q: 'How do exam vouchers work?', a: 'Purchasing the Exam Voucher tier includes a real, vendor-issued voucher code (delivered by email within 3–5 business days) PLUS lifetime practice access to the same certification at no additional cost. Use the code to register for your official exam at the vendor\'s testing partner.' }
+      ];
+
   return (
     <>
       {/* Hero */}
@@ -212,12 +230,7 @@ export default async function HomePage() {
           </div>
 
           <div className="mx-auto mt-10 max-w-3xl space-y-3">
-            {[
-              { q: 'Are these real exam questions?', a: 'No — and that\'s intentional. ExamNova provides original, hand-authored practice questions modelled on each certification\'s public exam blueprint. We do not sell or distribute real exam content ("dumps"), which would violate vendor terms and undermine the value of your certification.' },
-              { q: 'How does the free teaser work?', a: `Every exam includes a free ${TEASER_N}-question teaser so you can sample the question quality and format before you buy. After signing in, you can retake the teaser as often as you like — there's no per-attempt limit.` },
-              { q: 'What is the difference between Practice Mode and Exam Mode?', a: 'Practice Mode reveals the correct answer and full explanation after each question — ideal for studying and reinforcing concepts. Exam Mode is a timed simulation: no answer feedback until you submit, auto-save every 15 seconds, and auto-submit when time runs out — mirroring the real testing experience.' },
-              { q: 'How do exam vouchers work?', a: 'Purchasing the Exam Voucher tier includes a real, vendor-issued voucher code (delivered by email within 3–5 business days) PLUS lifetime practice access to the same certification at no additional cost. Use the code to register for your official exam at the vendor\'s testing partner.' }
-            ].map((f, i) => (
+            {FAQS.map((f, i) => (
               <details key={i} className="group rounded-xl border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:shadow-sm open:border-blue-300 open:shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600 dark:open:border-blue-500/60">
                 <summary className="flex cursor-pointer list-none items-start justify-between gap-4 text-base font-semibold text-slate-900 dark:text-slate-100">
                   <span>{f.q}</span>
