@@ -172,6 +172,8 @@ export function ExamRunner(props: ExamRunnerProps) {
       : `${m}:${String(s).padStart(2, '0')}`;
   }
 
+  const isCkad = props.examVendor === 'Linux Foundation' && /CKAD/i.test(props.examTitle);
+
   return (
     <div className="container-app py-8">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
@@ -189,6 +191,35 @@ export function ExamRunner(props: ExamRunnerProps) {
           <button onClick={() => submitAttempt()} className="btn-primary-grad">Submit exam</button>
         </div>
       </div>
+
+      {isCkad && (
+        <details className="mb-4 rounded-md border border-blue-200 bg-blue-50 px-4 py-2 text-sm dark:border-blue-900 dark:bg-blue-950/40">
+          <summary className="cursor-pointer font-medium text-blue-900 dark:text-blue-200">
+            Practice these tasks hands-on — free Kubernetes playground
+          </summary>
+          <div className="mt-2 space-y-2 text-slate-700 dark:text-slate-200">
+            <p>
+              The real CKAD exam is performance-based — you solve tasks on a live cluster from a browser terminal. Open the Killercoda playground in a second tab and reproduce each question with <code className="rounded bg-white px-1 dark:bg-slate-800">kubectl</code> while you work through this set.
+            </p>
+            <p>
+              <a
+                href="https://killercoda.com/playgrounds/scenario/kubernetes"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-blue-700 underline hover:no-underline dark:text-blue-300"
+              >
+                Open the free Kubernetes playground →
+              </a>
+            </p>
+            <ul className="list-disc space-y-1 pl-5 text-xs text-slate-600 dark:text-slate-300">
+              <li>Spins up a single-node cluster in your browser — no signup, no install.</li>
+              <li>For each question, also try to <em>produce</em> the resource: <code className="rounded bg-white px-1 dark:bg-slate-800">kubectl run</code>, <code className="rounded bg-white px-1 dark:bg-slate-800">create -f</code>, <code className="rounded bg-white px-1 dark:bg-slate-800">edit</code>, then verify with <code className="rounded bg-white px-1 dark:bg-slate-800">describe</code> / <code className="rounded bg-white px-1 dark:bg-slate-800">get -o yaml</code>.</li>
+              <li>Practice imperative shortcuts you&apos;ll need under time pressure — <code className="rounded bg-white px-1 dark:bg-slate-800">--dry-run=client -o yaml</code>, <code className="rounded bg-white px-1 dark:bg-slate-800">kubectl explain</code>, <code className="rounded bg-white px-1 dark:bg-slate-800">alias k=kubectl</code>.</li>
+              <li>Killercoda sessions expire after ~60 min of inactivity. KodeKloud runs the playground; we are not affiliated with them.</li>
+            </ul>
+          </div>
+        </details>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
         <div className="card p-6">
