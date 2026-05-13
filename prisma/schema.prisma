@@ -66,6 +66,12 @@ enum DeliveryStatus {
   CANCELED
 }
 
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum EmailTemplateKey {
   ORDER_CONFIRMATION
   VOUCHER_DELIVERY
@@ -112,6 +118,7 @@ model User {
   anonymizedAt  DateTime?
   // When set, the user's existing JWTs are considered invalid (force-logout).
   sessionVersion Int          @default(0)
+  reviews       Review[]
 }
 
 // NextAuth/Prisma adapter table used by OAuth providers (Google, GitHub, …)
@@ -183,6 +190,8 @@ model Exam {
   bundleItems     BundleItem[]
   coupons         Coupon[]
   voucherInventory VoucherInventory[]
+  reviews         Review[]
+  testimonials    Testimonial[]
   @@index([vendorId])
 }
 
@@ -464,6 +473,7 @@ model Attempt {
   // responses: Record<questionId, { answer: string[]; flagged?: boolean; timeSpent?: number }>
   responses   Json      @default("{}")
   lastSavedAt DateTime  @default(now())
+  reviews     Review[]
   @@index([userId, examId])
   @@index([guestToken])
 }
@@ -799,4 +809,45 @@ model AdminLog {
   metadata   Json?
   createdAt  DateTime @default(now())
   @@index([adminId, createdAt])
+}
+
+model Review {
+  id        String       @id @default(cuid())
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  examId    String
+  exam      Exam         @relation(fields: [examId], references: [id], onDelete: Cascade)
+  rating    Int                                            // 1..5, validated app-side
+  title     String?
+  body      String?
+  status    ReviewStatus @default(PENDING)
+  attemptId String?
+  attempt   Attempt?     @relation(fields: [attemptId], references: [id], onDelete: SetNull)
+  adminNote String?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  deletedAt DateTime?
+  promotedTestimonial Testimonial? @relation("ReviewPromotedToTestimonial")
+  @@unique([userId, examId])
+  @@index([examId, status])
+  @@index([status, createdAt])
+}
+
+model Testimonial {
+  id             String   @id @default(cuid())
+  authorName     String
+  authorTitle    String?
+  avatarUrl      String?
+  quote          String
+  rating         Int?                                            // optional 1..5
+  examId         String?
+  exam           Exam?    @relation(fields: [examId], references: [id], onDelete: SetNull)
+  sourceReviewId String?  @unique
+  sourceReview   Review?  @relation("ReviewPromotedToTestimonial", fields: [sourceReviewId], references: [id], onDelete: SetNull)
+  published      Boolean  @default(false)
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+  @@index([published, sortOrder])
 }

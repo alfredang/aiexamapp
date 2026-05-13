@@ -1069,6 +1069,24 @@ async function main() {
   }
   if (topUpTotal > 0) console.log(`✓ Topped up ${topUpTotal} questions to isTeaser=true across ${examsWithContent.length} exams`);
 
+  // Sample testimonials — only created if the table is empty so re-seeding
+  // doesn't clobber curated admin content.
+  const tcount = await db.testimonial.count();
+  if (tcount === 0) {
+    const samples = [
+      { authorName: 'Priya S.', authorTitle: 'Cloud Engineer', quote: 'Passed AWS SAA-C03 on my first try. The per-domain breakdown showed me exactly where to focus my last week of study.', rating: 5 },
+      { authorName: 'Marco D.', authorTitle: 'IT Operations Lead', quote: 'The Exam Mode timer pressure was so realistic that the actual test felt easier. Great explanations on every question.', rating: 5 },
+      { authorName: 'Aisha R.', authorTitle: 'Data Analyst', quote: 'AZ-900 cleared in two weeks of evenings. The free teaser convinced me the content was solid before I paid.', rating: 5 },
+      { authorName: 'Jonas H.', authorTitle: 'Solutions Architect', quote: 'Original questions — clearly not exam dumps — but the difficulty and topic spread were spot on.', rating: 4 },
+      { authorName: 'Lena K.', authorTitle: 'DevOps Engineer', quote: 'I loved being able to flag tricky questions and revisit them. The review screen after submitting is gold.', rating: 5 },
+      { authorName: 'Tomás P.', authorTitle: 'Security Analyst', quote: 'The bundle with voucher saved me hours of shopping around. Practiced and booked the exam in one workflow.', rating: 5 }
+    ];
+    for (let i = 0; i < samples.length; i++) {
+      await db.testimonial.create({ data: { ...samples[i], published: true, sortOrder: i } });
+    }
+    console.log(`✓ Seeded ${samples.length} sample testimonials`);
+  }
+
   console.log(`Seed complete. Vendors: ${VENDORS.length}, Exams: ${EXAMS.length}, Bundles: ${BUNDLES.length}. Admins: ${admins.map(a => a.email).join(', ')}`);
 }
 

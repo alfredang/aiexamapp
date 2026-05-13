@@ -28,7 +28,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Search,
-  Sparkles
+  Sparkles,
+  MessageSquare,
+  Quote
 } from 'lucide-react';
 import { CmdK } from './admin/cmdk';
 import { NotificationBell } from './admin/notification-bell';
@@ -105,7 +107,9 @@ const SECTIONS: NavSection[] = [
       { href: '/admin-dashboard/settings/email-templates', label: 'Email Templates', icon: Mail },
       { href: '/admin-dashboard/pages', label: 'Pages', icon: FileText },
       { href: '/admin-dashboard/faq', label: 'FAQ', icon: FileText },
-      { href: '/admin-dashboard/banners', label: 'Banners', icon: Sparkles }
+      { href: '/admin-dashboard/banners', label: 'Banners', icon: Sparkles },
+      { href: '/admin-dashboard/reviews', label: 'Reviews', icon: MessageSquare },
+      { href: '/admin-dashboard/testimonials', label: 'Testimonials', icon: Quote }
     ]
   },
   {

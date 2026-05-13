@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { formatPrice } from '@/lib/utils';
 import { DotPattern } from '@/components/dot-pattern';
 import { Search, ShieldCheck, Sparkles, BookOpen, BadgeCheck, Award, ChevronDown, HelpCircle } from 'lucide-react';
+import { LandingTestimonials } from '@/components/landing-testimonials';
 
 // Vendor + popular-exam counts come from live DB queries; without this the
 // page is statically prerendered and shows stale counts after seed updates.
@@ -214,6 +215,8 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      <LandingTestimonials />
 
       {/* FAQ */}
       <section id="faq" className="border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">

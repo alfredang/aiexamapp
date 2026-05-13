@@ -6,6 +6,8 @@ import { formatPrice, tiersForExam, tierLabel } from '@/lib/utils';
 import { Check, Timer, BookOpen, Award, BookOpenCheck, Hourglass } from 'lucide-react';
 import { BuyTierForm } from './buy-tier-form';
 import { BundleAsExamView } from './bundle-as-exam-view';
+import { ExamReviews } from '@/components/exam-reviews';
+import { getExamRatingSummary } from '@/lib/reviews';
 
 export async function generateMetadata({ params }: { params: Promise<{ vendor: string; slug: string }> }) {
   const { slug } = await params;
@@ -86,6 +88,21 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ ven
   const teaserSizeRaw = await getSetting('TEASER_QUESTION_COUNT');
   const teaserN = Math.max(1, Math.min(50, Number(teaserSizeRaw) || 20));
   const domains = (exam.domains as any[]) || [];
+  const ratingSummary = await getExamRatingSummary(exam.id);
+  const jsonLd: any = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: exam.title,
+    description: exam.description,
+    brand: { '@type': 'Brand', name: exam.vendor.name }
+  };
+  if (ratingSummary.count > 0) {
+    jsonLd.aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: ratingSummary.average,
+      reviewCount: ratingSummary.count
+    };
+  }
 
   // Entitlement check for showing "You have access — Start your attempt"
   // sidebar. userIsEntitled was already computed above for unpublished
@@ -98,6 +115,7 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ ven
 
   return (
     <div className="container-app py-10">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="mb-2 text-sm">
         <Link href="/practice-exams" className="text-blue-600 hover:underline">All exams</Link>
         <span className="text-slate-400"> / </span>
@@ -161,6 +179,8 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ ven
               ))}
             </ul>
           </div>
+
+          <ExamReviews examId={exam.id} examTitle={exam.title} />
 
           <p className="mt-6 text-xs text-slate-500 dark:text-slate-400">
             This platform provides original practice questions for learning. We are not affiliated with {exam.vendor.name}, and we do not provide real exam dumps.

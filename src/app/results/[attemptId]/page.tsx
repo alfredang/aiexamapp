@@ -5,6 +5,9 @@ import { db } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { isAnswerCorrect, scoreAttempt, type Responses } from '@/lib/attempts';
 import { ExplanationView } from '@/components/explanation-view';
+import { ShareScore } from '@/components/share-score';
+import { ReviewFormModal } from '@/components/review-form-modal';
+import { canUserReview } from '@/lib/reviews';
 
 export default async function ResultsPage({ params }: { params: Promise<{ attemptId: string }> }) {
   const { attemptId } = await params;
@@ -31,6 +34,13 @@ export default async function ResultsPage({ params }: { params: Promise<{ attemp
   const responses = (attempt.responses as Responses) || {};
   const { score, correctCount, total, perDomain } = scoreAttempt(ordered, responses);
   const passed = attempt.passed ?? score >= attempt.exam.passingScore;
+  const canReview = userId ? await canUserReview(userId, attempt.examId) : false;
+  const existingReview = userId
+    ? await db.review.findUnique({
+        where: { userId_examId: { userId, examId: attempt.examId } },
+        select: { rating: true, title: true, body: true, status: true }
+      })
+    : null;
 
   return (
     <div className="container-app py-10">
@@ -42,11 +52,22 @@ export default async function ResultsPage({ params }: { params: Promise<{ attemp
           <span className="text-sm font-semibold uppercase tracking-wide">{passed ? 'Pass' : 'Did not pass'}</span>
         </div>
         <p className="mt-4 text-slate-600">{correctCount} correct out of {total} · pass mark {attempt.exam.passingScore}%</p>
-        <div className="mt-6 flex justify-center gap-2">
+        <div className="mt-6 flex flex-wrap justify-center gap-2">
           <Link href="/user-dashboard" className="btn-outline">My Content</Link>
           <Link href={`/practice-exams/${attempt.exam.vendor.slug}/${attempt.exam.slug}`} className="btn-primary-grad">Back to exam</Link>
+          {canReview && (
+            <ReviewFormModal
+              examId={attempt.examId}
+              examTitle={attempt.exam.title}
+              attemptId={attempt.id}
+              existing={existingReview as any}
+              trigger={<span className="btn-outline">{existingReview ? 'Edit your review' : 'Leave a review'}</span>}
+            />
+          )}
         </div>
       </div>
+
+      <ShareScore attemptId={attempt.id} examTitle={`${attempt.exam.vendor.name} ${attempt.exam.code}`} score={score} passed={passed} />
 
       {/* Per-domain breakdown */}
       <div className="mt-8 card p-6">
