@@ -207,7 +207,8 @@ function buildMultiVariantBundles(): BundleSeed[] {
     { slug: 'github-foundations', title: 'GitHub Foundations', description: 'All 4 GitHub Foundations practice exams in one bundle — covering GitHub features, repository management, collaboration, GitHub workflows, and GitHub administration.', variants: 4, price: 2000, priceVoucher: 9900 },
     { slug: 'isc2-cissp', title: 'ISC2 CISSP', description: 'All 6 CISSP practice exams in one bundle — covering security & risk management, asset security, security architecture & engineering, communication & network security, identity & access management, security assessment & testing, security operations, and software development security.', variants: 6, price: 2000, priceVoucher: 74900 },
     { slug: 'pmi-pmp', title: 'PMI PMP', description: 'All 6 PMP practice exams in one bundle — covering people, process, and business environment domains of the PMP examination content outline.', variants: 6, price: 2000, priceVoucher: 55500 },
-    { slug: 'linuxfoundation-ckad', title: 'Certified Kubernetes Application Developer (CKAD)', description: 'All 3 CKAD practice exams in one bundle — covering application design & build, deployment, observability & maintenance, environment/configuration/security, and services & networking, aligned to CNCF CKAD v1.35.', variants: 3, price: 2000, priceVoucher: 39500 }
+    { slug: 'linuxfoundation-ckad', title: 'Certified Kubernetes Application Developer (CKAD)', description: 'All 3 CKAD practice exams in one bundle — covering application design & build, deployment, observability & maintenance, environment/configuration/security, and services & networking, aligned to CNCF CKAD v1.35.', variants: 3, price: 2000, priceVoucher: 39500 },
+    { slug: 'linuxfoundation-cka', title: 'Certified Kubernetes Administrator (CKA)', description: 'All 3 CKA practice exams in one bundle — covering cluster architecture & install (kubeadm, etcd, RBAC, CRDs, CNI), workloads & scheduling, services & networking (Ingress + Gateway API), storage, and troubleshooting. Aligned to CNCF CKA v1.32.', variants: 3, price: 2000, priceVoucher: 39500 }
   ];
 
   const out: BundleSeed[] = specs.map(s => {
@@ -862,6 +863,50 @@ const EXAMS: ExamSeed[] = [
       { name: 'Application Observability and Maintenance', weight: 15 },
       { name: 'Application Environment, Configuration and Security', weight: 25 },
       { name: 'Services and Networking', weight: 20 }
+    ]
+  },
+
+  // CKA v1.32: 5 domains, 2 hours, 66% to pass. Real exam is performance-
+  // based (~15-20 hands-on tasks on a live cluster). Our practice variant
+  // uses multiple-choice / multi-select questions whose distribution
+  // matches the published blueprint weights. Real exam fee is USD 395.
+  {
+    vendorSlug: 'linuxfoundation', slug: 'linuxfoundation-cka-p1', code: 'CKA-P1',
+    title: 'Certified Kubernetes Administrator (CKA) — Practice Exam 1',
+    description: 'Practice exam 1 of 3 for the CNCF Certified Kubernetes Administrator (CKA) certification — full 120-minute, 20-question, blueprint-weighted set covering kubeadm install, etcd, RBAC, scheduling, Services & Ingress/Gateway API, NetworkPolicies, PV/PVC/StorageClasses, and the troubleshooting workflows tested by the TGS-2025054612-CKA labs. Aligned to CNCF CKA v1.32.',
+    level: 'Associate', durationMinutes: 120, passingScore: 66, questionCount: 20,
+    domains: [
+      { name: 'Cluster Architecture, Installation and Configuration', weight: 25 },
+      { name: 'Workloads and Scheduling', weight: 15 },
+      { name: 'Services and Networking', weight: 20 },
+      { name: 'Storage', weight: 10 },
+      { name: 'Troubleshooting', weight: 30 }
+    ]
+  },
+  {
+    vendorSlug: 'linuxfoundation', slug: 'linuxfoundation-cka-p2', code: 'CKA-P2',
+    title: 'Certified Kubernetes Administrator (CKA) — Practice Exam 2',
+    description: 'Practice exam 2 of 3 for the CNCF Certified Kubernetes Administrator (CKA) certification — a second 120-minute, 20-question, blueprint-weighted set. Aligned to CNCF CKA v1.32.',
+    level: 'Associate', durationMinutes: 120, passingScore: 66, questionCount: 20,
+    domains: [
+      { name: 'Cluster Architecture, Installation and Configuration', weight: 25 },
+      { name: 'Workloads and Scheduling', weight: 15 },
+      { name: 'Services and Networking', weight: 20 },
+      { name: 'Storage', weight: 10 },
+      { name: 'Troubleshooting', weight: 30 }
+    ]
+  },
+  {
+    vendorSlug: 'linuxfoundation', slug: 'linuxfoundation-cka-p3', code: 'CKA-P3',
+    title: 'Certified Kubernetes Administrator (CKA) — Practice Exam 3',
+    description: 'Practice exam 3 of 3 for the CNCF Certified Kubernetes Administrator (CKA) certification — a third 120-minute, 20-question, blueprint-weighted set. Aligned to CNCF CKA v1.32.',
+    level: 'Associate', durationMinutes: 120, passingScore: 66, questionCount: 20,
+    domains: [
+      { name: 'Cluster Architecture, Installation and Configuration', weight: 25 },
+      { name: 'Workloads and Scheduling', weight: 15 },
+      { name: 'Services and Networking', weight: 20 },
+      { name: 'Storage', weight: 10 },
+      { name: 'Troubleshooting', weight: 30 }
     ]
   }
 ];

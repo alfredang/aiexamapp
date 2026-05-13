@@ -172,7 +172,7 @@ export function ExamRunner(props: ExamRunnerProps) {
       : `${m}:${String(s).padStart(2, '0')}`;
   }
 
-  const isCkad = props.examVendor === 'Linux Foundation' && /CKAD/i.test(props.examTitle);
+  const isK8sPerf = props.examVendor === 'Linux Foundation' && /CKAD?\b/i.test(props.examTitle);
 
   return (
     <div className="container-app py-8">
@@ -192,14 +192,14 @@ export function ExamRunner(props: ExamRunnerProps) {
         </div>
       </div>
 
-      {isCkad && (
+      {isK8sPerf && (
         <details className="mb-4 rounded-md border border-blue-200 bg-blue-50 px-4 py-2 text-sm dark:border-blue-900 dark:bg-blue-950/40">
           <summary className="cursor-pointer font-medium text-blue-900 dark:text-blue-200">
             Practice these tasks hands-on — free Kubernetes playground
           </summary>
           <div className="mt-2 space-y-2 text-slate-700 dark:text-slate-200">
             <p>
-              The real CKAD exam is performance-based — you solve tasks on a live cluster from a browser terminal. Open the Killercoda playground in a second tab and reproduce each question with <code className="rounded bg-white px-1 dark:bg-slate-800">kubectl</code> while you work through this set.
+              The real CKA / CKAD exam is performance-based — you solve tasks on a live cluster from a browser terminal. Open the Killercoda playground in a second tab and reproduce each question with <code className="rounded bg-white px-1 dark:bg-slate-800">kubectl</code> while you work through this set.
             </p>
             <p>
               <a
