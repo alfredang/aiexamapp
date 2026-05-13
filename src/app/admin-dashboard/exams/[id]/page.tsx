@@ -187,6 +187,52 @@ async function toggleQuestionStatus(formData: FormData) {
   revalidatePath(`/admin-dashboard/exams/${examId}`);
 }
 
+async function publishAllDrafts(formData: FormData) {
+  'use server';
+  const session = await auth();
+  const user = session?.user as any;
+  if (user?.role !== 'ADMIN') return;
+  const examId = String(formData.get('examId'));
+  if (!examId) return;
+  const result = await db.question.updateMany({
+    where: { examId, status: 'DRAFT' },
+    data: { status: 'PUBLISHED' }
+  });
+  await db.adminLog.create({
+    data: {
+      adminId: user.id,
+      action: 'question.bulk_publish',
+      targetType: 'Exam',
+      targetId: examId,
+      metadata: { count: result.count }
+    }
+  });
+  revalidatePath(`/admin-dashboard/exams/${examId}`);
+}
+
+async function unpublishAll(formData: FormData) {
+  'use server';
+  const session = await auth();
+  const user = session?.user as any;
+  if (user?.role !== 'ADMIN') return;
+  const examId = String(formData.get('examId'));
+  if (!examId) return;
+  const result = await db.question.updateMany({
+    where: { examId, status: 'PUBLISHED' },
+    data: { status: 'DRAFT' }
+  });
+  await db.adminLog.create({
+    data: {
+      adminId: user.id,
+      action: 'question.bulk_unpublish',
+      targetType: 'Exam',
+      targetId: examId,
+      metadata: { count: result.count }
+    }
+  });
+  revalidatePath(`/admin-dashboard/exams/${examId}`);
+}
+
 const LEVELS = ['Foundational', 'Associate', 'Professional', 'Specialty'];
 
 export default async function EditExamPage({ params }: { params: Promise<{ id: string }> }) {
@@ -388,11 +434,33 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
       </section>
 
       <section className="card p-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Questions ({exam.questions.length})</h2>
-          <span className="text-xs text-slate-500">
-            Target: {exam.questionCount} · Duration: {exam.durationMinutes} min
-          </span>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold">Questions ({exam.questions.length})</h2>
+            <div className="text-xs text-slate-500">
+              {exam.questions.filter((q) => q.status === 'DRAFT').length} draft ·{' '}
+              {exam.questions.filter((q) => q.status === 'PUBLISHED').length} published ·{' '}
+              Target: {exam.questionCount} · Duration: {exam.durationMinutes} min
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {exam.questions.some((q) => q.status === 'DRAFT') && (
+              <form action={publishAllDrafts}>
+                <input type="hidden" name="examId" value={exam.id} />
+                <button className="btn-primary text-sm" type="submit">
+                  Publish all drafts ({exam.questions.filter((q) => q.status === 'DRAFT').length})
+                </button>
+              </form>
+            )}
+            {exam.questions.some((q) => q.status === 'PUBLISHED') && (
+              <form action={unpublishAll}>
+                <input type="hidden" name="examId" value={exam.id} />
+                <button className="btn-outline text-sm" type="submit">
+                  Unpublish all
+                </button>
+              </form>
+            )}
+          </div>
         </div>
 
         <div className="mt-3 overflow-x-auto">

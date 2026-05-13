@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Flag, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ExplanationView } from '@/components/explanation-view';
 
 export type RunnerQuestion = {
   id: string;
@@ -233,8 +234,12 @@ export function ExamRunner(props: ExamRunnerProps) {
           )}
           {a.submitted && a.explanation && (
             <div className="mt-4 rounded-md border border-slate-200 bg-slate-50 p-4 text-sm dark:border-slate-700 dark:bg-slate-800/60">
-              <div className="mb-1 font-semibold">{a.isCorrect ? '✓ Correct' : '✗ Incorrect'}</div>
-              <p className="text-slate-700 dark:text-slate-300">{a.explanation}</p>
+              <div className="mb-2 font-semibold">{a.isCorrect ? '✓ Correct' : '✗ Incorrect'}</div>
+              <ExplanationView
+                text={a.explanation}
+                options={q.options}
+                correctIds={a.correct ?? []}
+              />
             </div>
           )}
           {props.mode === 'EXAM' && a.answer.length > 0 && (

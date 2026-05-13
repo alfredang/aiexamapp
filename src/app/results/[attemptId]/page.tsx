@@ -4,6 +4,7 @@ import { notFound, redirect } from 'next/navigation';
 import { db } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { isAnswerCorrect, scoreAttempt, type Responses } from '@/lib/attempts';
+import { ExplanationView } from '@/components/explanation-view';
 
 export default async function ResultsPage({ params }: { params: Promise<{ attemptId: string }> }) {
   const { attemptId } = await params;
@@ -94,7 +95,17 @@ export default async function ResultsPage({ params }: { params: Promise<{ attemp
                   );
                 })}
               </ul>
-              <p className="mt-2 text-sm text-slate-600"><b>Explanation:</b> {q.explanation}</p>
+              <div className="mt-3 rounded-md border border-slate-200 bg-slate-50 p-4 text-sm dark:border-slate-700 dark:bg-slate-800/60">
+                <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Explanation
+                </div>
+                <ExplanationView
+                  text={q.explanation}
+                  options={(q.options as any[]) as { id: string; text: string }[]}
+                  correctIds={correctIds}
+                  references={(q.references as any[]) as { label: string; url: string }[]}
+                />
+              </div>
             </div>
           );
         })}

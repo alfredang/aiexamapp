@@ -10,6 +10,7 @@ import { Pager } from '@/components/admin/pager';
 import { StatusBadge } from '@/components/admin/badge';
 import { ConfirmButton } from '@/components/admin/confirm-button';
 import { buildQS } from '@/components/admin/qs';
+import { SelectAllCheckbox, SelectedCounter } from '@/components/admin/bulk-select';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,6 +60,42 @@ async function restoreExam(formData: FormData) {
   await db.adminLog.create({
     data: { adminId: user.id, action: 'exam.restore', targetType: 'Exam', targetId: id, metadata: {} }
   });
+  revalidatePath('/admin-dashboard/exams');
+}
+
+async function bulkExamAction(formData: FormData) {
+  'use server';
+  const session = await auth();
+  const user = session?.user as any;
+  if (user?.role !== 'ADMIN') return;
+  const op = String(formData.get('op') || '');
+  const ids = formData.getAll('ids').map(String).filter(Boolean);
+  if (!ids.length) return;
+  if (op === 'publish') {
+    const result = await db.exam.updateMany({
+      where: { id: { in: ids }, deletedAt: null },
+      data: { published: true }
+    });
+    await db.adminLog.create({
+      data: { adminId: user.id, action: 'exam.bulk_publish', targetType: 'Exam', targetId: ids[0], metadata: { ids, count: result.count } }
+    });
+  } else if (op === 'unpublish') {
+    const result = await db.exam.updateMany({
+      where: { id: { in: ids } },
+      data: { published: false }
+    });
+    await db.adminLog.create({
+      data: { adminId: user.id, action: 'exam.bulk_unpublish', targetType: 'Exam', targetId: ids[0], metadata: { ids, count: result.count } }
+    });
+  } else if (op === 'archive') {
+    const result = await db.exam.updateMany({
+      where: { id: { in: ids }, deletedAt: null },
+      data: { deletedAt: new Date(), published: false }
+    });
+    await db.adminLog.create({
+      data: { adminId: user.id, action: 'exam.bulk_archive', targetType: 'Exam', targetId: ids[0], metadata: { ids, count: result.count } }
+    });
+  }
   revalidatePath('/admin-dashboard/exams');
 }
 
@@ -192,7 +229,24 @@ export default async function AdminExamsPage({
     }
   ].filter(Boolean) as { key: string; label: string; clearHref: string }[];
 
+  const BULK_FORM_ID = 'admin-exams-bulk-form';
+
   const columns: Column<ExamRow>[] = [
+    {
+      key: 'select',
+      header: '',
+      headerClassName: 'w-10',
+      cell: (e) => (
+        <input
+          type="checkbox"
+          name="ids"
+          value={e.id}
+          form={BULK_FORM_ID}
+          aria-label={`Select ${e.code}`}
+          className="h-4 w-4 cursor-pointer accent-blue-600"
+        />
+      )
+    },
     {
       key: 'vendor',
       header: 'Vendor',
@@ -343,6 +397,49 @@ export default async function AdminExamsPage({
           </select>
         </FilterField>
       </FilterBar>
+
+      {!archived && (
+        <form
+          id={BULK_FORM_ID}
+          action={bulkExamAction}
+          className="flex flex-wrap items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-[12px] dark:border-slate-700 dark:bg-slate-900/40"
+        >
+          <label className="inline-flex cursor-pointer items-center gap-1.5 text-slate-700 dark:text-slate-200">
+            <SelectAllCheckbox formId={BULK_FORM_ID} className="h-4 w-4 accent-blue-600" />
+            Select all
+          </label>
+          <span className="text-slate-400">·</span>
+          <span className="text-slate-600 dark:text-slate-400">
+            <SelectedCounter formId={BULK_FORM_ID} /> selected
+          </span>
+          <span className="text-slate-400">·</span>
+          <span className="text-slate-500">With selected:</span>
+          <button
+            type="submit"
+            name="op"
+            value="publish"
+            className="btn-sm bg-emerald-600 text-white hover:bg-emerald-700"
+          >
+            Publish
+          </button>
+          <button
+            type="submit"
+            name="op"
+            value="unpublish"
+            className="btn-sm border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+          >
+            Unpublish
+          </button>
+          <button
+            type="submit"
+            name="op"
+            value="archive"
+            className="btn-sm border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+          >
+            Archive
+          </button>
+        </form>
+      )}
 
       <DataTable
         columns={columns}
