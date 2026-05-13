@@ -431,15 +431,15 @@ export default async function AdminExamsPage({
             ))}
           </select>
         </FilterField>
-        <FilterField label="Search" className="min-w-[14rem] flex-1">
-          <input name="q" defaultValue={q} placeholder="Title or code…" className="input-sm" />
-        </FilterField>
         <FilterField label="Status">
           <select name="status" defaultValue={status} className="input-sm">
             <option value="">All</option>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
           </select>
+        </FilterField>
+        <FilterField label="Search" className="min-w-[14rem] flex-1">
+          <input name="q" defaultValue={q} placeholder="Title or code…" className="input-sm" />
         </FilterField>
         <FilterField label="View">
           <select name="archived" defaultValue={archived ? '1' : ''} className="input-sm">

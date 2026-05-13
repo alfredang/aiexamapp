@@ -225,10 +225,11 @@ export default async function AdminBundlesPage({ searchParams }: { searchParams:
     {
       key: 'code',
       header: 'Exam Code',
+      headerClassName: 'w-24',
       cell: (b) => {
         const code = bundleBaseCode(b.items[0]?.exam.code);
         return code ? (
-          <span className="font-mono text-[12px]">{code}</span>
+          <span className="whitespace-nowrap font-mono text-[12px]">{code}</span>
         ) : (
           <span className="text-slate-400">—</span>
         );
@@ -385,15 +386,15 @@ export default async function AdminBundlesPage({ searchParams }: { searchParams:
             ))}
           </select>
         </FilterField>
-        <FilterField label="Search" className="min-w-[14rem] flex-1">
-          <input name="q" defaultValue={q} placeholder="Title or slug…" className="input-sm" />
-        </FilterField>
         <FilterField label="Status">
           <select name="status" defaultValue={status} className="input-sm">
             <option value="">All</option>
             <option value="published">Published</option>
             <option value="draft">Draft</option>
           </select>
+        </FilterField>
+        <FilterField label="Search" className="min-w-[14rem] flex-1">
+          <input name="q" defaultValue={q} placeholder="Title or slug…" className="input-sm" />
         </FilterField>
       </FilterBar>
 
