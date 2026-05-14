@@ -158,7 +158,7 @@ const PAGE_SIZE = 50;
 type ExamRow = Awaited<ReturnType<typeof loadExams>>[number];
 
 async function loadExams(where: any, skip: number, take: number) {
-  return db.exam.findMany({
+  const exams = await db.exam.findMany({
     where,
     include: {
       vendor: true,
@@ -169,6 +169,26 @@ async function loadExams(where: any, skip: number, take: number) {
     skip,
     take
   });
+  // Per-exam draft/published question counts for the publish-status dot indicator.
+  const examIds = exams.map((e) => e.id);
+  const statusCounts = examIds.length
+    ? await db.question.groupBy({
+        by: ['examId', 'status'],
+        where: { examId: { in: examIds } },
+        _count: { _all: true }
+      })
+    : [];
+  const draftByExam = new Map<string, number>();
+  const publishedByExam = new Map<string, number>();
+  for (const r of statusCounts) {
+    if (r.status === 'DRAFT') draftByExam.set(r.examId, r._count._all);
+    else if (r.status === 'PUBLISHED') publishedByExam.set(r.examId, r._count._all);
+  }
+  return exams.map((e) => ({
+    ...e,
+    draftCount: draftByExam.get(e.id) ?? 0,
+    publishedCount: publishedByExam.get(e.id) ?? 0
+  }));
 }
 
 function fmtDate(d: Date | null | undefined): string {
@@ -266,14 +286,52 @@ export default async function AdminExamsPage({
     {
       key: 'title',
       header: 'Exam Name',
-      cell: (e) => (
-        <Link
-          href={`/admin-dashboard/exams/${e.id}`}
-          className="font-medium text-slate-900 hover:underline dark:text-slate-100"
-        >
-          {e.title.split(' — ')[0].replace(/\s*\(Practice Exam\s+\d+\)\s*$/i, '')}
-        </Link>
-      )
+      cell: (e) => {
+        const baseTitle = e.title.split(' — ')[0].replace(/\s*\(Practice Exam\s+\d+\)\s*$/i, '');
+        const variantMatch = e.code.match(/-P(\d+)$/i);
+        return (
+          <Link
+            href={`/admin-dashboard/exams/${e.id}`}
+            className="font-medium text-slate-900 hover:underline dark:text-slate-100"
+          >
+            {baseTitle}
+            {variantMatch && (
+              <span className="ml-1 text-[11px] font-normal text-slate-500 dark:text-slate-400">
+                · P{variantMatch[1]}
+              </span>
+            )}
+          </Link>
+        );
+      }
+    },
+    {
+      key: 'publishDot',
+      header: '',
+      align: 'left',
+      headerClassName: 'w-6',
+      className: 'pl-0 pr-3',
+      cell: (e) => {
+        const total = e.draftCount + e.publishedCount;
+        let cls = 'bg-slate-400 dark:bg-slate-600';
+        let title = 'No questions yet';
+        let aria = 'No questions';
+        if (total > 0 && e.draftCount === 0) {
+          cls = 'bg-emerald-500';
+          title = `All ${e.publishedCount} questions published`;
+          aria = 'All questions published';
+        } else if (e.draftCount > 0) {
+          cls = 'bg-rose-500';
+          title = `${e.draftCount} draft, ${e.publishedCount} published`;
+          aria = `${e.draftCount} draft questions remaining`;
+        }
+        return (
+          <span
+            className={`inline-block h-2.5 w-2.5 rounded-full ${cls}`}
+            title={title}
+            aria-label={aria}
+          />
+        );
+      }
     },
     { key: 'code', header: 'Code', cell: (e) => <span className="font-mono text-[12px]">{e.code}</span> },
     {
