@@ -22,14 +22,10 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
       { code: { contains: q, mode: 'insensitive' as const } }
     ] } : {})
   };
-  // Pull all exams + all bundles that match the filters, then merge and
-  // paginate as a single unified list so every page shows exactly 12 cards
-  // (mix of bundles and standalone exams).
-  const allExams = await db.exam.findMany({
-    where,
-    include: { vendor: true, _count: { select: { questions: { where: { status: 'PUBLISHED' } } } } },
-    orderBy: { createdAt: 'desc' }
-  });
+  // Bundle-only catalog (per project policy): individual exam cards are
+  // hidden — customers only purchase bundles. The `where` filter is still
+  // used by the bundle query indirectly when we filter by vendor/level.
+  void where;
 
   const allBundlesRaw = await db.bundle.findMany({
     where: q ? {
@@ -50,14 +46,9 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
     return true;
   });
 
-  // Unified card list: bundles first (featured/preferred), then standalone exams.
-  type Card =
-    | { kind: 'bundle'; data: (typeof allBundles)[number] }
-    | { kind: 'exam'; data: (typeof allExams)[number] };
-  const allCards: Card[] = [
-    ...allBundles.map(b => ({ kind: 'bundle' as const, data: b })),
-    ...allExams.map(e => ({ kind: 'exam' as const, data: e }))
-  ];
+  // Bundle-only catalog: no standalone exam cards.
+  type Card = { kind: 'bundle'; data: (typeof allBundles)[number] };
+  const allCards: Card[] = allBundles.map(b => ({ kind: 'bundle' as const, data: b }));
   const totalCount = allCards.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
   const requestedPage = Number(sp.page) || 1;
@@ -83,47 +74,26 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {pageCards.map(card => {
-          if (card.kind === 'bundle') {
-            const b = card.data;
-            // Use the first item's exam to derive vendor, code, level —
-            // bundles group multiple practice exams of the same cert which
-            // share these attributes.
-            const firstItem = b.items[0]?.exam;
-            const totalQuestions = b.items.reduce((sum, it) => sum + it.exam.questionCount, 0);
-            return (
-              <Link key={`b-${b.id}`} href={firstItem ? `/practice-exams/${firstItem.vendor.slug}/${b.slug}` : `/bundles/${b.slug}`} className="card-hover p-5">
-                <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
-                  {firstItem && <span className="badge">{firstItem.vendor.name}</span>}
-                  {firstItem && <span className="badge">{firstItem.code}</span>}
-                  {firstItem && <span className="badge">{firstItem.level}</span>}
-                </div>
-                <h3 className="font-semibold">{b.title}</h3>
-                <p className="mt-1 line-clamp-2 text-sm text-slate-600 dark:text-slate-300">{b.description}</p>
-                <div className="mt-4 flex items-center justify-between text-sm">
-                  <span className="text-slate-500 dark:text-slate-400">{totalQuestions} questions · {b.items.length} practice exams</span>
-                  <span className="font-semibold text-blue-700 dark:text-blue-300">{b.price === 0 ? 'Free' : `from ${formatPrice(b.price)}`}</span>
-                </div>
-              </Link>
-            );
-          }
-          const e = card.data;
+          const b = card.data;
+          const firstItem = b.items[0]?.exam;
+          const totalQuestions = b.items.reduce((sum, it) => sum + it.exam.questionCount, 0);
           return (
-            <Link key={`e-${e.id}`} href={`/practice-exams/${e.vendor.slug}/${e.slug}`} className="card-hover p-5">
+            <Link key={`b-${b.id}`} href={firstItem ? `/practice-exams/${firstItem.vendor.slug}/${b.slug}` : `/bundles/${b.slug}`} className="card-hover p-5">
               <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
-                <span className="badge">{e.vendor.name}</span>
-                <span className="badge">{e.code}</span>
-                <span className="badge">{e.level}</span>
+                {firstItem && <span className="badge">{firstItem.vendor.name}</span>}
+                {firstItem && <span className="badge">{firstItem.code}</span>}
+                {firstItem && <span className="badge">{firstItem.level}</span>}
               </div>
-              <h3 className="font-semibold">{e.title}</h3>
-              <p className="mt-1 line-clamp-2 text-sm text-slate-600 dark:text-slate-300">{e.description}</p>
+              <h3 className="font-semibold">{b.title}</h3>
+              <p className="mt-1 line-clamp-2 text-sm text-slate-600 dark:text-slate-300">{b.description}</p>
               <div className="mt-4 flex items-center justify-between text-sm">
-                <span className="text-slate-500 dark:text-slate-400">{e._count.questions} questions · {e.durationMinutes} min</span>
-                <span className="text-blue-700 dark:text-blue-300">View details →</span>
+                <span className="text-slate-500 dark:text-slate-400">{totalQuestions} questions · {b.items.length} practice exams</span>
+                <span className="font-semibold text-blue-700 dark:text-blue-300">{b.price === 0 ? 'Free' : `from ${formatPrice(b.price)}`}</span>
               </div>
             </Link>
           );
         })}
-        {totalCount === 0 && <p className="text-slate-500">No exams found.</p>}
+        {totalCount === 0 && <p className="text-slate-500">No bundles found.</p>}
       </div>
 
       {totalPages > 1 && (
