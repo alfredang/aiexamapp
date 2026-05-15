@@ -509,7 +509,7 @@ export default async function AdminExamsPage({
         <form
           id={BULK_FORM_ID}
           action={bulkExamAction}
-          className="flex flex-wrap items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-[12px] dark:border-slate-700 dark:bg-slate-900/40"
+          className="sticky top-24 z-30 flex flex-wrap items-center gap-2 rounded-md border border-slate-200 bg-slate-50/95 px-3 py-2 text-[12px] shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-900/95"
         >
           <label className="inline-flex cursor-pointer items-center gap-1.5 text-slate-700 dark:text-slate-200">
             <SelectAllCheckbox formId={BULK_FORM_ID} className="h-4 w-4 accent-blue-600" />
