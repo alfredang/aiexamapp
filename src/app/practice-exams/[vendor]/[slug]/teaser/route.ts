@@ -1,17 +1,24 @@
 import { cookies } from 'next/headers';
-import { notFound, redirect } from 'next/navigation';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { auth } from '@/lib/auth';
 
-export default async function TeaserStartPage({ params }: { params: Promise<{ vendor: string; slug: string }> }) {
+// Route handler (replaces the prior page.tsx). Next.js 16 disallows writing
+// cookies in Server Components, so the guest-token cookie must be set here.
+// User flow: link to /practice-exams/{vendor}/{slug}/teaser → GET this handler
+// → creates a teaser Attempt and redirects to /exam/{attemptId}.
+
+export async function GET(req: NextRequest, { params }: { params: Promise<{ vendor: string; slug: string }> }) {
   const { vendor: vendorSlug, slug } = await params;
+
   const exam = await db.exam.findUnique({ where: { slug }, include: { vendor: true } });
-  if (!exam || exam.vendor.slug !== vendorSlug) notFound();
+  if (!exam || exam.vendor.slug !== vendorSlug) {
+    return new NextResponse('Not found', { status: 404 });
+  }
 
   const session = await auth();
   const userId = (session?.user as any)?.id as string | undefined;
 
-  // Cookie for guest token
   const c = await cookies();
   let gt = c.get('gt')?.value;
   if (!userId && !gt) {
@@ -24,13 +31,15 @@ export default async function TeaserStartPage({ params }: { params: Promise<{ ve
     select: { id: true }
   });
   if (teaserQuestions.length === 0) {
-    return <div className="container-app py-16 text-center"><h1 className="text-xl font-semibold">Teaser not yet available</h1></div>;
+    // No teaser content yet — bounce back to the exam detail page with a notice flag.
+    return NextResponse.redirect(new URL(`/practice-exams/${vendorSlug}/${slug}?teaser=unavailable`, req.url));
   }
+
   // Admin-configurable teaser size (Settings → TEASER_QUESTION_COUNT, default 20).
   const { getSetting } = await import('@/lib/settings');
   const sizeRaw = await getSetting('TEASER_QUESTION_COUNT');
   const teaserSize = Math.max(1, Math.min(50, Number(sizeRaw) || 20));
-  const ids = teaserQuestions.map(q => q.id).sort(() => Math.random() - 0.5).slice(0, teaserSize);
+  const ids = teaserQuestions.map((q) => q.id).sort(() => Math.random() - 0.5).slice(0, teaserSize);
 
   const attempt = await db.attempt.create({
     data: {
@@ -44,5 +53,5 @@ export default async function TeaserStartPage({ params }: { params: Promise<{ ve
       responses: {}
     }
   });
-  redirect(`/exam/${attempt.id}`);
+  return NextResponse.redirect(new URL(`/exam/${attempt.id}`, req.url));
 }

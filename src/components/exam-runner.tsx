@@ -22,8 +22,9 @@ export type ExamRunnerProps = {
   questions: RunnerQuestion[];
   remainingSec: number;        // 0 for untimed
   initialResponses: Record<string, RunnerResponse>;
-  teaserGateAt?: number[];     // e.g. [20, 30] — show modal after answering this many in teaser
+  teaserGateAt?: number[];     // e.g. [last] — show modal after answering this many in teaser
   onTeaserGate?: (count: number) => void;
+  autoSubmitAtEnd?: boolean;   // teaser path for non-guests: auto-submit when all answered
 };
 
 export function ExamRunner(props: ExamRunnerProps) {
@@ -126,6 +127,10 @@ export function ExamRunner(props: ExamRunnerProps) {
     const newCount = answeredCount + (a.submitted ? 0 : 1);
     if (props.isTeaser && props.teaserGateAt?.includes(newCount)) {
       props.onTeaserGate?.(newCount);
+    }
+    // End-of-teaser auto-submit for non-guest users (no signup gate needed)
+    if (props.autoSubmitAtEnd && newCount === props.questions.length) {
+      setTimeout(() => { void submitAttempt(true); }, 600);
     }
   }
 

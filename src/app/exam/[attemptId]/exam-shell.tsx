@@ -29,8 +29,9 @@ export function ExamShell(props: {
         questions={props.questions}
         remainingSec={props.remainingSec}
         initialResponses={props.initialResponses}
-        teaserGateAt={props.isTeaser && props.isGuest ? [20, 30] : undefined}
+        teaserGateAt={props.isTeaser && props.isGuest ? [props.questions.length] : undefined}
         onTeaserGate={(c) => setGateAt(c)}
+        autoSubmitAtEnd={props.isTeaser && !props.isGuest}
       />
       {gateAt !== null && (
         <TeaserGate
