@@ -45,7 +45,7 @@ export async function Footer() {
   const legalLinks = footerPages.filter((p) => p.footerGroup === 'legal');
 
   return (
-    <footer className="border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
+    <footer className="border-t border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
       <div className="container-app grid gap-8 py-10 md:grid-cols-12">
         <div className="md:col-span-3">
           <div className="mb-3 flex items-center">
