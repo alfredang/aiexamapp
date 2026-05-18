@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { auth } from '@/lib/auth';
 import { Sparkles } from 'lucide-react';
 import { SubmitBusyButton } from '@/components/admin/submit-busy-button';
+import { SeoSavedFlash } from '@/components/admin/seo-saved-flash';
 
 async function requireAdmin() {
   const session = await auth();
@@ -233,6 +234,23 @@ async function unpublishAll(formData: FormData) {
   revalidatePath(`/admin-dashboard/exams/${examId}`);
 }
 
+async function saveSeoMeta(formData: FormData) {
+  'use server';
+  await requireAdmin();
+  const id = String(formData.get('id'));
+  if (!id) return;
+  const metaTitle = String(formData.get('metaTitle') || '').trim() || null;
+  const metaDescription = String(formData.get('metaDescription') || '').trim() || null;
+  const metaKeywords = String(formData.get('metaKeywords') || '').trim() || null;
+  const ogImage = String(formData.get('ogImage') || '').trim() || null;
+  await db.exam.update({
+    where: { id },
+    data: { metaTitle, metaDescription, metaKeywords, ogImage }
+  });
+  revalidatePath(`/admin-dashboard/exams/${id}`);
+  redirect(`/admin-dashboard/exams/${id}?seo=saved#seo`);
+}
+
 const LEVELS = ['Foundational', 'Associate', 'Professional', 'Specialty'];
 
 export default async function EditExamPage({ params }: { params: Promise<{ id: string }> }) {
@@ -245,6 +263,7 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
 
   return (
     <div className="space-y-6">
+      <SeoSavedFlash />
       <div className="flex items-center justify-between">
         <div>
           <Link href="/admin-dashboard/exams" className="text-xs text-slate-500 hover:underline">
@@ -328,7 +347,7 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
         </div>
       </form>
 
-      <section className="card p-4">
+      <section id="seo" className="card p-4">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-[13px] font-semibold text-slate-800 dark:text-slate-100">SEO meta</h2>
           <form action={runSeoAssist}>
@@ -340,20 +359,8 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
             />
           </form>
         </div>
-        <form action={updateExam} className="grid gap-3 md:grid-cols-2">
+        <form action={saveSeoMeta} className="grid gap-3 md:grid-cols-2">
           <input type="hidden" name="id" value={exam.id} />
-          {/* Required dupes so the form re-saves all other fields untouched */}
-          <input type="hidden" name="title" value={exam.title} />
-          <input type="hidden" name="code" value={exam.code} />
-          <input type="hidden" name="slug" value={exam.slug} />
-          <input type="hidden" name="level" value={exam.level} />
-          <input type="hidden" name="description" value={exam.description ?? ''} />
-          <input type="hidden" name="durationMinutes" value={exam.durationMinutes} />
-          <input type="hidden" name="passingScore" value={exam.passingScore} />
-          <input type="hidden" name="questionCount" value={exam.questionCount} />
-          <input type="hidden" name="infoUrl" value={exam.infoUrl ?? ''} />
-          <input type="hidden" name="label" value={exam.label ?? ''} />
-          {exam.published && <input type="hidden" name="published" value="on" />}
           <Field label="Meta title (≤70 chars)" className="md:col-span-2">
             <input name="metaTitle" defaultValue={exam.metaTitle ?? ''} className="input" placeholder="AWS SAA-C03 Practice Exam | ExamNova" />
           </Field>
@@ -367,7 +374,11 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
             <input name="ogImage" defaultValue={exam.ogImage ?? ''} className="input" />
           </Field>
           <div className="md:col-span-2 flex justify-end">
-            <button className="btn-primary">Save SEO</button>
+            <SubmitBusyButton
+              idleLabel={<>Save SEO</>}
+              busyLabel={<>Saving…</>}
+              className="btn-primary disabled:cursor-wait disabled:opacity-70"
+            />
           </div>
         </form>
       </section>
