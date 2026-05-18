@@ -339,6 +339,576 @@ const P1: Q[] = [
     correct: ['a'],
     explanation: 'OOMKilled means the container exceeded its `limits.memory`. Profile actual usage and raise the limit. Increasing only the request changes scheduling but not the cgroup memory cap.',
     references: [REF_RES]
+  },
+
+  // ── Cluster Architecture, Installation & Configuration (+11) ──
+  {
+    domain: CLUSTER, difficulty: 2, type: QType.SINGLE,
+    stem: 'Before running `kubeadm init`, swap must be disabled. Which command disables it for the current boot?',
+    options: opts4(
+      'swapoff -a',
+      'systemctl disable swap',
+      'kubeadm config swap off',
+      'sysctl -w vm.swappiness=0'
+    ),
+    correct: ['a'],
+    explanation: '`swapoff -a` disables all swap immediately. To persist across reboots you also comment the swap entry in `/etc/fstab`. `vm.swappiness=0` only discourages swapping; it does not disable it.',
+    references: [REF_KUBEADM]
+  },
+  {
+    domain: CLUSTER, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command prints the join command (with token and CA hash) for adding a new worker to an existing kubeadm cluster?',
+    options: opts4(
+      'kubeadm token create --print-join-command',
+      'kubeadm join --generate',
+      'kubectl get token -n kube-system',
+      'kubeadm init phase bootstrap-token'
+    ),
+    correct: ['a'],
+    explanation: '`kubeadm token create --print-join-command` mints a fresh bootstrap token and prints the full `kubeadm join` line including `--discovery-token-ca-cert-hash`. Tokens default to a 24h TTL.',
+    references: [REF_KUBEADM]
+  },
+  {
+    domain: CLUSTER, difficulty: 3, type: QType.SINGLE,
+    stem: 'You must give ServiceAccount `ci` in namespace `build` permission to create Jobs in that namespace only. The correct binding subject is:',
+    options: opts4(
+      'kind: User, name: ci',
+      'kind: ServiceAccount, name: ci, namespace: build',
+      'kind: Group, name: system:serviceaccounts',
+      'kind: ServiceAccount, name: system:ci'
+    ),
+    correct: ['b'],
+    explanation: 'A RoleBinding subject for a ServiceAccount uses `kind: ServiceAccount` with the `name` and `namespace`. Binding to the broad `system:serviceaccounts` group would over-grant to every SA.',
+    references: [REF_RBAC]
+  },
+  {
+    domain: CLUSTER, difficulty: 3, type: QType.SINGLE,
+    stem: 'After editing `/etc/kubernetes/manifests/kube-apiserver.yaml`, how does the change take effect?',
+    options: opts4(
+      'Run `systemctl restart kube-apiserver`.',
+      'The kubelet detects the file change and recreates the static Pod automatically.',
+      'Run `kubectl rollout restart -n kube-system deploy/kube-apiserver`.',
+      'Run `kubeadm upgrade apply`.'
+    ),
+    correct: ['b'],
+    explanation: 'The kubelet watches `/etc/kubernetes/manifests/` and restarts the corresponding static Pod whenever the manifest changes. There is no systemd unit or Deployment for control-plane components on kubeadm clusters.',
+    references: [REF_APISVR]
+  },
+  {
+    domain: CLUSTER, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which etcdctl invocation correctly takes a snapshot when etcd uses client TLS certificates?',
+    options: opts4(
+      'ETCDCTL_API=3 etcdctl snapshot save /backup/snap.db --endpoints=https://127.0.0.1:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key',
+      'etcdctl backup --data-dir /var/lib/etcd',
+      'kubectl exec etcd -- snapshot save',
+      'ETCDCTL_API=2 etcdctl snapshot save /backup/snap.db'
+    ),
+    correct: ['a'],
+    explanation: 'API v3 snapshots require `--endpoints` plus the CA, client cert, and key. The legacy `etcdctl backup` and API v2 do not produce a v3 snapshot usable by `snapshot restore`.',
+    references: [REF_ETCD]
+  },
+  {
+    domain: CLUSTER, difficulty: 3, type: QType.SINGLE,
+    stem: 'You need to cordon `node01` so the scheduler stops placing NEW Pods there but existing Pods keep running. The command is:',
+    options: opts4(
+      'kubectl drain node01',
+      'kubectl cordon node01',
+      'kubectl taint node node01 key=val:NoExecute',
+      'kubectl delete node node01'
+    ),
+    correct: ['b'],
+    explanation: '`kubectl cordon` marks the node `SchedulingDisabled` without evicting Pods. `drain` additionally evicts Pods; a NoExecute taint would evict non-tolerating Pods.',
+    references: [REF_KCTL]
+  },
+  {
+    domain: CLUSTER, difficulty: 4, type: QType.SINGLE,
+    stem: 'You must restore an etcd snapshot to recover a cluster. Before pointing the etcd static Pod at the restored data directory, you should:',
+    options: opts4(
+      'Leave the apiserver running so it can replay the WAL.',
+      'Stop the kube-apiserver (move its manifest out of /etc/kubernetes/manifests) so it does not write during the restore.',
+      'Delete /var/lib/kubelet.',
+      'Run `kubeadm reset` first.'
+    ),
+    correct: ['b'],
+    explanation: 'During an etcd restore the apiserver must not be writing to etcd. Moving the apiserver (and etcd) static-Pod manifests out, performing the restore, then restoring the manifests is the safe sequence.',
+    references: [REF_ETCD]
+  },
+  {
+    domain: CLUSTER, difficulty: 3, type: QType.SINGLE,
+    stem: 'On the first control-plane node you run `kubeadm upgrade apply v1.32.1`. To upgrade an additional control-plane node you then run:',
+    options: opts4(
+      'kubeadm upgrade apply v1.32.1 again',
+      'kubeadm upgrade node',
+      'kubeadm init --upgrade',
+      'kubeadm join --upgrade'
+    ),
+    correct: ['b'],
+    explanation: 'Only the first control-plane node runs `kubeadm upgrade apply`. Every other control-plane and worker node runs `kubeadm upgrade node`, then upgrades the kubelet/kubectl packages.',
+    references: [REF_UPGRADE]
+  },
+  {
+    domain: CLUSTER, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command shows whether control-plane component certificates managed by kubeadm are close to expiring?',
+    options: opts4(
+      'kubeadm certs check-expiration',
+      'kubectl get certificates -A',
+      'openssl verify /etc/kubernetes/admin.conf',
+      'kubeadm config view'
+    ),
+    correct: ['a'],
+    explanation: '`kubeadm certs check-expiration` lists every kubeadm-managed certificate and its expiry. `kubeadm certs renew` renews them. `kubectl get certificates` lists cert-manager CRs, not control-plane PKI.',
+    references: [REF_KUBEADM]
+  },
+  {
+    domain: CLUSTER, difficulty: 3, type: QType.MULTI,
+    stem: 'Select ALL true statements about kubeconfig files.',
+    options: opts4(
+      'A context binds a cluster, a user, and an optional namespace.',
+      '`kubectl config use-context <name>` switches the active context.',
+      'Client certificate data can be embedded base64 or referenced by file path.',
+      'The KUBECONFIG env var can merge multiple kubeconfig files.'
+    ),
+    correct: ['a', 'b', 'c', 'd'],
+    explanation: 'All four are correct. A context ties cluster+user(+namespace); `use-context` switches; credentials may be inline (`*-data`) or file paths; `KUBECONFIG=a:b:c` merges files at load time.',
+    references: [REF_KCTL]
+  },
+  {
+    domain: CLUSTER, difficulty: 2, type: QType.TRUE_FALSE,
+    stem: 'On a default kubeadm cluster, kube-scheduler and kube-controller-manager run as Deployments in the kube-system namespace.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['b'],
+    explanation: 'False. They run as static Pods managed by the kubelet from `/etc/kubernetes/manifests/`, not as Deployments. Only add-ons like CoreDNS run as Deployments.',
+    references: [REF_APISVR]
+  },
+
+  // ── Workloads and Scheduling (+7) ──
+  {
+    domain: WORK, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command scales Deployment `web` to 5 replicas imperatively?',
+    options: opts4(
+      'kubectl scale deploy web --replicas=5',
+      'kubectl edit deploy web --replicas=5',
+      'kubectl set replicas deploy/web 5',
+      'kubectl patch deploy web --replicas 5'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl scale deploy web --replicas=5` directly updates the replica count. `kubectl set` has no `replicas` subcommand and `patch` needs a JSON/strategic merge body.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: WORK, difficulty: 3, type: QType.SINGLE,
+    stem: 'A Pod must only schedule on nodes labelled `disktype=ssd`. The simplest spec field is:',
+    options: opts4(
+      'spec.nodeName: ssd',
+      'spec.nodeSelector: { disktype: ssd }',
+      'spec.tolerations',
+      'spec.priorityClassName: ssd'
+    ),
+    correct: ['b'],
+    explanation: '`nodeSelector` is the simplest hard node-constraint, matching node labels exactly. `nodeName` pins to one specific node by name; tolerations relate to taints, not labels.',
+    references: [REF_AFFIN]
+  },
+  {
+    domain: WORK, difficulty: 3, type: QType.SINGLE,
+    stem: 'A CronJob should run every 5 minutes. The correct `schedule` value is:',
+    options: opts4(
+      '"*/5 * * * *"',
+      '"5 * * * *"',
+      '"@every5m"',
+      '"0/5 0 0 0 0"'
+    ),
+    correct: ['a'],
+    explanation: 'CronJob uses standard cron syntax: `*/5 * * * *` means "every 5th minute". `5 * * * *` runs once per hour at minute 5.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: WORK, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'You want to roll back Deployment `api` to its previous revision after a bad image. The command is:',
+    options: opts4(
+      'kubectl rollout undo deploy/api',
+      'kubectl rollout pause deploy/api',
+      'kubectl delete deploy api && kubectl apply -f api.yaml',
+      'kubectl set image deploy/api api=previous'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl rollout undo deploy/api` reverts to the prior ReplicaSet revision. Add `--to-revision=N` for a specific revision (see `kubectl rollout history`).',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: WORK, difficulty: 3, type: QType.MULTI,
+    stem: 'Select ALL true statements about static Pods.',
+    options: opts4(
+      'They are defined by manifest files in the kubelet `staticPodPath` (default /etc/kubernetes/manifests).',
+      'The apiserver creates a read-only mirror Pod so they appear in `kubectl get pods`.',
+      'You can delete a static Pod with `kubectl delete pod` permanently.',
+      'They are managed directly by the kubelet, not by a controller.'
+    ),
+    correct: ['a', 'b', 'd'],
+    explanation: 'Deleting the mirror Pod via kubectl does NOT remove a static Pod — the kubelet recreates it; you must remove the manifest file. The other statements are correct.',
+    references: [REF_APISVR]
+  },
+  {
+    domain: WORK, difficulty: 4, type: QType.SINGLE,
+    stem: 'A Deployment uses `strategy.type: Recreate`. During an image update, the rollout behavior is:',
+    options: opts4(
+      'New Pods come up before old Pods are terminated.',
+      'All old Pods are terminated first, then new Pods are created (brief downtime).',
+      'One Pod at a time is replaced.',
+      'The update is rejected — Recreate is invalid for Deployments.'
+    ),
+    correct: ['b'],
+    explanation: 'The `Recreate` strategy kills all existing Pods before creating new ones, causing a short outage. `RollingUpdate` is the default that avoids downtime via surge/unavailable controls.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: WORK, difficulty: 2, type: QType.TRUE_FALSE,
+    stem: 'A Job with `completions: 5` and `parallelism: 2` runs at most 2 Pods at a time until 5 succeed.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['a'],
+    explanation: 'True. `parallelism` caps concurrent Pods; `completions` is the total number of successful Pod runs required before the Job is complete.',
+    references: [REF_DEPLOY]
+  },
+
+  // ── Services and Networking (+9) ──
+  {
+    domain: NET, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'A Service of type ClusterIP is reachable:',
+    options: opts4(
+      'only from within the cluster',
+      'from any external client on the node IP',
+      'only from the control-plane nodes',
+      'from the internet via the cloud load balancer'
+    ),
+    correct: ['a'],
+    explanation: 'ClusterIP is the default type and is reachable only from inside the cluster (Pods/Nodes). External exposure requires NodePort, LoadBalancer, or an Ingress/Gateway.',
+    references: [REF_SVC]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'CoreDNS runs in kube-system. To verify in-cluster DNS, you exec a debug Pod and run:',
+    options: opts4(
+      'nslookup kubernetes.default.svc.cluster.local',
+      'ping coredns',
+      'curl http://kube-dns:53',
+      'kubectl dns test'
+    ),
+    correct: ['a'],
+    explanation: 'Resolving `kubernetes.default.svc.cluster.local` from a Pod confirms CoreDNS and the kube-dns Service work. ICMP/HTTP against DNS does not validate name resolution.',
+    references: [REF_DNS]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE,
+    stem: 'A ClusterIP Service has a selector `app=web` but no endpoints appear. The MOST likely cause is:',
+    options: opts4(
+      'No running Pods carry the label `app=web` (or they are not Ready).',
+      'kube-proxy is not installed.',
+      'The Service needs a NodePort.',
+      'CoreDNS is down.'
+    ),
+    correct: ['a'],
+    explanation: 'Endpoints (EndpointSlices) are populated from Ready Pods matching the selector. A label mismatch or unready Pods yields an empty endpoint list and connection failures.',
+    references: [REF_SVC]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE,
+    stem: 'An Ingress resource exists but returns nothing. `kubectl get ingress` shows an empty ADDRESS column. The MOST likely cause is:',
+    options: opts4(
+      'No Ingress controller is installed/running to satisfy the Ingress.',
+      'The Service is ClusterIP.',
+      'TLS is not configured.',
+      'The path type is Prefix.'
+    ),
+    correct: ['a'],
+    explanation: 'An Ingress object is inert without a controller (ingress-nginx, etc.) watching and programming it. No controller means no ADDRESS and no routing.',
+    references: [REF_ING]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE,
+    stem: 'You need an Ingress path that matches `/app` and any sub-path like `/app/x`. The pathType should be:',
+    options: opts4(
+      'Exact',
+      'Prefix',
+      'ImplementationSpecific only',
+      'Regex'
+    ),
+    correct: ['b'],
+    explanation: '`Prefix` matches the path element prefix, so `/app` also matches `/app/x`. `Exact` requires an exact string match; `Regex` is not a valid pathType value.',
+    references: [REF_ING]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE,
+    stem: 'A NetworkPolicy should allow ingress to `app=db` Pods ONLY on TCP 5432. The rule includes:',
+    options: opts4(
+      'ports: [{ protocol: TCP, port: 5432 }] under an ingress rule',
+      'egress: [{ ports: [{ port: 5432 }] }]',
+      'policyTypes: [Egress] only',
+      'a Service annotation `allow-port: 5432`'
+    ),
+    correct: ['a'],
+    explanation: 'Port restrictions are declared in the `ports` list of an ingress (or egress) rule. Combined with a `from` peer this allows only matching sources on TCP 5432.',
+    references: [REF_NP]
+  },
+  {
+    domain: NET, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which Service type creates a DNS CNAME to an external hostname with no proxying?',
+    options: opts4(
+      'ClusterIP',
+      'NodePort',
+      'ExternalName',
+      'LoadBalancer'
+    ),
+    correct: ['c'],
+    explanation: '`ExternalName` returns a CNAME record to the configured `externalName` hostname; kube-proxy does not proxy traffic and no cluster IP is allocated.',
+    references: [REF_SVC]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.MULTI,
+    stem: 'Select ALL true statements about kube-proxy.',
+    options: opts4(
+      'It programs iptables (or IPVS) rules to implement Service virtual IPs.',
+      'It typically runs as a DaemonSet on every node.',
+      'It resolves Service DNS names.',
+      'In IPVS mode it provides additional load-balancing algorithms.'
+    ),
+    correct: ['a', 'b', 'd'],
+    explanation: 'DNS resolution is CoreDNS, not kube-proxy. kube-proxy implements Service VIP routing via iptables/IPVS and runs as a per-node DaemonSet; IPVS adds algorithms like rr/lc.',
+    references: [REF_SVC]
+  },
+  {
+    domain: NET, difficulty: 2, type: QType.TRUE_FALSE,
+    stem: 'A headless Service is created by setting `spec.clusterIP: None`.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['a'],
+    explanation: 'True. With `clusterIP: None` and a selector, DNS returns the individual Pod A records instead of a single virtual IP — the basis for StatefulSet stable Pod DNS.',
+    references: [REF_DNS]
+  },
+
+  // ── Storage (+5) ──
+  {
+    domain: STORE, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'A PVC stays `Pending` and `kubectl describe pvc` shows "no persistent volumes available for this claim and no storage class is set". The MOST likely cause is:',
+    options: opts4(
+      'No matching PV exists and no (default) StorageClass can dynamically provision one.',
+      'The Pod is not scheduled.',
+      'reclaimPolicy is Retain.',
+      'The PVC requested ReadWriteMany.'
+    ),
+    correct: ['a'],
+    explanation: 'Without a matching pre-provisioned PV and with no StorageClass (or default) for dynamic provisioning, the PVC cannot bind and stays Pending.',
+    references: [REF_PV]
+  },
+  {
+    domain: STORE, difficulty: 3, type: QType.SINGLE,
+    stem: 'A PV has `persistentVolumeReclaimPolicy: Delete`. When its bound PVC is deleted:',
+    options: opts4(
+      'The PV becomes Available for reuse.',
+      'The PV and the underlying storage asset are deleted.',
+      'The PV becomes Released and is retained.',
+      'Nothing happens until the node reboots.'
+    ),
+    correct: ['b'],
+    explanation: 'With `Delete`, removing the PVC also deletes the PV object and the backing volume (for dynamically provisioned volumes). `Retain` keeps both for manual reclamation.',
+    references: [REF_PV]
+  },
+  {
+    domain: STORE, difficulty: 3, type: QType.SINGLE,
+    stem: 'Multiple Pods across different nodes must write to the same volume simultaneously. The PVC accessMode must be:',
+    options: opts4(
+      'ReadWriteOnce',
+      'ReadWriteMany',
+      'ReadOnlyMany',
+      'ReadWriteOncePod'
+    ),
+    correct: ['b'],
+    explanation: 'ReadWriteMany allows multiple nodes to mount the volume read-write (e.g. NFS/CephFS). ReadWriteOnce is single-node; ReadWriteOncePod restricts to a single Pod.',
+    references: [REF_PV]
+  },
+  {
+    domain: STORE, difficulty: 3, type: QType.SINGLE,
+    stem: 'To mount a ConfigMap key `app.conf` as a file at `/etc/app/app.conf`, you use:',
+    options: opts4(
+      'a configMap volume with an items[] mapping plus a volumeMount',
+      'an emptyDir volume',
+      'env.valueFrom.configMapKeyRef',
+      'a hostPath volume'
+    ),
+    correct: ['a'],
+    explanation: 'A `configMap` volume (optionally with `items` to map specific keys to paths) mounted via `volumeMounts` projects the data as files. `configMapKeyRef` injects it as an env var, not a file.',
+    references: [REF_VOL]
+  },
+  {
+    domain: STORE, difficulty: 2, type: QType.TRUE_FALSE,
+    stem: 'A PVC with accessMode ReadWriteOnce can be mounted read-write by Pods on only one node at a time.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['a'],
+    explanation: 'True. ReadWriteOnce permits read-write mounting by one node; multiple Pods on that same node may share it. Cross-node concurrent write needs ReadWriteMany.',
+    references: [REF_PV]
+  },
+
+  // ── Troubleshooting (+13) ──
+  {
+    domain: TS, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command shows recent cluster events sorted by time to triage a failing Pod?',
+    options: opts4(
+      'kubectl get events --sort-by=.metadata.creationTimestamp',
+      'kubectl logs events',
+      'kubectl top events',
+      'journalctl -u events'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl get events --sort-by=.metadata.creationTimestamp` lists events chronologically. `kubectl describe pod` shows events scoped to one object.',
+    references: [REF_DEBUG]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A Pod is `CrashLoopBackOff`. The single most useful command to see why the container exits is:',
+    options: opts4(
+      'kubectl logs <pod> --previous',
+      'kubectl get pod <pod> -o wide',
+      'kubectl top pod <pod>',
+      'kubectl edit pod <pod>'
+    ),
+    correct: ['a'],
+    explanation: 'CrashLoopBackOff means the container repeatedly exits; `kubectl logs --previous` shows the last terminated container\'s output (the actual error), since the current instance may not be running.',
+    references: [REF_LOGS]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE,
+    stem: 'A node shows `MemoryPressure=True` and Pods are being evicted. The first investigative command on the node is:',
+    options: opts4(
+      'kubectl describe node <node> (review conditions and allocatable)',
+      'kubectl delete node <node>',
+      'systemctl restart docker',
+      'kubeadm reset'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl describe node` reveals the conditions, allocatable resources, and eviction events so you can identify memory exhaustion before taking action.',
+    references: [REF_DEBUG]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE,
+    stem: 'A Pod is stuck `Terminating` for a long time after deletion. A common safe cause to check first is:',
+    options: opts4(
+      'A finalizer on the Pod (or the node is unreachable so the kubelet cannot confirm deletion).',
+      'The apiserver is down.',
+      'etcd is corrupted.',
+      'kube-proxy crashed.'
+    ),
+    correct: ['a'],
+    explanation: 'Pods stuck Terminating are usually waiting on a finalizer or a NotReady/unreachable node where the kubelet cannot confirm container shutdown. `--force --grace-period=0` is the last-resort removal.',
+    references: [REF_KCTL]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'You need to run an interactive shell in a running Pod\'s container to debug. The command is:',
+    options: opts4(
+      'kubectl exec -it <pod> -- /bin/sh',
+      'kubectl attach <pod>',
+      'kubectl run <pod> -- sh',
+      'kubectl debug <pod> --shell'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl exec -it <pod> -- /bin/sh` opens an interactive TTY in the container. `attach` connects to the existing process stdio; `kubectl debug` creates an ephemeral debug container (different use).',
+    references: [REF_KCTL]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A Pod stays `Pending` and describe shows "Insufficient cpu". The remediation is:',
+    options: opts4(
+      'Lower the Pod CPU requests or add a node with more allocatable CPU.',
+      'Increase the Pod CPU limit.',
+      'Restart kube-scheduler.',
+      'Add a toleration.'
+    ),
+    correct: ['a'],
+    explanation: '"Insufficient cpu" means no node has enough allocatable CPU to satisfy the Pod\'s requests. Reduce requests or add capacity. Limits do not affect scheduling feasibility.',
+    references: [REF_RES]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE,
+    stem: 'After `kubectl apply`, a container is `RunContainerError` with "exec: \\"./start.sh\\": permission denied". The MOST likely cause is:',
+    options: opts4(
+      'The entrypoint script is not executable / wrong command in the image or spec.',
+      'NetworkPolicy blocks startup.',
+      'The node is NotReady.',
+      'The Service selector is wrong.'
+    ),
+    correct: ['a'],
+    explanation: 'RunContainerError with a permission/exec message points to a bad command, missing executable bit, or wrong path in the image or `command`/`args`. Fix the image or the Pod command.',
+    references: [REF_DEBUG]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE,
+    stem: 'kubelet on a worker is healthy but the node is `NotReady` and `kubectl describe node` shows `NetworkUnavailable=True`. The likely cause is:',
+    options: opts4(
+      'The CNI plugin is not installed or its Pods are failing on that node.',
+      'The apiserver cert expired.',
+      'Swap is enabled.',
+      'kubectl is the wrong version.'
+    ),
+    correct: ['a'],
+    explanation: '`NetworkUnavailable=True` indicates the node network (CNI) is not set up. Check the CNI DaemonSet Pods (Calico/Flannel/etc.) on that node and their logs.',
+    references: [REF_CNI]
+  },
+  {
+    domain: TS, difficulty: 4, type: QType.SINGLE,
+    stem: 'The kube-apiserver static Pod keeps restarting. Which log source should you check directly on the control-plane node?',
+    options: opts4(
+      'crictl logs of the apiserver container (or /var/log/pods/...)',
+      'kubectl logs -n kube-system deploy/kube-apiserver',
+      'systemctl status kube-apiserver',
+      'kubectl get events only'
+    ),
+    correct: ['a'],
+    explanation: 'When the apiserver is down, kubectl cannot reach it, so inspect the container directly via `crictl ps -a` / `crictl logs` or `/var/log/pods`. There is no apiserver Deployment or systemd unit.',
+    references: [REF_APISVR]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE,
+    stem: 'A liveness probe is restarting a healthy container repeatedly. The MOST likely misconfiguration is:',
+    options: opts4(
+      'initialDelaySeconds is too small / probe path or port is wrong.',
+      'The container has no readiness probe.',
+      'The Service is ClusterIP.',
+      'The image is too large.'
+    ),
+    correct: ['a'],
+    explanation: 'A liveness probe firing before the app is ready (low initialDelaySeconds) or pointed at the wrong path/port causes endless restarts. Tune the delay/threshold or fix the probe target.',
+    references: [REF_DEBUG]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'You must collect metrics with `kubectl top nodes` but it returns "Metrics API not available". The fix is:',
+    options: opts4(
+      'Install/repair the metrics-server in the cluster.',
+      'Restart kube-proxy.',
+      'Enable the dashboard.',
+      'Set --enable-metrics on kubectl.'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl top` depends on the metrics-server serving the metrics.k8s.io API. If it is not installed or unhealthy, `top` fails. Deploy/fix metrics-server.',
+    references: [REF_DEBUG]
+  },
+  {
+    domain: TS, difficulty: 4, type: QType.MULTI,
+    stem: 'A worker node is NotReady. Select ALL valid first-step checks.',
+    options: opts4(
+      '`systemctl status kubelet` and `journalctl -u kubelet` on the node.',
+      '`kubectl describe node <node>` for conditions and events.',
+      'Verify the container runtime (`crictl info` / `systemctl status containerd`).',
+      'Immediately run `kubeadm reset` on the node.'
+    ),
+    correct: ['a', 'b', 'c'],
+    explanation: 'Inspect the kubelet, node conditions, and the runtime first. `kubeadm reset` destroys node state and is never an appropriate first diagnostic step.',
+    references: [REF_DEBUG, REF_KUBEADM]
+  },
+  {
+    domain: TS, difficulty: 2, type: QType.TRUE_FALSE,
+    stem: 'When the kube-apiserver is unreachable, `kubectl logs` can still retrieve container logs.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['b'],
+    explanation: 'False. `kubectl logs` proxies through the apiserver to the kubelet. If the apiserver is down you must read logs on the node via `crictl logs` or `/var/log/pods`.',
+    references: [REF_LOGS]
   }
 ];
 
@@ -612,6 +1182,576 @@ const P2: Q[] = [
     correct: ['b'],
     explanation: 'On kubeadm clusters scheduler/controller-manager/apiserver run as static Pods from `/etc/kubernetes/manifests/`. A missing or broken manifest is the typical cause. There is no Deployment or systemd unit for them.',
     references: [REF_APISVR]
+  },
+
+  // ── Cluster Architecture, Installation & Configuration (+11) ──
+  {
+    domain: CLUSTER, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which kernel module and sysctl are required for kube-proxy/CNI iptables traffic to work on a kubeadm node?',
+    options: opts4(
+      'br_netfilter module + net.bridge.bridge-nf-call-iptables=1',
+      'overlay module only',
+      'ip_vs module + net.ipv4.tcp_syncookies=0',
+      'nf_conntrack module + vm.max_map_count=262144'
+    ),
+    correct: ['a'],
+    explanation: 'Loading `br_netfilter` and setting `net.bridge.bridge-nf-call-iptables=1` (plus `net.ipv4.ip_forward=1`) lets bridged traffic traverse iptables so Service/Pod networking functions.',
+    references: [REF_KUBEADM]
+  },
+  {
+    domain: CLUSTER, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'To create a ClusterRole that allows reading Pods and a ClusterRoleBinding to group `developers` imperatively, you run:',
+    options: opts4(
+      'kubectl create clusterrole pod-reader --verb=get,list,watch --resource=pods && kubectl create clusterrolebinding dev-read --clusterrole=pod-reader --group=developers',
+      'kubectl create role pod-reader --verb=* --resource=pods',
+      'kubectl create rolebinding dev-read --role=pod-reader --user=developers',
+      'kubectl auth grant developers pods'
+    ),
+    correct: ['a'],
+    explanation: 'A cluster-wide read needs a ClusterRole bound by a ClusterRoleBinding; binding to a `--group` grants every member. A Role/RoleBinding would only scope to one namespace.',
+    references: [REF_RBAC]
+  },
+  {
+    domain: CLUSTER, difficulty: 3, type: QType.SINGLE,
+    stem: 'Which command verifies whether ServiceAccount `build:ci` may create deployments in namespace `build`?',
+    options: opts4(
+      'kubectl auth can-i create deployments --as=system:serviceaccount:build:ci -n build',
+      'kubectl get rolebinding ci -n build',
+      'kubectl describe sa ci -n build',
+      'kubectl auth whoami --sa ci'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl auth can-i ... --as=system:serviceaccount:<ns>:<name>` impersonates the SA and reports whether RBAC permits the action — the canonical RBAC verification command.',
+    references: [REF_RBAC]
+  },
+  {
+    domain: CLUSTER, difficulty: 3, type: QType.SINGLE,
+    stem: 'During `kubeadm upgrade`, before draining a control-plane node you should verify the plan with:',
+    options: opts4(
+      'kubeadm upgrade plan',
+      'kubeadm config images list',
+      'kubeadm token list',
+      'kubeadm certs check-expiration'
+    ),
+    correct: ['a'],
+    explanation: '`kubeadm upgrade plan` shows the current versions, the available target versions, and component upgrade actions — always run before `kubeadm upgrade apply`.',
+    references: [REF_UPGRADE]
+  },
+  {
+    domain: CLUSTER, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'After restoring etcd to `/var/lib/etcd-restore`, what must be updated in the etcd static Pod manifest?',
+    options: opts4(
+      'The `--data-dir` flag and the corresponding hostPath volume must point to /var/lib/etcd-restore.',
+      'Only the container image tag.',
+      'The `--listen-peer-urls` to 2379.',
+      'Nothing — etcd auto-discovers the restored data.'
+    ),
+    correct: ['a'],
+    explanation: 'A restore creates a new data directory; the etcd static Pod must reference it via `--data-dir` and its hostPath volume so the kubelet starts etcd from the restored data.',
+    references: [REF_ETCD]
+  },
+  {
+    domain: CLUSTER, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which file does `kubeadm init` write that you copy to `$HOME/.kube/config` for cluster-admin access?',
+    options: opts4(
+      '/etc/kubernetes/admin.conf',
+      '/etc/kubernetes/kubelet.conf',
+      '/etc/kubernetes/scheduler.conf',
+      '/var/lib/kubelet/config.yaml'
+    ),
+    correct: ['a'],
+    explanation: '`/etc/kubernetes/admin.conf` is the cluster-admin kubeconfig generated by kubeadm. `kubelet.conf`/`scheduler.conf` are component kubeconfigs with scoped identities.',
+    references: [REF_KUBEADM]
+  },
+  {
+    domain: CLUSTER, difficulty: 4, type: QType.SINGLE,
+    stem: 'You add a second control-plane node. The join command must include which extra flag beyond a worker join?',
+    options: opts4(
+      '--control-plane (with an uploaded certificate key)',
+      '--node-role=master',
+      '--etcd-only',
+      '--skip-phases=addon'
+    ),
+    correct: ['a'],
+    explanation: 'Joining a control-plane node uses `kubeadm join --control-plane` plus `--certificate-key` (from `kubeadm init phase upload-certs` / `--upload-certs`) so the new node receives the control-plane PKI.',
+    references: [REF_KUBEADM]
+  },
+  {
+    domain: CLUSTER, difficulty: 3, type: QType.SINGLE,
+    stem: 'kubeadm-managed certificates are expiring. The command to renew all of them is:',
+    options: opts4(
+      'kubeadm certs renew all',
+      'kubeadm init --renew-certs',
+      'kubectl certificate approve --all',
+      'openssl req -renew -in admin.conf'
+    ),
+    correct: ['a'],
+    explanation: '`kubeadm certs renew all` renews every kubeadm-managed control-plane certificate. The control-plane static Pods then need a restart to pick up the new certs.',
+    references: [REF_KUBEADM]
+  },
+  {
+    domain: CLUSTER, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command sets the default namespace for the current kubeconfig context?',
+    options: opts4(
+      'kubectl config set-context --current --namespace=dev',
+      'kubectl set namespace dev',
+      'kubectl config use-namespace dev',
+      'kubectl namespace dev --default'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl config set-context --current --namespace=dev` patches the active context so subsequent commands default to namespace `dev`.',
+    references: [REF_KCTL]
+  },
+  {
+    domain: CLUSTER, difficulty: 3, type: QType.MULTI,
+    stem: 'Select ALL valid steps when upgrading a kubeadm WORKER node.',
+    options: opts4(
+      '`kubectl drain <node> --ignore-daemonsets` from a control plane.',
+      '`kubeadm upgrade node` on the worker.',
+      'Upgrade the kubelet/kubectl packages and restart the kubelet.',
+      '`kubectl uncordon <node>` afterwards.'
+    ),
+    correct: ['a', 'b', 'c', 'd'],
+    explanation: 'All four are part of the documented worker upgrade: drain, `kubeadm upgrade node`, upgrade kubelet/kubectl + restart, then uncordon to resume scheduling.',
+    references: [REF_UPGRADE]
+  },
+  {
+    domain: CLUSTER, difficulty: 2, type: QType.TRUE_FALSE,
+    stem: 'A bootstrap token created by `kubeadm token create` expires after 24 hours by default.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['a'],
+    explanation: 'True. Bootstrap tokens default to a 24h TTL; use `--ttl 0` for a non-expiring token (not recommended) or create a new one with `--print-join-command` when needed.',
+    references: [REF_KUBEADM]
+  },
+
+  // ── Workloads and Scheduling (+7) ──
+  {
+    domain: WORK, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command generates Pod YAML without creating the object?',
+    options: opts4(
+      'kubectl run nginx --image=nginx --dry-run=client -o yaml',
+      'kubectl create pod nginx --yaml',
+      'kubectl get pod nginx -o template',
+      'kubectl apply --preview'
+    ),
+    correct: ['a'],
+    explanation: '`--dry-run=client -o yaml` renders the manifest locally without contacting the apiserver — the standard exam shortcut to scaffold and then edit YAML.',
+    references: [REF_KCTL]
+  },
+  {
+    domain: WORK, difficulty: 3, type: QType.SINGLE,
+    stem: 'A Pod must tolerate a node tainted `gpu=true:NoSchedule` AND only land on GPU nodes labelled `gpu=true`. You need:',
+    options: opts4(
+      'a matching toleration plus a nodeSelector/affinity for the label',
+      'only a toleration',
+      'only a nodeSelector',
+      'a PriorityClass'
+    ),
+    correct: ['a'],
+    explanation: 'A toleration only permits scheduling onto the tainted node; it does not attract the Pod there. Add a nodeSelector or nodeAffinity on `gpu=true` to also require placement on GPU nodes.',
+    references: [REF_TAINT]
+  },
+  {
+    domain: WORK, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A Deployment should keep at most 5 old ReplicaSets for rollback history. The field is:',
+    options: opts4(
+      'spec.revisionHistoryLimit: 5',
+      'spec.strategy.maxHistory: 5',
+      'spec.rollback.limit: 5',
+      'metadata.annotations.history: 5'
+    ),
+    correct: ['a'],
+    explanation: '`spec.revisionHistoryLimit` controls how many old ReplicaSets are retained for `kubectl rollout undo`. The default is 10; setting 0 disables rollback history.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: WORK, difficulty: 3, type: QType.SINGLE,
+    stem: 'An initContainer must complete before the app container starts. If the initContainer exits non-zero, the Pod:',
+    options: opts4(
+      'restarts the initContainer per the Pod restartPolicy until it succeeds',
+      'starts the app container anyway',
+      'is deleted immediately',
+      'skips the failed initContainer'
+    ),
+    correct: ['a'],
+    explanation: 'Init containers run sequentially and must succeed; on failure the kubelet restarts the Pod (subject to restartPolicy) until the init container exits 0. The app container never starts until all init containers succeed.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: WORK, difficulty: 3, type: QType.MULTI,
+    stem: 'Select ALL true statements about node affinity.',
+    options: opts4(
+      'requiredDuringSchedulingIgnoredDuringExecution is a hard rule.',
+      'preferredDuringScheduling... is a soft (weighted) preference.',
+      'Affinity rules are re-evaluated and Pods evicted if labels change later.',
+      'It can express richer set-based label matching than nodeSelector.'
+    ),
+    correct: ['a', 'b', 'd'],
+    explanation: '`IgnoredDuringExecution` means running Pods are NOT evicted when node labels change. Required is hard, preferred is soft/weighted, and affinity supports operators like In/NotIn/Exists.',
+    references: [REF_AFFIN]
+  },
+  {
+    domain: WORK, difficulty: 4, type: QType.SINGLE,
+    stem: 'Topology spread constraints with `maxSkew: 1` and `topologyKey: zone` aim to:',
+    options: opts4(
+      'distribute Pods so the count difference between zones is at most 1',
+      'allow at most 1 Pod per zone',
+      'place all Pods in one zone',
+      'evict Pods when zones become unbalanced'
+    ),
+    correct: ['a'],
+    explanation: '`maxSkew` bounds the permitted imbalance of matching Pods across topology domains (zones), spreading them evenly. It is a scheduling constraint, not a runtime eviction mechanism.',
+    references: [REF_AFFIN]
+  },
+  {
+    domain: WORK, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
+    stem: 'Setting `spec.nodeName` directly on a Pod bypasses the scheduler and binds the Pod to that node.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['a'],
+    explanation: 'True. A Pod with `nodeName` set is assigned to that node without scheduler involvement; it will fail if that node lacks capacity or does not exist.',
+    references: [REF_AFFIN]
+  },
+
+  // ── Services and Networking (+9) ──
+  {
+    domain: NET, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command imperatively creates a ClusterIP Service for Deployment `api` on port 80?',
+    options: opts4(
+      'kubectl expose deploy api --port=80',
+      'kubectl create svc api --port 80',
+      'kubectl run svc api --port=80',
+      'kubectl service create api 80'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl expose deploy api --port=80` creates a Service (ClusterIP by default) selecting the Deployment\'s Pods. `--target-port` sets the container port if it differs.',
+    references: [REF_SVC]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A NodePort Service is created. Which port range will Kubernetes allocate by default?',
+    options: opts4(
+      '30000–32767',
+      '1–1024',
+      '8080–8443',
+      '40000–49999'
+    ),
+    correct: ['a'],
+    explanation: 'The default `--service-node-port-range` is 30000–32767. A specific `nodePort` can be requested within that range; conflicts are rejected.',
+    references: [REF_SVC]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE,
+    stem: 'Two Pods in different namespaces cannot communicate after you add a default-deny NetworkPolicy. To allow cross-namespace traffic you must:',
+    options: opts4(
+      'add an ingress rule with a namespaceSelector matching the source namespace labels',
+      'delete kube-proxy',
+      'switch the Service to NodePort',
+      'set hostNetwork: true'
+    ),
+    correct: ['a'],
+    explanation: 'With a default-deny policy in place you must explicitly allow the source via a `from` peer using a `namespaceSelector` (and optionally `podSelector`) matching the other namespace.',
+    references: [REF_NP]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE,
+    stem: 'An Ingress with TLS needs a certificate. The secret it references must be of type:',
+    options: opts4(
+      'kubernetes.io/tls',
+      'Opaque',
+      'kubernetes.io/dockerconfigjson',
+      'bootstrap.kubernetes.io/token'
+    ),
+    correct: ['a'],
+    explanation: 'Ingress `spec.tls[].secretName` must reference a `kubernetes.io/tls` Secret containing `tls.crt` and `tls.key`. Opaque secrets are not recognized for TLS termination.',
+    references: [REF_ING]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE,
+    stem: 'You want client source IP preserved at the backend for a NodePort/LoadBalancer Service. Set:',
+    options: opts4(
+      'externalTrafficPolicy: Local',
+      'internalTrafficPolicy: Cluster',
+      'sessionAffinity: ClientIP',
+      'publishNotReadyAddresses: true'
+    ),
+    correct: ['a'],
+    explanation: '`externalTrafficPolicy: Local` stops the second hop SNAT so the original client IP reaches the Pod, at the cost of only routing to nodes that host a backend Pod.',
+    references: [REF_SVC]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE,
+    stem: 'A Gateway API HTTPRoute splits 80/20 between two backend Services. The weights are configured under:',
+    options: opts4(
+      'spec.rules[].backendRefs[].weight',
+      'spec.rules[].split',
+      'spec.parentRefs[].weight',
+      'metadata.annotations.traffic-split'
+    ),
+    correct: ['a'],
+    explanation: 'HTTPRoute supports weighted traffic splitting by assigning `weight` to each entry in `backendRefs` within a rule. There is no `split` or `parentRefs.weight` field.',
+    references: [REF_GW]
+  },
+  {
+    domain: NET, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'CoreDNS configuration is stored in which Kubernetes object?',
+    options: opts4(
+      'a ConfigMap named coredns in kube-system',
+      'a Secret named coredns',
+      'a CRD named Corefile',
+      'the kube-dns Service annotations'
+    ),
+    correct: ['a'],
+    explanation: 'CoreDNS reads its `Corefile` from the `coredns` ConfigMap in `kube-system`. Editing that ConfigMap (then restarting CoreDNS) changes DNS behavior.',
+    references: [REF_DNS]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.MULTI,
+    stem: 'Select ALL true statements about NetworkPolicy default behavior.',
+    options: opts4(
+      'With no policies, all Pod traffic is allowed.',
+      'A policy selecting a Pod for Ingress makes that Pod default-deny for non-matching ingress.',
+      'NetworkPolicy requires a CNI that implements it.',
+      'Egress is restricted only if policyTypes includes Egress.'
+    ),
+    correct: ['a', 'b', 'c', 'd'],
+    explanation: 'All four are correct. Pods are non-isolated until a policy selects them; once selected for a direction, only explicitly allowed traffic in that direction is permitted, and enforcement depends on the CNI.',
+    references: [REF_NP]
+  },
+  {
+    domain: NET, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
+    stem: 'A Service named `web` in namespace `prod` is resolvable from another namespace as `web.prod.svc.cluster.local`.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['a'],
+    explanation: 'True. The fully qualified Service DNS name is `<service>.<namespace>.svc.cluster.local`, which resolves from any namespace.',
+    references: [REF_DNS]
+  },
+
+  // ── Storage (+5) ──
+  {
+    domain: STORE, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command lists all PersistentVolumes and their bound claims/status?',
+    options: opts4(
+      'kubectl get pv',
+      'kubectl get volumes',
+      'kubectl describe storage',
+      'kubectl get pvc -A --show-pv'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl get pv` shows each PV with capacity, access modes, reclaim policy, status, and the bound claim. `kubectl get pvc` shows the claim side.',
+    references: [REF_PV]
+  },
+  {
+    domain: STORE, difficulty: 3, type: QType.SINGLE,
+    stem: 'A StatefulSet `db` has 3 replicas with a volumeClaimTemplate. The PVCs created are named:',
+    options: opts4(
+      'data-db-0, data-db-1, data-db-2',
+      'db-pvc-1, db-pvc-2, db-pvc-3',
+      'db-data (one shared PVC)',
+      'pvc-<uuid> randomly'
+    ),
+    correct: ['a'],
+    explanation: 'StatefulSet PVCs from a volumeClaimTemplate are named `<template-name>-<statefulset-name>-<ordinal>`, giving each Pod its own stable PVC.',
+    references: [REF_PV]
+  },
+  {
+    domain: STORE, difficulty: 3, type: QType.SINGLE,
+    stem: 'You expand a PVC by editing `spec.resources.requests.storage` but the new size is not reflected. The MOST likely reason is:',
+    options: opts4(
+      'allowVolumeExpansion is not true on the StorageClass.',
+      'The PVC is ReadWriteOnce.',
+      'The Pod is not labelled.',
+      'reclaimPolicy is Retain.'
+    ),
+    correct: ['a'],
+    explanation: 'Online expansion requires `allowVolumeExpansion: true` on the StorageClass; without it the larger request is rejected/ignored by the provisioner.',
+    references: [REF_SC]
+  },
+  {
+    domain: STORE, difficulty: 3, type: QType.SINGLE,
+    stem: 'A Pod must read a Secret as files at `/etc/creds`. The correct volume type is:',
+    options: opts4(
+      'a secret volume mounted at /etc/creds',
+      'an emptyDir volume',
+      'a hostPath volume',
+      'a downwardAPI volume'
+    ),
+    correct: ['a'],
+    explanation: 'A `secret` volume projects each Secret key as a file under the mount path. `downwardAPI` exposes Pod metadata, not Secret data; emptyDir/hostPath do not source Secret contents.',
+    references: [REF_VOL]
+  },
+  {
+    domain: STORE, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
+    stem: 'A PVC can bind to a PV only if the PV capacity is greater than or equal to the requested size and the access modes are compatible.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['a'],
+    explanation: 'True. Binding requires the PV capacity ≥ the PVC request and the requested access mode to be among the PV access modes (StorageClass must also match if specified).',
+    references: [REF_PV]
+  },
+
+  // ── Troubleshooting (+13) ──
+  {
+    domain: TS, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command shows the node a Pod is scheduled on plus its Pod IP?',
+    options: opts4(
+      'kubectl get pod <pod> -o wide',
+      'kubectl logs <pod>',
+      'kubectl top pod <pod>',
+      'kubectl get pod <pod> --short'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl get pod -o wide` adds NODE, IP, and NOMINATED NODE columns — the quickest way to see placement during triage.',
+    references: [REF_KCTL]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A Pod is `Pending` and describe shows "node(s) didn\'t match Pod\'s node affinity/selector". The fix is:',
+    options: opts4(
+      'Correct the nodeSelector/affinity or label a node to match.',
+      'Increase Pod CPU limits.',
+      'Restart the scheduler.',
+      'Add an imagePullSecret.'
+    ),
+    correct: ['a'],
+    explanation: 'No node satisfies the Pod\'s node affinity/selector. Either relax/fix the constraint or add the required label to a suitable node so the scheduler can place the Pod.',
+    references: [REF_AFFIN]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A container is `CreateContainerConfigError`. `kubectl describe pod` shows "secret \\"db-cred\\" not found". The remediation is:',
+    options: opts4(
+      'Create the missing Secret `db-cred` in the Pod namespace.',
+      'Restart the kubelet.',
+      'Recreate the node.',
+      'Add a liveness probe.'
+    ),
+    correct: ['a'],
+    explanation: 'CreateContainerConfigError commonly means a referenced ConfigMap/Secret is missing. Create `db-cred` in the same namespace; the kubelet then starts the container.',
+    references: [REF_DEBUG]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'You need to test connectivity from inside the cluster to a Service. The quickest approach is:',
+    options: opts4(
+      'kubectl run tmp --rm -it --image=busybox -- wget -qO- http://<svc>:<port>',
+      'curl from your laptop directly to the ClusterIP',
+      'kubectl get svc -o yaml',
+      'ping the Service DNS from the control-plane host'
+    ),
+    correct: ['a'],
+    explanation: 'A throwaway Pod (`kubectl run --rm -it`) tests Service reachability from within the cluster network — ClusterIPs are not routable from outside or from the host.',
+    references: [REF_DEBUG]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE,
+    stem: 'The scheduler Pod is healthy but no Pods are being scheduled cluster-wide. A likely cause to check is:',
+    options: opts4(
+      'All nodes are cordoned/NotReady or tainted so no node is feasible.',
+      'CoreDNS is down.',
+      'kubectl is outdated.',
+      'The dashboard is disabled.'
+    ),
+    correct: ['a'],
+    explanation: 'If every node is cordoned, NotReady, or carries a NoSchedule taint, the scheduler has no feasible node. Check `kubectl get nodes` and node taints/conditions.',
+    references: [REF_DEBUG]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE,
+    stem: 'A node\'s kubelet logs show "failed to run Kubelet: misconfiguration: kubelet cgroup driver: cgroupfs is different from runtime cgroup driver: systemd". The fix is:',
+    options: opts4(
+      'Align kubelet and runtime cgroup drivers (set both to systemd).',
+      'Disable the firewall.',
+      'Reinstall kubectl.',
+      'Delete /var/lib/etcd.'
+    ),
+    correct: ['a'],
+    explanation: 'The kubelet and container runtime must use the same cgroup driver. Set `cgroupDriver: systemd` in the kubelet config and ensure containerd uses `SystemdCgroup = true`, then restart both.',
+    references: [REF_CRI]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A Deployment shows the desired replicas but 0 available, and Pods are `0/1 Running`. The MOST likely cause is:',
+    options: opts4(
+      'The readiness probe is failing so Pods are Running but not Ready.',
+      'The image cannot be pulled.',
+      'etcd is down.',
+      'The Service has no selector.'
+    ),
+    correct: ['a'],
+    explanation: '`0/1 Running` means the container runs but the readiness probe fails, so the Pod is not Ready and not counted as available. Inspect/fix the readiness probe or the app.',
+    references: [REF_DEBUG]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'After a node reboot, its Pods are not rescheduled and the node stays `NotReady`. The first thing to check is:',
+    options: opts4(
+      'Whether the kubelet and container runtime services started on boot (systemctl is-enabled).',
+      'Whether CoreDNS scaled down.',
+      'Whether the Service is ClusterIP.',
+      'Whether kubectl is configured.'
+    ),
+    correct: ['a'],
+    explanation: 'After reboot a NotReady node usually means kubelet/containerd did not start. Verify they are enabled and running (`systemctl status/enable kubelet containerd`).',
+    references: [REF_DEBUG]
+  },
+  {
+    domain: TS, difficulty: 4, type: QType.SINGLE,
+    stem: 'kube-controller-manager is CrashLoopBackOff after editing its static Pod manifest. The fastest way to see the parse/flag error is:',
+    options: opts4(
+      'crictl logs of the controller-manager container on the control-plane node',
+      'kubectl logs -n kube-system deploy/kube-controller-manager',
+      'systemctl status kube-controller-manager',
+      'kubectl rollout status'
+    ),
+    correct: ['a'],
+    explanation: 'It is a static Pod, so use `crictl ps -a` + `crictl logs` (or `/var/log/pods`) on the node. A bad flag/YAML in the manifest is the usual culprit; fix the manifest and the kubelet restarts it.',
+    references: [REF_APISVR]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE,
+    stem: 'A Pod cannot resolve external domains but resolves cluster Services fine. The likely cause is:',
+    options: opts4(
+      'CoreDNS upstream forwarders (or node /etc/resolv.conf) are misconfigured.',
+      'The Pod has no Service.',
+      'kube-proxy is in IPVS mode.',
+      'The image lacks curl.'
+    ),
+    correct: ['a'],
+    explanation: 'Cluster names resolving but external names failing points to CoreDNS upstream forwarding (the `forward` plugin / node resolv.conf) being broken. Fix the upstream resolver configuration.',
+    references: [REF_DNS]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE,
+    stem: 'You must capture a failing Pod\'s describe output and recent events for a ticket. The single best command is:',
+    options: opts4(
+      'kubectl describe pod <pod> -n <ns>',
+      'kubectl get pod <pod> -o name',
+      'kubectl logs <pod> --tail=1',
+      'kubectl top pod <pod>'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl describe pod` consolidates spec status, container states, conditions, and the associated events — the primary first-look troubleshooting command.',
+    references: [REF_DEBUG]
+  },
+  {
+    domain: TS, difficulty: 4, type: QType.MULTI,
+    stem: 'A Pod is stuck in `ImagePullBackOff`. Select ALL valid causes.',
+    options: opts4(
+      'The image name or tag is wrong / does not exist.',
+      'The registry requires auth and no imagePullSecret is set.',
+      'The node cannot reach the registry network.',
+      'The Service selector does not match the Pod.'
+    ),
+    correct: ['a', 'b', 'c'],
+    explanation: 'ImagePullBackOff is purely about pulling the image: wrong name/tag, missing registry credentials, or no network path to the registry. A Service selector mismatch is unrelated to image pulls.',
+    references: [REF_DEBUG]
+  },
+  {
+    domain: TS, difficulty: 2, type: QType.TRUE_FALSE,
+    stem: '`kubectl get events -n <ns>` is useful for diagnosing why a Pod failed to schedule or pull its image.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['a'],
+    explanation: 'True. Scheduling failures, image pull errors, and probe failures are recorded as Events; listing them (sorted by time) is a core triage step alongside `kubectl describe`.',
+    references: [REF_DEBUG]
   }
 ];
 
@@ -885,6 +2025,576 @@ const P3: Q[] = [
     correct: ['a'],
     explanation: 'When the pod has multiple containers, omitting `-c` selects the default, which may not exist by the name kubectl is logging in the error. Specify the container explicitly.',
     references: [REF_KCTL]
+  },
+
+  // ── Cluster Architecture, Installation & Configuration (+11) ──
+  {
+    domain: CLUSTER, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which kubeadm phase command pre-pulls the container images required for the control plane?',
+    options: opts4(
+      'kubeadm config images pull',
+      'kubeadm init --pull-images',
+      'crictl pull kubeadm',
+      'kubectl get images -A'
+    ),
+    correct: ['a'],
+    explanation: '`kubeadm config images pull` downloads the apiserver, controller-manager, scheduler, etcd, and pause images ahead of `kubeadm init` to speed up and de-risk the bootstrap.',
+    references: [REF_KUBEADM]
+  },
+  {
+    domain: CLUSTER, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A ClusterRole aggregation should automatically include rules from labelled ClusterRoles. The mechanism is:',
+    options: opts4(
+      'spec.aggregationRule.clusterRoleSelectors on the aggregate ClusterRole',
+      'metadata.ownerReferences',
+      'a RoleBinding with `aggregate: true`',
+      'the `rbac.authorization.k8s.io/aggregate` Service annotation'
+    ),
+    correct: ['a'],
+    explanation: 'An aggregated ClusterRole uses `aggregationRule.clusterRoleSelectors`; the controller merges rules from any ClusterRole whose labels match. The aggregate role\'s own `rules` are managed by the controller.',
+    references: [REF_RBAC]
+  },
+  {
+    domain: CLUSTER, difficulty: 3, type: QType.SINGLE,
+    stem: 'To rotate a leaked bootstrap token, you should:',
+    options: opts4(
+      'kubeadm token delete <token-id> and create a new one when needed',
+      'restart the apiserver',
+      'rotate the etcd snapshot',
+      'kubectl delete secret kube-proxy'
+    ),
+    correct: ['a'],
+    explanation: 'Bootstrap tokens live as Secrets in kube-system; `kubeadm token delete` revokes a leaked token immediately. Generate a fresh one with `kubeadm token create --print-join-command` only when joining nodes.',
+    references: [REF_KUBEADM]
+  },
+  {
+    domain: CLUSTER, difficulty: 3, type: QType.SINGLE,
+    stem: 'You must change the cluster\'s API server `--audit-log-path`. On a kubeadm cluster you edit:',
+    options: opts4(
+      '/etc/kubernetes/manifests/kube-apiserver.yaml (static Pod manifest)',
+      '/etc/systemd/system/kube-apiserver.service',
+      'the kube-apiserver ConfigMap in kube-system',
+      'kubectl edit deploy kube-apiserver'
+    ),
+    correct: ['a'],
+    explanation: 'apiserver flags are set as container args in its static Pod manifest. After saving, the kubelet recreates the Pod with the new flag. No systemd unit/Deployment/ConfigMap drives it.',
+    references: [REF_APISVR]
+  },
+  {
+    domain: CLUSTER, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which etcdctl command verifies the integrity/metadata of a saved snapshot file?',
+    options: opts4(
+      'ETCDCTL_API=3 etcdctl snapshot status /backup/snap.db',
+      'etcdctl verify snapshot /backup/snap.db',
+      'etcdctl snapshot check',
+      'kubectl get etcd snapshot'
+    ),
+    correct: ['a'],
+    explanation: '`etcdctl snapshot status <file>` prints the snapshot\'s hash, revision, and total keys, confirming it is a valid v3 snapshot before relying on it for restore.',
+    references: [REF_ETCD]
+  },
+  {
+    domain: CLUSTER, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command removes a node cleanly from the cluster after draining it?',
+    options: opts4(
+      'kubectl delete node <node> (then `kubeadm reset` on the node)',
+      'kubectl cordon <node>',
+      'kubeadm token delete <node>',
+      'systemctl stop kubelet only'
+    ),
+    correct: ['a'],
+    explanation: 'After `kubectl drain`, remove the node object with `kubectl delete node`, then run `kubeadm reset` on the host to clean its cluster state and config files.',
+    references: [REF_KUBEADM]
+  },
+  {
+    domain: CLUSTER, difficulty: 4, type: QType.SINGLE,
+    stem: 'A kubeadm `kubeadm join` fails with "couldn\'t validate the identity of the API Server: cluster CA hash ... does not match". The cause is:',
+    options: opts4(
+      'A stale/incorrect --discovery-token-ca-cert-hash on the join command.',
+      'The worker has swap enabled.',
+      'CoreDNS is down.',
+      'The worker kubelet is too new.'
+    ),
+    correct: ['a'],
+    explanation: 'The CA cert hash pins the API server identity during discovery. A mismatched/old hash (e.g. CA rotated) fails validation. Regenerate the join command with `kubeadm token create --print-join-command`.',
+    references: [REF_KUBEADM]
+  },
+  {
+    domain: CLUSTER, difficulty: 3, type: QType.SINGLE,
+    stem: 'You want a Role that allows only `get` and `list` on Secrets in namespace `app`. The apiGroup for Secrets is:',
+    options: opts4(
+      '"" (core/v1, the empty string)',
+      'rbac.authorization.k8s.io',
+      'apps',
+      'policy'
+    ),
+    correct: ['a'],
+    explanation: 'Secrets, ConfigMaps, Pods, and Services are in the core API group, denoted by the empty string `""` in RBAC `apiGroups`.',
+    references: [REF_RBAC]
+  },
+  {
+    domain: CLUSTER, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command displays the cluster API server endpoint kubectl is currently configured to use?',
+    options: opts4(
+      'kubectl cluster-info',
+      'kubectl get apiserver',
+      'kubectl config endpoint',
+      'kubectl version --server-url'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl cluster-info` prints the control-plane (API server) URL and core add-on endpoints, useful for confirming the active context targets the right cluster.',
+    references: [REF_KCTL]
+  },
+  {
+    domain: CLUSTER, difficulty: 3, type: QType.MULTI,
+    stem: 'Select ALL files/dirs kubeadm uses for control-plane state on a control-plane node.',
+    options: opts4(
+      '/etc/kubernetes/manifests (static Pod manifests)',
+      '/etc/kubernetes/pki (cluster certificates)',
+      '/var/lib/etcd (etcd data dir)',
+      '/etc/kubernetes/admin.conf (admin kubeconfig)'
+    ),
+    correct: ['a', 'b', 'c', 'd'],
+    explanation: 'All four are kubeadm-managed: static Pod manifests, the PKI directory, the etcd data directory, and the admin kubeconfig. Knowing these paths is essential for backup/restore and troubleshooting.',
+    references: [REF_KUBEADM, REF_ETCD]
+  },
+  {
+    domain: CLUSTER, difficulty: 2, type: QType.TRUE_FALSE,
+    stem: 'On a kubeadm cluster, etcd serves client requests on port 2379 and peer (replication) traffic on port 2380.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['a'],
+    explanation: 'True. 2379 is the etcd client port (used by the apiserver); 2380 is the peer port for inter-member replication. The apiserver must point at 2379.',
+    references: [REF_ETCD]
+  },
+
+  // ── Workloads and Scheduling (+7) ──
+  {
+    domain: WORK, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command updates the image of container `app` in Deployment `web` imperatively?',
+    options: opts4(
+      'kubectl set image deploy/web app=nginx:1.27',
+      'kubectl update deploy web --image=nginx:1.27',
+      'kubectl patch image deploy web',
+      'kubectl rollout image web nginx:1.27'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl set image deploy/web app=nginx:1.27` triggers a rolling update by changing the container image; `kubectl rollout undo` can revert it.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: WORK, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A node is tainted `node.kubernetes.io/unschedulable:NoSchedule` after `kubectl cordon`. To resume scheduling you run:',
+    options: opts4(
+      'kubectl uncordon <node>',
+      'kubectl taint node <node> node.kubernetes.io/unschedulable-',
+      'kubectl drain <node>',
+      'systemctl restart kubelet'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl uncordon` clears the `Unschedulable` mark so the scheduler can place new Pods again. It is the inverse of `cordon`.',
+    references: [REF_KCTL]
+  },
+  {
+    domain: WORK, difficulty: 3, type: QType.SINGLE,
+    stem: 'A Pod with `restartPolicy: OnFailure` in a Job exits with code 1. The behavior is:',
+    options: opts4(
+      'The container is restarted in place until it succeeds or backoffLimit is reached.',
+      'The Pod is deleted immediately.',
+      'The Job is marked Complete.',
+      'A new node is provisioned.'
+    ),
+    correct: ['a'],
+    explanation: 'With `OnFailure`, the kubelet restarts the failing container in the same Pod. The Job\'s `backoffLimit` caps total retries before the Job is marked Failed.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: WORK, difficulty: 3, type: QType.SINGLE,
+    stem: 'You want a DaemonSet Pod to also run on control-plane nodes. You must add:',
+    options: opts4(
+      'a toleration for the node-role.kubernetes.io/control-plane:NoSchedule taint',
+      'a nodeSelector for control-plane',
+      'hostNetwork: true',
+      'a PriorityClass'
+    ),
+    correct: ['a'],
+    explanation: 'Control-plane nodes carry a NoSchedule taint. A DaemonSet that must cover them needs a matching toleration; the controller still places one Pod per matching node.',
+    references: [REF_DS]
+  },
+  {
+    domain: WORK, difficulty: 3, type: QType.MULTI,
+    stem: 'Select ALL true statements about resource requests and limits.',
+    options: opts4(
+      'Requests influence scheduling (node must have enough allocatable).',
+      'Exceeding a memory limit causes an OOMKill.',
+      'Exceeding a CPU limit throttles the container (not killed).',
+      'A Pod with no requests is rejected by the apiserver.'
+    ),
+    correct: ['a', 'b', 'c'],
+    explanation: 'A Pod without requests/limits is allowed (it becomes BestEffort QoS). Requests drive scheduling, memory-over-limit is OOMKilled, and CPU-over-limit is throttled rather than killed.',
+    references: [REF_RES]
+  },
+  {
+    domain: WORK, difficulty: 4, type: QType.SINGLE,
+    stem: 'A higher-priority Pod cannot schedule due to capacity. With default preemption, the scheduler will:',
+    options: opts4(
+      'evict (preempt) lower-priority Pods on a node to make room',
+      'wait indefinitely',
+      'scale the node group automatically',
+      'reject the Pod permanently'
+    ),
+    correct: ['a'],
+    explanation: 'Preemption lets the scheduler evict lower-priority Pods so a pending higher-priority Pod can be scheduled. Setting `preemptionPolicy: Never` disables this for that PriorityClass.',
+    references: [REF_PRIO]
+  },
+  {
+    domain: WORK, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
+    stem: 'A DaemonSet automatically schedules a Pod on every node added to the cluster that matches its selector.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['a'],
+    explanation: 'True. The DaemonSet controller ensures one matching Pod per eligible node and creates a Pod automatically when a new matching node joins.',
+    references: [REF_DS]
+  },
+
+  // ── Services and Networking (+9) ──
+  {
+    domain: NET, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which object backs a Service\'s list of ready Pod IPs in modern Kubernetes?',
+    options: opts4(
+      'EndpointSlice',
+      'NetworkPolicy',
+      'IngressClass',
+      'ConfigMap'
+    ),
+    correct: ['a'],
+    explanation: 'EndpointSlices (the scalable successor to Endpoints) hold the ready backend addresses for a Service; kube-proxy programs routing from them.',
+    references: [REF_SVC]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'You need pods to reach a Service by short name `redis` within the same namespace. This works because:',
+    options: opts4(
+      'the Pod\'s DNS search list includes <namespace>.svc.cluster.local',
+      'kube-proxy resolves names',
+      'the Service has an ExternalName',
+      'CoreDNS rewrites all queries to localhost'
+    ),
+    correct: ['a'],
+    explanation: 'Pods get a `search` list (e.g. `ns.svc.cluster.local svc.cluster.local cluster.local`) so the unqualified name `redis` resolves to the same-namespace Service.',
+    references: [REF_DNS]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE,
+    stem: 'A NetworkPolicy must allow DNS so Pods can still resolve names under a default-deny egress policy. You should allow egress to:',
+    options: opts4(
+      'kube-system CoreDNS Pods on UDP/TCP 53',
+      'the apiserver on 6443',
+      'all egress on port 80',
+      'the node IP on 10250'
+    ),
+    correct: ['a'],
+    explanation: 'Under default-deny egress you must explicitly permit egress to the CoreDNS Pods (kube-dns) on port 53 UDP/TCP, otherwise name resolution breaks for selected Pods.',
+    references: [REF_NP]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE,
+    stem: 'An Ingress uses host `shop.example.com`. Two Services must be reached at `/` and `/api`. The correct Ingress structure is:',
+    options: opts4(
+      'one rule with host shop.example.com and two paths (/ and /api) each with its backend',
+      'two Ingress objects with the same host but different IngressClass',
+      'a Service of type ExternalName',
+      'a Gateway with no listeners'
+    ),
+    correct: ['a'],
+    explanation: 'A single Ingress rule can host multiple `paths`, each mapping a path to a backend Service/port — the standard fan-out (path-based) routing pattern.',
+    references: [REF_ING]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which field selects which Ingress controller implements a given Ingress object?',
+    options: opts4(
+      'spec.ingressClassName',
+      'metadata.namespace',
+      'spec.rules[].host',
+      'spec.backend.service.name'
+    ),
+    correct: ['a'],
+    explanation: '`spec.ingressClassName` (referencing an IngressClass) tells which controller should program the Ingress. A default IngressClass is used if the field is omitted and one is marked default.',
+    references: [REF_ING]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE,
+    stem: 'A Gateway listener uses `allowedRoutes.namespaces.from: Selector`. This means:',
+    options: opts4(
+      'only Routes in namespaces matching the label selector may attach',
+      'all namespaces may attach',
+      'only the Gateway\'s own namespace may attach',
+      'no Routes may attach'
+    ),
+    correct: ['a'],
+    explanation: '`from: Selector` restricts route attachment to namespaces whose labels match the listener\'s `namespaces.selector`. `Same` limits to the Gateway namespace; `All` allows any.',
+    references: [REF_GW]
+  },
+  {
+    domain: NET, difficulty: 2, type: QType.SINGLE,
+    stem: 'Which command shows the EndpointSlices (backends) for Service `web`?',
+    options: opts4(
+      'kubectl get endpointslices -l kubernetes.io/service-name=web',
+      'kubectl get pods --svc web',
+      'kubectl describe networkpolicy web',
+      'kubectl get ingress web -o endpoints'
+    ),
+    correct: ['a'],
+    explanation: 'EndpointSlices are labelled with `kubernetes.io/service-name`. Filtering by that label lists the slices (and thus the backend IPs) for a Service — handy when a Service has no working endpoints.',
+    references: [REF_SVC]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.MULTI,
+    stem: 'Select ALL true statements about ClusterIP vs NodePort vs LoadBalancer Services.',
+    options: opts4(
+      'NodePort builds on ClusterIP and additionally opens a port on every node.',
+      'LoadBalancer builds on NodePort and provisions an external LB (cloud) or needs MetalLB on bare metal.',
+      'ClusterIP is the default and is internal-only.',
+      'LoadBalancer works out of the box on bare metal with no extra components.'
+    ),
+    correct: ['a', 'b', 'c'],
+    explanation: 'LoadBalancer requires a cloud controller or a bare-metal implementation (MetalLB/kube-vip); it is not automatic on bare metal. The layered ClusterIP→NodePort→LoadBalancer model is otherwise correct.',
+    references: [REF_SVC]
+  },
+  {
+    domain: NET, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
+    stem: 'An Ingress resource has no effect unless an Ingress controller is deployed and running in the cluster.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['a'],
+    explanation: 'True. The Ingress API only declares routing intent; an Ingress controller (ingress-nginx, etc.) must watch and program it for traffic to flow.',
+    references: [REF_ING]
+  },
+
+  // ── Storage (+5) ──
+  {
+    domain: STORE, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command shows why a PVC is stuck Pending?',
+    options: opts4(
+      'kubectl describe pvc <name>',
+      'kubectl logs pvc <name>',
+      'kubectl top pvc <name>',
+      'kubectl get sc --pvc <name>'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl describe pvc` surfaces events such as "no persistent volumes available" or provisioning failures — the first step in diagnosing a Pending claim.',
+    references: [REF_PV]
+  },
+  {
+    domain: STORE, difficulty: 3, type: QType.SINGLE,
+    stem: 'A Pod must use a volume whose lifecycle is tied to the Pod (deleted when the Pod is removed). Use:',
+    options: opts4(
+      'an emptyDir volume',
+      'a PVC with reclaimPolicy Retain',
+      'a hostPath volume',
+      'a static PV'
+    ),
+    correct: ['a'],
+    explanation: '`emptyDir` is created when the Pod is assigned to a node and deleted when the Pod is removed — ephemeral, Pod-scoped storage (e.g. scratch space, sidecar log sharing).',
+    references: [REF_VOL]
+  },
+  {
+    domain: STORE, difficulty: 3, type: QType.SINGLE,
+    stem: 'You set a StorageClass as cluster default but PVCs still fail to provision dynamically. A likely cause is:',
+    options: opts4(
+      'No provisioner/CSI driver is installed for that StorageClass.',
+      'The PVC requested ReadOnlyMany.',
+      'The Pod has no nodeSelector.',
+      'reclaimPolicy is Delete.'
+    ),
+    correct: ['a'],
+    explanation: 'Dynamic provisioning needs a working provisioner (CSI driver/controller) matching the StorageClass `provisioner`. Without it, even a default StorageClass cannot create PVs.',
+    references: [REF_SC]
+  },
+  {
+    domain: STORE, difficulty: 3, type: QType.SINGLE,
+    stem: 'A PV is `Released` (Retain) and you want to reuse the underlying disk for a fresh PVC. The cleanest approach is:',
+    options: opts4(
+      'Delete the PV object and recreate a new PV pointing at the same disk, then bind a new PVC.',
+      'Change the StorageClass.',
+      'Reboot the node.',
+      'Set the PVC to ReadOnlyMany.'
+    ),
+    correct: ['a'],
+    explanation: 'A Retain PV stays Released with a stale claimRef. Either clear the claimRef to make it Available, or delete and recreate the PV referencing the same backing storage, then bind a new PVC.',
+    references: [REF_PV]
+  },
+  {
+    domain: STORE, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
+    stem: 'A StorageClass with `volumeBindingMode: WaitForFirstConsumer` delays PV provisioning until a Pod using the PVC is scheduled.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['a'],
+    explanation: 'True. WaitForFirstConsumer defers binding/provisioning until a consuming Pod is scheduled, enabling topology-aware placement (e.g. for local or zonal volumes).',
+    references: [REF_SC]
+  },
+
+  // ── Troubleshooting (+13) ──
+  {
+    domain: TS, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command lists all Pods across all namespaces with their status?',
+    options: opts4(
+      'kubectl get pods -A',
+      'kubectl get pods --cluster',
+      'kubectl describe pods --all',
+      'kubectl pods list'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl get pods -A` (or `--all-namespaces`) lists every Pod and its phase, the quickest cluster-wide health snapshot during triage.',
+    references: [REF_KCTL]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A Pod is `Evicted` with reason "The node was low on resource: ephemeral-storage". The remediation is:',
+    options: opts4(
+      'Reduce the Pod\'s disk usage / add ephemeral-storage limits, or free node disk.',
+      'Increase the memory request.',
+      'Restart kube-proxy.',
+      'Add a toleration.'
+    ),
+    correct: ['a'],
+    explanation: 'Ephemeral-storage eviction means node disk pressure. Clean node disk, set sensible ephemeral-storage requests/limits, or move logs/scratch to a volume.',
+    references: [REF_DEBUG]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE,
+    stem: 'kube-apiserver logs show "etcdserver: request timed out". The MOST likely root cause is:',
+    options: opts4(
+      'etcd is unhealthy/slow or unreachable from the apiserver.',
+      'kubectl is misconfigured.',
+      'A NetworkPolicy blocks Pods.',
+      'The Service has no endpoints.'
+    ),
+    correct: ['a'],
+    explanation: 'The apiserver depends on etcd; request timeouts point to etcd being down, slow (disk I/O), or network-unreachable. Check the etcd static Pod, disk latency, and `etcdctl endpoint health`.',
+    references: [REF_ETCD]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A Pod cannot reach a Service although endpoints exist. Curling the Pod IP directly works. The likely cause is:',
+    options: opts4(
+      'kube-proxy is not programming Service rules on that node (check its DaemonSet).',
+      'The image is wrong.',
+      'The PVC is Pending.',
+      'CoreDNS scaled to zero.'
+    ),
+    correct: ['a'],
+    explanation: 'Direct Pod IP works but the Service VIP does not → Service routing (iptables/IPVS) is not programmed, typically a kube-proxy failure on that node. Inspect the kube-proxy DaemonSet/logs.',
+    references: [REF_SVC]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'You need the last 50 log lines for container `app` in a multi-container Pod. The command is:',
+    options: opts4(
+      'kubectl logs <pod> -c app --tail=50',
+      'kubectl logs <pod> --all-containers --head=50',
+      'kubectl logs <pod> --previous',
+      'kubectl describe pod <pod> | tail -50'
+    ),
+    correct: ['a'],
+    explanation: 'In a multi-container Pod you must select the container with `-c`; `--tail=50` limits the output to the most recent 50 lines.',
+    references: [REF_LOGS]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE,
+    stem: 'A new Pod stays `Pending` and `kubectl describe` shows "untolerated taint" for a DEDICATED workload node. The intended fix is:',
+    options: opts4(
+      'Add a matching toleration to the Pod so it can land on the dedicated node.',
+      'Remove all taints cluster-wide.',
+      'Restart the scheduler.',
+      'Use hostNetwork.'
+    ),
+    correct: ['a'],
+    explanation: 'For a deliberately tainted dedicated node, the correct fix is to add the matching toleration to Pods that should run there — not to strip the taint, which would defeat node isolation.',
+    references: [REF_TAINT]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A worker shows `Ready` but Pods scheduled there never start (stuck ContainerCreating). `crictl ps` is empty. Check first:',
+    options: opts4(
+      'The container runtime and CNI on that node (crictl info, CNI Pod logs).',
+      'The apiserver audit log.',
+      'kubectl version skew.',
+      'The Ingress controller.'
+    ),
+    correct: ['a'],
+    explanation: 'ContainerCreating with no containers usually means the runtime or CNI cannot set up the sandbox. Inspect `crictl info`, containerd status, and the CNI plugin logs on that node.',
+    references: [REF_CNI]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE,
+    stem: 'After `kubectl apply`, a Deployment is unchanged and kubectl prints "unchanged". You expected a rollout. The likely reason is:',
+    options: opts4(
+      'The applied manifest is identical to the live spec (no diff to trigger a rollout).',
+      'The apiserver is down.',
+      'RBAC denied the apply.',
+      'The namespace is terminating.'
+    ),
+    correct: ['a'],
+    explanation: 'A rollout only happens when the Pod template changes. If `apply` reports "unchanged", the manifest matched the live object; use `kubectl rollout restart` to force a new rollout.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: TS, difficulty: 4, type: QType.SINGLE,
+    stem: 'etcd is up but `kubectl` commands are very slow cluster-wide. A common root cause to investigate is:',
+    options: opts4(
+      'etcd disk latency / fsync performance (slow storage backing /var/lib/etcd).',
+      'kubectl binary version.',
+      'A missing Service selector.',
+      'The Ingress class.'
+    ),
+    correct: ['a'],
+    explanation: 'etcd is highly sensitive to disk fsync latency. Slow disks cause apiserver/etcd latency that manifests as cluster-wide kubectl slowness. Check etcd metrics and move it to faster storage.',
+    references: [REF_ETCD]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE,
+    stem: 'A Job never completes and its Pod is stuck `Pending` with "0/3 nodes are available: insufficient memory". The fix is:',
+    options: opts4(
+      'Lower the Job Pod memory request or add node capacity.',
+      'Increase backoffLimit.',
+      'Set restartPolicy: Always.',
+      'Delete CoreDNS.'
+    ),
+    correct: ['a'],
+    explanation: '"insufficient memory" is a scheduling feasibility problem driven by the Pod\'s memory request vs node allocatable. Reduce the request or add memory capacity.',
+    references: [REF_RES]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'You suspect a control-plane node\'s kubelet client cert expired. The symptom that fits is:',
+    options: opts4(
+      'The node goes NotReady and kubelet logs show TLS/certificate errors talking to the apiserver.',
+      'Pods get more CPU.',
+      'Services lose their cluster IP.',
+      'CoreDNS returns NXDOMAIN for everything.'
+    ),
+    correct: ['a'],
+    explanation: 'An expired kubelet client cert breaks the kubelet→apiserver mTLS, so the node stops heartbeating and goes NotReady with cert errors. Rotate the kubelet cert / re-issue its kubeconfig.',
+    references: [REF_KUBEADM]
+  },
+  {
+    domain: TS, difficulty: 3, type: QType.SINGLE,
+    stem: 'To create an ephemeral debug container in a running Pod (e.g. to get a shell with tools), use:',
+    options: opts4(
+      'kubectl debug -it <pod> --image=busybox --target=<container>',
+      'kubectl exec -it <pod> --add-tools',
+      'kubectl run debug --attach',
+      'kubectl cp tools <pod>:/'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl debug` injects an ephemeral container sharing the target Pod\'s namespaces, useful when the app image lacks a shell or debugging tools. It does not restart the Pod.',
+    references: [REF_DEBUG]
+  },
+  {
+    domain: TS, difficulty: 2, type: QType.TRUE_FALSE,
+    stem: 'A Pod in `CrashLoopBackOff` is repeatedly starting and exiting; the back-off delay between restarts grows over time.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['a'],
+    explanation: 'True. The kubelet applies an exponential back-off (capped) between restarts of a repeatedly failing container, which is why the state is named CrashLoopBackOff.',
+    references: [REF_DEBUG]
   }
 ];
 
@@ -901,21 +2611,21 @@ const CKA_EXAMS: { slug: string; code: string; titleSuffix: string; descriptionS
     slug: 'linuxfoundation-cka-p1',
     code: 'CKA-P1',
     titleSuffix: 'Practice Exam 1',
-    descriptionSuffix: 'Practice exam 1 of 3 — full 120-minute, 20-question, blueprint-weighted set covering kubeadm install, etcd, RBAC, scheduling (taints/affinity/priority), Services & Ingress/Gateway API, NetworkPolicies, PV/PVC/StorageClasses, and the troubleshooting workflows tested by the TGS-2025054612-CKA labs.',
+    descriptionSuffix: 'Practice exam 1 of 3 — full 120-minute, 65-question, blueprint-weighted set covering kubeadm install, etcd, RBAC, scheduling (taints/affinity/priority), Services & Ingress/Gateway API, NetworkPolicies, PV/PVC/StorageClasses, and the troubleshooting workflows tested by the TGS-2025054612-CKA labs.',
     questions: P1
   },
   {
     slug: 'linuxfoundation-cka-p2',
     code: 'CKA-P2',
     titleSuffix: 'Practice Exam 2',
-    descriptionSuffix: 'Practice exam 2 of 3 — a second 120-minute, 20-question, blueprint-weighted set.',
+    descriptionSuffix: 'Practice exam 2 of 3 — a second 120-minute, 65-question, blueprint-weighted set.',
     questions: P2
   },
   {
     slug: 'linuxfoundation-cka-p3',
     code: 'CKA-P3',
     titleSuffix: 'Practice Exam 3',
-    descriptionSuffix: 'Practice exam 3 of 3 — a third 120-minute, 20-question, blueprint-weighted set.',
+    descriptionSuffix: 'Practice exam 3 of 3 — a third 120-minute, 65-question, blueprint-weighted set.',
     questions: P3
   }
 ];

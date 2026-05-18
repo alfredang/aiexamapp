@@ -1,6 +1,6 @@
 /**
  * CKAD bundle seed — vendor, three practice-exam variants, bundle,
- * and 60 blueprint-aligned questions. Idempotent: replaces rows
+ * and 195 blueprint-aligned questions. Idempotent: replaces rows
  * tagged `generatedBy: 'manual:ckad-seed'` and upserts catalog rows.
  *
  * Exported as `seedCkad(db)` so the same code path is reachable from
@@ -331,6 +331,576 @@ const P1: Q[] = [
     correct: ['b'],
     explanation: 'Ingress provides HTTP host- and path-based routing to multiple backend Services through a single ingress controller.',
     references: [REF_ING]
+  },
+
+  // ── Design and Build (+9 → 13) ──
+  {
+    domain: DESIGN, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command generates a Pod manifest to stdout WITHOUT creating the Pod, useful for editing before applying?',
+    options: opts4(
+      'kubectl run nginx --image=nginx --dry-run=client -o yaml',
+      'kubectl create pod nginx --image=nginx --no-apply',
+      'kubectl generate pod nginx --image=nginx',
+      'kubectl run nginx --image=nginx --export'
+    ),
+    correct: ['a'],
+    explanation: '`--dry-run=client -o yaml` renders the manifest locally without contacting the server, the standard recipe for scaffolding a YAML to edit. `--export` was removed and `kubectl generate` does not exist.',
+    references: [REF_PODS]
+  },
+  {
+    domain: DESIGN, difficulty: 3, type: QType.SINGLE,
+    stem: 'A Pod uses the ambassador pattern. What does the ambassador container do?',
+    options: opts4(
+      'Runs the migration before the app starts.',
+      'Proxies outbound network connections (e.g. to a sharded database) so the main container talks only to localhost.',
+      'Transforms the app\'s log format for an external monitoring system.',
+      'Holds the Pod\'s shared volume open.'
+    ),
+    correct: ['b'],
+    explanation: 'The ambassador pattern places a proxy sidecar that brokers connections to external services, letting the main container use a simple localhost endpoint while the ambassador handles discovery/sharding/TLS.',
+    references: [REF_MULTI]
+  },
+  {
+    domain: DESIGN, difficulty: 2, type: QType.TRUE_FALSE,
+    stem: 'A Job with `restartPolicy: Always` is valid in its Pod template.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['b'],
+    explanation: 'Job Pod templates must use `restartPolicy: OnFailure` or `Never`. `Always` is rejected because a Job must be able to reach a terminal completed state.',
+    references: [REF_JOBS]
+  },
+  {
+    domain: DESIGN, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'You want a Job whose Pods are cleaned up automatically 100 seconds after the Job finishes. Which field do you set?',
+    options: opts4(
+      'spec.ttlSecondsAfterFinished: 100',
+      'spec.activeDeadlineSeconds: 100',
+      'spec.backoffLimit: 100',
+      'spec.completions: 100'
+    ),
+    correct: ['a'],
+    explanation: '`ttlSecondsAfterFinished` lets the TTL controller delete a finished Job (and its Pods) after the given seconds. `activeDeadlineSeconds` caps runtime, not cleanup.',
+    references: [REF_JOBS]
+  },
+  {
+    domain: DESIGN, difficulty: 4, type: QType.SINGLE, isTeaser: true,
+    stem: 'A multi-stage Dockerfile copies a compiled binary from a `builder` stage into a minimal final image. The primary benefit is:',
+    options: opts4(
+      'Faster CPU at runtime.',
+      'A smaller final image with no build toolchain, reducing attack surface and pull time.',
+      'Automatic horizontal scaling.',
+      'Built-in liveness probing.'
+    ),
+    correct: ['b'],
+    explanation: 'Multi-stage builds discard compilers and intermediate artifacts, shipping only the runtime artifact. This shrinks the image and removes unneeded tools from the attack surface.',
+    references: [REF_PODS]
+  },
+  {
+    domain: DESIGN, difficulty: 3, type: QType.SINGLE,
+    stem: 'Which Pod field guarantees an init container completes before a sidecar (native sidecar) and the main app start?',
+    options: opts4(
+      'A regular initContainer entry (without restartPolicy) listed before the native sidecar.',
+      'A container in spec.containers with a higher priority.',
+      'spec.terminationGracePeriodSeconds.',
+      'An emptyDir volume.'
+    ),
+    correct: ['a'],
+    explanation: 'Ordinary init containers (no `restartPolicy: Always`) run to completion sequentially before any sidecar or app container starts. Native sidecars are init containers WITH `restartPolicy: Always` and stay running.',
+    references: [REF_INIT]
+  },
+  {
+    domain: DESIGN, difficulty: 3, type: QType.MULTI,
+    stem: 'Select ALL valid reasons to put two containers in the SAME Pod rather than two Pods.',
+    options: opts4(
+      'They must share the same network namespace (localhost) and lifecycle.',
+      'They need to share an emptyDir volume tightly coupled to the app.',
+      'They should scale independently of each other.',
+      'One adapts/proxies for the other (sidecar/adapter/ambassador).'
+    ),
+    correct: ['a', 'b', 'd'],
+    explanation: 'Co-locating is right for tightly coupled helpers sharing network/volumes/lifecycle. If two components must scale independently, they belong in separate Pods/Deployments.',
+    references: [REF_MULTI]
+  },
+  {
+    domain: DESIGN, difficulty: 2, type: QType.SINGLE,
+    stem: 'Which command creates a CronJob that runs `date` every 5 minutes using the busybox image?',
+    options: opts4(
+      'kubectl create cronjob now --image=busybox --schedule="*/5 * * * *" -- date',
+      'kubectl run cronjob now --image=busybox --every=5m -- date',
+      'kubectl create job now --cron="*/5 * * * *" --image=busybox -- date',
+      'kubectl schedule cronjob now --image=busybox -- date'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl create cronjob <name> --image= --schedule="<cron>" -- <cmd>` is the imperative form. The command after `--` becomes the container args.',
+    references: [REF_CRON]
+  },
+  {
+    domain: DESIGN, difficulty: 3, type: QType.SINGLE,
+    stem: 'A container should declare it listens on TCP 8080. Which Pod spec field documents this (and is used by some tooling/probes)?',
+    options: opts4(
+      'spec.containers[].ports: [{ containerPort: 8080 }]',
+      'spec.ports: [{ port: 8080 }]',
+      'spec.containers[].expose: 8080',
+      'metadata.annotations.port: "8080"'
+    ),
+    correct: ['a'],
+    explanation: '`containers[].ports[].containerPort` declares the port the container listens on. It is informational/used by tooling; it does not by itself publish the port externally.',
+    references: [REF_PODS]
+  },
+
+  // ── Deployment (+9 → 13) ──
+  {
+    domain: DEPLOY, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command creates a Deployment named `web` with 3 replicas of `nginx` imperatively?',
+    options: opts4(
+      'kubectl create deployment web --image=nginx --replicas=3',
+      'kubectl run web --image=nginx --replicas=3 --restart=Always',
+      'kubectl deploy web --image=nginx --count=3',
+      'kubectl create deploy web nginx 3'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl create deployment <name> --image= --replicas=` is the imperative form. `kubectl run` no longer creates Deployments.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: DEPLOY, difficulty: 3, type: QType.SINGLE,
+    stem: 'Which command shows the status of an ongoing rollout and blocks until it completes or fails?',
+    options: opts4(
+      'kubectl rollout status deployment/web',
+      'kubectl get rollout web --wait',
+      'kubectl rollout watch deployment/web',
+      'kubectl describe rollout web'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl rollout status deployment/<name>` watches the rollout and exits non-zero if it fails, making it useful in CI gates.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: DEPLOY, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command displays the revision history of Deployment `web`?',
+    options: opts4(
+      'kubectl rollout history deployment/web',
+      'kubectl get revisions deployment/web',
+      'kubectl history deployment web',
+      'kubectl describe deployment web --history'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl rollout history deployment/<name>` lists revisions; add `--revision=N` to see the template of a specific revision.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: DEPLOY, difficulty: 3, type: QType.TRUE_FALSE,
+    stem: 'A Deployment with `progressDeadlineSeconds: 600` will report a `ProgressDeadlineExceeded` condition if the rollout makes no progress within 600 seconds.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['a'],
+    explanation: '`progressDeadlineSeconds` bounds how long a rollout may stall; exceeding it sets the Deployment\'s `Progressing` condition to `False` with reason `ProgressDeadlineExceeded`.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: DEPLOY, difficulty: 3, type: QType.SINGLE,
+    stem: 'You change a Deployment\'s `spec.template` annotation only (no image change). What happens?',
+    options: opts4(
+      'Nothing — only image changes trigger rollouts.',
+      'A new ReplicaSet is created and a rolling update occurs because the Pod template hash changed.',
+      'The Deployment is rejected.',
+      'Existing Pods are patched in place without restart.'
+    ),
+    correct: ['b'],
+    explanation: 'Any change to `spec.template` (including labels/annotations on the Pod template) changes the template hash, creating a new ReplicaSet and triggering a rolling update.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: DEPLOY, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command applies all YAML manifests in a directory recursively?',
+    options: opts4(
+      'kubectl apply -f ./manifests/ -R',
+      'kubectl apply --dir ./manifests/',
+      'kubectl create -r ./manifests/',
+      'kubectl apply -f ./manifests/ --all'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl apply -f <dir> -R` (or `--recursive`) walks subdirectories applying every manifest found.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: DEPLOY, difficulty: 4, type: QType.SINGLE,
+    stem: 'A Deployment has `minReadySeconds: 20`. During a rolling update, a new Pod becomes Ready. When is it counted as available?',
+    options: opts4(
+      'Immediately when Ready.',
+      'Only after it has been Ready for 20 continuous seconds.',
+      'After 20 seconds regardless of Ready state.',
+      'Never — minReadySeconds blocks the rollout.'
+    ),
+    correct: ['b'],
+    explanation: '`minReadySeconds` requires a Pod to stay Ready for that duration before it is considered available, slowing rollouts so flapping Pods are not counted as healthy.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: DEPLOY, difficulty: 3, type: QType.SINGLE,
+    stem: 'Helm: which command upgrades a release `myapp` with a new chart version and overridden value `replicaCount=4`?',
+    options: opts4(
+      'helm upgrade myapp ./chart --set replicaCount=4',
+      'helm update myapp --replicas=4',
+      'helm install myapp ./chart --upgrade --replicaCount 4',
+      'helm patch myapp replicaCount=4'
+    ),
+    correct: ['a'],
+    explanation: '`helm upgrade <release> <chart> --set key=value` upgrades an existing release with overrides. `--set` overrides values inline; `-f` supplies a values file.',
+    references: [REF_HELM]
+  },
+  {
+    domain: DEPLOY, difficulty: 3, type: QType.SINGLE,
+    stem: 'Kustomize: which kubectl command applies a kustomization in the current directory?',
+    options: opts4(
+      'kubectl apply -k .',
+      'kubectl kustomize apply .',
+      'kubectl apply --kustomize-build .',
+      'kubectl apply -f kustomization.yaml'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl apply -k <dir>` builds the kustomization (base + overlays/patches) and applies the result. `kubectl kustomize <dir>` only renders to stdout.',
+    references: [REF_DEPLOY]
+  },
+
+  // ── Observability and Maintenance (+7 → 10) ──
+  {
+    domain: OBSERV, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which probe should you use to delay traffic to a Pod until it has loaded its cache, WITHOUT restarting the container if loading is slow?',
+    options: opts4(
+      'livenessProbe',
+      'readinessProbe',
+      'startupProbe',
+      'A preStop hook'
+    ),
+    correct: ['b'],
+    explanation: 'Readiness gates Service traffic without restarting the container. Liveness restarts on failure; startupProbe protects slow boots from liveness but does not itself gate Service endpoints the way readiness does.',
+    references: [REF_PROBES]
+  },
+  {
+    domain: OBSERV, difficulty: 3, type: QType.SINGLE,
+    stem: 'A probe has `initialDelaySeconds: 10`. What does this configure?',
+    options: opts4(
+      'How long the kubelet waits after container start before the FIRST probe.',
+      'The interval between probes.',
+      'How long to wait for a probe response before timing out.',
+      'Number of failures before action.'
+    ),
+    correct: ['a'],
+    explanation: '`initialDelaySeconds` delays the first probe after the container starts. `periodSeconds` is the interval, `timeoutSeconds` the per-probe timeout, `failureThreshold` the failure count.',
+    references: [REF_PROBES]
+  },
+  {
+    domain: OBSERV, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A container is OOMKilled. Where is this most directly visible?',
+    options: opts4(
+      'kubectl describe pod — the last state shows Terminated with reason OOMKilled.',
+      'kubectl get svc',
+      'kubectl top nodes only',
+      'It is never reported anywhere.'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl describe pod` shows the container\'s Last State as `Terminated` with reason `OOMKilled` and exit code 137 when the kernel OOM killer reaped it for exceeding its memory limit.',
+    references: [REF_RES]
+  },
+  {
+    domain: OBSERV, difficulty: 3, type: QType.SINGLE,
+    stem: 'Which command opens an interactive shell in a running Pod\'s `app` container?',
+    options: opts4(
+      'kubectl exec -it <pod> -c app -- /bin/sh',
+      'kubectl shell <pod>/app',
+      'kubectl run -it <pod> -c app -- sh',
+      'kubectl attach <pod> -c app --tty'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl exec -it <pod> -c <container> -- <shell>` runs a command in an existing container. `kubectl attach` attaches to the main process\'s stdio, not a new shell.',
+    references: [REF_LOGS]
+  },
+  {
+    domain: OBSERV, difficulty: 4, type: QType.SINGLE,
+    stem: 'A distroless container has no shell, so `kubectl exec -- sh` fails. Which feature lets you attach a debugging container to the running Pod?',
+    options: opts4(
+      'kubectl debug <pod> --image=busybox --target=app (ephemeral container)',
+      'kubectl exec --force <pod>',
+      'kubectl cp a shell into the Pod',
+      'kubectl logs --debug <pod>'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl debug` injects an ephemeral container sharing the target container\'s namespaces, letting you troubleshoot images that lack a shell or tools.',
+    references: [REF_PODS]
+  },
+  {
+    domain: OBSERV, difficulty: 2, type: QType.TRUE_FALSE,
+    stem: '`kubectl logs --previous <pod>` retrieves logs from the previous terminated instance of a container that has restarted.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['a'],
+    explanation: '`--previous` (`-p`) returns the logs of the prior container instance, essential for diagnosing a container that crashed and was restarted.',
+    references: [REF_LOGS]
+  },
+  {
+    domain: OBSERV, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command shows per-Pod CPU/memory for Pods in ALL namespaces (metrics-server installed)?',
+    options: opts4(
+      'kubectl top pods -A',
+      'kubectl top pods --all',
+      'kubectl get pods -o wide --metrics',
+      'kubectl metrics pods --all-namespaces'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl top pods -A` (or `--all-namespaces`) lists resource usage across every namespace from the Metrics API.',
+    references: [REF_LOGS]
+  },
+
+  // ── Environment, Configuration and Security (+11 → 16) ──
+  {
+    domain: CONFIG, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'You need to inject only the `DB_HOST` key of ConfigMap `db-cfg` as env var `DATABASE_HOST`. Which snippet is correct?',
+    options: opts4(
+      'env: [{ name: DATABASE_HOST, valueFrom: { configMapKeyRef: { name: db-cfg, key: DB_HOST } } }]',
+      'envFrom: [{ configMapRef: { name: db-cfg, key: DB_HOST } }]',
+      'env: [{ name: DATABASE_HOST, value: db-cfg/DB_HOST }]',
+      'env: [{ configMap: { db-cfg: DB_HOST } }]'
+    ),
+    correct: ['a'],
+    explanation: '`env[].valueFrom.configMapKeyRef` selects a single key and lets you rename it via the env var `name`. `envFrom` imports ALL keys and cannot select one key.',
+    references: [REF_CM]
+  },
+  {
+    domain: CONFIG, difficulty: 3, type: QType.SINGLE,
+    stem: 'Which command creates a ConfigMap from an existing file `app.properties` keeping the filename as the key?',
+    options: opts4(
+      'kubectl create configmap app --from-file=app.properties',
+      'kubectl create configmap app --from-literal=app.properties',
+      'kubectl create configmap app --file app.properties',
+      'kubectl set configmap app app.properties'
+    ),
+    correct: ['a'],
+    explanation: '`--from-file=<file>` stores the file content under a key named after the file. `--from-file=key=path` lets you choose a different key name.',
+    references: [REF_CM]
+  },
+  {
+    domain: CONFIG, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A Secret should be mounted so each key becomes a file under `/etc/creds`. Which volume mount is correct?',
+    options: opts4(
+      'A volume of type `secret` referencing the Secret, mounted at /etc/creds.',
+      'envFrom.secretRef pointed at /etc/creds.',
+      'A configMap volume.',
+      'hostPath: /etc/creds.'
+    ),
+    correct: ['a'],
+    explanation: 'A `secret` volume projects each Secret key as a file under the mountPath. `envFrom`/`secretKeyRef` inject env vars, not files.',
+    references: [REF_SEC]
+  },
+  {
+    domain: CONFIG, difficulty: 4, type: QType.SINGLE,
+    stem: 'A container sets `securityContext.readOnlyRootFilesystem: true` and the app needs to write temp files. The correct fix is:',
+    options: opts4(
+      'Set readOnlyRootFilesystem: false (defeats the hardening).',
+      'Mount an emptyDir volume at the app\'s temp/writable path.',
+      'Run the container as root.',
+      'Add a livenessProbe.'
+    ),
+    correct: ['b'],
+    explanation: 'Keep the root filesystem read-only for hardening and provide writable scratch space by mounting a writable volume (e.g. emptyDir) at the path the app writes to.',
+    references: [REF_SCTX]
+  },
+  {
+    domain: CONFIG, difficulty: 3, type: QType.SINGLE,
+    stem: 'Which `securityContext` setting drops all Linux capabilities and adds back only `NET_BIND_SERVICE`?',
+    options: opts4(
+      'capabilities: { drop: ["ALL"], add: ["NET_BIND_SERVICE"] }',
+      'privileged: false, netBind: true',
+      'capabilities: { remove: "*", grant: "NET_BIND_SERVICE" }',
+      'runAsUser: 0, capAdd: NET_BIND_SERVICE'
+    ),
+    correct: ['a'],
+    explanation: 'Container `securityContext.capabilities` uses `drop` and `add` lists. Dropping `ALL` then adding only what is needed follows least-privilege.',
+    references: [REF_SCTX]
+  },
+  {
+    domain: CONFIG, difficulty: 3, type: QType.TRUE_FALSE,
+    stem: 'Setting `automountServiceAccountToken: false` on a Pod or ServiceAccount prevents the API token from being mounted into the Pod.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['a'],
+    explanation: 'Disabling automount stops the default ServiceAccount token projection, reducing the blast radius for Pods that never call the Kubernetes API.',
+    references: [REF_SA]
+  },
+  {
+    domain: CONFIG, difficulty: 3, type: QType.SINGLE,
+    stem: 'A container needs the Pod\'s own name available as an env var. Which mechanism provides this?',
+    options: opts4(
+      'The Downward API via fieldRef: metadata.name',
+      'A ConfigMap auto-created per Pod',
+      'A Secret named after the Pod',
+      'spec.hostname only'
+    ),
+    correct: ['a'],
+    explanation: 'The Downward API exposes Pod metadata (name, namespace, labels, resource limits) to containers via `env[].valueFrom.fieldRef` or a downwardAPI volume.',
+    references: [REF_CM]
+  },
+  {
+    domain: CONFIG, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command creates a TLS Secret from cert and key files?',
+    options: opts4(
+      'kubectl create secret tls my-tls --cert=tls.crt --key=tls.key',
+      'kubectl create secret generic my-tls --tls --cert tls.crt',
+      'kubectl create tls my-tls tls.crt tls.key',
+      'kubectl create secret my-tls --type=tls'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl create secret tls <name> --cert= --key=` produces a `kubernetes.io/tls` Secret containing `tls.crt` and `tls.key`, suitable for Ingress TLS.',
+    references: [REF_SEC]
+  },
+  {
+    domain: CONFIG, difficulty: 4, type: QType.MULTI,
+    stem: 'Select ALL true statements about resource requests and limits.',
+    options: opts4(
+      'Scheduling decisions are based on requests, not limits.',
+      'A container exceeding its memory limit is OOMKilled.',
+      'A container exceeding its CPU limit is OOMKilled.',
+      'If requests == limits for all resources, the Pod gets the Guaranteed QoS class.'
+    ),
+    correct: ['a', 'b', 'd'],
+    explanation: 'CPU is compressible: exceeding the CPU limit causes throttling, NOT OOMKill. Memory is incompressible: exceeding the memory limit triggers OOMKill. Requests drive scheduling and QoS classification.',
+    references: [REF_RES]
+  },
+  {
+    domain: CONFIG, difficulty: 3, type: QType.SINGLE,
+    stem: 'A Pod needs an emptyDir that lives in RAM (tmpfs) for fast scratch I/O. Which spec achieves this?',
+    options: opts4(
+      'volumes: [{ name: cache, emptyDir: { medium: Memory } }]',
+      'volumes: [{ name: cache, emptyDir: { type: tmpfs } }]',
+      'volumes: [{ name: cache, ramDisk: {} }]',
+      'volumes: [{ name: cache, hostPath: { path: /dev/shm } }]'
+    ),
+    correct: ['a'],
+    explanation: '`emptyDir.medium: Memory` backs the volume with tmpfs (RAM). It counts against the container\'s memory limit and is cleared when the Pod is removed.',
+    references: [REF_PV]
+  },
+  {
+    domain: CONFIG, difficulty: 3, type: QType.SINGLE,
+    stem: 'You want a PVC of 5Gi that is dynamically provisioned by the `fast-ssd` StorageClass. Which fields are required on the PVC?',
+    options: opts4(
+      'spec.storageClassName: fast-ssd, spec.accessModes, spec.resources.requests.storage: 5Gi',
+      'spec.volumeName: fast-ssd only',
+      'spec.capacity.storage: 5Gi only',
+      'spec.provisioner: fast-ssd'
+    ),
+    correct: ['a'],
+    explanation: 'A dynamically provisioned PVC needs a `storageClassName`, `accessModes`, and a storage request. `provisioner` is a StorageClass field, and `capacity` is a PV field.',
+    references: [REF_PV]
+  },
+
+  // ── Services and Networking (+9 → 13) ──
+  {
+    domain: NET, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command exposes Deployment `web` as a ClusterIP Service on port 80 targeting container port 8080?',
+    options: opts4(
+      'kubectl expose deployment web --port=80 --target-port=8080',
+      'kubectl service create web --port=80 --container=8080',
+      'kubectl expose deployment web --listen=80 --forward=8080',
+      'kubectl create svc web 80:8080'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl expose deployment <name> --port= --target-port=` creates a Service (ClusterIP by default) whose `port` is the Service port and `targetPort` the container port.',
+    references: [REF_SVC]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A headless Service has `clusterIP: None`. What is its effect for a backing StatefulSet?',
+    options: opts4(
+      'It load-balances over a single virtual IP.',
+      'DNS returns the individual Pod IPs (and per-Pod DNS names) instead of one virtual IP.',
+      'It blocks all traffic.',
+      'It exposes the Service on every node.'
+    ),
+    correct: ['b'],
+    explanation: 'A headless Service (`clusterIP: None`) skips the virtual IP; DNS returns the Pod A records directly, enabling per-Pod addressing for StatefulSets.',
+    references: [REF_SVC]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE,
+    stem: 'A Service maps `port: 80` to `targetPort: http`. What must the Pod define for this to resolve?',
+    options: opts4(
+      'A named container port `http` in containers[].ports.',
+      'An env var named http.',
+      'A label http=true.',
+      'An annotation port/http.'
+    ),
+    correct: ['a'],
+    explanation: 'A string `targetPort` references a container port by its `name`. The Pod must declare `ports: [{ name: http, containerPort: <n> }]` so the Service can resolve it.',
+    references: [REF_SVC]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.TRUE_FALSE,
+    stem: 'A NetworkPolicy that specifies an `egress` rule restricts only outbound traffic from the selected Pods and does not by itself affect inbound traffic.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['a'],
+    explanation: 'Ingress and egress are independent in a NetworkPolicy. Declaring `policyTypes: [Egress]` with egress rules constrains outbound traffic only; ingress remains governed by other policies (or default-allow).',
+    references: [REF_NP]
+  },
+  {
+    domain: NET, difficulty: 4, type: QType.SINGLE,
+    stem: 'Two NetworkPolicies select the same Pod: one allows ingress from `app=a`, another from `app=b`. The effective ingress allow set is:',
+    options: opts4(
+      'Only app=a (first policy wins).',
+      'The UNION — traffic from app=a OR app=b is allowed.',
+      'The intersection — only Pods that are both app=a and app=b.',
+      'Nothing — conflicting policies deny all.'
+    ),
+    correct: ['b'],
+    explanation: 'NetworkPolicies are additive. When multiple policies select a Pod, the allowed traffic is the union of all their rules; there is no deny rule and no precedence.',
+    references: [REF_NP]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE,
+    stem: 'An Ingress needs path `/v2` to route to `api-v2:80`. Which `pathType` matches `/v2` and `/v2/users` but NOT `/v20`?',
+    options: opts4(
+      'Exact',
+      'Prefix',
+      'ImplementationSpecific',
+      'Regex'
+    ),
+    correct: ['b'],
+    explanation: '`pathType: Prefix` matches by URL path SEGMENTS, so `/v2` matches `/v2` and `/v2/users` but not `/v20`. `Exact` matches only `/v2` literally.',
+    references: [REF_ING]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE,
+    stem: 'A client Pod cannot resolve `web.default.svc.cluster.local`. Which component is responsible for in-cluster Service DNS?',
+    options: opts4(
+      'CoreDNS (the cluster DNS add-on)',
+      'kube-proxy',
+      'The Ingress controller',
+      'etcd'
+    ),
+    correct: ['a'],
+    explanation: 'CoreDNS serves cluster DNS, resolving Service and Pod names. kube-proxy programs the data path (iptables/IPVS) but does not answer DNS queries.',
+    references: [REF_SVC]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE,
+    stem: 'A Service of type LoadBalancer in a cloud cluster also implicitly allocates which other Service primitives?',
+    options: opts4(
+      'A ClusterIP and a NodePort, in addition to the external LB.',
+      'Only an ExternalName.',
+      'Nothing else; just the LB.',
+      'An Ingress object.'
+    ),
+    correct: ['a'],
+    explanation: 'A LoadBalancer Service is layered on top of NodePort and ClusterIP: it gets a ClusterIP, a NodePort on each node, and the cloud LB forwards to the NodePort.',
+    references: [REF_SVC]
+  },
+  {
+    domain: NET, difficulty: 4, type: QType.MULTI,
+    stem: 'Select ALL true statements about Services and selectors.',
+    options: opts4(
+      'A Service with no selector will not auto-populate Endpoints; you can manage Endpoints/EndpointSlices manually.',
+      'sessionAffinity: ClientIP pins a client to the same backend Pod.',
+      'A Service selector must match the Deployment\'s name.',
+      'Removing the only Ready Pod leaves the Service with zero endpoints, so connections fail.'
+    ),
+    correct: ['a', 'b', 'd'],
+    explanation: 'Selectors match Pod LABELS, not Deployment names. Selector-less Services support manual Endpoints. `sessionAffinity: ClientIP` provides client stickiness. No Ready Pods means no endpoints and failed connections.',
+    references: [REF_SVC]
   }
 ];
 
@@ -604,6 +1174,576 @@ const P2: Q[] = [
     correct: ['d'],
     explanation: 'ExternalName Services return a CNAME to an external host in cluster DNS — no proxying, no IP allocation.',
     references: [REF_SVC]
+  },
+
+  // ── Design and Build (+9 → 13) ──
+  {
+    domain: DESIGN, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command runs a one-off Pod that prints text and is removed automatically when it exits?',
+    options: opts4(
+      'kubectl run tmp --image=busybox --restart=Never --rm -it -- echo hi',
+      'kubectl create pod tmp --image=busybox --once',
+      'kubectl run tmp --image=busybox --ephemeral -- echo hi',
+      'kubectl exec tmp --image=busybox -- echo hi'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl run ... --restart=Never --rm -it -- <cmd>` runs a throwaway Pod attached to your terminal and deletes it on exit, ideal for quick checks.',
+    references: [REF_PODS]
+  },
+  {
+    domain: DESIGN, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'The adapter multi-container pattern is best described as:',
+    options: opts4(
+      'A container that runs before the app to set up state.',
+      'A sidecar that transforms the main container\'s output into a standardized format for external consumers (e.g. metrics).',
+      'A proxy for outbound connections.',
+      'A container that holds a shared volume.'
+    ),
+    correct: ['b'],
+    explanation: 'The adapter normalizes/translates the main container\'s output (logs, metrics) into a format an external system expects, without modifying the app.',
+    references: [REF_MULTI]
+  },
+  {
+    domain: DESIGN, difficulty: 3, type: QType.TRUE_FALSE,
+    stem: 'A native sidecar is defined as an init container with `restartPolicy: Always` and keeps running alongside the main app containers.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['a'],
+    explanation: 'Native sidecars (stable since Kubernetes 1.29) are init containers with `restartPolicy: Always`; they start before app containers and continue running for the Pod\'s lifetime.',
+    references: [REF_INIT]
+  },
+  {
+    domain: DESIGN, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A Job must abort if it runs longer than 5 minutes regardless of retries. Which field enforces this?',
+    options: opts4(
+      'spec.activeDeadlineSeconds: 300',
+      'spec.backoffLimit: 300',
+      'spec.ttlSecondsAfterFinished: 300',
+      'spec.completions: 300'
+    ),
+    correct: ['a'],
+    explanation: '`activeDeadlineSeconds` is a hard wall-clock cap on the Job; once exceeded the Job is terminated and marked failed, overriding remaining retries.',
+    references: [REF_JOBS]
+  },
+  {
+    domain: DESIGN, difficulty: 2, type: QType.SINGLE,
+    stem: 'In a Pod spec, which field sets the command run by the container, overriding the image\'s ENTRYPOINT?',
+    options: opts4(
+      'spec.containers[].command',
+      'spec.containers[].entrypoint',
+      'spec.command',
+      'spec.containers[].run'
+    ),
+    correct: ['a'],
+    explanation: 'In Kubernetes, `containers[].command` overrides the image ENTRYPOINT and `containers[].args` overrides CMD.',
+    references: [REF_PODS]
+  },
+  {
+    domain: DESIGN, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'An indexed Job (`completionMode: Indexed`) with `completions: 3` gives each Pod:',
+    options: opts4(
+      'A unique completion index (0,1,2) via the JOB_COMPLETION_INDEX env var.',
+      'The same index 0.',
+      'A random UUID only.',
+      'No way to distinguish Pods.'
+    ),
+    correct: ['a'],
+    explanation: 'Indexed Jobs assign each Pod a unique index 0..completions-1, exposed via `JOB_COMPLETION_INDEX`, enabling static work partitioning.',
+    references: [REF_JOBS]
+  },
+  {
+    domain: DESIGN, difficulty: 3, type: QType.MULTI,
+    stem: 'Select ALL true statements about init containers vs sidecars.',
+    options: opts4(
+      'A plain init container must finish before the next container starts.',
+      'A native sidecar starts before app containers but does not block them by needing to complete.',
+      'Init containers and app containers always start at the same time.',
+      'Init containers can use a different image than the app container.'
+    ),
+    correct: ['a', 'b', 'd'],
+    explanation: 'Plain init containers run to completion sequentially; native sidecars (restartPolicy Always) start early but stay running. App containers do NOT start simultaneously with init containers. Each container can use any image.',
+    references: [REF_INIT]
+  },
+  {
+    domain: DESIGN, difficulty: 2, type: QType.SINGLE,
+    stem: 'Which Dockerfile instruction declares a default command that is easily overridden by `docker run <img> <args>`?',
+    options: opts4(
+      'CMD',
+      'ENTRYPOINT (exec form)',
+      'RUN',
+      'LABEL'
+    ),
+    correct: ['a'],
+    explanation: '`CMD` provides default arguments that are replaced entirely when the user passes a command to `docker run`. `ENTRYPOINT` is harder to override (requires `--entrypoint`).',
+    references: [REF_PODS]
+  },
+  {
+    domain: DESIGN, difficulty: 4, type: QType.SINGLE,
+    stem: 'A Pod\'s init container writes a config file to a shared emptyDir; the app container reads it. If the init container fails repeatedly, the app container:',
+    options: opts4(
+      'Starts anyway and reads a stale file.',
+      'Never starts — the Pod stays in Init:Error/CrashLoopBackOff until the init container succeeds.',
+      'Is scheduled to another node.',
+      'Is converted into a Job.'
+    ),
+    correct: ['b'],
+    explanation: 'App containers do not start until ALL init containers succeed. A persistently failing init container keeps the Pod in an Init phase and the app never runs.',
+    references: [REF_INIT]
+  },
+
+  // ── Deployment (+9 → 13) ──
+  {
+    domain: DEPLOY, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command records the previous and current config for a Deployment so you can diff before applying?',
+    options: opts4(
+      'kubectl diff -f deployment.yaml',
+      'kubectl apply --preview -f deployment.yaml',
+      'kubectl compare deployment.yaml',
+      'kubectl rollout diff deployment/web'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl diff -f <file>` shows what `kubectl apply` would change by comparing the manifest against the live cluster state.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: DEPLOY, difficulty: 3, type: QType.SINGLE,
+    stem: 'A Deployment selector is `matchLabels: {app: web}` but the Pod template labels are `{app: api}`. What happens on apply?',
+    options: opts4(
+      'It works; labels are advisory.',
+      'The Deployment is rejected/invalid because the selector must match the template labels.',
+      'A Service is auto-created.',
+      'It silently scales to zero.'
+    ),
+    correct: ['b'],
+    explanation: 'A Deployment\'s `spec.selector` must match the Pod template labels; a mismatch is a validation error and the object is rejected.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: DEPLOY, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'You ran `kubectl rollout undo deployment/web` but need to go to revision 2 specifically. Which command?',
+    options: opts4(
+      'kubectl rollout undo deployment/web --to-revision=2',
+      'kubectl rollout undo deployment/web -r 2',
+      'kubectl rollback deployment/web 2',
+      'kubectl set revision deployment/web 2'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl rollout undo deployment/<name> --to-revision=N` rolls back to a specific revision listed by `kubectl rollout history`.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: DEPLOY, difficulty: 3, type: QType.TRUE_FALSE,
+    stem: 'Scaling a Deployment with `kubectl scale` creates a new ReplicaSet revision.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['b'],
+    explanation: 'Scaling only changes the replica count on the existing ReplicaSet; it does NOT alter the Pod template, so no new revision is created. Only `spec.template` changes create revisions.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: DEPLOY, difficulty: 3, type: QType.SINGLE,
+    stem: 'A Deployment is stuck: new Pods are `Pending` due to insufficient memory and old Pods still serve traffic. With `maxUnavailable: 0`, the rollout:',
+    options: opts4(
+      'Forces old Pods down to make room.',
+      'Stalls — old Pods stay up (no downtime) until new Pods can be scheduled or the progress deadline triggers.',
+      'Deletes the Deployment.',
+      'Switches to Recreate automatically.'
+    ),
+    correct: ['b'],
+    explanation: 'With `maxUnavailable: 0`, the controller will not remove old Pods until replacements are Ready. If new Pods cannot schedule, the rollout stalls safely and may report ProgressDeadlineExceeded.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: DEPLOY, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command edits a live Deployment in your default editor and applies on save?',
+    options: opts4(
+      'kubectl edit deployment/web',
+      'kubectl modify deployment web',
+      'kubectl patch deployment web --editor',
+      'kubectl update deployment web'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl edit <resource>/<name>` opens the live object in `$EDITOR`; saving applies the change via a patch.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: DEPLOY, difficulty: 4, type: QType.SINGLE,
+    stem: 'A Deployment owns ReplicaSet `web-abc` (current) and `web-def` (old, 0 replicas). You delete ReplicaSet `web-abc` directly. What happens?',
+    options: opts4(
+      'The Deployment recreates a matching ReplicaSet and its Pods to reconcile desired state.',
+      'The Deployment is deleted too.',
+      'Nothing — the Pods keep running orphaned.',
+      'The old ReplicaSet web-def is promoted with the new image.'
+    ),
+    correct: ['a'],
+    explanation: 'The Deployment controller continuously reconciles; deleting its active ReplicaSet causes it to create a new ReplicaSet from the current template and restore the desired Pods.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: DEPLOY, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'Helm: which command lists the currently installed releases in a namespace?',
+    options: opts4(
+      'helm list -n <namespace>',
+      'helm get releases',
+      'helm ps -n <namespace>',
+      'helm show releases'
+    ),
+    correct: ['a'],
+    explanation: '`helm list` (alias `helm ls`) shows installed releases; `-n` scopes to a namespace, `-A` lists across all namespaces.',
+    references: [REF_HELM]
+  },
+  {
+    domain: DEPLOY, difficulty: 3, type: QType.SINGLE,
+    stem: 'Helm: which command renders a chart\'s templates locally without installing, to inspect the resulting manifests?',
+    options: opts4(
+      'helm template ./mychart',
+      'helm render ./mychart',
+      'helm install ./mychart --dry-only',
+      'helm build ./mychart'
+    ),
+    correct: ['a'],
+    explanation: '`helm template <chart>` renders manifests to stdout with values substituted, without touching the cluster. `helm install --dry-run` requires a cluster connection.',
+    references: [REF_HELM]
+  },
+
+  // ── Observability and Maintenance (+7 → 10) ──
+  {
+    domain: OBSERV, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command shows a Pod\'s recent Events plus container statuses for troubleshooting?',
+    options: opts4(
+      'kubectl describe pod <pod>',
+      'kubectl logs <pod> --events',
+      'kubectl get pod <pod> -o events',
+      'kubectl inspect pod <pod>'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl describe pod` shows container state, restart counts, conditions, and the Events section — the first stop for diagnosing scheduling/start failures.',
+    references: [REF_LOGS]
+  },
+  {
+    domain: OBSERV, difficulty: 3, type: QType.SINGLE,
+    stem: 'A readiness probe uses `periodSeconds: 5`, `successThreshold: 1`, `failureThreshold: 3`. After the Pod becomes unready, how many consecutive successful probes return it to Ready?',
+    options: opts4(
+      '1',
+      '3',
+      '5',
+      'It never returns automatically.'
+    ),
+    correct: ['a'],
+    explanation: '`successThreshold` for readiness defaults to 1; a single success flips the Pod back to Ready. `failureThreshold` (3) is how many failures mark it unready.',
+    references: [REF_PROBES]
+  },
+  {
+    domain: OBSERV, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'An exec probe command returns exit code 0. The probe is considered:',
+    options: opts4(
+      'Successful',
+      'Failed',
+      'Unknown',
+      'Timed out'
+    ),
+    correct: ['a'],
+    explanation: 'An exec probe succeeds when the command exits 0; any non-zero exit is a failure. httpGet succeeds on 2xx/3xx; tcpSocket succeeds if the connection opens.',
+    references: [REF_PROBES]
+  },
+  {
+    domain: OBSERV, difficulty: 4, type: QType.SINGLE,
+    stem: 'A container restarts every ~40s. `kubectl describe pod` shows Last State Terminated, Reason Error, Exit Code 1, and a livenessProbe with periodSeconds 10 failureThreshold 3. The MOST likely root cause to investigate first is:',
+    options: opts4(
+      'The Service selector.',
+      'The application itself exiting/crashing (exit code 1) or failing its liveness endpoint — check kubectl logs --previous.',
+      'A NetworkPolicy.',
+      'The node\'s disk pressure.'
+    ),
+    correct: ['b'],
+    explanation: 'Reason `Error` with exit code 1 plus a ~30s liveness window points to the app crashing or failing its health endpoint. `kubectl logs --previous` reveals the crash output.',
+    references: [REF_PROBES]
+  },
+  {
+    domain: OBSERV, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
+    stem: 'A failing readiness probe causes the kubelet to restart the container.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['b'],
+    explanation: 'Readiness only removes the Pod from Service endpoints; it never restarts the container. Liveness probe failures are what trigger restarts.',
+    references: [REF_PROBES]
+  },
+  {
+    domain: OBSERV, difficulty: 3, type: QType.SINGLE,
+    stem: 'Which command streams logs from the last 1 hour for a Pod and keeps following new lines?',
+    options: opts4(
+      'kubectl logs <pod> --since=1h -f',
+      'kubectl logs <pod> --last=1h --stream',
+      'kubectl logs <pod> -t 1h',
+      'kubectl logs <pod> --range=1h --watch'
+    ),
+    correct: ['a'],
+    explanation: '`--since=1h` limits to the last hour and `-f` follows. `--tail=N` instead limits to the last N lines.',
+    references: [REF_LOGS]
+  },
+  {
+    domain: OBSERV, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A Pod is stuck `Pending`. `kubectl describe pod` shows a FailedScheduling event "0/3 nodes available: insufficient cpu". The fix that does NOT require new nodes is:',
+    options: opts4(
+      'Lower the Pod\'s CPU request so it fits an existing node.',
+      'Add a livenessProbe.',
+      'Change the Service type.',
+      'Increase replicas.'
+    ),
+    correct: ['a'],
+    explanation: 'Insufficient CPU at scheduling means the Pod\'s CPU REQUEST exceeds any node\'s allocatable. Reducing the request (or freeing capacity) lets the scheduler place it without adding nodes.',
+    references: [REF_RES]
+  },
+
+  // ── Environment, Configuration and Security (+11 → 16) ──
+  {
+    domain: CONFIG, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A Secret\'s value should be consumed as an env var WITHOUT the value appearing in the Pod manifest. Which is correct?',
+    options: opts4(
+      'env: [{ name: PW, valueFrom: { secretKeyRef: { name: db, key: password } } }]',
+      'env: [{ name: PW, value: "{{secret:db.password}}" }]',
+      'env: [{ name: PW, configMapKeyRef: { name: db, key: password } }]',
+      'envFrom: [{ value: db/password }]'
+    ),
+    correct: ['a'],
+    explanation: '`env[].valueFrom.secretKeyRef` references a Secret key by name; the literal value stays in the Secret, not the Pod spec.',
+    references: [REF_SEC]
+  },
+  {
+    domain: CONFIG, difficulty: 3, type: QType.SINGLE,
+    stem: 'A Pod must run with supplemental group 3000 added to its processes for shared-volume access. Which field?',
+    options: opts4(
+      'spec.securityContext.fsGroup or supplementalGroups',
+      'spec.containers[].user',
+      'spec.serviceAccountName',
+      'metadata.labels.group'
+    ),
+    correct: ['a'],
+    explanation: 'Pod-level `securityContext.fsGroup` sets a supplemental group that owns mounted volumes; `supplementalGroups` adds extra GIDs to the container processes.',
+    references: [REF_SCTX]
+  },
+  {
+    domain: CONFIG, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command creates a docker-registry pull Secret?',
+    options: opts4(
+      'kubectl create secret docker-registry regcred --docker-server=... --docker-username=... --docker-password=...',
+      'kubectl create secret generic regcred --type=docker',
+      'kubectl create registry-secret regcred',
+      'kubectl create secret tls regcred --registry'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl create secret docker-registry` produces a `kubernetes.io/dockerconfigjson` Secret for pulling from private registries via `imagePullSecrets`.',
+    references: [REF_SEC]
+  },
+  {
+    domain: CONFIG, difficulty: 4, type: QType.SINGLE,
+    stem: 'A Pod sets `runAsNonRoot: true` but the image\'s default user is root (UID 0) and no `runAsUser` is set. What happens at start?',
+    options: opts4(
+      'The container starts as root anyway.',
+      'The kubelet refuses to start the container (CreateContainerConfigError) because it would run as root.',
+      'Kubernetes auto-assigns UID 1000.',
+      'The Pod is OOMKilled.'
+    ),
+    correct: ['b'],
+    explanation: '`runAsNonRoot: true` makes the kubelet validate the effective user is non-root at start. If the image would run as UID 0, container creation fails rather than running privileged.',
+    references: [REF_SCTX]
+  },
+  {
+    domain: CONFIG, difficulty: 3, type: QType.SINGLE,
+    stem: 'Which command attaches an existing ConfigMap\'s keys to a Deployment\'s Pods as env vars via imperative patch is impractical; instead the recommended approach is:',
+    options: opts4(
+      'Add `envFrom: [{ configMapRef: { name: <cm> } }]` to the Deployment\'s container spec and apply.',
+      'Set the keys as Pod annotations.',
+      'Create a Service pointing at the ConfigMap.',
+      'Mount the ConfigMap as a Secret.'
+    ),
+    correct: ['a'],
+    explanation: 'Declaratively adding `envFrom.configMapRef` to the container projects every ConfigMap key as an env var; editing the Deployment template triggers a rollout so Pods pick it up.',
+    references: [REF_CM]
+  },
+  {
+    domain: CONFIG, difficulty: 3, type: QType.TRUE_FALSE,
+    stem: 'Environment variables injected from a ConfigMap update automatically in a running container when the ConfigMap changes.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['b'],
+    explanation: 'Env vars are evaluated only at container start. ConfigMap/Secret changes reflect live ONLY for volume mounts; env-var consumers need a Pod restart.',
+    references: [REF_CM]
+  },
+  {
+    domain: CONFIG, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A Pod needs its memory limit exposed to the app as an env var. Which Downward API ref is correct?',
+    options: opts4(
+      'valueFrom: { resourceFieldRef: { containerName: app, resource: limits.memory } }',
+      'valueFrom: { fieldRef: { fieldPath: spec.memory } }',
+      'valueFrom: { configMapKeyRef: { name: limits } }',
+      'value: $(MEMORY_LIMIT)'
+    ),
+    correct: ['a'],
+    explanation: 'The Downward API exposes resource requests/limits via `resourceFieldRef` (e.g. `limits.memory`, `requests.cpu`), letting apps self-tune (e.g. JVM heap).',
+    references: [REF_RES]
+  },
+  {
+    domain: CONFIG, difficulty: 3, type: QType.SINGLE,
+    stem: 'A ServiceAccount `reader` needs read access to ConfigMaps in namespace `app`. Minimal RBAC is:',
+    options: opts4(
+      'A Role with rules [verbs: get,list,watch; resources: configmaps] plus a RoleBinding to the SA.',
+      'A ClusterRoleBinding granting cluster-admin.',
+      'Add the SA to the system:masters group.',
+      'Set the Pod privileged.'
+    ),
+    correct: ['a'],
+    explanation: 'Least privilege: a namespaced Role limited to `get/list/watch` on `configmaps`, bound to the SA via a RoleBinding in that namespace.',
+    references: [REF_SA]
+  },
+  {
+    domain: CONFIG, difficulty: 4, type: QType.MULTI,
+    stem: 'Select ALL true statements about ConfigMaps and Secrets.',
+    options: opts4(
+      'Both can be mounted as volumes or injected as env vars.',
+      'A Secret\'s data values are base64-encoded in the manifest.',
+      'A ConfigMap can store binary data via the binaryData field.',
+      'Secrets are encrypted at rest by default without any extra configuration.'
+    ),
+    correct: ['a', 'b', 'c'],
+    explanation: 'ConfigMaps/Secrets both support volume and env consumption; Secret `data` is base64; ConfigMaps support `binaryData`. Encryption at rest requires explicit EncryptionConfiguration — it is NOT on by default.',
+    references: [REF_SEC, REF_CM]
+  },
+  {
+    domain: CONFIG, difficulty: 3, type: QType.SINGLE,
+    stem: 'A PVC is `Pending` with event "no persistent volumes available for this claim and no storage class is set". The fix is:',
+    options: opts4(
+      'Set a valid storageClassName (or create a matching PV) so the claim can bind/provision.',
+      'Increase the Pod\'s CPU limit.',
+      'Add a readiness probe.',
+      'Recreate the Service.'
+    ),
+    correct: ['a'],
+    explanation: 'A PVC with no StorageClass and no matching static PV cannot bind. Specifying a StorageClass enables dynamic provisioning, or an admin must create a matching PV.',
+    references: [REF_PV]
+  },
+  {
+    domain: CONFIG, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A container should NOT be able to gain more privileges than its parent process. Which setting enforces this?',
+    options: opts4(
+      'securityContext.allowPrivilegeEscalation: false',
+      'securityContext.privileged: true',
+      'securityContext.runAsUser: 0',
+      'hostPID: true'
+    ),
+    correct: ['a'],
+    explanation: '`allowPrivilegeEscalation: false` sets the no_new_privs flag so setuid binaries cannot elevate privileges beyond the container process.',
+    references: [REF_SCTX]
+  },
+
+  // ── Services and Networking (+9 → 13) ──
+  {
+    domain: NET, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'From a Pod in namespace `team-a`, what is the shortest name that resolves Service `cache` in the SAME namespace?',
+    options: opts4(
+      'cache',
+      'cache.team-a',
+      'cache.svc',
+      'cache.cluster.local'
+    ),
+    correct: ['a'],
+    explanation: 'Within the same namespace the bare Service name `cache` resolves via the search domain. The FQDN is `cache.team-a.svc.cluster.local`.',
+    references: [REF_SVC]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE,
+    stem: 'A Service uses `externalTrafficPolicy: Local` on a NodePort. The effect is:',
+    options: opts4(
+      'Traffic is only routed to Pods on the node that received it, preserving the client source IP.',
+      'All traffic is dropped.',
+      'Traffic is duplicated to every Pod.',
+      'The Service becomes ClusterIP.'
+    ),
+    correct: ['a'],
+    explanation: '`externalTrafficPolicy: Local` avoids the extra SNAT hop, preserving the client source IP but only forwarding to local Pods (nodes without a Pod return no endpoints).',
+    references: [REF_SVC]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A NetworkPolicy allows DNS egress. Which rule typically permits Pods to resolve names?',
+    options: opts4(
+      'egress to kube-system namespace / kube-dns Pods on UDP and TCP port 53',
+      'egress to 0.0.0.0/0 port 443',
+      'ingress from port 53',
+      'egress to the API server on 6443'
+    ),
+    correct: ['a'],
+    explanation: 'When a default-deny egress policy is in place, you must explicitly allow egress to the cluster DNS (CoreDNS/kube-dns) on port 53 (UDP and TCP) or name resolution breaks.',
+    references: [REF_NP]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.TRUE_FALSE,
+    stem: 'An Ingress resource requires a running Ingress controller to actually route traffic.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['a'],
+    explanation: 'The Ingress object only declares routing intent; an Ingress controller (e.g. ingress-nginx) must be deployed to watch Ingress objects and implement the routing.',
+    references: [REF_ING]
+  },
+  {
+    domain: NET, difficulty: 4, type: QType.SINGLE,
+    stem: 'A Service\'s `targetPort` is omitted entirely. What value does Kubernetes use?',
+    options: opts4(
+      'It defaults to the same value as `port`.',
+      'It defaults to 0 and the Service fails.',
+      'It defaults to 80.',
+      'The Service is rejected.'
+    ),
+    correct: ['a'],
+    explanation: 'When `targetPort` is not specified it defaults to the value of `port`; the Service forwards Service-port traffic to the same numeric container port.',
+    references: [REF_SVC]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'You need pod-to-pod traffic blocked by default in namespace `secure`, allowing only explicitly permitted flows. The baseline policy is:',
+    options: opts4(
+      'A NetworkPolicy with podSelector: {} and policyTypes: [Ingress, Egress] with no rules (default-deny), then add allow policies.',
+      'A LoadBalancer Service.',
+      'Set hostNetwork: true on all Pods.',
+      'Delete CoreDNS.'
+    ),
+    correct: ['a'],
+    explanation: 'A default-deny policy selecting all Pods with empty Ingress/Egress rule sets establishes a deny baseline; additive allow policies then open required paths (including DNS).',
+    references: [REF_NP]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE,
+    stem: 'An Ingress has `spec.ingressClassName: nginx`. Its purpose is:',
+    options: opts4(
+      'To select which Ingress controller handles this Ingress.',
+      'To set the TLS cipher suite.',
+      'To name the backend Service.',
+      'To define the URL path.'
+    ),
+    correct: ['a'],
+    explanation: '`ingressClassName` binds the Ingress to a specific IngressClass/controller, important in clusters running multiple Ingress controllers.',
+    references: [REF_ING]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A Service `web` has endpoints but `curl web` from another Pod times out, while `curl <podIP>` works. The MOST likely cause is:',
+    options: opts4(
+      'A NetworkPolicy or DNS issue (the Service name/IP path is blocked or unresolved), not the Pods themselves.',
+      'The Pods are down.',
+      'The image is wrong.',
+      'The Deployment has zero replicas.'
+    ),
+    correct: ['a'],
+    explanation: 'Direct Pod IP working but Service name failing isolates the problem to DNS resolution or a NetworkPolicy blocking the ClusterIP/DNS path — the Pods are healthy.',
+    references: [REF_NP]
+  },
+  {
+    domain: NET, difficulty: 4, type: QType.MULTI,
+    stem: 'Select ALL true statements about Ingress.',
+    options: opts4(
+      'A single Ingress can fan out multiple hostnames to different Services.',
+      'TLS termination can be configured via spec.tls with a kubernetes.io/tls Secret.',
+      'Ingress natively load-balances raw TCP/UDP for arbitrary protocols.',
+      'pathType Prefix matches by path segments.'
+    ),
+    correct: ['a', 'b', 'd'],
+    explanation: 'Ingress is HTTP/HTTPS layer-7 routing — it does not natively handle arbitrary TCP/UDP (use a Service of type LoadBalancer/NodePort for that). It supports host fan-out, TLS termination, and prefix path matching.',
+    references: [REF_ING]
   }
 ];
 
@@ -877,6 +2017,576 @@ const P3: Q[] = [
     correct: ['b'],
     explanation: 'Cross-namespace selection requires BOTH a namespaceSelector (to match the source namespace) AND a podSelector (to match the source Pods). Option A would match only Pods in the same namespace.',
     references: [REF_NP]
+  },
+
+  // ── Design and Build (+9 → 13) ──
+  {
+    domain: DESIGN, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command adds a label `tier=backend` to an existing Pod `api`?',
+    options: opts4(
+      'kubectl label pod api tier=backend',
+      'kubectl set label pod/api tier=backend',
+      'kubectl annotate pod api tier=backend',
+      'kubectl edit pod api --label tier=backend'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl label <resource> <name> key=value` adds/updates a label. Use `key-` to remove a label and `--overwrite` to change an existing one.',
+    references: [REF_PODS]
+  },
+  {
+    domain: DESIGN, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A workload needs exactly one Pod per node for a node-local agent. Which controller is designed for this?',
+    options: opts4(
+      'Deployment',
+      'DaemonSet',
+      'Job',
+      'StatefulSet'
+    ),
+    correct: ['b'],
+    explanation: 'A DaemonSet ensures one Pod per (matching) node — used for log shippers, node exporters, and CNI agents. Deployments do not pin one Pod per node.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: DESIGN, difficulty: 3, type: QType.TRUE_FALSE,
+    stem: 'Containers in the same Pod can communicate over localhost because they share the Pod\'s network namespace.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['a'],
+    explanation: 'All containers in a Pod share one network namespace and IP, so they reach each other via `localhost`/127.0.0.1 and must not bind the same port.',
+    references: [REF_PODS]
+  },
+  {
+    domain: DESIGN, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A CronJob keeps too many old Jobs around. Which fields cap retained finished Jobs?',
+    options: opts4(
+      'spec.successfulJobsHistoryLimit and spec.failedJobsHistoryLimit',
+      'spec.backoffLimit and spec.completions',
+      'spec.ttlSeconds and spec.maxJobs',
+      'spec.concurrencyPolicy only'
+    ),
+    correct: ['a'],
+    explanation: 'CronJob `successfulJobsHistoryLimit` (default 3) and `failedJobsHistoryLimit` (default 1) bound how many finished Jobs are retained for inspection.',
+    references: [REF_CRON]
+  },
+  {
+    domain: DESIGN, difficulty: 2, type: QType.SINGLE,
+    stem: 'Which Pod spec field passes ARGS to the container, overriding the image CMD but not the ENTRYPOINT?',
+    options: opts4(
+      'spec.containers[].args',
+      'spec.containers[].command',
+      'spec.args',
+      'spec.containers[].cmd'
+    ),
+    correct: ['a'],
+    explanation: '`containers[].args` overrides the image CMD (the default arguments) while leaving the ENTRYPOINT intact. `containers[].command` overrides ENTRYPOINT.',
+    references: [REF_PODS]
+  },
+  {
+    domain: DESIGN, difficulty: 4, type: QType.SINGLE,
+    stem: 'A Pod has containers A and B sharing an emptyDir. A writes a ready file then exits 0; B waits for it. With `restartPolicy: Always`, what happens to A?',
+    options: opts4(
+      'A is restarted repeatedly even though it succeeded, because Always restarts on any exit.',
+      'A is never restarted.',
+      'The whole Pod is deleted.',
+      'A is converted to an init container.'
+    ),
+    correct: ['a'],
+    explanation: 'With `restartPolicy: Always`, the kubelet restarts a container that exits regardless of exit code. A short-lived setup step belongs in an init container, not a sidecar with Always.',
+    references: [REF_PODS]
+  },
+  {
+    domain: DESIGN, difficulty: 3, type: QType.MULTI,
+    stem: 'Select ALL true statements about Jobs.',
+    options: opts4(
+      'parallelism controls how many Pods may run at once.',
+      'completions sets how many successful Pods are required.',
+      'A Job Pod template may use restartPolicy: Always.',
+      'backoffLimit caps failed retries before the Job is marked Failed.'
+    ),
+    correct: ['a', 'b', 'd'],
+    explanation: 'Job Pod templates must use `OnFailure` or `Never` (never `Always`). `parallelism`/`completions` shape concurrency and required successes; `backoffLimit` bounds retries.',
+    references: [REF_JOBS]
+  },
+  {
+    domain: DESIGN, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which Dockerfile instruction is best for declaring a writable data location decoupled from the image layers?',
+    options: opts4(
+      'VOLUME /data',
+      'MOUNT /data',
+      'STORAGE /data',
+      'PERSIST /data'
+    ),
+    correct: ['a'],
+    explanation: '`VOLUME` declares a mount point whose contents live outside the image\'s union filesystem. In Kubernetes you typically supply that path via a Pod volume (emptyDir/PVC).',
+    references: [REF_PODS]
+  },
+  {
+    domain: DESIGN, difficulty: 3, type: QType.SINGLE,
+    stem: 'A Pod must be scheduled only onto nodes labelled `disktype=ssd`. The simplest mechanism is:',
+    options: opts4(
+      'spec.nodeSelector: { disktype: ssd }',
+      'A NetworkPolicy',
+      'A readinessProbe',
+      'spec.serviceAccountName'
+    ),
+    correct: ['a'],
+    explanation: '`nodeSelector` is the simplest node-constraint: the Pod schedules only on nodes carrying all the specified labels. Affinity offers richer expressions.',
+    references: [REF_PODS]
+  },
+
+  // ── Deployment (+9 → 13) ──
+  {
+    domain: DEPLOY, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command outputs a Deployment manifest without creating it, to save to a file?',
+    options: opts4(
+      'kubectl create deployment web --image=nginx --dry-run=client -o yaml',
+      'kubectl create deployment web --image=nginx --no-create',
+      'kubectl get deployment web -o yaml --template',
+      'kubectl deploy web --image=nginx --export'
+    ),
+    correct: ['a'],
+    explanation: '`--dry-run=client -o yaml` renders the manifest client-side without contacting the API server, the standard scaffold-then-edit workflow.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: DEPLOY, difficulty: 3, type: QType.SINGLE,
+    stem: 'A Deployment\'s old ReplicaSets are piling up consuming etcd. The field to reduce retention is:',
+    options: opts4(
+      'spec.revisionHistoryLimit',
+      'spec.replicas',
+      'spec.minReadySeconds',
+      'spec.progressDeadlineSeconds'
+    ),
+    correct: ['a'],
+    explanation: 'Lowering `revisionHistoryLimit` reduces how many old ReplicaSets are kept (default 10). Fewer revisions means less clutter but fewer rollback targets.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: DEPLOY, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command annotates a Deployment with a change-cause so it appears in rollout history?',
+    options: opts4(
+      'kubectl annotate deployment/web kubernetes.io/change-cause="bump to 1.27"',
+      'kubectl set cause deployment/web "bump to 1.27"',
+      'kubectl rollout cause deployment/web --msg="bump"',
+      'kubectl label deployment/web change-cause=bump'
+    ),
+    correct: ['a'],
+    explanation: 'The `kubernetes.io/change-cause` annotation populates the CHANGE-CAUSE column in `kubectl rollout history`, documenting why each revision was created.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: DEPLOY, difficulty: 3, type: QType.TRUE_FALSE,
+    stem: 'With RollingUpdate, `maxSurge` and `maxUnavailable` cannot both be 0.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['a'],
+    explanation: 'If both are 0 the rollout can neither create an extra Pod nor drop an existing one, so it could never make progress; Kubernetes rejects that combination.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: DEPLOY, difficulty: 4, type: QType.SINGLE,
+    stem: 'You set `kubectl rollout pause deployment/web`, then change the image twice, then `kubectl rollout resume`. How many new ReplicaSets/rollouts occur?',
+    options: opts4(
+      'One — the paused state batches the changes; resuming rolls out the final template once.',
+      'Two — one rollout per image change.',
+      'Zero — pause cancels changes.',
+      'Three.'
+    ),
+    correct: ['a'],
+    explanation: 'While paused, the Deployment accumulates spec changes without rolling out. Resuming performs a single rollout to the latest template, enabling staged multi-edit canaries.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: DEPLOY, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command deletes all resources defined in a manifest file?',
+    options: opts4(
+      'kubectl delete -f app.yaml',
+      'kubectl remove -f app.yaml',
+      'kubectl destroy -f app.yaml',
+      'kubectl apply -f app.yaml --delete'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl delete -f <file>` removes every object the manifest declares, useful for tearing down a declaratively created app.',
+    references: [REF_DEPLOY]
+  },
+  {
+    domain: DEPLOY, difficulty: 3, type: QType.SINGLE,
+    stem: 'Helm: which command rolls a release back to a previous revision?',
+    options: opts4(
+      'helm rollback <release> <revision>',
+      'helm undo <release>',
+      'helm revert <release> --to <revision>',
+      'helm upgrade <release> --rollback'
+    ),
+    correct: ['a'],
+    explanation: '`helm rollback <release> <revision>` reverts a release to a prior revision recorded in its history (`helm history <release>` lists them).',
+    references: [REF_HELM]
+  },
+  {
+    domain: DEPLOY, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'In a Helm chart, where do default configurable parameters live?',
+    options: opts4(
+      'values.yaml',
+      'Chart.yaml',
+      'templates/_helpers.tpl',
+      'requirements.lock'
+    ),
+    correct: ['a'],
+    explanation: '`values.yaml` holds default values referenced by templates via `.Values`; users override them with `--set` or `-f`. `Chart.yaml` holds chart metadata.',
+    references: [REF_HELM]
+  },
+  {
+    domain: DEPLOY, difficulty: 3, type: QType.SINGLE,
+    stem: 'A Kustomize overlay needs to change the image tag of the base for the prod environment. Which kustomization field does this cleanly?',
+    options: opts4(
+      'images: [{ name: myapp, newTag: v2 }]',
+      'patchesJson6902 only',
+      'configMapGenerator',
+      'namePrefix'
+    ),
+    correct: ['a'],
+    explanation: 'Kustomize\'s `images` transformer overrides image name/tag/digest without a manual patch, a common base-vs-overlay pattern.',
+    references: [REF_DEPLOY]
+  },
+
+  // ── Observability and Maintenance (+7 → 10) ──
+  {
+    domain: OBSERV, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command shows which node a Pod is running on and its Pod IP?',
+    options: opts4(
+      'kubectl get pod <pod> -o wide',
+      'kubectl describe node <pod>',
+      'kubectl get pod <pod> --node',
+      'kubectl top pod <pod>'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl get pod -o wide` adds NODE, IP, NOMINATED NODE columns — quick context for scheduling/networking diagnosis.',
+    references: [REF_LOGS]
+  },
+  {
+    domain: OBSERV, difficulty: 3, type: QType.SINGLE,
+    stem: 'A liveness httpGet probe returns HTTP 500. The kubelet treats this as:',
+    options: opts4(
+      'A failure (only 2xx/3xx are success).',
+      'A success (any response means alive).',
+      'Unknown until timeout.',
+      'A readiness signal only.'
+    ),
+    correct: ['a'],
+    explanation: 'httpGet probes succeed only on status codes 200–399. A 4xx/5xx counts as a failure toward `failureThreshold`.',
+    references: [REF_PROBES]
+  },
+  {
+    domain: OBSERV, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'You need to copy a log file out of a running Pod\'s container to your machine. Which command?',
+    options: opts4(
+      'kubectl cp <namespace>/<pod>:/var/log/app.log ./app.log',
+      'kubectl scp <pod>:/var/log/app.log .',
+      'kubectl logs <pod> > app.log only works for stdout',
+      'kubectl get file <pod>:/var/log/app.log'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl cp` copies files between a container and the local filesystem (it requires `tar` in the container). It is the way to retrieve files not written to stdout.',
+    references: [REF_LOGS]
+  },
+  {
+    domain: OBSERV, difficulty: 4, type: QType.MULTI,
+    stem: 'Select ALL correct probe-tuning statements for a slow-starting app.',
+    options: opts4(
+      'A startupProbe with a generous failureThreshold × periodSeconds protects boot from liveness kills.',
+      'Once the startupProbe succeeds, liveness and readiness probes begin.',
+      'initialDelaySeconds on liveness can also mitigate slow starts but is less precise than a startupProbe.',
+      'A startupProbe runs for the entire Pod lifetime.'
+    ),
+    correct: ['a', 'b', 'c'],
+    explanation: 'startupProbe runs only until it first succeeds, then hands off to liveness/readiness. A long startup budget is its purpose; `initialDelaySeconds` is a coarser alternative.',
+    references: [REF_PROBES]
+  },
+  {
+    domain: OBSERV, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
+    stem: '`kubectl top` requires a metrics provider (e.g. metrics-server) to be installed in the cluster.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['a'],
+    explanation: '`kubectl top` reads the Metrics API; without metrics-server (or an equivalent) it errors with "Metrics API not available".',
+    references: [REF_LOGS]
+  },
+  {
+    domain: OBSERV, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A Pod shows STATUS `ImagePullBackOff`. The first command to confirm the cause is:',
+    options: opts4(
+      'kubectl describe pod <pod> (read the Events for the pull error/auth failure)',
+      'kubectl logs <pod>',
+      'kubectl top pod <pod>',
+      'kubectl exec <pod> -- sh'
+    ),
+    correct: ['a'],
+    explanation: 'There are no logs for a container that never started. `kubectl describe pod` Events show the exact pull error: wrong tag, missing image, or registry auth failure.',
+    references: [REF_LOGS]
+  },
+  {
+    domain: OBSERV, difficulty: 3, type: QType.SINGLE,
+    stem: 'A Pod terminated with exit code 137. This typically indicates:',
+    options: opts4(
+      'The process was killed by SIGKILL (often the OOM killer or a failed graceful shutdown).',
+      'A successful completion.',
+      'A configuration parse error.',
+      'A DNS failure.'
+    ),
+    correct: ['a'],
+    explanation: 'Exit code 137 = 128 + 9 (SIGKILL). Common causes are an OOMKill (memory limit exceeded) or termination after the grace period elapsed.',
+    references: [REF_RES]
+  },
+
+  // ── Environment, Configuration and Security (+11 → 16) ──
+  {
+    domain: CONFIG, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A specific Secret key `tls.key` should be projected to file path `keys/server.key` with mode 0400. Which volume config?',
+    options: opts4(
+      'secret: { secretName: s, items: [{ key: tls.key, path: keys/server.key, mode: 0400 }] }',
+      'secret: { secretName: s, file: keys/server.key }',
+      'configMap: { name: s, key: tls.key }',
+      'secret: { secretName: s, env: tls.key }'
+    ),
+    correct: ['a'],
+    explanation: 'A secret volume\'s `items` lets you select specific keys, set the in-Pod relative `path`, and per-file `mode` permissions.',
+    references: [REF_SEC]
+  },
+  {
+    domain: CONFIG, difficulty: 3, type: QType.SINGLE,
+    stem: 'A Pod must run with seccomp profile RuntimeDefault. Which field sets this?',
+    options: opts4(
+      'spec.securityContext.seccompProfile.type: RuntimeDefault',
+      'spec.containers[].seccomp: default',
+      'metadata.annotations.seccomp: runtime/default',
+      'spec.runtimeClassName: seccomp'
+    ),
+    correct: ['a'],
+    explanation: 'The modern field is `securityContext.seccompProfile.type` (RuntimeDefault or Localhost). The old annotation form is deprecated/removed.',
+    references: [REF_SCTX]
+  },
+  {
+    domain: CONFIG, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command updates an existing ConfigMap key idempotently from a manifest?',
+    options: opts4(
+      'kubectl apply -f configmap.yaml',
+      'kubectl create configmap --update',
+      'kubectl set configmap -f configmap.yaml',
+      'kubectl patch configmap --from-file'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl apply -f` is the declarative, idempotent path: it creates the ConfigMap if absent and patches changed keys if present.',
+    references: [REF_CM]
+  },
+  {
+    domain: CONFIG, difficulty: 4, type: QType.SINGLE,
+    stem: 'A container needs the NET_ADMIN capability but the cluster enforces the Baseline Pod Security Standard. The likely outcome is:',
+    options: opts4(
+      'The Pod is rejected/denied by the namespace\'s Pod Security admission because NET_ADMIN is disallowed under Baseline/Restricted.',
+      'It works with no restriction.',
+      'Kubernetes silently drops only that capability and continues.',
+      'It forces privileged mode automatically.'
+    ),
+    correct: ['a'],
+    explanation: 'Pod Security admission Baseline/Restricted profiles forbid adding most capabilities (only a small set is allowed). A Pod requesting NET_ADMIN is rejected in an enforcing namespace.',
+    references: [REF_SCTX]
+  },
+  {
+    domain: CONFIG, difficulty: 3, type: QType.SINGLE,
+    stem: 'A Pod should disable mounting the default ServiceAccount token. Which Pod field?',
+    options: opts4(
+      'spec.automountServiceAccountToken: false',
+      'spec.serviceAccountName: none',
+      'spec.containers[].mountToken: false',
+      'metadata.annotations.token: disabled'
+    ),
+    correct: ['a'],
+    explanation: 'Setting `automountServiceAccountToken: false` at the Pod (or ServiceAccount) level stops projecting the API token, reducing exposure for Pods that never call the API.',
+    references: [REF_SA]
+  },
+  {
+    domain: CONFIG, difficulty: 3, type: QType.TRUE_FALSE,
+    stem: 'A ConfigMap mounted as a volume reflects updates in the container\'s filesystem after the kubelet sync, but subPath mounts do NOT receive updates.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['a'],
+    explanation: 'Whole-volume ConfigMap mounts update on sync, but a `subPath` mount is resolved once at start and is NOT updated when the ConfigMap changes.',
+    references: [REF_CM]
+  },
+  {
+    domain: CONFIG, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A Pod requests `memory: 256Mi` and limits `memory: 256Mi`, and CPU request==limit. Its QoS class is:',
+    options: opts4(
+      'Guaranteed',
+      'Burstable',
+      'BestEffort',
+      'Critical'
+    ),
+    correct: ['a'],
+    explanation: 'When every container has requests equal to limits for both CPU and memory, the Pod is `Guaranteed` — the last to be evicted under node pressure.',
+    references: [REF_RES]
+  },
+  {
+    domain: CONFIG, difficulty: 3, type: QType.SINGLE,
+    stem: 'An app reads its config from `/config/app.yaml`. You want this sourced from ConfigMap key `app.yaml`. Which mount is correct?',
+    options: opts4(
+      'A configMap volume with items mapping key app.yaml → path app.yaml, mounted at /config',
+      'envFrom configMapRef',
+      'A secret volume',
+      'hostPath /config'
+    ),
+    correct: ['a'],
+    explanation: 'Mounting the ConfigMap as a volume (optionally using `items` to control filenames) places `app.yaml` at `/config/app.yaml` for file-based config consumption.',
+    references: [REF_CM]
+  },
+  {
+    domain: CONFIG, difficulty: 4, type: QType.MULTI,
+    stem: 'Select ALL true statements about SecurityContext.',
+    options: opts4(
+      'runAsUser can be set at Pod or container level; the container value wins for that container.',
+      'allowPrivilegeEscalation is a container-level field.',
+      'fsGroup is a Pod-level field affecting volume ownership.',
+      'privileged: true is required to run as a non-root user.'
+    ),
+    correct: ['a', 'b', 'c'],
+    explanation: 'Running as non-root needs `runAsNonRoot`/`runAsUser`, NOT privileged (privileged grants near-host access). Pod vs container precedence, container-only `allowPrivilegeEscalation`, and Pod-level `fsGroup` are all correct.',
+    references: [REF_SCTX]
+  },
+  {
+    domain: CONFIG, difficulty: 3, type: QType.SINGLE,
+    stem: 'A PVC with StorageClass `standard` and `allowVolumeExpansion: true` needs more space. The supported way to grow it is:',
+    options: opts4(
+      'Edit the PVC\'s spec.resources.requests.storage to a larger value and apply.',
+      'Delete and recreate the PVC (data loss).',
+      'Edit the PV capacity directly only.',
+      'Scale the Deployment.'
+    ),
+    correct: ['a'],
+    explanation: 'When the StorageClass allows expansion, increasing the PVC\'s requested storage triggers an online (or after-restart) volume resize without recreating the claim.',
+    references: [REF_PV]
+  },
+  {
+    domain: CONFIG, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A Pod must NOT share the host\'s PID namespace. Which is the safe default to keep?',
+    options: opts4(
+      'spec.hostPID: false (the default)',
+      'spec.hostPID: true',
+      'spec.shareProcessNamespace: true with hostPID',
+      'spec.hostNetwork: true'
+    ),
+    correct: ['a'],
+    explanation: 'Leaving `hostPID` false (default) isolates the Pod from host processes. Setting it true exposes/inspects host PIDs and is a security concern best avoided.',
+    references: [REF_SCTX]
+  },
+
+  // ── Services and Networking (+9 → 13) ──
+  {
+    domain: NET, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Which command creates a ClusterIP Service for an existing Pod labelled `app=cache` on port 6379?',
+    options: opts4(
+      'kubectl expose pod <pod> --port=6379 --name=cache',
+      'kubectl create svc <pod> --port=6379',
+      'kubectl service expose pod <pod> 6379',
+      'kubectl run cache --expose --port=6379'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl expose pod <pod> --port=` creates a Service selecting that Pod\'s labels (ClusterIP by default). For Deployments use `kubectl expose deployment`.',
+    references: [REF_SVC]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE,
+    stem: 'A NetworkPolicy `ingress.from` uses only `ipBlock: { cidr: 10.0.0.0/24 }`. This allows ingress from:',
+    options: opts4(
+      'Any source whose IP falls in 10.0.0.0/24 (subject to CNI handling of pod source IPs).',
+      'Only Pods with a specific label.',
+      'All namespaces.',
+      'Nothing — ipBlock is invalid for ingress.'
+    ),
+    correct: ['a'],
+    explanation: '`ipBlock` matches by CIDR. It is typically used for off-cluster sources; pod-to-pod source IPs may be obscured by SNAT depending on the CNI.',
+    references: [REF_NP]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A Service should distribute connections so a given client always hits the same Pod. Which setting?',
+    options: opts4(
+      'spec.sessionAffinity: ClientIP',
+      'spec.type: LoadBalancer',
+      'spec.externalTrafficPolicy: Local',
+      'spec.publishNotReadyAddresses: true'
+    ),
+    correct: ['a'],
+    explanation: '`sessionAffinity: ClientIP` makes kube-proxy route a client IP to the same backend for the affinity timeout window.',
+    references: [REF_SVC]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.TRUE_FALSE,
+    stem: 'A ClusterIP Service is reachable from outside the cluster by default.',
+    options: opts4('True', 'False', '', ''),
+    correct: ['b'],
+    explanation: 'ClusterIP is internal-only. External exposure needs NodePort, LoadBalancer, an Ingress, or port-forwarding.',
+    references: [REF_SVC]
+  },
+  {
+    domain: NET, difficulty: 4, type: QType.SINGLE,
+    stem: 'A NetworkPolicy permits egress to `podSelector: {role: db}` on TCP 5432, but app Pods also fail DNS lookups. The cause is:',
+    options: opts4(
+      'A default-deny egress is in effect and DNS (UDP/TCP 53 to CoreDNS) was not explicitly allowed.',
+      'The db Pods are down.',
+      'ClusterIP is disabled.',
+      'The Service selector is wrong.'
+    ),
+    correct: ['a'],
+    explanation: 'Once an egress policy selects the Pods, all egress not explicitly allowed is denied — including DNS. You must add an egress rule for port 53 to the cluster DNS.',
+    references: [REF_NP]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'You want to test a Service from your laptop without exposing it externally. Which command?',
+    options: opts4(
+      'kubectl port-forward service/web 8080:80',
+      'kubectl expose service/web --external',
+      'kubectl proxy service/web',
+      'kubectl tunnel web 8080:80'
+    ),
+    correct: ['a'],
+    explanation: '`kubectl port-forward service/<svc> <local>:<svcPort>` tunnels a local port to the Service through the API server — handy for ad-hoc testing without changing Service type.',
+    references: [REF_SVC]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE,
+    stem: 'An Ingress with no `host` field on a rule matches:',
+    options: opts4(
+      'All inbound HTTP hosts (the rule is a default/catch-all for its paths).',
+      'No traffic.',
+      'Only localhost.',
+      'Only HTTPS traffic.'
+    ),
+    correct: ['a'],
+    explanation: 'A rule without `host` applies to requests for any hostname, acting as a default backend rule for the listed paths.',
+    references: [REF_ING]
+  },
+  {
+    domain: NET, difficulty: 3, type: QType.SINGLE, isTeaser: true,
+    stem: 'A Pod needs to reach a Service in another namespace `data`. From namespace `app`, the correct DNS name for Service `pg` is:',
+    options: opts4(
+      'pg.data.svc.cluster.local (or short form pg.data)',
+      'pg (resolves only same-namespace)',
+      'data.pg.cluster.local',
+      'pg.app.svc.cluster.local'
+    ),
+    correct: ['a'],
+    explanation: 'Cross-namespace access uses `<svc>.<ns>` or the FQDN `<svc>.<ns>.svc.cluster.local`. The bare name only resolves within the caller\'s own namespace.',
+    references: [REF_SVC]
+  },
+  {
+    domain: NET, difficulty: 4, type: QType.MULTI,
+    stem: 'Select ALL true statements about NetworkPolicies.',
+    options: opts4(
+      'They are namespaced resources.',
+      'Without a policy selecting a Pod, the Pod allows all traffic by default.',
+      'Selecting a Pod with policyTypes Ingress and no ingress rules denies all ingress to it.',
+      'NetworkPolicies are enforced even when the CNI plugin does not support them.'
+    ),
+    correct: ['a', 'b', 'c'],
+    explanation: 'NetworkPolicies are namespaced and additive; an unselected Pod defaults to allow-all; a selected Pod with empty ingress rules is default-deny ingress. Enforcement REQUIRES a policy-capable CNI (Calico, Cilium, etc.).',
+    references: [REF_NP]
   }
 ];
 
@@ -893,21 +2603,21 @@ const CKAD_EXAMS: { slug: string; code: string; titleSuffix: string; description
     slug: 'linuxfoundation-ckad-p1',
     code: 'CKAD-P1',
     titleSuffix: 'Practice Exam 1',
-    descriptionSuffix: 'Practice exam 1 of 3 — full 120-minute, 20-question, blueprint-weighted set covering Pods, Deployments, Jobs, ConfigMaps/Secrets, SecurityContexts, ServiceAccounts, probes, multi-container patterns, Services, NetworkPolicies, and Ingress.',
+    descriptionSuffix: 'Practice exam 1 of 3 — full 120-minute, 65-question, blueprint-weighted set covering Pods, Deployments, Jobs, ConfigMaps/Secrets, SecurityContexts, ServiceAccounts, probes, multi-container patterns, Services, NetworkPolicies, and Ingress.',
     questions: P1
   },
   {
     slug: 'linuxfoundation-ckad-p2',
     code: 'CKAD-P2',
     titleSuffix: 'Practice Exam 2',
-    descriptionSuffix: 'Practice exam 2 of 3 — a second 120-minute, 20-question, blueprint-weighted set.',
+    descriptionSuffix: 'Practice exam 2 of 3 — a second 120-minute, 65-question, blueprint-weighted set.',
     questions: P2
   },
   {
     slug: 'linuxfoundation-ckad-p3',
     code: 'CKAD-P3',
     titleSuffix: 'Practice Exam 3',
-    descriptionSuffix: 'Practice exam 3 of 3 — a third 120-minute, 20-question, blueprint-weighted set.',
+    descriptionSuffix: 'Practice exam 3 of 3 — a third 120-minute, 65-question, blueprint-weighted set.',
     questions: P3
   }
 ];
