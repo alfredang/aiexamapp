@@ -42,6 +42,16 @@ export const PAYMENT_SUBGROUPS: SettingsGroup[] = [
     ]
   },
   {
+    slug: 'stripe',
+    title: 'Stripe',
+    fields: [
+      { key: 'STRIPE_ENABLED', label: 'Enabled (true/false)', placeholder: 'true' },
+      { key: 'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY', label: 'Publishable Key' },
+      { key: 'STRIPE_SECRET_KEY', label: 'Secret Key', secret: true },
+      { key: 'STRIPE_WEBHOOK_SECRET', label: 'Webhook Secret', secret: true }
+    ]
+  },
+  {
     slug: 'paynow',
     title: 'PayNow',
     fields: [

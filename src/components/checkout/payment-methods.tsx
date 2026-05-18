@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 
-export type MethodId = 'PAYPAL' | 'HITPAY' | 'PAYNOW';
+export type MethodId = 'PAYPAL' | 'HITPAY' | 'PAYNOW' | 'STRIPE';
 
 type MethodInfo = { id: MethodId; enabled: boolean };
 
@@ -22,7 +22,7 @@ type Props = {
   onSelect: (m: MethodId) => void;
 };
 
-const LABEL: Record<MethodId, string> = { PAYPAL: 'PayPal / Card', HITPAY: 'HitPay (Card, GrabPay, Apple Pay)', PAYNOW: 'PayNow (SG)' };
+const LABEL: Record<MethodId, string> = { PAYPAL: 'PayPal / Card', HITPAY: 'HitPay (Card, GrabPay, Apple Pay)', PAYNOW: 'PayNow (SG)', STRIPE: 'Stripe (Card, Apple Pay, Google Pay)' };
 
 export function PaymentMethodsPicker({ methods, selected, onSelect }: Props) {
   const enabled = methods.filter((m) => m.enabled);

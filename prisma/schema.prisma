@@ -55,6 +55,7 @@ enum PaymentProvider {
   PAYPAL
   PAYNOW
   HITPAY
+  STRIPE
   TEST
 }
 

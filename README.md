@@ -1,163 +1,242 @@
-<div align="center">
-
 # ExamNova
 
-[![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
-[![Prisma](https://img.shields.io/badge/Prisma-6-2D3748?logo=prisma)](https://www.prisma.io/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Auth.js](https://img.shields.io/badge/Auth.js-v5-green)](https://authjs.dev/)
+ExamNova is a full-stack certification practice-exam platform designed for commercial training and certification-preparation providers. It allows users to browse certification bundles, take free teaser attempts, purchase practice exams and real-exam vouchers, and take timed or practice-mode exams with detailed result breakdowns. The platform includes a robust admin backend with AI-assisted question generation, dynamic e-commerce features (Stripe, PayPal, HitPay, PayNow), invoicing, and voucher fulfillment.
 
-Practice smarter for your next certification. End-to-end e-commerce admin + AI-assisted question authoring on Next.js 15.
+## Table of Contents
 
-</div>
+- [Overview](#overview)
+- [Features](#features)
+- [Demo](#demo)
+- [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
+- [Repository Structure](#repository-structure)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Running Locally](#running-locally)
+- [Scripts](#scripts)
+- [Usage](#usage)
+- [Database](#database)
+- [Testing](#testing)
+- [Deployment](#deployment)
+- [Security](#security)
+- [Troubleshooting](#troubleshooting)
+- [Known Issues](#known-issues)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [License](#license)
 
----
+## Overview
 
-## Screenshot
+ExamNova is built to provide an end-to-end e-commerce and exam-taking experience. It solves the problem of managing certification preparation platforms by bundling practice exams and optional real-exam vouchers into unified e-commerce products. The platform is designed for scalable content generation using Claude AI and Firecrawl, enabling administrators to quickly author and maintain a large library of high-quality, blueprint-aligned practice questions.
 
-![Screenshot](screenshot.png)
+**Current Status:** The core application features, checkout flows, exam runners, and admin dashboards are implemented and functioning.
 
----
+## Features
 
-## What it does
+- **Public Catalog:** Browse certification vendors, levels, and exam bundles with search and pagination.
+- **Bundle-based Commerce:** Purchase multi-variant practice exams and optional real-exam vouchers as a single product.
+- **Multiple Payment Gateways:** Checkout support for Stripe, PayPal, HitPay, and PayNow with an integrated tax (GST) engine.
+- **Exam Runner:** Timed exam mode and practice mode with autosave functionality, question flagging, and detailed post-exam result breakdowns.
+- **Free Teasers:** Guest and authenticated users can take a configurable number of free teaser questions.
+- **AI-Assisted Question Authoring:** Generate blueprint-aligned questions using Claude AI and Firecrawl via manual input, blueprints, PDFs, or web scraping.
+- **Voucher Fulfillment & Invoicing:** Automated invoice minting, voucher inventory management, and scheduled email delivery via background workers.
+- **Comprehensive Admin Dashboard:** Manage catalog, orders, users (RBAC), refunds, coupons, API tokens, dynamic settings, and CMS content (FAQ, Banners).
+- **Social Login:** Authenticate via Password, OTP, Google, GitHub, Microsoft, and LinkedIn (configurable in settings).
 
-ExamNova is a full-stack practice-exam platform with a production-grade admin backend:
+## Demo
 
-- **Customer surface** — vendor catalog, free teaser, **bundle-only purchases** (multiple practice exams + optional real-exam voucher, sold together — no per-exam SKUs), multi-provider checkout (PayPal · HitPay · PayNow), invoices.
-- **Admin backend** — compact dashboard with KPI cards, drill-down reports, RBAC, audit log, notifications bell, ⌘K global search.
-- **AI-assisted authoring** — four modes to create exam questions (Manual · Blueprint · PDF · Web-scrape) using Claude Agent SDK + Firecrawl.
-- **Money layer** — sequential invoice + order numbering, tax (GST) engine, multi-currency display, refunds with provider APIs + auto credit-note minting, coupon engine.
-- **Operations** — voucher inventory (CSV bulk upload, FIFO claim), webhook event log, GDPR data export, API tokens for partners, cron workers (delivery, expiry, scheduled reports).
+- **Live Demo:** [Add deployment URL]
+- **Screenshot:** ![Screenshot](screenshot.png)
 
-## Quick start
+## Tech Stack
 
-```bash
-docker compose up -d postgres mailhog     # Postgres on :55432, MailHog on :8025
-npm install --legacy-peer-deps
-cp .env.example .env                       # set DATABASE_URL host port to 55432
-npx prisma migrate dev --name init
-npm run db:seed                            # admin + sample exams
-npm run dev -- -p 3040 -H 127.0.0.1
-```
-
-## Key routes
-
-### Public marketing
-- `/` — homepage with hero, vendor grid, popular bundles, FAQ
-- `/practice-exams` — bundle catalog (vendors, levels, search, pagination — auto-filters on vendor/level change)
-- `/practice-exams/[vendor]/[slug]` — **bundle detail** with per-domain blueprint + PRACTICE / PRACTICE+VOUCHER prices (bundles are the only thing you can buy)
-- `/practice-exams/[vendor]/[slug]/teaser` — free practice teaser (count configurable via admin)
-- `/exam/[attemptId]` — unified runner for Practice + Exam modes (questions always shuffled)
-- `/results/[attemptId]` — per-domain breakdown + review
-- `/checkout/[bundleId]?tier=PRACTICE|VOUCHER` — checkout with PayPal · HitPay · PayNow + promo code input
-- `/sitemap.xml` — auto-generated from published bundles + pages
-
-### Authenticated user
-- `/user-dashboard` — overview · exams · attempts · orders · invoices · vouchers · settings (theme picker)
-
-### Admin (`/admin-dashboard`)
-- **Overview** — KPI dashboard (revenue today/7d/30d/MTD · refund rate · signups · active learners · tax MTD)
-- **Catalog** — Vendors · Exams (questions live here, but exams are not directly sold) · **Bundles** (the unit of sale — group multiple practice exams ± a real-exam voucher into one product, set bundle price + optional voucher price)
-- **Money** — Orders · Invoices · Vouchers (Deliveries + Inventory) · Coupons · Webhook Events
-- **Reports** — Revenue · Tax (GST) · Exam analytics — all with date-range pickers + CSV exports
-- **People** — Users (detail tabs, tags, notes, impersonate, GDPR export) · Admins
-- **Content** — Email Templates · Pages · FAQ · Banners
-- **System** — Notifications · Logs (Email + Audit) · API Tokens · Settings · Site SEO
-
-## Four ways to author questions
-
-After creating an exam, the **Author questions** chooser at `/admin-dashboard/exams/[id]/author` offers four modes:
-
-1. **Manual** — type 5 questions at a time with per-answer explanations
-2. **AI Assist (Blueprint)** — auto-generate the full exam (e.g. 60 questions) where domain distribution matches the published blueprint percentages. Uses Firecrawl to scrape the official exam objectives, then Claude generates questions per domain quota.
-3. **From PDF / e-book** — upload a vendor study guide; pdf-parse extracts text, Claude grounds questions in it.
-4. **From web pages (Firecrawl + Claude)** — paste URLs, Firecrawl scrapes to markdown, Claude authors questions.
-
-Approve/Discard each generated question before it lands in the bank.
+| Area | Technology |
+|---|---|
+| Frontend | Next.js 16 (App Router), React 19, Tailwind CSS |
+| Backend | Node.js, Next.js API Routes |
+| Database | PostgreSQL, Prisma ORM |
+| Authentication | Auth.js (NextAuth v5 beta), Argon2 |
+| Payments | Stripe, PayPal, HitPay, PayNow |
+| AI / Integrations | Claude Agent SDK, Firecrawl API, Nodemailer, PDF-lib |
+| Deployment | Docker, Coolify-ready |
 
 ## Architecture
 
-Single Next.js 15 (App Router) app — server actions, edge-safe middleware split, SSE streaming for AI generation.
+ExamNova uses a monolithic architecture built entirely on the Next.js App Router. It leverages Server Actions for form submissions and Next.js Route Handlers for webhooks, external integrations, and cron workers. Data is persisted in PostgreSQL using Prisma.
 
-- **Auth** — Auth.js v5 with three providers: password (argon2id), OTP, Google + GitHub OAuth (configurable from admin Settings → Social Login)
-- **DB** — Prisma + Postgres (`models`: User, Exam, Vendor, Question, Bundle, Order, Invoice, Refund, Coupon, Entitlement, VoucherInventory, VoucherDelivery, EmailLog, AdminLog, AdminNotification, ApiToken, …)
-- **Payments** — PayPal Orders v2, HitPay, PayNow (manual SGQR + admin confirm); all webhooks log to `PaymentWebhookEvent` first to preserve payloads
-- **PDF** — `pdf-lib` for invoice + voucher rendering (shared layout helpers in `src/lib/pdf/layout.ts`)
-- **AI** — `@anthropic-ai/claude-agent-sdk` for streaming generation; Firecrawl for web scraping
-- **Email** — Nodemailer with Gmail OAuth (preferred) or SMTP transport; every send logged to `EmailLog`
-- **Cron** — three worker routes auth'd via `WORKER_SHARED_SECRET`: `/api/worker/voucher-delivery`, `/api/worker/voucher-expiry`, `/api/worker/reports`
-
-## Configurable from admin Settings
-
-No hardcoded constants — everything below is editable at runtime under `/admin-dashboard/settings`:
-
-| Group | Keys |
-|---|---|
-| Company Info | name, short name, UEN, address, website, email, tel |
-| Branding | brand name, logo URL, primary color, support email |
-| Site SEO | home title, description, keywords |
-| Tax & Invoice | TAX_ENABLED, TAX_RATE_BPS, TAX_LABEL, TAX_INCLUSIVE, COMPANY_GST_REG, INVOICE_PREFIX, FX_TO_SGD_*_BPS |
-| Payment | PayPal · HitPay · PayNow credentials + enabled flags, voucher delay days, fulfilment TZ, **free teaser question count** |
-| Email | EMAIL_TRANSPORT (Gmail OAuth · SMTP), credentials, EMAIL_FROM |
-| Social Login | Google + GitHub OAuth client IDs + secrets |
-| Credentials | Anthropic, Firecrawl, Tavily, worker shared secret |
-
-## Claude skills + agents
-
-Project-level [.claude/skills/](.claude/skills/) and [.claude/agents/](.claude/agents/):
-
-- `custom-practice-exam` — generate one full blueprint-aligned exam
-- `seo-audit` — audit and improve marketing-page SEO
-- `exam-batch-generator` (agent) — generate practice exams for many certifications in parallel using the skill above
-
-## Repo layout
-
+```mermaid
+flowchart TD
+    User[User / Visitor] --> NextUI[Next.js Frontend]
+    Admin[Administrator] --> NextUI
+    NextUI --> RouteHandlers[Next.js API & Server Actions]
+    RouteHandlers --> Prisma[Prisma ORM]
+    Prisma --> Postgres[(PostgreSQL Database)]
+    RouteHandlers --> Payments[Stripe / PayPal / HitPay]
+    RouteHandlers --> Email[Nodemailer / Gmail OAuth]
+    RouteHandlers --> AI[Claude / Firecrawl API]
+    Cron[Cron Workers] --> RouteHandlers
 ```
-prisma/
-  schema.prisma                # full data model (25+ models)
-  migrations/                  # all reversible Prisma migrations
-src/
-  app/
-    admin-dashboard/           # admin backend — see route list above
-    practice-exams/            # public catalog + detail + teaser
-    user-dashboard/            # authenticated user surface
-    checkout/, exam/, results/ # purchase + practice runner + results
-    api/
-      admin/                   # admin-only endpoints (gated)
-      worker/                  # cron-triggered jobs
-      paypal/, hitpay/, paynow/ # payment webhooks + capture
-    sitemap.xml/, icon.svg     # SEO + favicon
-  components/
-    admin/                     # dense data-table, pager, filter-bar, badge, cmdk, …
-    checkout/                  # billing card, paynow modal, promo code
-  lib/
-    analytics.ts               # revenue, tax, exam, cohort, per-question stats
-    invoice/                   # issue + render-invoice-pdf + build-lines
-    payments/                  # refund, hitpay, webhook-log
-    sources/                   # PDF + URL extraction + chunking
-    claude.ts                  # Claude streaming question generator
-    coupons.ts, numbering.ts, permissions.ts, voucher-inventory.ts,
-    api-tokens.ts, admin-notifications.ts, seo-assist.ts, …
-.claude/
-  skills/                      # project skills (committed)
-  agents/                      # batch automation agents (committed)
-```
+
+## Repository Structure
+
+- `prisma/`: Database schema, migrations, and seed scripts.
+- `src/app/`: Next.js App Router pages (public marketing, checkout, exam runner, user dashboard, admin dashboard, API routes).
+- `src/components/`: Shared UI components for frontend and dense admin data tables.
+- `src/lib/`: Core business logic (analytics, invoice generation, payments, AI integration, coupons, settings, etc.).
+- `scripts/`: Bulk question seeding, content generation, and utility scripts.
+- `.claude/`: Project-specific Claude AI agent and skill instructions.
+- `public/`: Static assets and logos.
+
+## Prerequisites
+
+- **Node.js**: v22+
+- **Docker**: For running a local PostgreSQL database and MailHog.
+- **Database**: PostgreSQL 16+
+
+## Installation
+
+1. Clone the repository:
+   ```bash
+   git clone [Add repository URL]
+   cd ai-exams
+   ```
+
+2. Install dependencies (requires `--legacy-peer-deps` due to some React 19 incompatibilities):
+   ```bash
+   npm install --legacy-peer-deps
+   ```
+
+3. Copy the environment configuration:
+   ```bash
+   cp .env.example .env
+   ```
+
+## Configuration
+
+1. Start the local database and mail server using Docker Compose:
+   ```bash
+   docker compose up -d postgres mailhog
+   ```
+   *(Postgres is exposed on port 55432, MailHog on port 8025)*
+
+2. Open the `.env` file and configure the `DATABASE_URL` to point to the local instance (e.g., `postgresql://postgres:postgres@localhost:55432/postgres`).
+
+3. Note that most application configuration (Stripe keys, PayPal keys, Auth providers, SEO, Company Info, Email credentials) is managed **at runtime via the Admin Dashboard Settings** rather than environment variables.
+
+## Running Locally
+
+1. Apply database migrations:
+   ```bash
+   npx prisma db push
+   # Or npm run db:migrate if managing dev migrations
+   ```
+
+2. Seed the database with the initial admin user and catalog exams:
+   ```bash
+   npm run db:seed
+   ```
+
+3. Start the Next.js development server:
+   ```bash
+   npm run dev -- -p 3040 -H 127.0.0.1
+   ```
+
+4. The application will be available at `http://localhost:3040`.
+
+## Scripts
+
+- `npm run dev`: Starts the development server.
+- `npm run build`: Generates the Prisma client and builds the Next.js application for production.
+- `npm run start`: Starts the Next.js production server.
+- `npm run lint`: Runs ESLint.
+- `npm run typecheck`: Runs TypeScript compiler check without emitting files.
+- `npm run db:migrate`: Creates and applies development database migrations.
+- `npm run db:deploy`: Applies pending database migrations (for production).
+- `npm run db:seed`: Seeds the database with default vendors, exams, bundles, and admin users.
+- `npm run db:studio`: Opens Prisma Studio to visually inspect the database.
+
+## Usage
+
+### User Flow
+1. Visit the homepage and browse the `/practice-exams` catalog.
+2. Select a bundle and try a free teaser attempt.
+3. Sign up, proceed to `/checkout/bundle/[bundleId]`, and complete the payment using Stripe, PayPal, or HitPay.
+4. Navigate to `/user-dashboard` to view purchased exams, vouchers, and start practice attempts.
+
+### Admin Flow
+1. Sign in using the seeded admin credentials.
+2. Navigate to `/admin-dashboard` to view KPIs and manage the catalog.
+3. Go to `/admin-dashboard/settings` to configure Payment Providers, Email Transports, and Social Logins.
+4. Go to `/admin-dashboard/exams/[id]/author` to generate new exam questions using the AI integration.
+
+## Database
+
+The project uses PostgreSQL with Prisma ORM.
+
+- **Schema:** Defined in `prisma/schema.prisma`.
+- **Seeding:** The `prisma/seed.ts` file populates the database with initial vendor data, multi-variant exam bundles, and admin user credentials.
+- **Migration:** Run `npm run db:migrate` or `npx prisma db push` to apply schema changes.
 
 ## Testing
 
-There is no automated test runner. Manual verification flows:
+There is no automated test runner configured in the repository (e.g., Jest/Cypress). 
 
-- Local dev server `npm run dev -- -p 3040 -H 127.0.0.1`
-- Playwright MCP for E2E smoke (homepage / catalog / exam detail / sitemap / login)
-- Mailhog at `http://127.0.0.1:8025` for outbound emails
-- Stripe / PayPal sandbox for payment flows
+### Manual Testing
+- **Local Dev Server:** Verify functionality manually on the local dev server.
+- **E2E Smoke:** Use Playwright MCP for end-to-end smoke testing (homepage, catalog, checkout, login).
+- **Email:** Use MailHog at `http://127.0.0.1:8025` to intercept outbound emails.
+- **Payments:** Use Stripe/PayPal sandbox credentials for testing checkout flows.
 
-## Deploy
+## Deployment
 
-Coolify-ready via [Dockerfile](Dockerfile) (multi-stage, Next standalone). Container runs `prisma migrate deploy` before `node server.js`. Set `NEXTAUTH_URL`, `DATABASE_URL`, and the worker secret as env vars; all other configuration is admin-managed.
+The application is built for deployment on platforms like Vercel or self-hosted Docker environments (Coolify-ready).
 
----
+### Docker Deployment
+The repository includes a multi-stage `Dockerfile` tailored for Next.js standalone output.
 
-© Tertiary Infotech Academy Pte Ltd
+1. Ensure environment variables (`NEXTAUTH_URL`, `DATABASE_URL`, `WORKER_SHARED_SECRET`, etc.) are configured in the deployment platform.
+2. Build and deploy the Docker image. The container will automatically run `prisma migrate deploy` before starting the server.
+
+## Security
+
+> [!WARNING]
+> Ensure you update default admin passwords provided in the seed script (`password123`) before deploying to production.
+
+- Ensure `NEXTAUTH_SECRET` and `WORKER_SHARED_SECRET` are randomly generated and securely stored.
+- Most sensitive keys (Stripe, HitPay, OAuth Client Secrets) are stored encrypted in the `Setting` database table and decrypted at runtime.
+- Next.js Route handlers acting as webhooks verify request signatures (e.g., Stripe, HitPay) before processing logic.
+
+## Troubleshooting
+
+- **Database Connection Error:** Ensure Docker is running and the `DATABASE_URL` port matches the exposed port (`55432` by default).
+- **Next.js Hydration Errors:** Occur occasionally during development; restart the dev server or verify HTML markup nesting.
+- **AI Generation Failing:** Check the Admin Dashboard Settings to ensure a valid `ANTHROPIC_API_KEY` and `FIRECRAWL_API_KEY` are provided.
+- **NPM Install Errors:** Ensure you pass the `--legacy-peer-deps` flag to `npm install` to avoid conflicts with React 19.
+
+## Known Issues
+
+- The runner UI currently only supports `SINGLE`, `MULTI`, and `TRUE_FALSE` questions, despite the database schema supporting `ORDERING` and `HOTSPOT`.
+- Formal compliance certifications (e.g., GDPR reporting features) are limited to data export requests.
+- Role-based Access Control (RBAC) granular roles (Finance, Support, Content) are defined but mostly require strict `ADMIN` enforcement at the API proxy layer.
+
+## Roadmap
+
+- [ ] Define security and privacy acceptance gates before production use.
+- [ ] Add automated test coverage for auth, payments, attempts, and admin mutations.
+- [ ] Implement front-end support for `ORDERING` and `HOTSPOT` question types.
+- [ ] Refine proxy permissions to utilize non-admin granular RBAC roles (`FINANCE`, `SUPPORT`, `CONTENT`).
+
+## Contributing
+
+1. Fork the repository.
+2. Create a feature branch (`git checkout -b feature/amazing-feature`).
+3. Commit your changes (`git commit -m 'Add amazing feature'`).
+4. Push to the branch (`git push origin feature/amazing-feature`).
+5. Open a Pull Request.
+
+Please ensure your code passes `npm run typecheck` and `npm run lint` before opening a pull request.
+
+## License
+
+© Tertiary Infotech Academy Pte Ltd. [Confirm license]

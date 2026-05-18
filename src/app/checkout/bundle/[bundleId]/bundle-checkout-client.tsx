@@ -13,6 +13,7 @@ export function BundleCheckoutClient({ bundleId, tier }: { bundleId: string; tie
   const [method, setMethod] = useState<MethodId>('PAYPAL');
   const [hitpayBusy, setHitpayBusy] = useState(false);
   const [paynowBusy, setPaynowBusy] = useState(false);
+  const [stripeBusy, setStripeBusy] = useState(false);
   const [paynowSession, setPaynowSession] = useState<{ orderId: string; qrDataUrl: string; reference: string; amount: number; currency: string } | null>(null);
   const methods = usePaymentMethods();
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'sb';
@@ -46,6 +47,19 @@ export function BundleCheckoutClient({ bundleId, tier }: { bundleId: string; tie
     });
     setHitpayBusy(false);
     if (!r.ok) { setErr('Could not start HitPay checkout.'); return; }
+    const d = await r.json();
+    window.location.href = d.url;
+  }
+
+  async function payWithStripe() {
+    setErr(''); setStripeBusy(true);
+    const r = await fetch('/api/stripe/create-order', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ bundleId, tier, billingAddressId: addressId })
+    });
+    setStripeBusy(false);
+    if (!r.ok) { setErr('Could not start Stripe checkout.'); return; }
     const d = await r.json();
     window.location.href = d.url;
   }
@@ -97,6 +111,11 @@ export function BundleCheckoutClient({ bundleId, tier }: { bundleId: string; tie
         {method === 'PAYNOW' && (
           <button type="button" disabled={!addressId || paynowBusy} onClick={payWithPaynow} className="btn-primary-grad w-full">
             {paynowBusy ? 'Generating QR…' : 'Pay with PayNow'}
+          </button>
+        )}
+        {method === 'STRIPE' && (
+          <button type="button" disabled={!addressId || stripeBusy} onClick={payWithStripe} className="btn-primary-grad w-full">
+            {stripeBusy ? 'Redirecting…' : 'Pay with Stripe'}
           </button>
         )}
       </div>

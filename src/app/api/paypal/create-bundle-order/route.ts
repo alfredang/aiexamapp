@@ -52,6 +52,7 @@ export async function POST(req: Request) {
       code: couponCode,
       userId,
       examId: null,
+      bundleId,
       vendorId: vendorIdForCoupon,
       subtotalCents: subtotal
     });

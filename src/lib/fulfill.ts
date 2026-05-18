@@ -12,6 +12,7 @@ function providerLabel(p: PaymentProvider): string {
     case 'PAYPAL': return 'PayPal';
     case 'PAYNOW': return 'PayNow';
     case 'HITPAY': return 'HitPay';
+    case 'STRIPE': return 'Stripe';
     case 'TEST': return 'Test';
   }
 }
