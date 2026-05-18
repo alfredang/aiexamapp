@@ -1,0 +1,37 @@
+import { NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
+import { db } from '@/lib/db';
+import { seedKcsa } from '@/lib/seed/kcsa-questions';
+
+export const runtime = 'nodejs';
+
+/**
+ * One-shot admin endpoint to seed the KCSA bundle (vendor + 3 practice
+ * exams + 195 questions + bundle) into the current database. Idempotent —
+ * safe to call repeatedly; rewrites questions tagged
+ * `generatedBy: 'manual:kcsa-seed'`.
+ *
+ * Intended for bootstrapping the production DB after deploy without
+ * shelling into the container.
+ */
+export async function POST() {
+  const session = await auth();
+  const user = session?.user as { id?: string; role?: string } | undefined;
+  if (user?.role !== 'ADMIN') {
+    return NextResponse.json({ error: 'forbidden' }, { status: 403 });
+  }
+
+  const result = await seedKcsa(db);
+
+  await db.adminLog.create({
+    data: {
+      adminId: user.id!,
+      action: 'seed.kcsa',
+      targetType: 'Bundle',
+      targetId: 'linuxfoundation-kcsa',
+      metadata: JSON.parse(JSON.stringify(result))
+    }
+  });
+
+  return NextResponse.json({ ok: true, ...result });
+}

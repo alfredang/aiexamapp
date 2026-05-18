@@ -33,7 +33,12 @@ const VENDORS = [
   { slug: 'axelos', name: 'AXELOS', description: 'ITIL, PRINCE2, and IT service management certifications.' },
   { slug: 'linuxfoundation', name: 'Linux Foundation', description: 'CNCF / Linux Foundation certifications — CKAD, CKA, CKS, and other open-source ecosystem credentials.' },
   { slug: 'tableau', name: 'Tableau', description: 'Tableau certifications for data visualization and analytics.' },
-  { slug: 'iassc', name: 'IASSC', description: 'Lean Six Sigma certifications.' }
+  { slug: 'iassc', name: 'IASSC', description: 'Lean Six Sigma certifications.' },
+  { slug: 'hashicorp', name: 'HashiCorp', description: 'HashiCorp certifications — Terraform, Vault, Consul, and infrastructure automation credentials.' },
+  { slug: 'docker', name: 'Docker', description: 'Docker certifications — containerization, image management, orchestration, and the Docker Certified Associate credential.' },
+  { slug: 'redhat', name: 'Red Hat', description: 'Red Hat certifications — RHCSA, RHCE, and enterprise Linux system administration credentials.' },
+  { slug: 'gitlab', name: 'GitLab', description: 'GitLab certifications — Git workflows, CI/CD pipelines, DevSecOps, and the GitLab Certified Associate credential.' },
+  { slug: 'elastic', name: 'Elastic', description: 'Elastic certifications — Elasticsearch, Kibana, the Elastic Stack, and the Elastic Certified Engineer credential.' }
 ];
 
 const CLAUDE_ARCHITECT_DOMAINS = [
@@ -87,7 +92,7 @@ const HIDDEN_EXAM_SLUGS = [
 // in this list is force-hidden (published = false), regardless of question
 // count. Used to launch with AWS only and roll out other vendors gradually.
 // Flip a single string to re-enable a vendor.
-const VISIBLE_VENDOR_SLUGS = ['aws', 'microsoft', 'google', 'anthropic', 'cisco', 'comptia', 'oracle', 'linuxfoundation'];
+const VISIBLE_VENDOR_SLUGS = ['aws', 'microsoft', 'google', 'anthropic', 'cisco', 'comptia', 'oracle', 'linuxfoundation', 'hashicorp', 'docker', 'redhat', 'gitlab', 'elastic', 'isc2', 'pmi', 'scrum-org', 'github', 'axelos', 'tableau', 'iassc'];
 
 // Curated bundles — multi-exam products defined declaratively here.
 // Each item references an exam by slug + the tier the buyer receives.
@@ -209,9 +214,49 @@ function buildMultiVariantBundles(): BundleSeed[] {
     { slug: 'pmi-pmp', title: 'PMI PMP', description: 'All 6 PMP practice exams in one bundle — covering people, process, and business environment domains of the PMP examination content outline.', variants: 6, price: 2000, priceVoucher: 55500 },
     { slug: 'linuxfoundation-ckad', title: 'Certified Kubernetes Application Developer (CKAD)', description: 'All 3 CKAD practice exams in one bundle — covering application design & build, deployment, observability & maintenance, environment/configuration/security, and services & networking, aligned to CNCF CKAD v1.35.', variants: 3, price: 2000, priceVoucher: 39500 },
     { slug: 'linuxfoundation-cka', title: 'Certified Kubernetes Administrator (CKA)', description: 'All 3 CKA practice exams in one bundle — covering cluster architecture & install (kubeadm, etcd, RBAC, CRDs, CNI), workloads & scheduling, services & networking (Ingress + Gateway API), storage, and troubleshooting. Aligned to CNCF CKA v1.32.', variants: 3, price: 2000, priceVoucher: 39500 },
-    { slug: 'axelos-itil-4', title: 'AXELOS ITIL 4 Foundation', description: 'All 2 ITIL 4 Foundation practice exams in one bundle — covering key concepts of service management, the ITIL guiding principles, the four dimensions of service management, and ITIL practices.', variants: 2, price: 2000, priceVoucher: 30000 },
-    { slug: 'tableau-desktop-specialist', title: 'Tableau Desktop Specialist', description: 'All 2 Tableau Desktop Specialist practice exams in one bundle — covering connecting to and preparing data, exploring and analyzing data, sharing insights, and understanding Tableau concepts.', variants: 2, price: 2000, priceVoucher: 10000 },
-    { slug: 'iassc-lean-six-sigma-green', title: 'IASSC Lean Six Sigma Green Belt', description: 'All 2 IASSC Lean Six Sigma Green Belt practice exams in one bundle — covering Define, Measure, Analyze, Improve, and Control phases.', variants: 2, price: 2000, priceVoucher: 29500 }
+    { slug: 'hashicorp-terraform-associate', title: 'HashiCorp Certified: Terraform Associate (003)', description: 'All 3 Terraform Associate (003) practice exams in one bundle — covering IaC concepts, Terraform fundamentals & workflow, modules, state management, and reading/generating/modifying configuration. Aligned to the HashiCorp Terraform Associate 003 objectives.', variants: 3, price: 2000, priceVoucher: 7050 },
+    { slug: 'docker-dca', title: 'Docker Certified Associate (DCA)', description: 'All 3 Docker Certified Associate practice exams in one bundle — covering orchestration, image creation/management/registry, installation & configuration, networking, security, and storage & volumes. Aligned to the DCA exam domains.', variants: 3, price: 2000, priceVoucher: 19500 },
+    { slug: 'redhat-rhcsa-ex200', title: 'Red Hat Certified System Administrator (RHCSA EX200)', description: 'All 3 RHCSA (EX200) practice exams in one bundle — covering essential tools, operating running systems, local storage & file systems, system deployment & maintenance, users & groups, and security. Aligned to the official Red Hat EX200 objectives (RHEL 9).', variants: 3, price: 2000, priceVoucher: 50000 },
+    { slug: 'gitlab-certified-associate', title: 'GitLab Certified Associate', description: 'All 3 GitLab Certified Associate practice exams in one bundle — covering Git & GitLab fundamentals, source code management & workflows, CI/CD pipelines, project management & collaboration, and security & compliance basics. Aligned to the GitLab Certified Associate curriculum.', variants: 3, price: 2000, priceVoucher: 9900 },
+    { slug: 'elastic-certified-engineer', title: 'Elastic Certified Engineer', description: 'All 3 Elastic Certified Engineer practice exams in one bundle — covering installation & configuration, indexing data, queries, mappings & text analysis, cluster administration, and data processing & aggregations. Aligned to the Elastic Certified Engineer exam objectives.', variants: 3, price: 2000, priceVoucher: 40000 },
+    { slug: 'microsoft-az-305', title: 'Microsoft Azure Solutions Architect Expert (AZ-305)', description: 'All 3 AZ-305 practice exams in one bundle — designing identity, governance & monitoring, data storage, business continuity, and infrastructure solutions on Azure.', variants: 3, price: 2000, priceVoucher: 16500 },
+    { slug: 'microsoft-az-204', title: 'Microsoft Azure Developer Associate (AZ-204)', description: 'All 3 AZ-204 practice exams in one bundle — developing Azure compute and storage solutions, implementing security, monitoring & optimizing, and connecting to/consuming Azure and third-party services.', variants: 3, price: 2000, priceVoucher: 16500 },
+    { slug: 'microsoft-sc-900', title: 'Microsoft Security, Compliance, and Identity Fundamentals (SC-900)', description: 'All 3 SC-900 practice exams in one bundle — security/compliance/identity concepts, Microsoft Entra capabilities, Microsoft security solutions, and Microsoft compliance (Purview) solutions.', variants: 3, price: 2000, priceVoucher: 9900 },
+    { slug: 'comptia-a-plus', title: 'CompTIA A+ (220-1101 / 220-1102)', description: 'All 3 CompTIA A+ practice exams in one bundle — hardware, networking, mobile & virtualization, operating systems, security, and software/operational troubleshooting across Core 1 and Core 2.', variants: 3, price: 2000, priceVoucher: 26300 },
+    { slug: 'comptia-network-plus', title: 'CompTIA Network+ (N10-009)', description: 'All 3 CompTIA Network+ practice exams in one bundle — networking concepts, implementation, operations, security, and troubleshooting.', variants: 3, price: 2000, priceVoucher: 36900 },
+    { slug: 'comptia-security-plus', title: 'CompTIA Security+ (SY0-701)', description: 'All 3 CompTIA Security+ practice exams in one bundle — general security concepts, threats/vulnerabilities/mitigations, security architecture, security operations, and security program management & oversight.', variants: 3, price: 2000, priceVoucher: 40400 },
+    { slug: 'google-professional-cloud-architect', title: 'Google Professional Cloud Architect', description: 'All 3 Professional Cloud Architect practice exams in one bundle — designing & planning architecture, managing & provisioning infrastructure, security & compliance, optimizing processes, managing implementation, and operational reliability on Google Cloud.', variants: 3, price: 2000, priceVoucher: 20000 },
+    { slug: 'google-professional-data-engineer', title: 'Google Professional Data Engineer', description: 'All 3 Professional Data Engineer practice exams in one bundle — designing data processing systems, ingesting & processing data, storing data, preparing & using data for analysis, and maintaining & automating data workloads on Google Cloud.', variants: 3, price: 2000, priceVoucher: 20000 },
+    { slug: 'isc2-ccsp', title: 'ISC2 CCSP', description: 'All 3 CCSP practice exams in one bundle — cloud concepts/architecture/design, cloud data security, cloud platform & infrastructure security, cloud application security, cloud security operations, and legal/risk/compliance.', variants: 3, price: 2000, priceVoucher: 59900 },
+    { slug: 'linuxfoundation-cks', title: 'Certified Kubernetes Security Specialist (CKS)', description: 'All 3 CKS practice exams in one bundle — cluster setup, cluster hardening, system hardening, minimizing microservice vulnerabilities, supply chain security, and monitoring/logging/runtime security. Aligned to CNCF CKS v1.32.', variants: 3, price: 2000, priceVoucher: 44500 },
+    { slug: 'pmi-capm', title: 'PMI CAPM', description: 'All 3 CAPM practice exams in one bundle — project management fundamentals & core concepts, predictive plan-based methodologies, agile frameworks/methodologies, and business analysis frameworks.', variants: 3, price: 2000, priceVoucher: 30000 },
+    { slug: 'scrum-org-pspo-i', title: 'Professional Scrum Product Owner I (PSPO I)', description: 'All 3 PSPO I practice exams in one bundle — the Scrum framework, product value & vision, Product Backlog management, stakeholders & customers, and empiricism/agility, grounded in the Scrum Guide.', variants: 3, price: 2000, priceVoucher: 20000 },
+    // ───── Wave 3b: competitor-parity new certs (65 Q/variant × 3) ─────
+    { slug: 'axelos-itil4-foundation', title: 'ITIL 4 Foundation', description: 'All 4 ITIL 4 Foundation practice exams in one bundle — key concepts of service management, the four dimensions & guiding principles, the service value system & value chain, and the ITIL practices. Aligned to the ITIL 4 Foundation syllabus.', variants: 4, price: 2000, priceVoucher: 38000 },
+    { slug: 'tableau-desktop-specialist', title: 'Tableau Desktop Specialist', description: 'All 3 Tableau Desktop Specialist practice exams in one bundle — connecting to & preparing data, exploring & analyzing data, sharing insights, and understanding Tableau concepts.', variants: 3, price: 2000, priceVoucher: 10000 },
+    { slug: 'iassc-lean-six-sigma-green-belt', title: 'IASSC Lean Six Sigma Green Belt', description: 'All 3 IASSC Lean Six Sigma Green Belt practice exams in one bundle — covering the Define, Measure, Analyze, Improve, and Control phases of the DMAIC methodology. Aligned to the IASSC Green Belt body of knowledge.', variants: 3, price: 2000, priceVoucher: 29500 },
+    { slug: 'comptia-pentest-plus', title: 'CompTIA PenTest+ (PT0-003)', description: 'All 3 CompTIA PenTest+ practice exams in one bundle — engagement management, reconnaissance & enumeration, vulnerability discovery & analysis, attacks & exploits, and post-exploitation & lateral movement.', variants: 3, price: 2000, priceVoucher: 41200 },
+    { slug: 'comptia-securityx', title: 'CompTIA SecurityX (CAS-005)', description: 'All 3 CompTIA SecurityX (CASP+) practice exams in one bundle — governance/risk & compliance, security architecture, security engineering, and security operations.', variants: 3, price: 2000, priceVoucher: 52400 },
+    { slug: 'isc2-cc', title: 'ISC2 Certified in Cybersecurity (CC)', description: 'All 3 ISC2 CC practice exams in one bundle — security principles, business continuity/DR & incident response, access controls concepts, network security, and security operations.', variants: 3, price: 2000, priceVoucher: 5000 },
+    { slug: 'microsoft-sc-300', title: 'Microsoft Identity and Access Administrator (SC-300)', description: 'All 3 SC-300 practice exams in one bundle — implementing identities in Microsoft Entra, authentication & access management, access management for applications, and identity governance.', variants: 3, price: 2000, priceVoucher: 16500 },
+    { slug: 'microsoft-pl-900', title: 'Microsoft Power Platform Fundamentals (PL-900)', description: 'All 3 PL-900 practice exams in one bundle — Power Platform business value, core components, Power Apps, Power Automate, Power BI, and Power Pages & Copilot Studio.', variants: 3, price: 2000, priceVoucher: 9900 },
+    { slug: 'cisco-devnet-associate-200-901', title: 'Cisco DevNet Associate (200-901 DEVASC)', description: 'All 3 Cisco DevNet Associate practice exams in one bundle — software development & design, understanding & using APIs, Cisco platforms & development, application deployment & security, infrastructure & automation, and network fundamentals.', variants: 3, price: 2000, priceVoucher: 30000 },
+    { slug: 'linuxfoundation-kcna', title: 'Kubernetes and Cloud Native Associate (KCNA)', description: 'All 3 KCNA practice exams in one bundle — Kubernetes fundamentals, container orchestration, cloud native architecture, cloud native observability, and cloud native application delivery. Aligned to the CNCF KCNA curriculum.', variants: 3, price: 2000, priceVoucher: 25000 },
+    { slug: 'hashicorp-vault-associate', title: 'HashiCorp Certified: Vault Associate (002)', description: 'All 3 Vault Associate (002) practice exams in one bundle — Vault architecture, authentication & authorization, secrets engines, Vault policies, tokens, and encryption as a service. Aligned to the HashiCorp Vault Associate 002 objectives.', variants: 3, price: 2000, priceVoucher: 7050 },
+    { slug: 'pmi-acp', title: 'PMI Agile Certified Practitioner (PMI-ACP)', description: 'All 3 PMI-ACP practice exams in one bundle — agile principles & mindset, value-driven delivery, stakeholder engagement, team performance, adaptive planning, problem detection & resolution, and continuous improvement.', variants: 3, price: 2000, priceVoucher: 50500 },
+    // ───── Wave 3c: competitor-parity new certs (65 Q/variant × 3) ─────
+    { slug: 'microsoft-sc-100', title: 'Microsoft Cybersecurity Architect Expert (SC-100)', description: 'All 3 SC-100 practice exams in one bundle — designing solutions aligned with security best practices; security operations, identity & compliance capabilities; and security solutions for infrastructure, applications & data.', variants: 3, price: 2000, priceVoucher: 16500 },
+    { slug: 'microsoft-dp-600', title: 'Microsoft Fabric Analytics Engineer (DP-600)', description: 'All 3 DP-600 practice exams in one bundle — planning & managing a data analytics solution, preparing & serving data, implementing & managing semantic models, and exploring & analyzing data in Microsoft Fabric.', variants: 3, price: 2000, priceVoucher: 16500 },
+    { slug: 'microsoft-pl-600', title: 'Microsoft Power Platform Solution Architect (PL-600)', description: 'All 3 PL-600 practice exams in one bundle — solution envisioning & requirement analysis, architecting a solution, and implementing the solution on Power Platform.', variants: 3, price: 2000, priceVoucher: 16500 },
+    { slug: 'google-professional-cloud-devops-engineer', title: 'Google Professional Cloud DevOps Engineer', description: 'All 3 Professional Cloud DevOps Engineer practice exams in one bundle — bootstrapping & managing a Google Cloud organization, CI/CD pipelines, SRE practices, observability, and optimizing service performance.', variants: 3, price: 2000, priceVoucher: 20000 },
+    { slug: 'google-professional-cloud-network-engineer', title: 'Google Professional Cloud Network Engineer', description: 'All 3 Professional Cloud Network Engineer practice exams in one bundle — designing & planning a network, implementing VPCs, configuring network services, hybrid interconnectivity, and managing/monitoring network operations on Google Cloud.', variants: 3, price: 2000, priceVoucher: 20000 },
+    { slug: 'cisco-ccnp-security-350-701', title: 'Cisco CCNP Security (SCOR 350-701)', description: 'All 3 CCNP Security (SCOR 350-701) practice exams in one bundle — security concepts, network security, securing the cloud, content security, endpoint protection & detection, and secure network access/visibility/enforcement.', variants: 3, price: 2000, priceVoucher: 40000 },
+    { slug: 'comptia-project-plus', title: 'CompTIA Project+ (PK0-005)', description: 'All 3 CompTIA Project+ (PK0-005) practice exams in one bundle — project management concepts, project life cycle phases, tools & documentation, and basics of IT & governance.', variants: 3, price: 2000, priceVoucher: 25000 },
+    { slug: 'oracle-java-se-17-1z0-829', title: 'Oracle Certified Professional: Java SE 17 Developer (1Z0-829)', description: 'All 3 Java SE 17 Developer (1Z0-829) practice exams in one bundle — the Java object-oriented approach, program flow, generics & collections, streams & lambdas, exceptions, the module system, concurrency, JDBC, and localization.', variants: 3, price: 2000, priceVoucher: 24500 },
+    { slug: 'isc2-sscp', title: 'ISC2 SSCP', description: 'All 3 SSCP practice exams in one bundle — security operations & administration, access controls, risk identification/monitoring/analysis, incident response & recovery, cryptography, network & communications security, and systems & application security.', variants: 3, price: 2000, priceVoucher: 28900 },
+    { slug: 'pmi-rmp', title: 'PMI Risk Management Professional (PMI-RMP)', description: 'All 3 PMI-RMP practice exams in one bundle — risk strategy & planning, risk identification, risk analysis, risk response, and monitor & close risks.', variants: 3, price: 2000, priceVoucher: 52000 },
+    { slug: 'linuxfoundation-kcsa', title: 'Kubernetes and Cloud Native Security Associate (KCSA)', description: 'All 3 KCSA practice exams in one bundle — overview of cloud native security, Kubernetes cluster component security, Kubernetes security fundamentals, the Kubernetes threat model, platform security, and compliance & security frameworks. Aligned to the CNCF KCSA curriculum.', variants: 3, price: 2000, priceVoucher: 25000 },
+    { slug: 'hashicorp-consul-associate', title: 'HashiCorp Certified: Consul Associate (003)', description: 'All 3 Consul Associate (003) practice exams in one bundle — Consul architecture, deployment, service discovery & registration, service mesh, network infrastructure automation, and Consul security. Aligned to the HashiCorp Consul Associate 003 objectives.', variants: 3, price: 2000, priceVoucher: 7050 }
   ];
 
   const out: BundleSeed[] = specs.map(s => {
@@ -911,7 +956,575 @@ const EXAMS: ExamSeed[] = [
       { name: 'Storage', weight: 10 },
       { name: 'Troubleshooting', weight: 30 }
     ]
-  }
+  },
+
+  // HashiCorp Terraform Associate (003): 8 objective groups, 1 hour,
+  // 70% to pass. Practice variants use multiple-choice / multi-select
+  // questions whose distribution matches the published 003 objectives.
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'hashicorp', slug: `hashicorp-terraform-associate-p${n}`, code: `TFA003-P${n}`,
+    title: `HashiCorp Certified: Terraform Associate (003) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for the HashiCorp Certified: Terraform Associate (003) certification — a 60-minute, 20-question, blueprint-weighted set covering IaC concepts, Terraform fundamentals & workflow, modules, state management, and reading/generating/modifying configuration. Aligned to the HashiCorp Terraform Associate 003 objectives.`,
+    level: 'Associate', durationMinutes: 60, passingScore: 70, questionCount: 20,
+    domains: [
+      { name: 'Infrastructure as Code (IaC) Concepts', weight: 10 },
+      { name: 'The Purpose of Terraform (vs other IaC)', weight: 10 },
+      { name: 'Terraform Fundamentals', weight: 15 },
+      { name: 'The Terraform Workflow', weight: 15 },
+      { name: 'Terraform Modules', weight: 15 },
+      { name: 'Use Terraform Outside the Core Workflow', weight: 10 },
+      { name: 'Implement and Maintain State', weight: 15 },
+      { name: 'Read, Generate, and Modify Configuration', weight: 10 }
+    ]
+  })),
+
+  // Docker Certified Associate (DCA): 6 domains, 90 minutes, ~65% to pass.
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'docker', slug: `docker-dca-p${n}`, code: `DCA-P${n}`,
+    title: `Docker Certified Associate (DCA) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for the Docker Certified Associate (DCA) certification — a 90-minute, 20-question, blueprint-weighted set covering orchestration, image creation/management/registry, installation & configuration, networking, security, and storage & volumes. Aligned to the DCA exam domains.`,
+    level: 'Associate', durationMinutes: 90, passingScore: 65, questionCount: 20,
+    domains: [
+      { name: 'Orchestration', weight: 25 },
+      { name: 'Image Creation, Management, and Registry', weight: 20 },
+      { name: 'Installation and Configuration', weight: 15 },
+      { name: 'Networking', weight: 15 },
+      { name: 'Security', weight: 15 },
+      { name: 'Storage and Volumes', weight: 10 }
+    ]
+  })),
+
+  // Red Hat Certified System Administrator (RHCSA EX200): 7 objective
+  // groups, 150 minutes, 70% to pass. Real exam is performance-based on
+  // RHEL 9; practice variants match the published EX200 objective weights.
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'redhat', slug: `redhat-rhcsa-ex200-p${n}`, code: `RHCSA-P${n}`,
+    title: `Red Hat Certified System Administrator (RHCSA EX200) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for the Red Hat Certified System Administrator (RHCSA EX200) certification — a 150-minute, 20-question, blueprint-weighted set covering essential tools, operating running systems, local storage & file systems, system deployment & maintenance, users & groups, and security. Aligned to the official Red Hat EX200 objectives (RHEL 9).`,
+    level: 'Associate', durationMinutes: 150, passingScore: 70, questionCount: 20,
+    domains: [
+      { name: 'Understand and Use Essential Tools', weight: 15 },
+      { name: 'Operate Running Systems', weight: 15 },
+      { name: 'Configure Local Storage', weight: 15 },
+      { name: 'Create and Configure File Systems', weight: 15 },
+      { name: 'Deploy, Configure, and Maintain Systems', weight: 20 },
+      { name: 'Manage Users and Groups', weight: 10 },
+      { name: 'Manage Security', weight: 10 }
+    ]
+  })),
+
+  // GitLab Certified Associate: 5 domains, 60 minutes, 70% to pass.
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'gitlab', slug: `gitlab-certified-associate-p${n}`, code: `GLCA-P${n}`,
+    title: `GitLab Certified Associate — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for the GitLab Certified Associate certification — a 60-minute, 20-question, blueprint-weighted set covering Git & GitLab fundamentals, source code management & workflows, CI/CD pipelines, project management & collaboration, and security & compliance basics. Aligned to the GitLab Certified Associate curriculum.`,
+    level: 'Associate', durationMinutes: 60, passingScore: 70, questionCount: 20,
+    domains: [
+      { name: 'Git and GitLab Fundamentals', weight: 20 },
+      { name: 'Source Code Management and Workflows', weight: 20 },
+      { name: 'CI/CD Pipelines', weight: 30 },
+      { name: 'Project Management and Collaboration', weight: 15 },
+      { name: 'Security and Compliance Basics', weight: 15 }
+    ]
+  })),
+
+  // Elastic Certified Engineer: 6 domains, 180 minutes, 70% to pass.
+  // Real exam is hands-on; practice variants match the published topics.
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'elastic', slug: `elastic-certified-engineer-p${n}`, code: `ECE-P${n}`,
+    title: `Elastic Certified Engineer — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for the Elastic Certified Engineer certification — a 180-minute, 20-question, blueprint-weighted set covering installation & configuration, indexing data, queries, mappings & text analysis, cluster administration, and data processing & aggregations. Aligned to the Elastic Certified Engineer exam objectives.`,
+    level: 'Professional', durationMinutes: 180, passingScore: 70, questionCount: 20,
+    domains: [
+      { name: 'Installation and Configuration', weight: 20 },
+      { name: 'Indexing Data', weight: 20 },
+      { name: 'Queries', weight: 20 },
+      { name: 'Mappings and Text Analysis', weight: 20 },
+      { name: 'Cluster Administration', weight: 10 },
+      { name: 'Data Processing and Aggregations', weight: 10 }
+    ]
+  })),
+
+  // ───── Wave 3a: competitor-parity new certs (65 Q/variant × 3) ─────
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'microsoft', slug: `microsoft-az-305-p${n}`, code: `AZ-305-P${n}`,
+    title: `Microsoft Azure Solutions Architect Expert (AZ-305) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for Microsoft AZ-305 — a 120-minute, 65-question, blueprint-weighted set covering identity/governance/monitoring, data storage, business continuity, and infrastructure solution design on Azure.`,
+    level: 'Expert', durationMinutes: 120, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Design identity, governance, and monitoring solutions', weight: 28 },
+      { name: 'Design data storage solutions', weight: 24 },
+      { name: 'Design business continuity solutions', weight: 18 },
+      { name: 'Design infrastructure solutions', weight: 30 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'microsoft', slug: `microsoft-az-204-p${n}`, code: `AZ-204-P${n}`,
+    title: `Microsoft Azure Developer Associate (AZ-204) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for Microsoft AZ-204 — a 120-minute, 65-question, blueprint-weighted set covering Azure compute and storage development, security, monitoring & optimization, and connecting to/consuming Azure and third-party services.`,
+    level: 'Associate', durationMinutes: 120, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Develop Azure compute solutions', weight: 27 },
+      { name: 'Develop for Azure storage', weight: 17 },
+      { name: 'Implement Azure security', weight: 18 },
+      { name: 'Monitor, troubleshoot, and optimize Azure solutions', weight: 13 },
+      { name: 'Connect to and consume Azure services and third-party services', weight: 25 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'microsoft', slug: `microsoft-sc-900-p${n}`, code: `SC-900-P${n}`,
+    title: `Microsoft Security, Compliance, and Identity Fundamentals (SC-900) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for Microsoft SC-900 — a 60-minute, 65-question, blueprint-weighted set covering security/compliance/identity concepts, Microsoft Entra, Microsoft security solutions, and Microsoft compliance (Purview) solutions.`,
+    level: 'Foundational', durationMinutes: 60, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Describe the concepts of security, compliance, and identity', weight: 13 },
+      { name: 'Describe the capabilities of Microsoft Entra', weight: 27 },
+      { name: 'Describe the capabilities of Microsoft security solutions', weight: 35 },
+      { name: 'Describe the capabilities of Microsoft compliance solutions', weight: 25 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'comptia', slug: `comptia-a-plus-p${n}`, code: `220-1100-P${n}`,
+    title: `CompTIA A+ (220-1101 / 220-1102) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for CompTIA A+ — a 90-minute, 65-question, blueprint-weighted set covering hardware, networking, mobile & virtualization, operating systems, security, and software/operational troubleshooting across Core 1 and Core 2.`,
+    level: 'Foundational', durationMinutes: 90, passingScore: 72, questionCount: 65,
+    domains: [
+      { name: 'Hardware', weight: 18 },
+      { name: 'Networking', weight: 17 },
+      { name: 'Mobile Devices and Virtualization', weight: 13 },
+      { name: 'Operating Systems', weight: 18 },
+      { name: 'Security', weight: 18 },
+      { name: 'Software and Operational Troubleshooting', weight: 16 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'comptia', slug: `comptia-network-plus-p${n}`, code: `N10-009-P${n}`,
+    title: `CompTIA Network+ (N10-009) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for CompTIA Network+ — a 90-minute, 65-question, blueprint-weighted set covering networking concepts, implementation, operations, security, and troubleshooting.`,
+    level: 'Foundational', durationMinutes: 90, passingScore: 72, questionCount: 65,
+    domains: [
+      { name: 'Networking Concepts', weight: 23 },
+      { name: 'Network Implementation', weight: 20 },
+      { name: 'Network Operations', weight: 19 },
+      { name: 'Network Security', weight: 14 },
+      { name: 'Network Troubleshooting', weight: 24 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'comptia', slug: `comptia-security-plus-p${n}`, code: `SY0-701-P${n}`,
+    title: `CompTIA Security+ (SY0-701) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for CompTIA Security+ — a 90-minute, 65-question, blueprint-weighted set covering general security concepts, threats/vulnerabilities/mitigations, security architecture, security operations, and security program management & oversight.`,
+    level: 'Foundational', durationMinutes: 90, passingScore: 75, questionCount: 65,
+    domains: [
+      { name: 'General Security Concepts', weight: 12 },
+      { name: 'Threats, Vulnerabilities, and Mitigations', weight: 22 },
+      { name: 'Security Architecture', weight: 18 },
+      { name: 'Security Operations', weight: 28 },
+      { name: 'Security Program Management and Oversight', weight: 20 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'google', slug: `google-professional-cloud-architect-p${n}`, code: `PCA-P${n}`,
+    title: `Google Professional Cloud Architect — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for Google Professional Cloud Architect — a 120-minute, 65-question, blueprint-weighted set covering architecture design & planning, infrastructure provisioning, security & compliance, process optimization, implementation management, and operational reliability.`,
+    level: 'Professional', durationMinutes: 120, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Designing and planning a cloud solution architecture', weight: 24 },
+      { name: 'Managing and provisioning a solution infrastructure', weight: 18 },
+      { name: 'Designing for security and compliance', weight: 18 },
+      { name: 'Analyzing and optimizing technical and business processes', weight: 13 },
+      { name: 'Managing implementation', weight: 12 },
+      { name: 'Ensuring solution and operations reliability', weight: 15 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'google', slug: `google-professional-data-engineer-p${n}`, code: `PDE-P${n}`,
+    title: `Google Professional Data Engineer — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for Google Professional Data Engineer — a 120-minute, 65-question, blueprint-weighted set covering designing data processing systems, ingesting & processing data, storing data, preparing & using data for analysis, and maintaining & automating data workloads.`,
+    level: 'Professional', durationMinutes: 120, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Designing data processing systems', weight: 22 },
+      { name: 'Ingesting and processing the data', weight: 25 },
+      { name: 'Storing the data', weight: 20 },
+      { name: 'Preparing and using data for analysis', weight: 15 },
+      { name: 'Maintaining and automating data workloads', weight: 18 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'isc2', slug: `isc2-ccsp-p${n}`, code: `CCSP-P${n}`,
+    title: `ISC2 CCSP — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for ISC2 CCSP — a 240-minute, 65-question, blueprint-weighted set covering cloud concepts/architecture/design, cloud data security, cloud platform & infrastructure security, cloud application security, cloud security operations, and legal/risk/compliance.`,
+    level: 'Professional', durationMinutes: 240, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Cloud Concepts, Architecture and Design', weight: 17 },
+      { name: 'Cloud Data Security', weight: 20 },
+      { name: 'Cloud Platform and Infrastructure Security', weight: 17 },
+      { name: 'Cloud Application Security', weight: 17 },
+      { name: 'Cloud Security Operations', weight: 16 },
+      { name: 'Legal, Risk and Compliance', weight: 13 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'linuxfoundation', slug: `linuxfoundation-cks-p${n}`, code: `CKS-P${n}`,
+    title: `Certified Kubernetes Security Specialist (CKS) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for CNCF CKS — a 120-minute, 65-question, blueprint-weighted set covering cluster setup, cluster hardening, system hardening, minimizing microservice vulnerabilities, supply chain security, and monitoring/logging/runtime security. Aligned to CNCF CKS v1.32.`,
+    level: 'Specialty', durationMinutes: 120, passingScore: 67, questionCount: 65,
+    domains: [
+      { name: 'Cluster Setup', weight: 15 },
+      { name: 'Cluster Hardening', weight: 15 },
+      { name: 'System Hardening', weight: 10 },
+      { name: 'Minimize Microservice Vulnerabilities', weight: 20 },
+      { name: 'Supply Chain Security', weight: 20 },
+      { name: 'Monitoring, Logging and Runtime Security', weight: 20 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'pmi', slug: `pmi-capm-p${n}`, code: `CAPM-P${n}`,
+    title: `PMI CAPM — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for PMI CAPM — a 180-minute, 65-question, blueprint-weighted set covering project management fundamentals & core concepts, predictive plan-based methodologies, agile frameworks/methodologies, and business analysis frameworks.`,
+    level: 'Associate', durationMinutes: 180, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Project Management Fundamentals and Core Concepts', weight: 36 },
+      { name: 'Predictive, Plan-Based Methodologies', weight: 17 },
+      { name: 'Agile Frameworks/Methodologies', weight: 20 },
+      { name: 'Business Analysis Frameworks', weight: 27 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'scrum-org', slug: `scrum-org-pspo-i-p${n}`, code: `PSPO-I-P${n}`,
+    title: `Professional Scrum Product Owner I (PSPO I) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for Scrum.org PSPO I — a 60-minute, 65-question, blueprint-weighted set covering the Scrum framework, product value & vision, Product Backlog management, stakeholders & customers, and empiricism/agility, grounded in the Scrum Guide.`,
+    level: 'Associate', durationMinutes: 60, passingScore: 85, questionCount: 65,
+    domains: [
+      { name: 'Scrum Framework', weight: 25 },
+      { name: 'Product Value and Vision', weight: 20 },
+      { name: 'Product Backlog Management', weight: 25 },
+      { name: 'Stakeholders and Customers', weight: 15 },
+      { name: 'Empiricism and Agility', weight: 15 }
+    ]
+  })),
+
+  // ───── Wave 3b: competitor-parity new certs (65 Q/variant × 3) ─────
+  ...(['1', '2', '3', '4'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'axelos', slug: `axelos-itil4-foundation-p${n}`, code: `ITIL4-FND-P${n}`,
+    title: `ITIL 4 Foundation — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for ITIL 4 Foundation — a 60-minute, 65-question, blueprint-weighted set covering key concepts of service management, the four dimensions & guiding principles, the service value system & value chain, and the ITIL practices. Aligned to the ITIL 4 Foundation syllabus.`,
+    level: 'Foundational', durationMinutes: 60, passingScore: 65, questionCount: 65,
+    domains: [
+      { name: 'Key Concepts of Service Management', weight: 20 },
+      { name: 'The Four Dimensions and Guiding Principles', weight: 25 },
+      { name: 'Service Value System and Value Chain', weight: 20 },
+      { name: 'ITIL Practices', weight: 35 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'tableau', slug: `tableau-desktop-specialist-p${n}`, code: `TDS-P${n}`,
+    title: `Tableau Desktop Specialist — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for the Tableau Desktop Specialist certification — a 60-minute, 65-question, blueprint-weighted set covering connecting to & preparing data, exploring & analyzing data, sharing insights, and understanding Tableau concepts.`,
+    level: 'Foundational', durationMinutes: 60, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Connecting to and Preparing Data', weight: 25 },
+      { name: 'Exploring and Analyzing Data', weight: 35 },
+      { name: 'Sharing Insights', weight: 20 },
+      { name: 'Understanding Tableau Concepts', weight: 20 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'iassc', slug: `iassc-lean-six-sigma-green-belt-p${n}`, code: `ICGB-P${n}`,
+    title: `IASSC Lean Six Sigma Green Belt — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for the IASSC Lean Six Sigma Green Belt certification — a 180-minute, 65-question, blueprint-weighted set covering the Define, Measure, Analyze, Improve, and Control phases of the DMAIC methodology. Aligned to the IASSC Green Belt body of knowledge.`,
+    level: 'Associate', durationMinutes: 180, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Define Phase', weight: 23 },
+      { name: 'Measure Phase', weight: 23 },
+      { name: 'Analyze Phase', weight: 23 },
+      { name: 'Improve Phase', weight: 18 },
+      { name: 'Control Phase', weight: 13 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'comptia', slug: `comptia-pentest-plus-p${n}`, code: `PT0-003-P${n}`,
+    title: `CompTIA PenTest+ (PT0-003) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for CompTIA PenTest+ (PT0-003) — a 165-minute, 65-question, blueprint-weighted set covering engagement management, reconnaissance & enumeration, vulnerability discovery & analysis, attacks & exploits, and post-exploitation & lateral movement.`,
+    level: 'Associate', durationMinutes: 165, passingScore: 75, questionCount: 65,
+    domains: [
+      { name: 'Engagement Management', weight: 13 },
+      { name: 'Reconnaissance and Enumeration', weight: 21 },
+      { name: 'Vulnerability Discovery and Analysis', weight: 17 },
+      { name: 'Attacks and Exploits', weight: 35 },
+      { name: 'Post-exploitation and Lateral Movement', weight: 14 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'comptia', slug: `comptia-securityx-p${n}`, code: `CAS-005-P${n}`,
+    title: `CompTIA SecurityX (CAS-005) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for CompTIA SecurityX (CASP+, CAS-005) — a 165-minute, 65-question, blueprint-weighted set covering governance/risk & compliance, security architecture, security engineering, and security operations.`,
+    level: 'Professional', durationMinutes: 165, passingScore: 75, questionCount: 65,
+    domains: [
+      { name: 'Governance, Risk, and Compliance', weight: 20 },
+      { name: 'Security Architecture', weight: 27 },
+      { name: 'Security Engineering', weight: 31 },
+      { name: 'Security Operations', weight: 22 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'isc2', slug: `isc2-cc-p${n}`, code: `CC-P${n}`,
+    title: `ISC2 Certified in Cybersecurity (CC) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for ISC2 Certified in Cybersecurity (CC) — a 120-minute, 65-question, blueprint-weighted set covering security principles, business continuity/DR & incident response, access controls concepts, network security, and security operations.`,
+    level: 'Foundational', durationMinutes: 120, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Security Principles', weight: 26 },
+      { name: 'Business Continuity, Disaster Recovery and Incident Response', weight: 10 },
+      { name: 'Access Controls Concepts', weight: 22 },
+      { name: 'Network Security', weight: 24 },
+      { name: 'Security Operations', weight: 18 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'microsoft', slug: `microsoft-sc-300-p${n}`, code: `SC-300-P${n}`,
+    title: `Microsoft Identity and Access Administrator (SC-300) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for Microsoft SC-300 — a 120-minute, 65-question, blueprint-weighted set covering implementing identities in Microsoft Entra, authentication & access management, access management for applications, and identity governance.`,
+    level: 'Associate', durationMinutes: 120, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Implement Identities in Microsoft Entra', weight: 20 },
+      { name: 'Implement Authentication and Access Management', weight: 30 },
+      { name: 'Implement Access Management for Applications', weight: 15 },
+      { name: 'Plan and Implement Identity Governance', weight: 35 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'microsoft', slug: `microsoft-pl-900-p${n}`, code: `PL-900-P${n}`,
+    title: `Microsoft Power Platform Fundamentals (PL-900) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for Microsoft PL-900 — a 60-minute, 65-question, blueprint-weighted set covering Power Platform business value, core components, Power Apps, Power Automate, Power BI, and Power Pages & Copilot Studio.`,
+    level: 'Foundational', durationMinutes: 60, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Describe the Business Value of Power Platform', weight: 20 },
+      { name: 'Identify Core Components of Power Platform', weight: 20 },
+      { name: 'Demonstrate the Capabilities of Power Apps', weight: 15 },
+      { name: 'Demonstrate the Capabilities of Power Automate', weight: 15 },
+      { name: 'Demonstrate the Capabilities of Power BI', weight: 15 },
+      { name: 'Demonstrate the Capabilities of Power Pages and Copilot Studio', weight: 15 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'cisco', slug: `cisco-devnet-associate-200-901-p${n}`, code: `200-901-P${n}`,
+    title: `Cisco DevNet Associate (200-901 DEVASC) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for Cisco DevNet Associate (200-901 DEVASC) — a 120-minute, 65-question, blueprint-weighted set covering software development & design, understanding & using APIs, Cisco platforms & development, application deployment & security, infrastructure & automation, and network fundamentals.`,
+    level: 'Associate', durationMinutes: 120, passingScore: 80, questionCount: 65,
+    domains: [
+      { name: 'Software Development and Design', weight: 15 },
+      { name: 'Understanding and Using APIs', weight: 20 },
+      { name: 'Cisco Platforms and Development', weight: 15 },
+      { name: 'Application Deployment and Security', weight: 15 },
+      { name: 'Infrastructure and Automation', weight: 20 },
+      { name: 'Network Fundamentals', weight: 15 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'linuxfoundation', slug: `linuxfoundation-kcna-p${n}`, code: `KCNA-P${n}`,
+    title: `Kubernetes and Cloud Native Associate (KCNA) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for the CNCF KCNA certification — a 90-minute, 65-question, blueprint-weighted set covering Kubernetes fundamentals, container orchestration, cloud native architecture, cloud native observability, and cloud native application delivery. Aligned to the CNCF KCNA curriculum.`,
+    level: 'Foundational', durationMinutes: 90, passingScore: 75, questionCount: 65,
+    domains: [
+      { name: 'Kubernetes Fundamentals', weight: 46 },
+      { name: 'Container Orchestration', weight: 22 },
+      { name: 'Cloud Native Architecture', weight: 16 },
+      { name: 'Cloud Native Observability', weight: 8 },
+      { name: 'Cloud Native Application Delivery', weight: 8 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'hashicorp', slug: `hashicorp-vault-associate-p${n}`, code: `VA-002-P${n}`,
+    title: `HashiCorp Certified: Vault Associate (002) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for the HashiCorp Vault Associate (002) certification — a 60-minute, 65-question, blueprint-weighted set covering Vault architecture, authentication & authorization, secrets engines, Vault policies, tokens, and encryption as a service. Aligned to the HashiCorp Vault Associate 002 objectives.`,
+    level: 'Associate', durationMinutes: 60, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Vault Architecture', weight: 15 },
+      { name: 'Authentication and Authorization', weight: 20 },
+      { name: 'Secrets Engines', weight: 20 },
+      { name: 'Vault Policies', weight: 15 },
+      { name: 'Tokens', weight: 15 },
+      { name: 'Encryption as a Service', weight: 15 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'pmi', slug: `pmi-acp-p${n}`, code: `PMI-ACP-P${n}`,
+    title: `PMI Agile Certified Practitioner (PMI-ACP) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for PMI-ACP — a 180-minute, 65-question, blueprint-weighted set covering agile principles & mindset, value-driven delivery, stakeholder engagement, team performance, adaptive planning, problem detection & resolution, and continuous improvement.`,
+    level: 'Professional', durationMinutes: 180, passingScore: 75, questionCount: 65,
+    domains: [
+      { name: 'Agile Principles and Mindset', weight: 16 },
+      { name: 'Value-Driven Delivery', weight: 20 },
+      { name: 'Stakeholder Engagement', weight: 17 },
+      { name: 'Team Performance', weight: 16 },
+      { name: 'Adaptive Planning', weight: 12 },
+      { name: 'Problem Detection and Resolution', weight: 10 },
+      { name: 'Continuous Improvement', weight: 9 }
+    ]
+  })),
+
+  // ───── Wave 3c: competitor-parity new certs (65 Q/variant × 3) ─────
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'microsoft', slug: `microsoft-sc-100-p${n}`, code: `SC-100-P${n}`,
+    title: `Microsoft Cybersecurity Architect Expert (SC-100) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for Microsoft SC-100 — a 120-minute, 65-question, blueprint-weighted set covering designing solutions that align with security best practices & priorities; security operations, identity & compliance capabilities; and security solutions for infrastructure, applications & data.`,
+    level: 'Expert', durationMinutes: 120, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Design Solutions That Align with Security Best Practices and Priorities', weight: 24 },
+      { name: 'Design Security Operations, Identity, and Compliance Capabilities', weight: 27 },
+      { name: 'Design Security Solutions for Infrastructure', weight: 23 },
+      { name: 'Design Security Solutions for Applications and Data', weight: 26 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'microsoft', slug: `microsoft-dp-600-p${n}`, code: `DP-600-P${n}`,
+    title: `Microsoft Fabric Analytics Engineer (DP-600) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for Microsoft DP-600 — a 100-minute, 65-question, blueprint-weighted set covering planning & managing a data analytics solution, preparing & serving data, implementing & managing semantic models, and exploring & analyzing data in Microsoft Fabric.`,
+    level: 'Associate', durationMinutes: 100, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Plan, Implement, and Manage a Solution for Data Analytics', weight: 12 },
+      { name: 'Prepare and Serve Data', weight: 41 },
+      { name: 'Implement and Manage Semantic Models', weight: 23 },
+      { name: 'Explore and Analyze Data', weight: 24 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'microsoft', slug: `microsoft-pl-600-p${n}`, code: `PL-600-P${n}`,
+    title: `Microsoft Power Platform Solution Architect (PL-600) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for Microsoft PL-600 — a 120-minute, 65-question, blueprint-weighted set covering solution envisioning & requirement analysis, architecting a solution, and implementing the solution on Power Platform.`,
+    level: 'Expert', durationMinutes: 120, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Perform Solution Envisioning and Requirement Analysis', weight: 38 },
+      { name: 'Architect a Solution', weight: 39 },
+      { name: 'Implement the Solution', weight: 23 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'google', slug: `google-professional-cloud-devops-engineer-p${n}`, code: `GCP-PCDOE-P${n}`,
+    title: `Google Professional Cloud DevOps Engineer — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for the Google Professional Cloud DevOps Engineer certification — a 120-minute, 65-question, blueprint-weighted set covering bootstrapping & managing a Google Cloud organization, CI/CD pipelines, SRE practices, observability, and optimizing service performance.`,
+    level: 'Professional', durationMinutes: 120, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Bootstrapping and Managing a Google Cloud Organization', weight: 18 },
+      { name: 'Building and Implementing CI/CD Pipelines', weight: 22 },
+      { name: 'Applying Site Reliability Engineering Practices', weight: 22 },
+      { name: 'Implementing Observability', weight: 20 },
+      { name: 'Optimizing Service Performance', weight: 18 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'google', slug: `google-professional-cloud-network-engineer-p${n}`, code: `GCP-PCNE-P${n}`,
+    title: `Google Professional Cloud Network Engineer — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for the Google Professional Cloud Network Engineer certification — a 120-minute, 65-question, blueprint-weighted set covering designing & planning a network, implementing VPCs, configuring network services, hybrid interconnectivity, and managing/monitoring network operations on Google Cloud.`,
+    level: 'Professional', durationMinutes: 120, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Designing, Planning, and Prototyping a Google Cloud Network', weight: 26 },
+      { name: 'Implementing Virtual Private Cloud Instances', weight: 21 },
+      { name: 'Configuring Network Services', weight: 23 },
+      { name: 'Implementing Hybrid Interconnectivity', weight: 14 },
+      { name: 'Managing, Monitoring, and Optimizing Network Operations', weight: 16 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'cisco', slug: `cisco-ccnp-security-350-701-p${n}`, code: `350-701-P${n}`,
+    title: `Cisco CCNP Security (SCOR 350-701) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for Cisco CCNP Security (SCOR 350-701) — a 120-minute, 65-question, blueprint-weighted set covering security concepts, network security, securing the cloud, content security, endpoint protection & detection, and secure network access/visibility/enforcement.`,
+    level: 'Professional', durationMinutes: 120, passingScore: 80, questionCount: 65,
+    domains: [
+      { name: 'Security Concepts', weight: 25 },
+      { name: 'Network Security', weight: 20 },
+      { name: 'Securing the Cloud', weight: 15 },
+      { name: 'Content Security', weight: 15 },
+      { name: 'Endpoint Protection and Detection', weight: 10 },
+      { name: 'Secure Network Access, Visibility, and Enforcement', weight: 15 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'comptia', slug: `comptia-project-plus-p${n}`, code: `PK0-005-P${n}`,
+    title: `CompTIA Project+ (PK0-005) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for CompTIA Project+ (PK0-005) — a 90-minute, 65-question, blueprint-weighted set covering project management concepts, project life cycle phases, tools & documentation, and basics of IT & governance.`,
+    level: 'Foundational', durationMinutes: 90, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Project Management Concepts', weight: 33 },
+      { name: 'Project Life Cycle Phases', weight: 30 },
+      { name: 'Tools and Documentation', weight: 19 },
+      { name: 'Basics of IT and Governance', weight: 18 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'oracle', slug: `oracle-java-se-17-1z0-829-p${n}`, code: `1Z0-829-P${n}`,
+    title: `Oracle Certified Professional: Java SE 17 Developer (1Z0-829) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for Oracle Java SE 17 Developer (1Z0-829) — a 90-minute, 65-question, blueprint-weighted set covering the Java object-oriented approach, program flow, generics & collections, streams & lambdas, exceptions, the module system, concurrency, JDBC, and localization.`,
+    level: 'Professional', durationMinutes: 90, passingScore: 68, questionCount: 65,
+    domains: [
+      { name: 'Handling Date, Time, Text, Numeric and Boolean Values', weight: 8 },
+      { name: 'Controlling Program Flow', weight: 8 },
+      { name: 'Java Object-Oriented Approach', weight: 18 },
+      { name: 'Exception Handling', weight: 8 },
+      { name: 'Working with Arrays and Collections', weight: 10 },
+      { name: 'Working with Streams and Lambda Expressions', weight: 14 },
+      { name: 'Java Platform Module System', weight: 8 },
+      { name: 'Concurrency', weight: 10 },
+      { name: 'Database Applications with JDBC', weight: 8 },
+      { name: 'Localization', weight: 8 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'isc2', slug: `isc2-sscp-p${n}`, code: `SSCP-P${n}`,
+    title: `ISC2 SSCP — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for ISC2 SSCP — a 180-minute, 65-question, blueprint-weighted set covering security operations & administration, access controls, risk identification/monitoring/analysis, incident response & recovery, cryptography, network & communications security, and systems & application security.`,
+    level: 'Associate', durationMinutes: 180, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Security Operations and Administration', weight: 16 },
+      { name: 'Access Controls', weight: 15 },
+      { name: 'Risk Identification, Monitoring, and Analysis', weight: 15 },
+      { name: 'Incident Response and Recovery', weight: 14 },
+      { name: 'Cryptography', weight: 9 },
+      { name: 'Network and Communications Security', weight: 16 },
+      { name: 'Systems and Application Security', weight: 15 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'pmi', slug: `pmi-rmp-p${n}`, code: `PMI-RMP-P${n}`,
+    title: `PMI Risk Management Professional (PMI-RMP) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for PMI-RMP — a 150-minute, 65-question, blueprint-weighted set covering risk strategy & planning, risk identification, risk analysis, risk response, and monitor & close risks.`,
+    level: 'Professional', durationMinutes: 150, passingScore: 75, questionCount: 65,
+    domains: [
+      { name: 'Risk Strategy and Planning', weight: 22 },
+      { name: 'Risk Identification', weight: 23 },
+      { name: 'Risk Analysis', weight: 23 },
+      { name: 'Risk Response', weight: 13 },
+      { name: 'Monitor and Close Risks', weight: 19 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'linuxfoundation', slug: `linuxfoundation-kcsa-p${n}`, code: `KCSA-P${n}`,
+    title: `Kubernetes and Cloud Native Security Associate (KCSA) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for the CNCF KCSA certification — a 90-minute, 65-question, blueprint-weighted set covering overview of cloud native security, Kubernetes cluster component security, Kubernetes security fundamentals, the Kubernetes threat model, platform security, and compliance & security frameworks. Aligned to the CNCF KCSA curriculum.`,
+    level: 'Foundational', durationMinutes: 90, passingScore: 75, questionCount: 65,
+    domains: [
+      { name: 'Overview of Cloud Native Security', weight: 14 },
+      { name: 'Kubernetes Cluster Component Security', weight: 22 },
+      { name: 'Kubernetes Security Fundamentals', weight: 22 },
+      { name: 'Kubernetes Threat Model', weight: 16 },
+      { name: 'Platform Security', weight: 16 },
+      { name: 'Compliance and Security Frameworks', weight: 10 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'hashicorp', slug: `hashicorp-consul-associate-p${n}`, code: `CA-003-P${n}`,
+    title: `HashiCorp Certified: Consul Associate (003) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for the HashiCorp Consul Associate (003) certification — a 60-minute, 65-question, blueprint-weighted set covering Consul architecture, deployment, service discovery & registration, service mesh, network infrastructure automation, and Consul security. Aligned to the HashiCorp Consul Associate 003 objectives.`,
+    level: 'Associate', durationMinutes: 60, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Explain Consul Architecture', weight: 16 },
+      { name: 'Deploy Consul', weight: 16 },
+      { name: 'Service Discovery and Registration', weight: 18 },
+      { name: 'Service Mesh', weight: 20 },
+      { name: 'Network Infrastructure Automation', weight: 15 },
+      { name: 'Consul Security', weight: 15 }
+    ]
+  }))
 ];
 
 async function main() {
