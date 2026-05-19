@@ -964,8 +964,8 @@ const EXAMS: ExamSeed[] = [
   ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
     vendorSlug: 'hashicorp', slug: `hashicorp-terraform-associate-p${n}`, code: `TFA003-P${n}`,
     title: `HashiCorp Certified: Terraform Associate (003) — Practice Exam ${n}`,
-    description: `Practice exam ${n} of 3 for the HashiCorp Certified: Terraform Associate (003) certification — a 60-minute, 20-question, blueprint-weighted set covering IaC concepts, Terraform fundamentals & workflow, modules, state management, and reading/generating/modifying configuration. Aligned to the HashiCorp Terraform Associate 003 objectives.`,
-    level: 'Associate', durationMinutes: 60, passingScore: 70, questionCount: 20,
+    description: `Practice exam ${n} of 3 for the HashiCorp Certified: Terraform Associate (003) certification — a 60-minute, 65-question, blueprint-weighted set covering IaC concepts, Terraform fundamentals & workflow, modules, state management, and reading/generating/modifying configuration. Aligned to the HashiCorp Terraform Associate 003 objectives.`,
+    level: 'Associate', durationMinutes: 60, passingScore: 70, questionCount: 65,
     domains: [
       { name: 'Infrastructure as Code (IaC) Concepts', weight: 10 },
       { name: 'The Purpose of Terraform (vs other IaC)', weight: 10 },
@@ -982,8 +982,8 @@ const EXAMS: ExamSeed[] = [
   ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
     vendorSlug: 'docker', slug: `docker-dca-p${n}`, code: `DCA-P${n}`,
     title: `Docker Certified Associate (DCA) — Practice Exam ${n}`,
-    description: `Practice exam ${n} of 3 for the Docker Certified Associate (DCA) certification — a 90-minute, 20-question, blueprint-weighted set covering orchestration, image creation/management/registry, installation & configuration, networking, security, and storage & volumes. Aligned to the DCA exam domains.`,
-    level: 'Associate', durationMinutes: 90, passingScore: 65, questionCount: 20,
+    description: `Practice exam ${n} of 3 for the Docker Certified Associate (DCA) certification — a 90-minute, 65-question, blueprint-weighted set covering orchestration, image creation/management/registry, installation & configuration, networking, security, and storage & volumes. Aligned to the DCA exam domains.`,
+    level: 'Associate', durationMinutes: 90, passingScore: 65, questionCount: 65,
     domains: [
       { name: 'Orchestration', weight: 25 },
       { name: 'Image Creation, Management, and Registry', weight: 20 },
@@ -1017,8 +1017,8 @@ const EXAMS: ExamSeed[] = [
   ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
     vendorSlug: 'gitlab', slug: `gitlab-certified-associate-p${n}`, code: `GLCA-P${n}`,
     title: `GitLab Certified Associate — Practice Exam ${n}`,
-    description: `Practice exam ${n} of 3 for the GitLab Certified Associate certification — a 60-minute, 20-question, blueprint-weighted set covering Git & GitLab fundamentals, source code management & workflows, CI/CD pipelines, project management & collaboration, and security & compliance basics. Aligned to the GitLab Certified Associate curriculum.`,
-    level: 'Associate', durationMinutes: 60, passingScore: 70, questionCount: 20,
+    description: `Practice exam ${n} of 3 for the GitLab Certified Associate certification — a 60-minute, 65-question, blueprint-weighted set covering Git & GitLab fundamentals, source code management & workflows, CI/CD pipelines, project management & collaboration, and security & compliance basics. Aligned to the GitLab Certified Associate curriculum.`,
+    level: 'Associate', durationMinutes: 60, passingScore: 70, questionCount: 65,
     domains: [
       { name: 'Git and GitLab Fundamentals', weight: 20 },
       { name: 'Source Code Management and Workflows', weight: 20 },
@@ -1033,8 +1033,8 @@ const EXAMS: ExamSeed[] = [
   ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
     vendorSlug: 'elastic', slug: `elastic-certified-engineer-p${n}`, code: `ECE-P${n}`,
     title: `Elastic Certified Engineer — Practice Exam ${n}`,
-    description: `Practice exam ${n} of 3 for the Elastic Certified Engineer certification — a 180-minute, 20-question, blueprint-weighted set covering installation & configuration, indexing data, queries, mappings & text analysis, cluster administration, and data processing & aggregations. Aligned to the Elastic Certified Engineer exam objectives.`,
-    level: 'Professional', durationMinutes: 180, passingScore: 70, questionCount: 20,
+    description: `Practice exam ${n} of 3 for the Elastic Certified Engineer certification — a 180-minute, 65-question, blueprint-weighted set covering installation & configuration, indexing data, queries, mappings & text analysis, cluster administration, and data processing & aggregations. Aligned to the Elastic Certified Engineer exam objectives.`,
+    level: 'Professional', durationMinutes: 180, passingScore: 70, questionCount: 65,
     domains: [
       { name: 'Installation and Configuration', weight: 20 },
       { name: 'Indexing Data', weight: 20 },
@@ -1569,14 +1569,19 @@ async function main() {
     await db.exam.upsert({
       where: { slug: e.slug },
       update: {
+        // Sync catalog-content fields only. `questionCount` and `published`
+        // are DELIBERATELY excluded: prod admins set them manually
+        // (activate/deactivate, tune exam length) and this seed runs on
+        // EVERY deploy (Docker CMD: migrate deploy && tsx prisma/seed.ts).
+        // Overwriting them here silently reverts admin changes on every
+        // deploy. Prod is authoritative for these — only `create` sets the
+        // initial values for brand-new exams.
         title: e.title,
         description: e.description,
         level: e.level,
         durationMinutes: e.durationMinutes,
         passingScore: e.passingScore,
-        questionCount: e.questionCount,
-        domains: e.domains,
-        published: isPublished
+        domains: e.domains
       },
       create: {
         vendorId: vendorMap[e.vendorSlug],
