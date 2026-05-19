@@ -878,8 +878,8 @@ const EXAMS: ExamSeed[] = [
   {
     vendorSlug: 'linuxfoundation', slug: 'linuxfoundation-ckad-p1', code: 'CKAD-P1',
     title: 'Certified Kubernetes Application Developer (CKAD) — Practice Exam 1',
-    description: 'Practice exam 1 of 3 for the CNCF Certified Kubernetes Application Developer (CKAD) certification — full 120-minute, 20-question, blueprint-weighted set covering Pods, Deployments, Jobs, ConfigMaps/Secrets, SecurityContexts, ServiceAccounts, probes, multi-container patterns, Services, NetworkPolicies, and Ingress. Aligned to CNCF CKAD v1.35.',
-    level: 'Associate', durationMinutes: 120, passingScore: 66, questionCount: 20,
+    description: 'Practice exam 1 of 3 for the CNCF Certified Kubernetes Application Developer (CKAD) certification — full 120-minute, 65-question, blueprint-weighted set covering Pods, Deployments, Jobs, ConfigMaps/Secrets, SecurityContexts, ServiceAccounts, probes, multi-container patterns, Services, NetworkPolicies, and Ingress. Aligned to CNCF CKAD v1.35.',
+    level: 'Associate', durationMinutes: 120, passingScore: 66, questionCount: 65,
     domains: [
       { name: 'Application Design and Build', weight: 20 },
       { name: 'Application Deployment', weight: 20 },
@@ -891,8 +891,8 @@ const EXAMS: ExamSeed[] = [
   {
     vendorSlug: 'linuxfoundation', slug: 'linuxfoundation-ckad-p2', code: 'CKAD-P2',
     title: 'Certified Kubernetes Application Developer (CKAD) — Practice Exam 2',
-    description: 'Practice exam 2 of 3 for the CNCF Certified Kubernetes Application Developer (CKAD) certification — a second 120-minute, 20-question, blueprint-weighted set. Aligned to CNCF CKAD v1.35.',
-    level: 'Associate', durationMinutes: 120, passingScore: 66, questionCount: 20,
+    description: 'Practice exam 2 of 3 for the CNCF Certified Kubernetes Application Developer (CKAD) certification — a second 120-minute, 65-question, blueprint-weighted set. Aligned to CNCF CKAD v1.35.',
+    level: 'Associate', durationMinutes: 120, passingScore: 66, questionCount: 65,
     domains: [
       { name: 'Application Design and Build', weight: 20 },
       { name: 'Application Deployment', weight: 20 },
@@ -904,8 +904,8 @@ const EXAMS: ExamSeed[] = [
   {
     vendorSlug: 'linuxfoundation', slug: 'linuxfoundation-ckad-p3', code: 'CKAD-P3',
     title: 'Certified Kubernetes Application Developer (CKAD) — Practice Exam 3',
-    description: 'Practice exam 3 of 3 for the CNCF Certified Kubernetes Application Developer (CKAD) certification — a third 120-minute, 20-question, blueprint-weighted set. Aligned to CNCF CKAD v1.35.',
-    level: 'Associate', durationMinutes: 120, passingScore: 66, questionCount: 20,
+    description: 'Practice exam 3 of 3 for the CNCF Certified Kubernetes Application Developer (CKAD) certification — a third 120-minute, 65-question, blueprint-weighted set. Aligned to CNCF CKAD v1.35.',
+    level: 'Associate', durationMinutes: 120, passingScore: 66, questionCount: 65,
     domains: [
       { name: 'Application Design and Build', weight: 20 },
       { name: 'Application Deployment', weight: 20 },
@@ -922,8 +922,8 @@ const EXAMS: ExamSeed[] = [
   {
     vendorSlug: 'linuxfoundation', slug: 'linuxfoundation-cka-p1', code: 'CKA-P1',
     title: 'Certified Kubernetes Administrator (CKA) — Practice Exam 1',
-    description: 'Practice exam 1 of 3 for the CNCF Certified Kubernetes Administrator (CKA) certification — full 120-minute, 20-question, blueprint-weighted set covering kubeadm install, etcd, RBAC, scheduling, Services & Ingress/Gateway API, NetworkPolicies, PV/PVC/StorageClasses, and the troubleshooting workflows tested by the TGS-2025054612-CKA labs. Aligned to CNCF CKA v1.32.',
-    level: 'Associate', durationMinutes: 120, passingScore: 66, questionCount: 20,
+    description: 'Practice exam 1 of 3 for the CNCF Certified Kubernetes Administrator (CKA) certification — full 120-minute, 65-question, blueprint-weighted set covering kubeadm install, etcd, RBAC, scheduling, Services & Ingress/Gateway API, NetworkPolicies, PV/PVC/StorageClasses, and the troubleshooting workflows tested by the TGS-2025054612-CKA labs. Aligned to CNCF CKA v1.32.',
+    level: 'Associate', durationMinutes: 120, passingScore: 66, questionCount: 65,
     domains: [
       { name: 'Cluster Architecture, Installation and Configuration', weight: 25 },
       { name: 'Workloads and Scheduling', weight: 15 },
@@ -935,8 +935,8 @@ const EXAMS: ExamSeed[] = [
   {
     vendorSlug: 'linuxfoundation', slug: 'linuxfoundation-cka-p2', code: 'CKA-P2',
     title: 'Certified Kubernetes Administrator (CKA) — Practice Exam 2',
-    description: 'Practice exam 2 of 3 for the CNCF Certified Kubernetes Administrator (CKA) certification — a second 120-minute, 20-question, blueprint-weighted set. Aligned to CNCF CKA v1.32.',
-    level: 'Associate', durationMinutes: 120, passingScore: 66, questionCount: 20,
+    description: 'Practice exam 2 of 3 for the CNCF Certified Kubernetes Administrator (CKA) certification — a second 120-minute, 65-question, blueprint-weighted set. Aligned to CNCF CKA v1.32.',
+    level: 'Associate', durationMinutes: 120, passingScore: 66, questionCount: 65,
     domains: [
       { name: 'Cluster Architecture, Installation and Configuration', weight: 25 },
       { name: 'Workloads and Scheduling', weight: 15 },
@@ -948,8 +948,8 @@ const EXAMS: ExamSeed[] = [
   {
     vendorSlug: 'linuxfoundation', slug: 'linuxfoundation-cka-p3', code: 'CKA-P3',
     title: 'Certified Kubernetes Administrator (CKA) — Practice Exam 3',
-    description: 'Practice exam 3 of 3 for the CNCF Certified Kubernetes Administrator (CKA) certification — a third 120-minute, 20-question, blueprint-weighted set. Aligned to CNCF CKA v1.32.',
-    level: 'Associate', durationMinutes: 120, passingScore: 66, questionCount: 20,
+    description: 'Practice exam 3 of 3 for the CNCF Certified Kubernetes Administrator (CKA) certification — a third 120-minute, 65-question, blueprint-weighted set. Aligned to CNCF CKA v1.32.',
+    level: 'Associate', durationMinutes: 120, passingScore: 66, questionCount: 65,
     domains: [
       { name: 'Cluster Architecture, Installation and Configuration', weight: 25 },
       { name: 'Workloads and Scheduling', weight: 15 },
@@ -1001,8 +1001,8 @@ const EXAMS: ExamSeed[] = [
   ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
     vendorSlug: 'redhat', slug: `redhat-rhcsa-ex200-p${n}`, code: `RHCSA-P${n}`,
     title: `Red Hat Certified System Administrator (RHCSA EX200) — Practice Exam ${n}`,
-    description: `Practice exam ${n} of 3 for the Red Hat Certified System Administrator (RHCSA EX200) certification — a 150-minute, 20-question, blueprint-weighted set covering essential tools, operating running systems, local storage & file systems, system deployment & maintenance, users & groups, and security. Aligned to the official Red Hat EX200 objectives (RHEL 9).`,
-    level: 'Associate', durationMinutes: 150, passingScore: 70, questionCount: 20,
+    description: `Practice exam ${n} of 3 for the Red Hat Certified System Administrator (RHCSA EX200) certification — a 150-minute, 65-question, blueprint-weighted set covering essential tools, operating running systems, local storage & file systems, system deployment & maintenance, users & groups, and security. Aligned to the official Red Hat EX200 objectives (RHEL 9).`,
+    level: 'Associate', durationMinutes: 150, passingScore: 70, questionCount: 65,
     domains: [
       { name: 'Understand and Use Essential Tools', weight: 15 },
       { name: 'Operate Running Systems', weight: 15 },
