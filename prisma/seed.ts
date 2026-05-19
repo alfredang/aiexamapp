@@ -964,8 +964,8 @@ const EXAMS: ExamSeed[] = [
   ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
     vendorSlug: 'hashicorp', slug: `hashicorp-terraform-associate-p${n}`, code: `TFA003-P${n}`,
     title: `HashiCorp Certified: Terraform Associate (003) — Practice Exam ${n}`,
-    description: `Practice exam ${n} of 3 for the HashiCorp Certified: Terraform Associate (003) certification — a 60-minute, 20-question, blueprint-weighted set covering IaC concepts, Terraform fundamentals & workflow, modules, state management, and reading/generating/modifying configuration. Aligned to the HashiCorp Terraform Associate 003 objectives.`,
-    level: 'Associate', durationMinutes: 60, passingScore: 70, questionCount: 20,
+    description: `Practice exam ${n} of 3 for the HashiCorp Certified: Terraform Associate (003) certification — a 60-minute, 65-question, blueprint-weighted set covering IaC concepts, Terraform fundamentals & workflow, modules, state management, and reading/generating/modifying configuration. Aligned to the HashiCorp Terraform Associate 003 objectives.`,
+    level: 'Associate', durationMinutes: 60, passingScore: 70, questionCount: 65,
     domains: [
       { name: 'Infrastructure as Code (IaC) Concepts', weight: 10 },
       { name: 'The Purpose of Terraform (vs other IaC)', weight: 10 },
