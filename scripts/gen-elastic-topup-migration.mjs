@@ -1,8 +1,8 @@
 /* Generate the Elastic Certified Engineer question-only top-up migration.
  *
- * Local exams use code ECE-P{n}; PROD uses CERTIFIED-ENGINEER-P{n}
- * (independently built). So we READ questions from local by ECE-P{n} and
- * EMIT inserts keyed on the PROD code CERTIFIED-ENGINEER-P{n}.
+ * Prod exam codes were aligned to match local: both use ECE-P{n} now.
+ * (They were CERTIFIED-ENGINEER-P{n} on prod earlier; admin renamed them.)
+ * Read questions from local ECE-P{n}, emit inserts keyed on prod ECE-P{n}.
  *
  * Same safe shape as the DCA top-up (20260519120000_dca_topup):
  *  - INSERT INTO "Question" only. No Exam/Bundle/Vendor writes.
@@ -17,8 +17,8 @@ import path from 'path';
 
 const db = new PrismaClient();
 const T = '$ece$';
-// local code -> prod code
-const MAP = { 'ECE-P1': 'CERTIFIED-ENGINEER-P1', 'ECE-P2': 'CERTIFIED-ENGINEER-P2', 'ECE-P3': 'CERTIFIED-ENGINEER-P3' };
+// local code -> prod code (now identical — prod renamed to match local)
+const MAP = { 'ECE-P1': 'ECE-P1', 'ECE-P2': 'ECE-P2', 'ECE-P3': 'ECE-P3' };
 
 function q(v) {
   const s = String(v);
@@ -30,7 +30,7 @@ const j = (v) => `${q(JSON.stringify(v))}::jsonb`;
 async function main() {
   const out = [
     '-- Elastic Certified Engineer question-only top-up (Wave 2 content -> prod).',
-    '-- Local code ECE-P{n} -> PROD code CERTIFIED-ENGINEER-P{n} (independent build).',
+    '-- Codes aligned: local ECE-P{n} == prod ECE-P{n} (admin renamed prod).',
     '-- SAFE: only INSERT INTO "Question"; idempotent via NOT EXISTS(examId,stem);',
     '-- no Exam/Bundle writes; never touches published/deletedAt; no deletes.',
     '-- Target prod exams are INACTIVE — questions land PUBLISHED and become',
