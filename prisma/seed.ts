@@ -1001,8 +1001,8 @@ const EXAMS: ExamSeed[] = [
   ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
     vendorSlug: 'redhat', slug: `redhat-rhcsa-ex200-p${n}`, code: `RHCSA-P${n}`,
     title: `Red Hat Certified System Administrator (RHCSA EX200) — Practice Exam ${n}`,
-    description: `Practice exam ${n} of 3 for the Red Hat Certified System Administrator (RHCSA EX200) certification — a 150-minute, 20-question, blueprint-weighted set covering essential tools, operating running systems, local storage & file systems, system deployment & maintenance, users & groups, and security. Aligned to the official Red Hat EX200 objectives (RHEL 9).`,
-    level: 'Associate', durationMinutes: 150, passingScore: 70, questionCount: 20,
+    description: `Practice exam ${n} of 3 for the Red Hat Certified System Administrator (RHCSA EX200) certification — a 150-minute, 65-question, blueprint-weighted set covering essential tools, operating running systems, local storage & file systems, system deployment & maintenance, users & groups, and security. Aligned to the official Red Hat EX200 objectives (RHEL 9).`,
+    level: 'Associate', durationMinutes: 150, passingScore: 70, questionCount: 65,
     domains: [
       { name: 'Understand and Use Essential Tools', weight: 15 },
       { name: 'Operate Running Systems', weight: 15 },
