@@ -1033,8 +1033,8 @@ const EXAMS: ExamSeed[] = [
   ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
     vendorSlug: 'elastic', slug: `elastic-certified-engineer-p${n}`, code: `ECE-P${n}`,
     title: `Elastic Certified Engineer — Practice Exam ${n}`,
-    description: `Practice exam ${n} of 3 for the Elastic Certified Engineer certification — a 180-minute, 20-question, blueprint-weighted set covering installation & configuration, indexing data, queries, mappings & text analysis, cluster administration, and data processing & aggregations. Aligned to the Elastic Certified Engineer exam objectives.`,
-    level: 'Professional', durationMinutes: 180, passingScore: 70, questionCount: 20,
+    description: `Practice exam ${n} of 3 for the Elastic Certified Engineer certification — a 180-minute, 65-question, blueprint-weighted set covering installation & configuration, indexing data, queries, mappings & text analysis, cluster administration, and data processing & aggregations. Aligned to the Elastic Certified Engineer exam objectives.`,
+    level: 'Professional', durationMinutes: 180, passingScore: 70, questionCount: 65,
     domains: [
       { name: 'Installation and Configuration', weight: 20 },
       { name: 'Indexing Data', weight: 20 },
