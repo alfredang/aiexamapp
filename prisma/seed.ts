@@ -253,6 +253,7 @@ function buildMultiVariantBundles(): BundleSeed[] {
     { slug: 'cisco-ccnp-security-350-701', title: 'Cisco CCNP Security (SCOR 350-701)', description: 'All 3 CCNP Security (SCOR 350-701) practice exams in one bundle — security concepts, network security, securing the cloud, content security, endpoint protection & detection, and secure network access/visibility/enforcement.', variants: 3, price: 2000, priceVoucher: 40000 },
     { slug: 'comptia-project-plus', title: 'CompTIA Project+ (PK0-005)', description: 'All 3 CompTIA Project+ (PK0-005) practice exams in one bundle — project management concepts, project life cycle phases, tools & documentation, and basics of IT & governance.', variants: 3, price: 2000, priceVoucher: 25000 },
     { slug: 'oracle-java-se-17-1z0-829', title: 'Oracle Certified Professional: Java SE 17 Developer (1Z0-829)', description: 'All 3 Java SE 17 Developer (1Z0-829) practice exams in one bundle — the Java object-oriented approach, program flow, generics & collections, streams & lambdas, exceptions, the module system, concurrency, JDBC, and localization.', variants: 3, price: 2000, priceVoucher: 24500 },
+    { slug: 'oracle-oci-foundations', title: 'Oracle Cloud Infrastructure Foundations Associate (1Z0-1085)', description: 'All 3 OCI Foundations Associate (1Z0-1085) practice exams in one bundle — OCI introduction, identity & access management, networking, compute, storage, and security & observability. Aligned to the official 1Z0-1085 exam objectives.', variants: 3, price: 2000, priceVoucher: 12500 },
     { slug: 'isc2-sscp', title: 'ISC2 SSCP', description: 'All 3 SSCP practice exams in one bundle — security operations & administration, access controls, risk identification/monitoring/analysis, incident response & recovery, cryptography, network & communications security, and systems & application security.', variants: 3, price: 2000, priceVoucher: 28900 },
     { slug: 'pmi-rmp', title: 'PMI Risk Management Professional (PMI-RMP)', description: 'All 3 PMI-RMP practice exams in one bundle — risk strategy & planning, risk identification, risk analysis, risk response, and monitor & close risks.', variants: 3, price: 2000, priceVoucher: 52000 },
     { slug: 'linuxfoundation-kcsa', title: 'Kubernetes and Cloud Native Security Associate (KCSA)', description: 'All 3 KCSA practice exams in one bundle — overview of cloud native security, Kubernetes cluster component security, Kubernetes security fundamentals, the Kubernetes threat model, platform security, and compliance & security frameworks. Aligned to the CNCF KCSA curriculum.', variants: 3, price: 2000, priceVoucher: 25000 },
@@ -1467,6 +1468,20 @@ const EXAMS: ExamSeed[] = [
       { name: 'Concurrency', weight: 10 },
       { name: 'Database Applications with JDBC', weight: 8 },
       { name: 'Localization', weight: 8 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'oracle', slug: `oracle-oci-foundations-1z0-1085-p${n}`, code: `1Z0-1085-P${n}`,
+    title: `Oracle Cloud Infrastructure Foundations Associate (1Z0-1085) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for the Oracle Cloud Infrastructure Foundations Associate (1Z0-1085) certification — a 60-minute, 65-question, blueprint-weighted set covering OCI introduction, identity & access management, networking, compute, storage, and security & observability. Aligned to the official 1Z0-1085 exam objectives.`,
+    level: 'Foundational', durationMinutes: 60, passingScore: 65, questionCount: 65,
+    domains: [
+      { name: 'OCI Introduction', weight: 15 },
+      { name: 'OCI Identity and Access Management', weight: 20 },
+      { name: 'Networking', weight: 20 },
+      { name: 'Compute', weight: 15 },
+      { name: 'Storage', weight: 15 },
+      { name: 'Security and Observability', weight: 15 }
     ]
   })),
   ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
