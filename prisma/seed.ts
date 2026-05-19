@@ -1017,8 +1017,8 @@ const EXAMS: ExamSeed[] = [
   ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
     vendorSlug: 'gitlab', slug: `gitlab-certified-associate-p${n}`, code: `GLCA-P${n}`,
     title: `GitLab Certified Associate — Practice Exam ${n}`,
-    description: `Practice exam ${n} of 3 for the GitLab Certified Associate certification — a 60-minute, 20-question, blueprint-weighted set covering Git & GitLab fundamentals, source code management & workflows, CI/CD pipelines, project management & collaboration, and security & compliance basics. Aligned to the GitLab Certified Associate curriculum.`,
-    level: 'Associate', durationMinutes: 60, passingScore: 70, questionCount: 20,
+    description: `Practice exam ${n} of 3 for the GitLab Certified Associate certification — a 60-minute, 65-question, blueprint-weighted set covering Git & GitLab fundamentals, source code management & workflows, CI/CD pipelines, project management & collaboration, and security & compliance basics. Aligned to the GitLab Certified Associate curriculum.`,
+    level: 'Associate', durationMinutes: 60, passingScore: 70, questionCount: 65,
     domains: [
       { name: 'Git and GitLab Fundamentals', weight: 20 },
       { name: 'Source Code Management and Workflows', weight: 20 },
