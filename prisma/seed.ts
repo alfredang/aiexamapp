@@ -1092,9 +1092,9 @@ const EXAMS: ExamSeed[] = [
     level: 'Expert', durationMinutes: 120, passingScore: 70, questionCount: 65,
     domains: [
       { name: 'Deploy and manage a Microsoft 365 tenant', weight: 27 },
-      { name: 'Implement and manage Microsoft Entra identity and access', weight: 18 },
-      { name: 'Manage security and threats by using Microsoft Defender XDR', weight: 32 },
-      { name: 'Manage compliance by using Microsoft Purview', weight: 23 }
+      { name: 'Implement and manage Microsoft Entra identity and access', weight: 27 },
+      { name: 'Manage security and threats by using Microsoft Defender XDR', weight: 33 },
+      { name: 'Manage compliance by using Microsoft Purview', weight: 13 }
     ]
   })),
   ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
