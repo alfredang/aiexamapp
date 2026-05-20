@@ -80,9 +80,14 @@ async function bulkExamAction(formData: FormData) {
     const fLevel = String(formData.get('filterLevel') || '');
     const fStatus = String(formData.get('filterStatus') || '');
     const fQ = String(formData.get('filterQ') || '').trim();
-    const fArchived = formData.get('filterArchived') === '1';
+    const rawArchived = String(formData.get('filterArchived') || '');
+    const fArchived = rawArchived === '1' ? '1' : rawArchived === 'all' ? 'all' : '';
     const where = {
-      ...(fArchived ? { deletedAt: { not: null } } : { deletedAt: null }),
+      ...(fArchived === '1'
+        ? { deletedAt: { not: null } }
+        : fArchived === 'all'
+          ? {}
+          : { deletedAt: null }),
       ...(fVendor ? { vendor: { slug: fVendor } } : {}),
       ...(fLevel ? { level: fLevel } : {}),
       ...(fStatus === 'active'
@@ -240,11 +245,17 @@ export default async function AdminExamsPage({
   const levelFilter = sp.level || '';
   const status = sp.status || '';
   const q = (sp.q || '').trim();
-  const archived = sp.archived === '1';
+  // 3-state: '' = Active (deletedAt null) — default, '1' = Archived only,
+  // 'all' = both. Old links with archived=1 keep working unchanged.
+  const archived = sp.archived === '1' ? '1' : sp.archived === 'all' ? 'all' : '';
   const requestedPage = Math.max(1, Number(sp.page || 1) || 1);
 
   const where = {
-    ...(archived ? { deletedAt: { not: null } } : { deletedAt: null }),
+    ...(archived === '1'
+      ? { deletedAt: { not: null } }
+      : archived === 'all'
+        ? {}
+        : { deletedAt: null }),
     ...(vendorFilter ? { vendor: { slug: vendorFilter } } : {}),
     ...(levelFilter ? { level: levelFilter } : {}),
     ...(status === 'active' ? { published: true } : status === 'inactive' ? { published: false } : {}),
@@ -384,7 +395,13 @@ export default async function AdminExamsPage({
     {
       key: 'status',
       header: 'Status',
-      cell: (e) => <StatusBadge status={e.published ? 'ACTIVE' : 'INACTIVE'} />
+      // On the "All" view archived and merely-inactive rows live side by
+      // side — surface ARCHIVED explicitly so they are distinguishable
+      // beyond just the Restore icon in the actions column.
+      cell: (e) =>
+        e.deletedAt
+          ? <StatusBadge status="ARCHIVED" />
+          : <StatusBadge status={e.published ? 'ACTIVE' : 'INACTIVE'} />
     },
     { key: 'qPerExam', header: 'Q / Exam', cell: (e) => e.questionCount, align: 'right' },
     { key: 'duration', header: 'Duration', cell: (e) => `${e.durationMinutes} min`, align: 'right' },
@@ -532,14 +549,17 @@ export default async function AdminExamsPage({
           <input name="q" defaultValue={q} placeholder="Title or code…" className="input-sm" />
         </FilterField>
         <FilterField label="View">
-          <select name="archived" defaultValue={archived ? '1' : ''} className="input-sm">
+          <select name="archived" defaultValue={archived} className="input-sm">
             <option value="">Active</option>
             <option value="1">Archived</option>
+            <option value="all">All</option>
           </select>
         </FilterField>
       </FilterBar>
 
-      {!archived && (
+      {/* Bulk form visible on Active and All views. Hidden on Archived-only
+          view (which uses a separate Restore form below). */}
+      {archived !== '1' && (
         <form
           id={BULK_FORM_ID}
           action={bulkExamAction}
@@ -553,7 +573,7 @@ export default async function AdminExamsPage({
           <input type="hidden" name="filterLevel" value={levelFilter} />
           <input type="hidden" name="filterStatus" value={status} />
           <input type="hidden" name="filterQ" value={q} />
-          <input type="hidden" name="filterArchived" value={archived ? '1' : ''} />
+          <input type="hidden" name="filterArchived" value={archived} />
           <label className="inline-flex cursor-pointer items-center gap-1.5 text-slate-700 dark:text-slate-200">
             <SelectAllCheckbox formId={BULK_FORM_ID} className="h-4 w-4 accent-blue-600" />
             Select all
