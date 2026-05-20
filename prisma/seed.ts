@@ -201,7 +201,7 @@ function buildMultiVariantBundles(): BundleSeed[] {
     { slug: 'microsoft-dp-100', title: 'Microsoft Azure Data Scientist Associate (DP-100)', description: 'All 2 DP-100 practice exams in one bundle — covering ML solution design, data exploration & model training, deployment preparation, and model retraining on Azure ML.', variants: 2, price: 2000, priceVoucher: 16500 },
     { slug: 'microsoft-dp-300', title: 'Microsoft Azure Database Administrator (DP-300)', description: 'All 4 DP-300 practice exams in one bundle — covering planning & implementing data platform resources, implementing secure environments, monitoring & optimization, automation, and HA/DR for Azure SQL.', variants: 4, price: 2000, priceVoucher: 16500 },
     { slug: 'microsoft-md-102', title: 'Microsoft Endpoint Administrator (MD-102)', description: 'All 4 MD-102 practice exams in one bundle — covering deploy Windows clients, manage identity & compliance, manage, protect, and monitor devices.', variants: 4, price: 2000, priceVoucher: 16500 },
-    { slug: 'microsoft-ms-102', title: 'Microsoft 365 Administrator Expert (MS-102)', description: 'All 4 MS-102 practice exams in one bundle — covering deploy & manage a Microsoft 365 tenant, implement & manage Microsoft Entra identity & access, manage security & threats with Defender XDR, and Microsoft Purview compliance.', variants: 4, price: 2000, priceVoucher: 16500 },
+    { slug: 'microsoft-ms-102', title: 'Microsoft 365 Administrator Expert (MS-102)', description: 'All 3 MS-102 practice exams in one bundle — covering deploy & manage a Microsoft 365 tenant, implement & manage Microsoft Entra identity & access, manage security & threats with Defender XDR, and Microsoft Purview compliance.', variants: 3, price: 2000, priceVoucher: 16500 },
     { slug: 'microsoft-pl-300', title: 'Microsoft Power BI Data Analyst (PL-300)', description: 'All 5 PL-300 practice exams in one bundle — covering data preparation, data modeling, data visualization, and data analysis deployment & maintenance in Power BI.', variants: 5, price: 2000, priceVoucher: 16500 },
     { slug: 'cisco-ccna', title: 'Cisco Certified Network Associate (CCNA)', description: 'All 6 CCNA (200-301) practice exams in one bundle — covering networking fundamentals, IP services, security fundamentals, automation & programmability, and network access.', variants: 6, price: 2000, priceVoucher: 30000 },
     { slug: 'cisco-ccnp-encor', title: 'Cisco CCNP Enterprise Core (ENCOR 350-401)', description: 'All 2 CCNP Enterprise Core (ENCOR 350-401) practice exams in one bundle — covering architecture, virtualization, infrastructure, network assurance, security, and automation.', variants: 2, price: 2000, priceVoucher: 40000 },
@@ -1083,6 +1083,18 @@ const EXAMS: ExamSeed[] = [
       { name: 'Deploy and manage Azure compute resources', weight: 23 },
       { name: 'Implement and manage virtual networking', weight: 22 },
       { name: 'Monitor and maintain Azure resources', weight: 15 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'microsoft', slug: `microsoft-ms-102-p${n}`, code: `MS-102-P${n}`,
+    title: `Microsoft 365 Administrator Expert (MS-102) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for Microsoft MS-102 — a 120-minute, 65-question, blueprint-weighted set covering deploy & manage a Microsoft 365 tenant, Microsoft Entra identity & access, security & threats with Microsoft Defender XDR, and Microsoft Purview compliance. Aligned to the official Microsoft MS-102 exam objectives.`,
+    level: 'Expert', durationMinutes: 120, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Deploy and manage a Microsoft 365 tenant', weight: 27 },
+      { name: 'Implement and manage Microsoft Entra identity and access', weight: 18 },
+      { name: 'Manage security and threats by using Microsoft Defender XDR', weight: 32 },
+      { name: 'Manage compliance by using Microsoft Purview', weight: 23 }
     ]
   })),
   ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
