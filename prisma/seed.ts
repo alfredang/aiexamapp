@@ -1073,6 +1073,19 @@ const EXAMS: ExamSeed[] = [
     ]
   })),
   ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'microsoft', slug: `microsoft-az-104-p${n}`, code: `AZ-104-P${n}`,
+    title: `Microsoft Azure Administrator (AZ-104) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for Microsoft AZ-104 — a 100-minute, 65-question, blueprint-weighted set covering Azure identities & governance, storage, compute resources, virtual networking, and monitoring & maintenance. Aligned to the official Microsoft AZ-104 exam objectives.`,
+    level: 'Associate', durationMinutes: 100, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Manage Azure identities and governance', weight: 22 },
+      { name: 'Implement and manage storage', weight: 18 },
+      { name: 'Deploy and manage Azure compute resources', weight: 23 },
+      { name: 'Implement and manage virtual networking', weight: 22 },
+      { name: 'Monitor and maintain Azure resources', weight: 15 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
     vendorSlug: 'microsoft', slug: `microsoft-sc-900-p${n}`, code: `SC-900-P${n}`,
     title: `Microsoft Security, Compliance, and Identity Fundamentals (SC-900) — Practice Exam ${n}`,
     description: `Practice exam ${n} of 3 for Microsoft SC-900 — a 60-minute, 65-question, blueprint-weighted set covering security/compliance/identity concepts, Microsoft Entra, Microsoft security solutions, and Microsoft compliance (Purview) solutions.`,
