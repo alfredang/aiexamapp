@@ -6,6 +6,7 @@ import { auth } from '@/lib/auth';
 import { Sparkles } from 'lucide-react';
 import { SubmitBusyButton } from '@/components/admin/submit-busy-button';
 import { SeoSavedFlash } from '@/components/admin/seo-saved-flash';
+import { ConfirmButton } from '@/components/admin/confirm-button';
 
 async function requireAdmin() {
   const session = await auth();
@@ -226,6 +227,30 @@ async function unpublishAll(formData: FormData) {
     data: {
       adminId: user.id,
       action: 'question.bulk_unpublish',
+      targetType: 'Exam',
+      targetId: examId,
+      metadata: { count: result.count }
+    }
+  });
+  revalidatePath(`/admin-dashboard/exams/${examId}`);
+}
+
+// HARD DELETE every question for an exam. Irreversible. Useful before a
+// refill-from-curated-set migration. Guarded by ADMIN + a typed
+// confirmation in the UI (ConfirmButton). Logs the count.
+async function deleteAllQuestions(formData: FormData) {
+  'use server';
+  const session = await auth();
+  const user = session?.user as any;
+  if (user?.role !== 'ADMIN') return;
+  const examId = String(formData.get('examId'));
+  if (!examId) return;
+  const result = await db.question.deleteMany({ where: { examId } });
+  if (result.count === 0) return;
+  await db.adminLog.create({
+    data: {
+      adminId: user.id,
+      action: 'question.bulk_hard_delete',
       targetType: 'Exam',
       targetId: examId,
       metadata: { count: result.count }
@@ -469,6 +494,18 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
                 <button className="btn-outline text-sm" type="submit">
                   Unpublish all
                 </button>
+              </form>
+            )}
+            {exam.questions.length > 0 && (
+              <form action={deleteAllQuestions}>
+                <input type="hidden" name="examId" value={exam.id} />
+                <ConfirmButton
+                  variant="danger"
+                  message={`HARD DELETE all ${exam.questions.length} questions for "${exam.code}"? This is IRREVERSIBLE — the questions are removed from the database entirely. Use this before a curated refill.`}
+                  className="h-8 px-3 text-sm"
+                >
+                  Delete all
+                </ConfirmButton>
               </form>
             )}
           </div>
