@@ -268,6 +268,8 @@ export default async function AdminExamsPage({
   // Single View dropdown now collapses what used to be two filters
   // (?status= + ?archived=) into one ?view= param. Old links still work:
   // we map legacy ?status= / ?archived= to the matching view value.
+  // Default is `all` so freshly-seeded INACTIVE rows are visible without
+  // toggling — admins almost always need to see everything when working.
   type View = 'active' | 'inactive' | 'archived' | 'all';
   function resolveView(): View {
     const raw = sp.view;
@@ -277,39 +279,59 @@ export default async function AdminExamsPage({
     if (sp.archived === 'all') return 'all';
     if (sp.status === 'inactive') return 'inactive';
     if (sp.status === 'active') return 'active';
-    return 'active'; // default
+    return 'all'; // default
   }
   const view: View = resolveView();
   const requestedPage = Math.max(1, Number(sp.page || 1) || 1);
 
-  const where = {
-    ...(view === 'active'
-      ? { deletedAt: null, published: true }
-      : view === 'inactive'
-        ? { deletedAt: null, published: false }
-        : view === 'archived'
-          ? { deletedAt: { not: null } }
-          : {}),
-    ...(vendorFilter ? { vendor: { slug: vendorFilter } } : {}),
-    ...(levelFilter ? { level: levelFilter } : {}),
-    ...searchClause(q)
-  };
+  // Build the `where` for a given view, sharing the search + vendor + level
+  // filters. Extracted so the empty-state hint can count how many rows would
+  // match in OTHER views with the same search.
+  function whereFor(v: View) {
+    return {
+      ...(v === 'active'
+        ? { deletedAt: null, published: true }
+        : v === 'inactive'
+          ? { deletedAt: null, published: false }
+          : v === 'archived'
+            ? { deletedAt: { not: null } }
+            : {}),
+      ...(vendorFilter ? { vendor: { slug: vendorFilter } } : {}),
+      ...(levelFilter ? { level: levelFilter } : {}),
+      ...searchClause(q)
+    };
+  }
+
+  const where = whereFor(view);
 
   const [vendors, totalCount] = await Promise.all([
     db.vendor.findMany({ orderBy: { name: 'asc' } }),
     db.exam.count({ where })
   ]);
 
+  // When the current view returns 0 results AND the user has narrowed by
+  // search/vendor/level, look in the other views with the same filters and
+  // surface "found N in inactive — switch?" so it's obvious where the rows
+  // are hiding. Skip when filters are empty (don't run 3 extra counts on the
+  // default landing page).
+  const hasFilters = !!(q || vendorFilter || levelFilter);
+  let viewHints: { view: View; count: number }[] = [];
+  if (totalCount === 0 && hasFilters) {
+    const others = (['active', 'inactive', 'archived', 'all'] as const).filter((v) => v !== view);
+    const counts = await Promise.all(others.map((v) => db.exam.count({ where: whereFor(v) })));
+    viewHints = others.map((v, i) => ({ view: v, count: counts[i] })).filter((h) => h.count > 0);
+  }
+
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
   const page = Math.min(requestedPage, totalPages);
   const exams = await loadExams(where, (page - 1) * PAGE_SIZE, PAGE_SIZE);
 
-  // baseParams omits view when it's the default ('active') for cleaner URLs.
-  const baseParams = { vendor: vendorFilter, level: levelFilter, q, view: view === 'active' ? undefined : view };
+  // baseParams omits view when it's the default ('all') for cleaner URLs.
+  const baseParams = { vendor: vendorFilter, level: levelFilter, q, view: view === 'all' ? undefined : view };
   const buildHref = (p: number) =>
     `/admin-dashboard/exams${buildQS({ ...baseParams, page: p === 1 ? undefined : p })}`;
 
-  const viewParam = view === 'active' ? undefined : view;
+  const viewParam = view === 'all' ? undefined : view;
   const activeFilters = [
     vendorFilter && {
       key: 'vendor',
@@ -326,7 +348,7 @@ export default async function AdminExamsPage({
       label: q,
       clearHref: `/admin-dashboard/exams${buildQS({ vendor: vendorFilter, level: levelFilter, view: viewParam })}`
     },
-    view !== 'active' && {
+    view !== 'all' && {
       key: 'view',
       label: view,
       clearHref: `/admin-dashboard/exams${buildQS({ vendor: vendorFilter, level: levelFilter, q })}`
@@ -642,12 +664,33 @@ export default async function AdminExamsPage({
         rows={exams}
         rowKey={(e) => e.id}
         empty={
-          <>
-            No exams match this filter.{' '}
-            <Link href="/admin-dashboard/exams" className="text-blue-600 hover:underline dark:text-blue-400">
-              Clear
-            </Link>
-          </>
+          viewHints.length > 0 ? (
+            <div className="space-y-2">
+              <div>
+                No exams match in <span className="font-semibold capitalize">{view}</span>.
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-1.5 text-[12px]">
+                <span className="text-slate-500">Found in:</span>
+                {viewHints.map((h) => (
+                  <Link
+                    key={h.view}
+                    href={`/admin-dashboard/exams${buildQS({ ...baseParams, view: h.view === 'all' ? undefined : h.view })}`}
+                    className="inline-flex items-center gap-1 rounded bg-blue-100 px-2 py-0.5 text-blue-900 hover:bg-blue-200 dark:bg-blue-900/40 dark:text-blue-200 dark:hover:bg-blue-900/60"
+                  >
+                    <span className="capitalize">{h.view}</span>
+                    <span className="text-blue-700 dark:text-blue-300">({h.count})</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <>
+              No exams match this filter.{' '}
+              <Link href="/admin-dashboard/exams" className="text-blue-600 hover:underline dark:text-blue-400">
+                Clear
+              </Link>
+            </>
+          )
         }
       />
 
