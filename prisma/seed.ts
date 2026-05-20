@@ -115,20 +115,17 @@ const BUNDLES: BundleSeed[] = [
     slug: 'microsoft-ai-900',
     title: 'Microsoft Azure AI Fundamentals (AI-900)',
     description:
-      'All 6 AI-900 practice exams in one bundle — 360 questions covering AI workloads, machine learning on Azure, computer vision, natural language processing, and generative AI. Save vs buying each practice exam separately.',
-    price: 2000,         // $79 — PRACTICE tier (all 6 practice exams)
+      'All 3 AI-900 practice exams in one bundle — 195 curated questions covering AI workloads & considerations, machine learning on Azure, computer vision, natural language processing, and generative AI, aligned to the official AI-900 study guide.',
+    price: 2000,         // $79 — PRACTICE tier (3 practice exams × 65 Q)
     priceVoucher: 9900, // $99 — VOUCHER tier (covers Microsoft AI-900 $99 exam fee)
     items: [
       { examSlug: 'microsoft-ai-900-p1', tier: 'PRACTICE', position: 1 },
       { examSlug: 'microsoft-ai-900-p2', tier: 'PRACTICE', position: 2 },
       { examSlug: 'microsoft-ai-900-p3', tier: 'PRACTICE', position: 3 },
-      { examSlug: 'microsoft-ai-900-p4', tier: 'PRACTICE', position: 4 },
-      { examSlug: 'microsoft-ai-900-p5', tier: 'PRACTICE', position: 5 },
-      { examSlug: 'microsoft-ai-900-p6', tier: 'PRACTICE', position: 6 },
       // Voucher item — only granted when the buyer picks the VOUCHER tier
       // at checkout. fulfillOrder filters items by Order.tier so PRACTICE
       // buyers do not receive this.
-      { examSlug: 'microsoft-ai-900-p1', tier: 'VOUCHER', position: 7 }
+      { examSlug: 'microsoft-ai-900-p1', tier: 'VOUCHER', position: 4 }
     ]
   },
   {
@@ -557,13 +554,17 @@ const EXAMS: ExamSeed[] = [
     vendorSlug: 'microsoft', slug: 'microsoft-ai-900', code: 'AI-900',
     title: 'Microsoft Azure AI Fundamentals',
     description: 'Introduction to AI concepts and Azure services for ML, computer vision, NLP, and generative AI.',
-    level: 'Foundational', durationMinutes: 60, passingScore: 70, questionCount: 40,
+    level: 'Foundational', durationMinutes: 60, passingScore: 70, questionCount: 65,
+    // Aligned to MS Learn AI-900 study guide ranges (verified 2026-05-20).
+    // Note: GenAI is 28% (3pp above the 20-25% range) to fit a clean 17 Q per
+    // variant; MS Learn has been continually bumping GenAI up so this errs
+    // safely in their indicated direction.
     domains: [
-      { name: 'AI workloads and considerations', weight: 17 },
-      { name: 'Fundamentals of machine learning on Azure', weight: 32 },
-      { name: 'Computer vision on Azure', weight: 17 },
-      { name: 'Natural language processing on Azure', weight: 17 },
-      { name: 'Generative AI on Azure', weight: 17 }
+      { name: 'Describe Artificial Intelligence workloads and considerations', weight: 18 },
+      { name: 'Describe fundamental principles of machine learning on Azure', weight: 18 },
+      { name: 'Describe features of computer vision workloads on Azure', weight: 18 },
+      { name: 'Describe features of Natural Language Processing (NLP) workloads on Azure', weight: 18 },
+      { name: 'Describe features of generative AI workloads on Azure', weight: 28 }
     ]
   },
   {
@@ -1660,13 +1661,10 @@ async function main() {
   // without flooding the view with the entire catalog. Add to this list if
   // you need to smoke-test a specific exam path.
   const TEAM_GRANTS: { examSlug: string; tier: Tier }[] = [
-    // AI-900 bundle: 6 P-variants collapse into one expandable bundle card.
+    // AI-900 bundle: 3 P-variants collapse into one expandable bundle card.
     { examSlug: 'microsoft-ai-900-p1', tier: Tier.PRACTICE },
     { examSlug: 'microsoft-ai-900-p2', tier: Tier.PRACTICE },
     { examSlug: 'microsoft-ai-900-p3', tier: Tier.PRACTICE },
-    { examSlug: 'microsoft-ai-900-p4', tier: Tier.PRACTICE },
-    { examSlug: 'microsoft-ai-900-p5', tier: Tier.PRACTICE },
-    { examSlug: 'microsoft-ai-900-p6', tier: Tier.PRACTICE },
     // One VOUCHER row on the same bundle exercises the green "Voucher" strip
     // when the bundle card is expanded, and populates /my-content/vouchers.
     { examSlug: 'microsoft-ai-900-p1', tier: Tier.VOUCHER },
