@@ -11,9 +11,9 @@
  * Question content is authored against the public Microsoft Learn docs
  * and the Microsoft 365 Administrator Expert (MS-102) study guide:
  *   - Deploy and manage a Microsoft 365 tenant                          — 27% (18/variant)
- *   - Implement and manage Microsoft Entra identity and access          — 18% (12/variant)
- *   - Manage security and threats by using Microsoft Defender XDR       — 32% (21/variant)
- *   - Manage compliance by using Microsoft Purview                      — 23% (14/variant)
+ *   - Implement and manage Microsoft Entra identity and access          — 27% (18/variant)
+ *   - Manage security and threats by using Microsoft Defender XDR       — 33% (21/variant)
+ *   - Manage compliance by using Microsoft Purview                      — 13% ( 8/variant)
  *
  * These are original practice scenarios. They are NOT real exam items and
  * make no claim of being official or actual MS-102 questions.
@@ -395,7 +395,7 @@ const P1: Q[] = [
     references: [REF_M365_DOMAIN]
   },
 
-  // ── Implement and manage Microsoft Entra identity and access (12) ──
+  // ── Implement and manage Microsoft Entra identity and access (18) ──
   {
     domain: IDENTITY, difficulty: 1, type: QType.SINGLE, isTeaser: true,
     stem: 'You need to create a new cloud-only user named Lin Wei who will sign in as lin@contoso.com and be assigned an E5 license. Where in the Microsoft Entra admin center do you start?',
@@ -551,6 +551,84 @@ const P1: Q[] = [
     correct: ['b'],
     explanation: 'PTA validates each sign-in against on-premises AD via a lightweight agent, without storing password hashes in the cloud. PHS stores hashes in the cloud. Cloud-only identities have no on-prem connection. Cloud Sync is a sync engine choice — it still typically uses PHS.',
     references: [REF_PTA, REF_SSO]
+  },
+  {
+    domain: IDENTITY, difficulty: 2, type: QType.SINGLE,
+    stem: 'You assigned the User Administrator role at the tenant scope to a delegated admin, but you want a different admin to manage only the users in the "Lagos" administrative unit. Which assignment shape achieves the second requirement?',
+    options: opts4(
+      'Assign the User Administrator role with the Lagos administrative unit as the role-assignment scope',
+      'Add the admin as a Global Administrator and ask them to operate only on Lagos users',
+      'Use a dynamic group of Lagos users as the target of a Conditional Access policy',
+      'Configure SSPR for the Lagos administrative unit only'
+    ),
+    correct: ['a'],
+    explanation: 'Administrative-unit-scoped role assignments restrict the admin to the objects in that AU. Global Administrator is unscoped. CA gates access; SSPR is for password reset — neither delegates user management.',
+    references: [REF_ADMIN_UNITS, REF_ENTRA_ROLES]
+  },
+  {
+    domain: IDENTITY, difficulty: 3, type: QType.SINGLE,
+    stem: 'You want all guest accounts that have been inactive in your tenant for 90 days to be automatically reviewed and removed if no longer needed. Which Microsoft Entra Identity Governance capability provides this?',
+    options: opts4(
+      'A recurring access review targeting guest users with auto-apply results to remove inactive guests',
+      'Per-user MFA',
+      'A retention policy on the guest mailbox',
+      'Group-based licensing for guests'
+    ),
+    correct: ['a'],
+    explanation: 'Access reviews can target guests, include inactivity/recommendations, and auto-apply removal. MFA does not remove guests. Retention is for content. Licensing does not govern guest lifecycle.',
+    references: [REF_ACCESS_REVIEW, REF_B2B]
+  },
+  {
+    domain: IDENTITY, difficulty: 2, type: QType.SINGLE,
+    stem: 'A user reports they never see an MFA prompt when signing in to Microsoft 365 from the corporate office, but they are required to use MFA from home. Which Microsoft Entra construct most likely produced this experience?',
+    options: opts4(
+      'A Conditional Access policy that requires MFA, with the corporate office IP range configured as a trusted named location excluded from the policy',
+      'A Microsoft Entra Connect filtering rule',
+      'A retention policy on the user',
+      'A Defender for Endpoint device tag'
+    ),
+    correct: ['a'],
+    explanation: 'CA policies can exclude trusted named locations (corporate IP ranges) so users in those networks bypass MFA. Connect filtering controls sync; retention is content; MDE tags are device metadata.',
+    references: [REF_CA, REF_NAMED_LOC]
+  },
+  {
+    domain: IDENTITY, difficulty: 3, type: QType.SINGLE,
+    stem: 'Your CTO wants every Microsoft Entra ID privileged role assignment to require a justification, expire in 8 hours, and trigger an email to the security team on every activation. Which Privileged Identity Management settings are required?',
+    options: opts4(
+      'Configure the role assignment as eligible and tune the role settings to require justification, set maximum activation duration to 8 hours, and add the security team as notification recipients',
+      'Make the user a permanent role member with MFA only',
+      'Block sign-ins for the user via Conditional Access',
+      'Remove the role and re-grant it manually each day'
+    ),
+    correct: ['a'],
+    explanation: 'PIM role settings expose activation maximum duration, required justification, MFA, approval, and email notifications. Permanent assignments bypass JIT controls. CA blocks do not enable activations. Manual cycling is error-prone.',
+    references: [REF_PIM]
+  },
+  {
+    domain: IDENTITY, difficulty: 2, type: QType.SINGLE,
+    stem: 'You want to enforce that all sign-ins to Microsoft 365 require a token strength that includes a phishing-resistant factor (e.g. FIDO2 or Windows Hello for Business) for users with the Global Administrator role. Which combination should you configure?',
+    options: opts4(
+      'A Conditional Access policy targeting the Global Administrators directory role, with the Authentication strength grant control set to Phishing-resistant MFA',
+      'Per-user MFA for the same admins',
+      'A retention label on the admins\' mailboxes',
+      'A Microsoft Entra ID Protection sign-in risk policy with low threshold'
+    ),
+    correct: ['a'],
+    explanation: 'CA supports targeting directory roles, and Authentication strengths can require phishing-resistant MFA. Per-user MFA cannot enforce method type. Retention labels and risk policies do not select methods.',
+    references: [REF_CA, REF_AUTH_METHODS, REF_PASSWORDLESS]
+  },
+  {
+    domain: IDENTITY, difficulty: 3, type: QType.SINGLE,
+    stem: 'A user signs in successfully and starts a long Microsoft 365 session. Twenty minutes later, the security team confirms the account is compromised and disables it in Microsoft Entra. With which feature enabled will the active session be revoked near-real-time, instead of waiting up to an hour for token expiry?',
+    options: opts4(
+      'Continuous access evaluation (CAE) for the cloud apps that support it',
+      'Conditional Access sign-in frequency = 1 hour',
+      'Pass-through authentication',
+      'Self-service password reset'
+    ),
+    correct: ['a'],
+    explanation: 'CAE allows Entra ID and supporting services to revoke active tokens in near-real-time when critical events (disable, password reset, location change) occur. Sign-in frequency only forces a re-prompt at the next interval; PTA is auth flow; SSPR is password reset.',
+    references: [REF_CA, REF_AUTH_METHODS]
   },
 
   // ── Manage security and threats by using Microsoft Defender XDR (21) ──
@@ -828,7 +906,7 @@ const P1: Q[] = [
     references: [REF_EXPOSURE]
   },
 
-  // ── Manage compliance by using Microsoft Purview (14) ──
+  // ── Manage compliance by using Microsoft Purview (8) ──
   {
     domain: PURVIEW, difficulty: 1, type: QType.SINGLE, isTeaser: true,
     stem: 'In the Microsoft Purview portal, where do you create a data loss prevention policy that prevents users from sharing credit card numbers in Microsoft Teams chats?',
@@ -867,19 +945,6 @@ const P1: Q[] = [
     correct: ['a'],
     explanation: 'Sensitivity labels apply encryption (Azure Information Protection / Microsoft Purview Information Protection), visual markings, and usage rights such as "Do not forward". Retention labels manage lifecycle; eDiscovery is for legal investigations; insider risk detects risky activities.',
     references: [REF_LABELS, REF_LABEL_POLICY]
-  },
-  {
-    domain: PURVIEW, difficulty: 3, type: QType.SINGLE,
-    stem: 'You want sensitivity labels to be applied to Word documents automatically when they contain at least 10 credit card numbers. Which feature should you configure?',
-    options: opts4(
-      'An auto-labeling policy that uses a credit card SIT condition and applies the chosen sensitivity label',
-      'A DLP policy with the "Block" action',
-      'A retention policy with custom triggers',
-      'A communication compliance policy'
-    ),
-    correct: ['a'],
-    explanation: 'Auto-labeling (service-side or client-side) applies sensitivity labels to content that matches a set of conditions, like ≥10 credit card numbers. DLP blocks or warns but does not apply labels itself. Retention is lifecycle. Communication compliance reviews messages.',
-    references: [REF_AUTO_LABEL, REF_LABELS]
   },
   {
     domain: PURVIEW, difficulty: 2, type: QType.SINGLE,
@@ -921,19 +986,6 @@ const P1: Q[] = [
     references: [REF_EDISCOVERY, REF_EDISCOVERY_STD]
   },
   {
-    domain: PURVIEW, difficulty: 2, type: QType.SINGLE,
-    stem: 'Which Microsoft Purview feature lets you search for actions like "FileDownloaded", "MailboxLogin", or "MemberAdded" across the tenant for forensic or audit purposes?',
-    options: opts4(
-      'Audit (Search the audit log) in the Microsoft Purview portal',
-      'Microsoft Defender for Endpoint timeline',
-      'Conditional Access insights',
-      'Microsoft 365 Apps usage analytics'
-    ),
-    correct: ['a'],
-    explanation: 'Purview Audit search returns user/admin activities (FileDownloaded, MailboxLogin, MemberAdded, etc.) across Microsoft 365 workloads. Defender for Endpoint timeline is per-device. CA insights show policy results. Apps usage analytics show usage telemetry.',
-    references: [REF_AUDIT]
-  },
-  {
     domain: PURVIEW, difficulty: 3, type: QType.SINGLE,
     stem: 'A regulator requires a 10-year audit retention with the ability to investigate intelligent insights such as MailItemsAccessed and Send-on-behalf events. Which capability provides these advanced events and extended retention?',
     options: opts4(
@@ -958,58 +1010,6 @@ const P1: Q[] = [
     correct: ['a'],
     explanation: 'Insider risk management templates such as "Data leaks by departing users" combine HR signals (resignation date) with file/email activity to flag risky actions. The other options address different concerns.',
     references: [REF_INSIDER, REF_INSIDER_POLICY]
-  },
-  {
-    domain: PURVIEW, difficulty: 2, type: QType.SINGLE,
-    stem: 'Where can you visualize how many files in your Microsoft 365 tenant contain sensitive information types and which sensitivity labels are applied?',
-    options: opts4(
-      'Microsoft Purview > Information Protection > Content explorer',
-      'Microsoft Defender portal > Incidents',
-      'Microsoft 365 admin center > Reports > Usage',
-      'Microsoft Entra > Identity Protection'
-    ),
-    correct: ['a'],
-    explanation: 'Content explorer shows the location and content of items matching SITs or labels. Incidents are security events. Usage reports show product usage. Identity Protection shows identity risk.',
-    references: [REF_CONTENT_EXPLORER, REF_DATA_CLASS]
-  },
-  {
-    domain: PURVIEW, difficulty: 2, type: QType.SINGLE,
-    stem: 'Which Purview tool shows activities performed on labeled or classified content over time (such as label changes, downloads, external sharing)?',
-    options: opts4(
-      'Activity explorer',
-      'Compliance Manager',
-      'Conditional Access insights',
-      'Power BI'
-    ),
-    correct: ['a'],
-    explanation: 'Activity explorer surfaces the activities (label applied, label changed, file copied, etc.) on labeled and classified content. Compliance Manager tracks regulatory improvement actions. CA insights cover sign-ins. Power BI is a BI tool.',
-    references: [REF_ACTIVITY_EXPLORER, REF_DATA_CLASS]
-  },
-  {
-    domain: PURVIEW, difficulty: 3, type: QType.SINGLE,
-    stem: 'You want to detect contracts (a hard-to-pattern-match document category) in your environment using machine learning, then apply a sensitivity label automatically. Which Purview feature should you use?',
-    options: opts4(
-      'A trainable classifier combined with an auto-labeling policy',
-      'A custom sensitive information type using regex only',
-      'A retention policy with a date condition',
-      'A Conditional Access app-enforced restriction'
-    ),
-    correct: ['a'],
-    explanation: 'Trainable classifiers use ML on sample content to classify hard-to-define categories like contracts; you can pair them with auto-labeling. Regex SITs do not handle prose well. Retention dates are lifecycle. CA restrictions are sign-in / session controls.',
-    references: [REF_TRAINABLE, REF_AUTO_LABEL]
-  },
-  {
-    domain: PURVIEW, difficulty: 2, type: QType.SINGLE,
-    stem: 'You need to prevent investment bankers from communicating with M&A advisors in your Microsoft 365 tenant to comply with regulatory information barriers. Which solution implements this?',
-    options: opts4(
-      'Microsoft Purview Information Barriers',
-      'Conditional Access for SharePoint',
-      'A DLP policy with block action',
-      'Microsoft Entra entitlement management'
-    ),
-    correct: ['a'],
-    explanation: 'Information Barriers prevent specified groups of users from communicating or collaborating in Teams, SharePoint, and OneDrive. CA, DLP, and entitlement management do not implement this regulatory segregation directly.',
-    references: [REF_INFO_BARRIERS]
   }
 ];
 
@@ -1251,7 +1251,7 @@ const P2: Q[] = [
     references: [REF_M365_DOMAIN]
   },
 
-  // ── Implement and manage Microsoft Entra identity and access (12) ──
+  // ── Implement and manage Microsoft Entra identity and access (18) ──
   {
     domain: IDENTITY, difficulty: 2, type: QType.SINGLE, isTeaser: true,
     stem: 'You need to invite an external contractor to collaborate on a SharePoint site. The contractor uses an existing Microsoft Entra account in another tenant. Which feature should you use?',
@@ -1407,6 +1407,84 @@ const P2: Q[] = [
     correct: ['a'],
     explanation: 'ID Protection sign-in/user risk policies require Entra ID P2 licensing. Security defaults are free but not risk-conditional. Per-user MFA is not risk-aware. Entra DS is unrelated.',
     references: [REF_IDPROTECT, REF_IDPROTECT_RISK]
+  },
+  {
+    domain: IDENTITY, difficulty: 3, type: QType.SINGLE,
+    stem: 'You want to roll out passwordless authentication using Windows Hello for Business across the enterprise, but only for users who currently have a Microsoft Authenticator registered. Where do you configure both the enablement and the targeted group?',
+    options: opts4(
+      'Microsoft Entra ID > Security > Authentication methods > Policies > Windows Hello for Business, scoped to the chosen group',
+      'Per-user MFA Service Settings only',
+      'A Conditional Access policy with named locations',
+      'Microsoft Entra Connect Sync filters'
+    ),
+    correct: ['a'],
+    explanation: 'Authentication methods policy controls which methods are enabled and to which groups. Per-user MFA service settings predate this and cannot scope WHfB. CA and Connect Sync filters are unrelated.',
+    references: [REF_AUTH_METHODS, REF_PASSWORDLESS]
+  },
+  {
+    domain: IDENTITY, difficulty: 2, type: QType.SINGLE,
+    stem: 'A new external partner uses an organization that is NOT a Microsoft Entra tenant — only personal email accounts. You still want them to access a Microsoft Teams team in your tenant with their existing email identity. Which Microsoft Entra capability supports this?',
+    options: opts4(
+      'B2B collaboration with email one-time passcode authentication for non-Entra guests',
+      'B2B direct connect',
+      'Federation with the partner\'s on-prem AD',
+      'A service principal granted to the partner'
+    ),
+    correct: ['a'],
+    explanation: 'Email one-time passcode (OTP) lets external users without an Entra/Microsoft account sign in as B2B guests using a code sent to their email. B2B direct connect is for Microsoft 365 cross-tenant Teams. Federation/SPNs are not the right fit.',
+    references: [REF_B2B, REF_ENTRA]
+  },
+  {
+    domain: IDENTITY, difficulty: 2, type: QType.SINGLE,
+    stem: 'You want to migrate from on-premises AD FS federation to managed cloud authentication while keeping the option to roll back. Which staged-rollout capability does Microsoft Entra Connect offer?',
+    options: opts4(
+      'Staged Rollout to move groups of users from federation to PHS or PTA in a controlled way',
+      'Tenant-wide replace federation in one shot',
+      'B2B collaboration migration',
+      'Microsoft Entra Domain Services replacement'
+    ),
+    correct: ['a'],
+    explanation: 'Staged Rollout in Entra ID lets you cut over groups of federated users to PHS or PTA gradually, with rollback. The other options are not the migration pattern.',
+    references: [REF_FEDERATION, REF_PHS, REF_PTA]
+  },
+  {
+    domain: IDENTITY, difficulty: 3, type: QType.SINGLE,
+    stem: 'A SOC analyst notices repeated sign-in attempts to a low-value SaaS app with valid usernames but wrong passwords from many IPs — a password spray pattern. Which Microsoft Entra capability automatically labels these sign-ins as risky and can require remediation?',
+    options: opts4(
+      'Microsoft Entra ID Protection (sign-in risk detection — "Password spray")',
+      'Conditional Access named locations',
+      'Per-user MFA enabled for the user',
+      'Self-service password reset'
+    ),
+    correct: ['a'],
+    explanation: 'ID Protection includes password-spray detection that elevates sign-in risk. CA named locations are a static condition. Per-user MFA and SSPR are not risk-based.',
+    references: [REF_IDPROTECT, REF_IDPROTECT_RISK]
+  },
+  {
+    domain: IDENTITY, difficulty: 2, type: QType.SINGLE,
+    stem: 'Which Microsoft Entra Identity Governance feature lets you define HR-event-triggered "joiner / mover / leaver" automation, such as creating a user, granting access packages, and disabling them at termination?',
+    options: opts4(
+      'Microsoft Entra lifecycle workflows',
+      'Microsoft Entra Domain Services',
+      'Microsoft Entra B2B direct connect',
+      'Conditional Access reporting-only mode'
+    ),
+    correct: ['a'],
+    explanation: 'Lifecycle workflows orchestrate joiner/mover/leaver tasks tied to attributes/dates and can invoke access-package operations. Entra DS is a managed domain; B2B direct connect is Teams cross-tenant; reporting-only is a CA policy mode.',
+    references: [REF_ENTITLEMENT, REF_ACCESS_REVIEW]
+  },
+  {
+    domain: IDENTITY, difficulty: 3, type: QType.SINGLE,
+    stem: 'Your organization wants to allow guests from a specific trusted partner tenant to bypass MFA in your tenant because they already satisfied MFA on their home tenant. Which Microsoft Entra setting enables this?',
+    options: opts4(
+      'Cross-tenant access settings — Inbound trust settings — Trust multifactor authentication from Microsoft Entra tenants',
+      'A Conditional Access named location',
+      'Per-user MFA for the partner organization',
+      'A federation trust in Microsoft Entra Connect'
+    ),
+    correct: ['a'],
+    explanation: 'Cross-tenant access settings include inbound trust controls to accept MFA, device-compliance, and Entra-joined claims from a specific partner tenant. Named locations are network IP scopes; per-user MFA and Connect federation are different controls.',
+    references: [REF_B2B, REF_CA, REF_AUTH_METHODS]
   },
 
   // ── Manage security and threats by using Microsoft Defender XDR (21) ──
@@ -1684,7 +1762,7 @@ const P2: Q[] = [
     references: [REF_EXPOSURE]
   },
 
-  // ── Manage compliance by using Microsoft Purview (14) ──
+  // ── Manage compliance by using Microsoft Purview (8) ──
   {
     domain: PURVIEW, difficulty: 2, type: QType.SINGLE, isTeaser: true,
     stem: 'A regulator requires that you protect documents containing personally identifiable information (PII) at rest and in transit. Which Microsoft Purview capability encrypts the document content and enforces who can decrypt it?',
@@ -1710,19 +1788,6 @@ const P2: Q[] = [
     correct: ['a'],
     explanation: 'Communication compliance scans Teams/Exchange/Yammer messages for inappropriate content with reviewers and pseudonymization. eDiscovery is for legal investigations. Information Barriers prevent communications. Insider risk monitors behavior, not message content review.',
     references: [REF_COMM_COMPLIANCE]
-  },
-  {
-    domain: PURVIEW, difficulty: 2, type: QType.SINGLE,
-    stem: 'Which Purview solution maintains a record of regulatory frameworks and tracks your tenant\'s improvement actions with an aggregated score?',
-    options: opts4(
-      'Compliance Manager',
-      'Audit (Premium)',
-      'Information Barriers',
-      'DLP'
-    ),
-    correct: ['a'],
-    explanation: 'Compliance Manager scores compliance against frameworks (e.g. ISO 27001, GDPR) and tracks improvement actions. Audit Premium is for advanced audit; Information Barriers segregate users; DLP prevents data loss.',
-    references: [REF_PURVIEW]
   },
   {
     domain: PURVIEW, difficulty: 3, type: QType.MULTI,
@@ -1751,19 +1816,6 @@ const P2: Q[] = [
     references: [REF_DLP_ENDPOINT, REF_DLP]
   },
   {
-    domain: PURVIEW, difficulty: 2, type: QType.SINGLE,
-    stem: 'You want to retain Teams chat messages for 5 years for regulatory reasons. Which Purview policy targets Teams chats?',
-    options: opts4(
-      'A retention policy with "Teams chats" as a location, retain-only for 5 years',
-      'A DLP rule for Teams',
-      'A sensitivity label with do-not-forward',
-      'An information barrier policy'
-    ),
-    correct: ['a'],
-    explanation: 'Retention policies have Teams chats as a supported location. DLP and sensitivity labels enforce protection, not retention. Information barriers prevent communication.',
-    references: [REF_RETENTION, REF_RETENTION_POLICY]
-  },
-  {
     domain: PURVIEW, difficulty: 3, type: QType.SINGLE,
     stem: 'Your organization plans to migrate to records management for declaring official corporate records. Which Purview feature should you use to declare items as records, restrict their modification, and apply file-plan metadata?',
     options: opts4(
@@ -1790,32 +1842,6 @@ const P2: Q[] = [
     references: [REF_EDISCOVERY_PREM, REF_EDISCOVERY]
   },
   {
-    domain: PURVIEW, difficulty: 2, type: QType.SINGLE,
-    stem: 'You need a quick content search across mailboxes and OneDrive to find any documents containing the phrase "merger" without a legal case. Which feature is best suited?',
-    options: opts4(
-      'Content search in the Microsoft Purview portal',
-      'Audit (Standard) search',
-      'A retention policy',
-      'A communication compliance policy'
-    ),
-    correct: ['a'],
-    explanation: 'Content search performs ad-hoc keyword searches across M365 content sources. Audit is for activities, not content. Retention manages lifecycle. Communication compliance reviews are scoped to messages and a policy.',
-    references: [REF_CONTENT_SEARCH, REF_EDISCOVERY]
-  },
-  {
-    domain: PURVIEW, difficulty: 3, type: QType.SINGLE,
-    stem: 'You want sensitivity-label policies to apply automatically to files in SharePoint at upload time when content matches a SIT (no client involvement). Which option is correct?',
-    options: opts4(
-      'Auto-labeling policy with "Auto-apply" running service-side on stored content and at upload',
-      'Client-only auto-labeling in Word/Excel',
-      'A DLP rule that applies labels',
-      'A retention policy with custom triggers'
-    ),
-    correct: ['a'],
-    explanation: 'Service-side auto-labeling runs on SharePoint/OneDrive/Exchange content and at upload, independent of the client. Client-only auto-labeling requires a session in the Office client. DLP can detect but only labels when paired with auto-labeling.',
-    references: [REF_AUTO_LABEL, REF_LABELS]
-  },
-  {
     domain: PURVIEW, difficulty: 3, type: QType.SINGLE,
     stem: 'You want a sensitivity label to grant Read-only permission to all employees but allow co-authoring for the Finance team. Which capability of sensitivity labels provides this?',
     options: opts4(
@@ -1829,19 +1855,6 @@ const P2: Q[] = [
     references: [REF_LABELS, REF_LABEL_POLICY]
   },
   {
-    domain: PURVIEW, difficulty: 2, type: QType.SINGLE,
-    stem: 'Which Purview feature shows where content classified as "Confidential" lives across Microsoft 365 (Exchange, SharePoint, OneDrive)?',
-    options: opts4(
-      'Content explorer',
-      'Activity explorer',
-      'Compliance Manager',
-      'Microsoft 365 admin center reports'
-    ),
-    correct: ['a'],
-    explanation: 'Content explorer visualizes the location and contents of items classified by SIT, trainable classifier, or sensitivity/retention label. Activity explorer shows activities; Compliance Manager scores frameworks; M365 admin reports show product usage.',
-    references: [REF_CONTENT_EXPLORER, REF_DATA_CLASS]
-  },
-  {
     domain: PURVIEW, difficulty: 3, type: QType.SINGLE,
     stem: 'You want to integrate HR signals so that data-exfiltration risk scoring increases for employees who have submitted a resignation. Which Microsoft Purview feature uses HR connectors?',
     options: opts4(
@@ -1853,19 +1866,6 @@ const P2: Q[] = [
     correct: ['a'],
     explanation: 'Insider risk management consumes HR signals through a data connector (resignation date, termination date, level) to enrich risk scoring. The other features don\'t take HR feeds.',
     references: [REF_INSIDER, REF_INSIDER_POLICY]
-  },
-  {
-    domain: PURVIEW, difficulty: 2, type: QType.SINGLE,
-    stem: 'Which Purview feature enables Office documents to detect intellectual-property categories such as "Source code" or "Resumes" using machine-learning models?',
-    options: opts4(
-      'Trainable classifiers',
-      'Sensitive information types using regex only',
-      'Communication compliance dictionaries',
-      'A retention policy'
-    ),
-    correct: ['a'],
-    explanation: 'Trainable classifiers use ML to recognize content categories that are hard to express as regex (source code, resumes, customer complaints, etc.). The other tools don\'t cover this use case.',
-    references: [REF_TRAINABLE, REF_DATA_CLASS]
   }
 ];
 
@@ -2107,7 +2107,7 @@ const P3: Q[] = [
     references: [REF_ENTRA_CLOUD_SYNC, REF_ENTRA_CONNECT_SYNC, REF_FEDERATION]
   },
 
-  // ── Implement and manage Microsoft Entra identity and access (12) ──
+  // ── Implement and manage Microsoft Entra identity and access (18) ──
   {
     domain: IDENTITY, difficulty: 2, type: QType.SINGLE, isTeaser: true,
     stem: 'You created a Conditional Access policy in "Report-only" mode targeting all users. After 48 hours of insights, you want to start enforcing it. Which step is required?',
@@ -2263,6 +2263,84 @@ const P3: Q[] = [
     correct: ['a'],
     explanation: 'Filtering OUs / specific accounts from sync ensures they don\'t exist in Entra ID. Blocking via CA is reactive; granting Global Admin is the opposite of the goal; sensitivity labels are for content protection.',
     references: [REF_ENTRA_CONNECT, REF_ENTRA_CONNECT_SYNC]
+  },
+  {
+    domain: IDENTITY, difficulty: 2, type: QType.SINGLE,
+    stem: 'You want every external Microsoft Entra B2B guest to be reviewed for continued business need every 90 days, with the inviter (sponsor) as the reviewer. Which feature satisfies the requirement?',
+    options: opts4(
+      'A recurring access review on Guest users with reviewer = "user\'s manager or sponsor"',
+      'A Conditional Access policy with sign-in frequency = 90 days',
+      'Microsoft Entra B2B direct connect',
+      'A retention label on guest user objects'
+    ),
+    correct: ['a'],
+    explanation: 'Access reviews can specifically target guest users and use the sponsor or manager as the reviewer on a recurring schedule. CA sign-in frequency forces a re-prompt but does not review need; B2B direct connect is a Teams feature; retention labels target content.',
+    references: [REF_ACCESS_REVIEW, REF_B2B]
+  },
+  {
+    domain: IDENTITY, difficulty: 3, type: QType.SINGLE,
+    stem: 'In Microsoft Entra, you want non-admin end users to be prevented from consenting to third-party OAuth apps that request high-risk Microsoft Graph permissions, while still allowing a security admin to approve them. Which configuration enforces this?',
+    options: opts4(
+      'User consent settings = "Do not allow user consent" combined with an admin consent request workflow',
+      'Block sign-ins for non-admins',
+      'Disable Conditional Access',
+      'Add all third-party apps to a Conditional Access named location'
+    ),
+    correct: ['a'],
+    explanation: 'User consent settings can disable user consent entirely (or limit it to verified publishers/low-risk perms); admin consent workflow lets users request approval. Blocking sign-ins is excessive; CA named locations are network IP scopes.',
+    references: [REF_ENTRA, REF_ENTRA_ROLES]
+  },
+  {
+    domain: IDENTITY, difficulty: 2, type: QType.SINGLE,
+    stem: 'A user reports their Microsoft Entra account was locked after a series of bad passwords. The IT team wants to confirm this was a real lockout and not a sign-in failure. Where should they investigate?',
+    options: opts4(
+      'Microsoft Entra > Monitoring > Sign-in logs (filter on the user and check the error code, e.g. AADSTS50053 / smart lockout)',
+      'Microsoft 365 admin center > Reports > Usage',
+      'A Conditional Access named location',
+      'Defender for Office 365 quarantine'
+    ),
+    correct: ['a'],
+    explanation: 'Entra sign-in logs include status codes and errors that distinguish bad password from smart-lockout (e.g. AADSTS50053). Usage reports, named locations, and MDO quarantine do not surface auth-error details.',
+    references: [REF_ENTRA, REF_IDPROTECT]
+  },
+  {
+    domain: IDENTITY, difficulty: 3, type: QType.SINGLE,
+    stem: 'Which Microsoft Entra ID Protection setting governs the minimum risk level at which a sign-in is automatically blocked or required to reauthenticate, and what licensing is required to use these risk-based Conditional Access policies?',
+    options: opts4(
+      'The sign-in risk and user risk policies expose thresholds (low/medium/high) and require Microsoft Entra ID P2 licensing per affected user',
+      'Per-user MFA controls the threshold, and licensing is included with all Microsoft 365 tenants',
+      'Security defaults expose risk thresholds for free',
+      'A retention policy controls the threshold'
+    ),
+    correct: ['a'],
+    explanation: 'Risk-based CA uses ID Protection signal at low/medium/high thresholds and requires Entra ID P2 licensing per affected user. Per-user MFA, security defaults, and retention policies do not expose risk thresholds.',
+    references: [REF_IDPROTECT, REF_IDPROTECT_RISK, REF_CA]
+  },
+  {
+    domain: IDENTITY, difficulty: 2, type: QType.SINGLE,
+    stem: 'You want a Microsoft Entra group whose membership is automatically populated from on-premises Active Directory through Microsoft Entra Connect Sync. Where is the source-of-authority for membership in this scenario?',
+    options: opts4(
+      'On-premises Active Directory — membership changes occur there and sync to Entra ID; you cannot edit the synced group\'s membership directly in Entra ID',
+      'Microsoft Entra ID — changes happen there and write back to AD via Entra Connect',
+      'Microsoft Intune device groups',
+      'Microsoft 365 admin center Groups blade'
+    ),
+    correct: ['a'],
+    explanation: 'For groups synced via Entra Connect Sync, on-premises AD is the source of authority for membership. Group write-back is supported only in limited scenarios. Intune device groups and the admin-center Groups blade do not own synced-group membership.',
+    references: [REF_ENTRA_CONNECT, REF_ENTRA_CONNECT_SYNC, REF_ENTRA_GROUPS]
+  },
+  {
+    domain: IDENTITY, difficulty: 2, type: QType.SINGLE,
+    stem: 'Your security team wants a Conditional Access policy to be deployed but only to a small pilot user group while the rest of the tenant continues unaffected. Which targeting approach is recommended?',
+    options: opts4(
+      'Set the policy to "On" but scope Users and groups = Include = the pilot security group, Exclude = break-glass accounts',
+      'Apply the policy in Report-only mode to all users indefinitely',
+      'Set the policy to Off and ask the pilot users to sign in manually',
+      'Disable Microsoft Entra ID for non-pilot users'
+    ),
+    correct: ['a'],
+    explanation: 'Including only the pilot group (and excluding break-glass accounts) is the recommended controlled rollout pattern. Report-only never enforces; Off does nothing; disabling Entra ID is destructive.',
+    references: [REF_CA, REF_CA_REQ]
   },
 
   // ── Manage security and threats by using Microsoft Defender XDR (21) ──
@@ -2540,7 +2618,7 @@ const P3: Q[] = [
     references: [REF_ANTIMAL, REF_EOP]
   },
 
-  // ── Manage compliance by using Microsoft Purview (14) ──
+  // ── Manage compliance by using Microsoft Purview (8) ──
   {
     domain: PURVIEW, difficulty: 2, type: QType.SINGLE, isTeaser: true,
     stem: 'You want to detect and warn users (without blocking) when they share a document containing U.S. SSNs in OneDrive externally. Which Purview policy action should you use?',
@@ -2607,32 +2685,6 @@ const P3: Q[] = [
     references: [REF_EDISCOVERY_PREM, REF_EDISCOVERY]
   },
   {
-    domain: PURVIEW, difficulty: 2, type: QType.SINGLE,
-    stem: 'Which Purview view should an analyst use to see how many SharePoint sites contain content with the "Confidential" label and to drill into specific files?',
-    options: opts4(
-      'Content explorer with the Confidential sensitivity label filter',
-      'Activity explorer with no filter',
-      'Compliance Manager scoring page',
-      'Audit search page'
-    ),
-    correct: ['a'],
-    explanation: 'Content explorer enumerates content by SIT or label and provides drill-down. Activity explorer shows activities (not inventory). Compliance Manager scores frameworks. Audit is for activities.',
-    references: [REF_CONTENT_EXPLORER, REF_DATA_CLASS]
-  },
-  {
-    domain: PURVIEW, difficulty: 2, type: QType.SINGLE,
-    stem: 'Which Purview tool shows trends like the number of files where a label was changed, downgraded, or removed across the tenant?',
-    options: opts4(
-      'Activity explorer',
-      'Compliance Manager',
-      'Defender XDR Incidents',
-      'Microsoft 365 admin center reports'
-    ),
-    correct: ['a'],
-    explanation: 'Activity explorer tracks label-related activities (applied, changed, removed, downgraded) over time. Compliance Manager scores frameworks. Defender XDR is for security incidents. Admin center reports show product usage.',
-    references: [REF_ACTIVITY_EXPLORER, REF_DATA_CLASS]
-  },
-  {
     domain: PURVIEW, difficulty: 3, type: QType.SINGLE,
     stem: 'You want communication-compliance reviewers to see Teams messages flagged for harassment, but with the sender\'s name pseudonymized to reduce bias. Which feature provides this?',
     options: opts4(
@@ -2647,45 +2699,6 @@ const P3: Q[] = [
   },
   {
     domain: PURVIEW, difficulty: 2, type: QType.SINGLE,
-    stem: 'You want to retain Teams meeting recordings and chats for legal compliance for 3 years. Where do you configure the policy?',
-    options: opts4(
-      'A retention policy with Teams chats and Teams channel messages as locations, with the appropriate retain duration',
-      'A Conditional Access policy',
-      'A DLP policy with retain action',
-      'An information barrier'
-    ),
-    correct: ['a'],
-    explanation: 'Teams chats and channel messages are supported retention locations. CA controls sign-ins. DLP does not retain. Information barriers prevent communication.',
-    references: [REF_RETENTION, REF_RETENTION_POLICY]
-  },
-  {
-    domain: PURVIEW, difficulty: 3, type: QType.SINGLE,
-    stem: 'You want to prevent users from disabling auditing in Exchange mailboxes. Which Purview feature is required, and what is the default state of mailbox auditing in Microsoft 365?',
-    options: opts4(
-      'Mailbox auditing is on by default for Microsoft 365; admins can adjust per-mailbox or via Set-Mailbox; Purview Audit (Premium) keeps logs longer',
-      'Mailbox auditing must be enabled per mailbox by the user',
-      'Mailbox auditing only exists in on-premises Exchange',
-      'Mailbox auditing is disabled by default'
-    ),
-    correct: ['a'],
-    explanation: 'Mailbox auditing has been on by default in Microsoft 365 for years; Purview Audit (Premium) provides longer retention and advanced events. Other options misstate the defaults.',
-    references: [REF_AUDIT, REF_AUDIT_PREMIUM]
-  },
-  {
-    domain: PURVIEW, difficulty: 2, type: QType.SINGLE,
-    stem: 'A regulator requires that you can produce evidence (logs, activities) within 90 days of receiving a request, even for events that happened in the prior year. Which Purview capability is necessary?',
-    options: opts4(
-      'Microsoft Purview Audit (Premium) with 1-year retention extended as needed',
-      'A DLP policy',
-      'A Conditional Access named location',
-      'A retention label that deletes after 30 days'
-    ),
-    correct: ['a'],
-    explanation: 'Audit (Premium) provides the longer retention and advanced events needed for regulatory inquiry. The other options either do not retain audit data or delete it.',
-    references: [REF_AUDIT_PREMIUM, REF_AUDIT]
-  },
-  {
-    domain: PURVIEW, difficulty: 2, type: QType.SINGLE,
     stem: 'You want to detect when a departing employee downloads many files containing trade secrets and prevent further sharing. Which Purview features should you combine?',
     options: opts4(
       'Insider risk management to surface the risky behavior, plus DLP to prevent sharing of the labeled content',
@@ -2696,19 +2709,6 @@ const P3: Q[] = [
     correct: ['a'],
     explanation: 'Combining insider risk management (behavior detection) with DLP (action prevention) addresses both the signal and the control. Other options miss one of those halves.',
     references: [REF_INSIDER, REF_DLP]
-  },
-  {
-    domain: PURVIEW, difficulty: 3, type: QType.SINGLE,
-    stem: 'Which Microsoft Purview capability requires a Microsoft 365 E5 (or equivalent compliance) license and enables granular protection scenarios like co-authoring on encrypted documents?',
-    options: opts4(
-      'Sensitivity labels with encryption (Microsoft Purview Information Protection P2)',
-      'Default mail anti-spam',
-      'Microsoft 365 service health',
-      'Group-based licensing'
-    ),
-    correct: ['a'],
-    explanation: 'Encryption + co-authoring is a Microsoft Purview Information Protection P2 capability requiring E5/E5 Compliance/EMS E5. The other options do not have this licensing or capability.',
-    references: [REF_LABELS]
   },
   {
     domain: PURVIEW, difficulty: 2, type: QType.SINGLE,
@@ -2727,9 +2727,9 @@ const P3: Q[] = [
 
 const MS102_DOMAINS = [
   { name: TENANT, weight: 27 },
-  { name: IDENTITY, weight: 18 },
-  { name: DEFENDER, weight: 32 },
-  { name: PURVIEW, weight: 23 }
+  { name: IDENTITY, weight: 27 },
+  { name: DEFENDER, weight: 33 },
+  { name: PURVIEW, weight: 13 }
 ];
 
 const MS102_EXAMS: { slug: string; code: string; titleSuffix: string; descriptionSuffix: string; questions: Q[] }[] = [
