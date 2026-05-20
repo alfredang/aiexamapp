@@ -10,7 +10,7 @@ import { Pager } from '@/components/admin/pager';
 import { StatusBadge } from '@/components/admin/badge';
 import { ConfirmButton } from '@/components/admin/confirm-button';
 import { buildQS } from '@/components/admin/qs';
-import { SelectAllCheckbox, SelectedCounter } from '@/components/admin/bulk-select';
+import { SelectAllCheckbox, SelectedCounter, SelectAllMatchingBanner } from '@/components/admin/bulk-select';
 
 export const dynamic = 'force-dynamic';
 
@@ -69,7 +69,41 @@ async function bulkExamAction(formData: FormData) {
   const user = session?.user as any;
   if (user?.role !== 'ADMIN') return;
   const op = String(formData.get('op') || '');
-  const ids = formData.getAll('ids').map(String).filter(Boolean);
+
+  // When the "Select all N matching" banner is engaged, the page does NOT
+  // submit per-row checkbox ids — instead we resolve ids on the server
+  // from the same filter the table was built with (scales without
+  // materialising every checkbox in the DOM).
+  let ids: string[];
+  if (formData.get('selectAllMatching') === '1') {
+    const fVendor = String(formData.get('filterVendor') || '');
+    const fLevel = String(formData.get('filterLevel') || '');
+    const fStatus = String(formData.get('filterStatus') || '');
+    const fQ = String(formData.get('filterQ') || '').trim();
+    const fArchived = formData.get('filterArchived') === '1';
+    const where = {
+      ...(fArchived ? { deletedAt: { not: null } } : { deletedAt: null }),
+      ...(fVendor ? { vendor: { slug: fVendor } } : {}),
+      ...(fLevel ? { level: fLevel } : {}),
+      ...(fStatus === 'active'
+        ? { published: true }
+        : fStatus === 'inactive'
+          ? { published: false }
+          : {}),
+      ...(fQ
+        ? {
+            OR: [
+              { title: { contains: fQ, mode: 'insensitive' as const } },
+              { code: { contains: fQ, mode: 'insensitive' as const } }
+            ]
+          }
+        : {})
+    };
+    const matching = await db.exam.findMany({ where, select: { id: true } });
+    ids = matching.map((e) => e.id);
+  } else {
+    ids = formData.getAll('ids').map(String).filter(Boolean);
+  }
   if (!ids.length) return;
   if (op === 'publish') {
     const result = await db.exam.updateMany({
@@ -509,8 +543,17 @@ export default async function AdminExamsPage({
         <form
           id={BULK_FORM_ID}
           action={bulkExamAction}
+          data-total-matching={totalCount}
           className="sticky top-24 z-30 flex flex-wrap items-center gap-2 rounded-md border border-slate-200 bg-slate-50/95 px-3 py-2 text-[12px] shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-900/95"
         >
+          {/* Hidden filter inputs: when SelectAllMatchingBanner promotes
+              the selection to "all matching", bulkExamAction re-resolves
+              the id list server-side from these (instead of per-row ids). */}
+          <input type="hidden" name="filterVendor" value={vendorFilter} />
+          <input type="hidden" name="filterLevel" value={levelFilter} />
+          <input type="hidden" name="filterStatus" value={status} />
+          <input type="hidden" name="filterQ" value={q} />
+          <input type="hidden" name="filterArchived" value={archived ? '1' : ''} />
           <label className="inline-flex cursor-pointer items-center gap-1.5 text-slate-700 dark:text-slate-200">
             <SelectAllCheckbox formId={BULK_FORM_ID} className="h-4 w-4 accent-blue-600" />
             Select all
@@ -519,6 +562,11 @@ export default async function AdminExamsPage({
           <span className="text-slate-600 dark:text-slate-400">
             <SelectedCounter formId={BULK_FORM_ID} /> selected
           </span>
+          <SelectAllMatchingBanner
+            formId={BULK_FORM_ID}
+            pageCount={exams.length}
+            totalCount={totalCount}
+          />
           <span className="text-slate-400">·</span>
           <span className="text-slate-500">With selected:</span>
           <button
