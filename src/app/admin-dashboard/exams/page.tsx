@@ -78,23 +78,22 @@ async function bulkExamAction(formData: FormData) {
   if (formData.get('selectAllMatching') === '1') {
     const fVendor = String(formData.get('filterVendor') || '');
     const fLevel = String(formData.get('filterLevel') || '');
-    const fStatus = String(formData.get('filterStatus') || '');
     const fQ = String(formData.get('filterQ') || '').trim();
-    const rawArchived = String(formData.get('filterArchived') || '');
-    const fArchived = rawArchived === '1' ? '1' : rawArchived === 'all' ? 'all' : '';
+    const rawView = String(formData.get('filterView') || '');
+    const fView: 'active' | 'inactive' | 'archived' | 'all' =
+      rawView === 'inactive' || rawView === 'archived' || rawView === 'all'
+        ? rawView
+        : 'active';
     const where = {
-      ...(fArchived === '1'
-        ? { deletedAt: { not: null } }
-        : fArchived === 'all'
-          ? {}
-          : { deletedAt: null }),
+      ...(fView === 'active'
+        ? { deletedAt: null, published: true }
+        : fView === 'inactive'
+          ? { deletedAt: null, published: false }
+          : fView === 'archived'
+            ? { deletedAt: { not: null } }
+            : {}),
       ...(fVendor ? { vendor: { slug: fVendor } } : {}),
       ...(fLevel ? { level: fLevel } : {}),
-      ...(fStatus === 'active'
-        ? { published: true }
-        : fStatus === 'inactive'
-          ? { published: false }
-          : {}),
       ...(fQ
         ? {
             OR: [
@@ -238,27 +237,39 @@ function fmtDate(d: Date | null | undefined): string {
 export default async function AdminExamsPage({
   searchParams
 }: {
-  searchParams: Promise<{ vendor?: string; level?: string; q?: string; archived?: string; status?: string; page?: string }>;
+  searchParams: Promise<{ vendor?: string; level?: string; q?: string; view?: string; archived?: string; status?: string; page?: string }>;
 }) {
   const sp = await searchParams;
   const vendorFilter = sp.vendor || '';
   const levelFilter = sp.level || '';
-  const status = sp.status || '';
   const q = (sp.q || '').trim();
-  // 3-state: '' = Active (deletedAt null) — default, '1' = Archived only,
-  // 'all' = both. Old links with archived=1 keep working unchanged.
-  const archived = sp.archived === '1' ? '1' : sp.archived === 'all' ? 'all' : '';
+  // Single View dropdown now collapses what used to be two filters
+  // (?status= + ?archived=) into one ?view= param. Old links still work:
+  // we map legacy ?status= / ?archived= to the matching view value.
+  type View = 'active' | 'inactive' | 'archived' | 'all';
+  function resolveView(): View {
+    const raw = sp.view;
+    if (raw === 'active' || raw === 'inactive' || raw === 'archived' || raw === 'all') return raw;
+    // Legacy compatibility — old bookmarks/links.
+    if (sp.archived === '1') return 'archived';
+    if (sp.archived === 'all') return 'all';
+    if (sp.status === 'inactive') return 'inactive';
+    if (sp.status === 'active') return 'active';
+    return 'active'; // default
+  }
+  const view: View = resolveView();
   const requestedPage = Math.max(1, Number(sp.page || 1) || 1);
 
   const where = {
-    ...(archived === '1'
-      ? { deletedAt: { not: null } }
-      : archived === 'all'
-        ? {}
-        : { deletedAt: null }),
+    ...(view === 'active'
+      ? { deletedAt: null, published: true }
+      : view === 'inactive'
+        ? { deletedAt: null, published: false }
+        : view === 'archived'
+          ? { deletedAt: { not: null } }
+          : {}),
     ...(vendorFilter ? { vendor: { slug: vendorFilter } } : {}),
     ...(levelFilter ? { level: levelFilter } : {}),
-    ...(status === 'active' ? { published: true } : status === 'inactive' ? { published: false } : {}),
     ...(q
       ? {
           OR: [
@@ -278,29 +289,31 @@ export default async function AdminExamsPage({
   const page = Math.min(requestedPage, totalPages);
   const exams = await loadExams(where, (page - 1) * PAGE_SIZE, PAGE_SIZE);
 
-  const baseParams = { vendor: vendorFilter, level: levelFilter, q, status };
+  // baseParams omits view when it's the default ('active') for cleaner URLs.
+  const baseParams = { vendor: vendorFilter, level: levelFilter, q, view: view === 'active' ? undefined : view };
   const buildHref = (p: number) =>
     `/admin-dashboard/exams${buildQS({ ...baseParams, page: p === 1 ? undefined : p })}`;
 
+  const viewParam = view === 'active' ? undefined : view;
   const activeFilters = [
     vendorFilter && {
       key: 'vendor',
       label: vendors.find((v) => v.slug === vendorFilter)?.name ?? vendorFilter,
-      clearHref: `/admin-dashboard/exams${buildQS({ level: levelFilter, q })}`
+      clearHref: `/admin-dashboard/exams${buildQS({ level: levelFilter, q, view: viewParam })}`
     },
     levelFilter && {
       key: 'level',
       label: levelFilter,
-      clearHref: `/admin-dashboard/exams${buildQS({ vendor: vendorFilter, q })}`
+      clearHref: `/admin-dashboard/exams${buildQS({ vendor: vendorFilter, q, view: viewParam })}`
     },
     q && {
       key: 'search',
       label: q,
-      clearHref: `/admin-dashboard/exams${buildQS({ vendor: vendorFilter, level: levelFilter, status })}`
+      clearHref: `/admin-dashboard/exams${buildQS({ vendor: vendorFilter, level: levelFilter, view: viewParam })}`
     },
-    status && {
-      key: 'status',
-      label: status,
+    view !== 'active' && {
+      key: 'view',
+      label: view,
       clearHref: `/admin-dashboard/exams${buildQS({ vendor: vendorFilter, level: levelFilter, q })}`
     }
   ].filter(Boolean) as { key: string; label: string; clearHref: string }[];
@@ -538,28 +551,22 @@ export default async function AdminExamsPage({
             ))}
           </select>
         </FilterField>
-        <FilterField label="Status">
-          <select name="status" defaultValue={status} className="input-sm">
-            <option value="">All</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-        </FilterField>
         <FilterField label="Search" className="min-w-[14rem] flex-1">
           <input name="q" defaultValue={q} placeholder="Title or code…" className="input-sm" />
         </FilterField>
         <FilterField label="View">
-          <select name="archived" defaultValue={archived} className="input-sm">
-            <option value="">Active</option>
-            <option value="1">Archived</option>
+          <select name="view" defaultValue={view} className="input-sm">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="archived">Archived</option>
             <option value="all">All</option>
           </select>
         </FilterField>
       </FilterBar>
 
-      {/* Bulk form visible on Active and All views. Hidden on Archived-only
-          view (which uses a separate Restore form below). */}
-      {archived !== '1' && (
+      {/* Bulk form visible on Active / Inactive / All views. Hidden on
+          Archived-only view (which uses per-row Restore icons). */}
+      {view !== 'archived' && (
         <form
           id={BULK_FORM_ID}
           action={bulkExamAction}
@@ -571,9 +578,8 @@ export default async function AdminExamsPage({
               the id list server-side from these (instead of per-row ids). */}
           <input type="hidden" name="filterVendor" value={vendorFilter} />
           <input type="hidden" name="filterLevel" value={levelFilter} />
-          <input type="hidden" name="filterStatus" value={status} />
           <input type="hidden" name="filterQ" value={q} />
-          <input type="hidden" name="filterArchived" value={archived} />
+          <input type="hidden" name="filterView" value={view} />
           <label className="inline-flex cursor-pointer items-center gap-1.5 text-slate-700 dark:text-slate-200">
             <SelectAllCheckbox formId={BULK_FORM_ID} className="h-4 w-4 accent-blue-600" />
             Select all
