@@ -14,6 +14,35 @@ import { SelectAllCheckbox, SelectedCounter, SelectAllMatchingBanner } from '@/c
 
 export const dynamic = 'force-dynamic';
 
+/** Build a Prisma `where` clause for the search bar.
+ *
+ *  Robust by design:
+ *   - searches title, code, slug, description, vendor name, and vendor slug
+ *   - case-insensitive substring (ILIKE '%term%')
+ *   - whitespace-tokenized: "microsoft administrator" → each token must
+ *     match at least one field. Lets multi-word searches find rows where
+ *     the words aren't contiguous (e.g. "ms 102" finds MS-102 titles).
+ *   - empty / whitespace-only query short-circuits to no filter.
+ *
+ *  Returned as a partial `where` to spread into the caller's clause.
+ */
+function searchClause(q: string) {
+  const tokens = q.trim().split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) return {};
+  const ci = (term: string) => ({ contains: term, mode: 'insensitive' as const });
+  const tokenOr = (tok: string) => ({
+    OR: [
+      { title: ci(tok) },
+      { code: ci(tok) },
+      { slug: ci(tok) },
+      { description: ci(tok) },
+      { vendor: { is: { name: ci(tok) } } },
+      { vendor: { is: { slug: ci(tok) } } }
+    ]
+  });
+  return tokens.length === 1 ? tokenOr(tokens[0]) : { AND: tokens.map(tokenOr) };
+}
+
 async function deleteExam(formData: FormData) {
   'use server';
   const session = await auth();
@@ -94,14 +123,7 @@ async function bulkExamAction(formData: FormData) {
             : {}),
       ...(fVendor ? { vendor: { slug: fVendor } } : {}),
       ...(fLevel ? { level: fLevel } : {}),
-      ...(fQ
-        ? {
-            OR: [
-              { title: { contains: fQ, mode: 'insensitive' as const } },
-              { code: { contains: fQ, mode: 'insensitive' as const } }
-            ]
-          }
-        : {})
+      ...searchClause(fQ)
     };
     const matching = await db.exam.findMany({ where, select: { id: true } });
     ids = matching.map((e) => e.id);
@@ -270,14 +292,7 @@ export default async function AdminExamsPage({
           : {}),
     ...(vendorFilter ? { vendor: { slug: vendorFilter } } : {}),
     ...(levelFilter ? { level: levelFilter } : {}),
-    ...(q
-      ? {
-          OR: [
-            { title: { contains: q, mode: 'insensitive' as const } },
-            { code: { contains: q, mode: 'insensitive' as const } }
-          ]
-        }
-      : {})
+    ...searchClause(q)
   };
 
   const [vendors, totalCount] = await Promise.all([
@@ -552,7 +567,7 @@ export default async function AdminExamsPage({
           </select>
         </FilterField>
         <FilterField label="Search" className="min-w-[14rem] flex-1">
-          <input name="q" defaultValue={q} placeholder="Title or code…" className="input-sm" />
+          <input name="q" defaultValue={q} placeholder="Title, code, slug, vendor…" className="input-sm" />
         </FilterField>
         <FilterField label="View">
           <select name="view" defaultValue={view} className="input-sm">
