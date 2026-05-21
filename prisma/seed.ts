@@ -115,20 +115,17 @@ const BUNDLES: BundleSeed[] = [
     slug: 'microsoft-ai-900',
     title: 'Microsoft Azure AI Fundamentals (AI-900)',
     description:
-      'All 6 AI-900 practice exams in one bundle — 360 questions covering AI workloads, machine learning on Azure, computer vision, natural language processing, and generative AI. Save vs buying each practice exam separately.',
-    price: 2000,         // $79 — PRACTICE tier (all 6 practice exams)
+      'All 3 AI-900 practice exams in one bundle — 195 curated questions covering AI workloads & considerations, machine learning on Azure, computer vision, natural language processing, and generative AI, aligned to the official AI-900 study guide.',
+    price: 2000,         // $79 — PRACTICE tier (3 practice exams × 65 Q)
     priceVoucher: 9900, // $99 — VOUCHER tier (covers Microsoft AI-900 $99 exam fee)
     items: [
       { examSlug: 'microsoft-ai-900-p1', tier: 'PRACTICE', position: 1 },
       { examSlug: 'microsoft-ai-900-p2', tier: 'PRACTICE', position: 2 },
       { examSlug: 'microsoft-ai-900-p3', tier: 'PRACTICE', position: 3 },
-      { examSlug: 'microsoft-ai-900-p4', tier: 'PRACTICE', position: 4 },
-      { examSlug: 'microsoft-ai-900-p5', tier: 'PRACTICE', position: 5 },
-      { examSlug: 'microsoft-ai-900-p6', tier: 'PRACTICE', position: 6 },
       // Voucher item — only granted when the buyer picks the VOUCHER tier
       // at checkout. fulfillOrder filters items by Order.tier so PRACTICE
       // buyers do not receive this.
-      { examSlug: 'microsoft-ai-900-p1', tier: 'VOUCHER', position: 7 }
+      { examSlug: 'microsoft-ai-900-p1', tier: 'VOUCHER', position: 4 }
     ]
   },
   {
@@ -198,9 +195,9 @@ function buildMultiVariantBundles(): BundleSeed[] {
     { slug: 'microsoft-ai-102', title: 'Microsoft Azure AI Engineer Associate (AI-102)', description: 'All 4 AI-102 practice exams in one bundle — covering plan & manage Azure AI solutions, implement decision & language solutions, generative AI solutions, and computer vision.', variants: 4, price: 2000, priceVoucher: 16500 },
     { slug: 'microsoft-dp-100', title: 'Microsoft Azure Data Scientist Associate (DP-100)', description: 'All 2 DP-100 practice exams in one bundle — covering ML solution design, data exploration & model training, deployment preparation, and model retraining on Azure ML.', variants: 2, price: 2000, priceVoucher: 16500 },
     { slug: 'microsoft-dp-300', title: 'Microsoft Azure Database Administrator (DP-300)', description: 'All 4 DP-300 practice exams in one bundle — covering planning & implementing data platform resources, implementing secure environments, monitoring & optimization, automation, and HA/DR for Azure SQL.', variants: 4, price: 2000, priceVoucher: 16500 },
-    { slug: 'microsoft-md-102', title: 'Microsoft Endpoint Administrator (MD-102)', description: 'All 4 MD-102 practice exams in one bundle — covering deploy Windows clients, manage identity & compliance, manage, protect, and monitor devices.', variants: 4, price: 2000, priceVoucher: 16500 },
+    { slug: 'microsoft-md-102', title: 'Microsoft Endpoint Administrator (MD-102)', description: 'All 3 MD-102 practice exams in one bundle — 195 curated questions covering preparing infrastructure for devices (Microsoft Entra device identity, Intune enrollment, identity & compliance, Windows Hello for Business, Windows LAPS), managing and maintaining devices (Windows Autopilot, configuration profiles, Intune Suite add-ons, remote actions, device query), managing applications (deploy, configure, and protect apps including M365 Apps, app protection policies, and app configuration policies), and protecting devices (endpoint security policies, Microsoft Defender for Endpoint integration, and Windows / iOS / macOS / Android update management). Aligned to the official Microsoft Endpoint Administrator (MD-102) study guide (skills measured as of April 28, 2026).', variants: 3, price: 2000, priceVoucher: 16500 },
     { slug: 'microsoft-ms-102', title: 'Microsoft 365 Administrator Expert (MS-102)', description: 'All 3 MS-102 practice exams in one bundle — covering deploy & manage a Microsoft 365 tenant, implement & manage Microsoft Entra identity & access, manage security & threats with Defender XDR, and Microsoft Purview compliance.', variants: 3, price: 2000, priceVoucher: 16500 },
-    { slug: 'microsoft-pl-300', title: 'Microsoft Power BI Data Analyst (PL-300)', description: 'All 5 PL-300 practice exams in one bundle — covering data preparation, data modeling, data visualization, and data analysis deployment & maintenance in Power BI.', variants: 5, price: 2000, priceVoucher: 16500 },
+    { slug: 'microsoft-pl-300', title: 'Microsoft Power BI Data Analyst Associate (PL-300)', description: 'All 3 PL-300 practice exams in one bundle — covering preparing the data, modeling the data, visualizing & analyzing the data, and managing & securing Power BI assets, aligned to the official PL-300 study guide.', variants: 3, price: 2000, priceVoucher: 16500 },
     { slug: 'cisco-ccna', title: 'Cisco Certified Network Associate (CCNA)', description: 'All 6 CCNA (200-301) practice exams in one bundle — covering networking fundamentals, IP services, security fundamentals, automation & programmability, and network access.', variants: 6, price: 2000, priceVoucher: 30000 },
     { slug: 'cisco-ccnp-encor', title: 'Cisco CCNP Enterprise Core (ENCOR 350-401)', description: 'All 2 CCNP Enterprise Core (ENCOR 350-401) practice exams in one bundle — covering architecture, virtualization, infrastructure, network assurance, security, and automation.', variants: 2, price: 2000, priceVoucher: 40000 },
     { slug: 'comptia-server-plus', title: 'CompTIA Server+', description: 'All 4 CompTIA Server+ (SK0-005) practice exams in one bundle — covering server hardware install/management, server administration, security & disaster recovery, and troubleshooting.', variants: 4, price: 2000, priceVoucher: 36900 },
@@ -482,10 +479,12 @@ const EXAMS: ExamSeed[] = [
     title: 'Microsoft Azure Fundamentals',
     description: 'Practice questions covering core Azure concepts, services, governance, and pricing.',
     level: 'Foundational', durationMinutes: 60, passingScore: 70, questionCount: 40,
+    // Aligned to MS Learn AZ-900 study guide ranges (verified 2026-05-20):
+    //   Cloud concepts 25–30 | Architecture 35–40 | Mgmt/governance 30–35
     domains: [
-      { name: 'Cloud concepts', weight: 25 },
-      { name: 'Azure architecture and services', weight: 35 },
-      { name: 'Azure management and governance', weight: 40 }
+      { name: 'Cloud concepts', weight: 28 },
+      { name: 'Azure architecture and services', weight: 40 },
+      { name: 'Azure management and governance', weight: 32 }
     ]
   },
   {
@@ -555,13 +554,17 @@ const EXAMS: ExamSeed[] = [
     vendorSlug: 'microsoft', slug: 'microsoft-ai-900', code: 'AI-900',
     title: 'Microsoft Azure AI Fundamentals',
     description: 'Introduction to AI concepts and Azure services for ML, computer vision, NLP, and generative AI.',
-    level: 'Foundational', durationMinutes: 60, passingScore: 70, questionCount: 40,
+    level: 'Foundational', durationMinutes: 60, passingScore: 70, questionCount: 65,
+    // Aligned to MS Learn AI-900 study guide ranges (verified 2026-05-20).
+    // Note: GenAI is 28% (3pp above the 20-25% range) to fit a clean 17 Q per
+    // variant; MS Learn has been continually bumping GenAI up so this errs
+    // safely in their indicated direction.
     domains: [
-      { name: 'AI workloads and considerations', weight: 17 },
-      { name: 'Fundamentals of machine learning on Azure', weight: 32 },
-      { name: 'Computer vision on Azure', weight: 17 },
-      { name: 'Natural language processing on Azure', weight: 17 },
-      { name: 'Generative AI on Azure', weight: 17 }
+      { name: 'Describe Artificial Intelligence workloads and considerations', weight: 18 },
+      { name: 'Describe fundamental principles of machine learning on Azure', weight: 18 },
+      { name: 'Describe features of computer vision workloads on Azure', weight: 18 },
+      { name: 'Describe features of Natural Language Processing (NLP) workloads on Azure', weight: 18 },
+      { name: 'Describe features of generative AI workloads on Azure', weight: 28 }
     ]
   },
   {
@@ -569,11 +572,14 @@ const EXAMS: ExamSeed[] = [
     title: 'Microsoft Azure Data Fundamentals',
     description: 'Core data concepts and how they are implemented using Azure data services.',
     level: 'Foundational', durationMinutes: 60, passingScore: 70, questionCount: 40,
+    // Aligned to MS Learn DP-900 study guide ranges (verified 2026-05-20):
+    //   Core 25–30 | Relational 20–25 | Non-relational 15–20 | Analytics 25–30
+    // D4 was renamed from "Analytics workloads on Azure" → "Describe an analytics workload".
     domains: [
-      { name: 'Core data concepts', weight: 27 },
-      { name: 'Considerations for relational data on Azure', weight: 22 },
-      { name: 'Considerations for non-relational data on Azure', weight: 17 },
-      { name: 'Analytics workloads on Azure', weight: 34 }
+      { name: 'Describe core data concepts', weight: 28 },
+      { name: 'Identify considerations for relational data on Azure', weight: 22 },
+      { name: 'Describe considerations for non-relational data on Azure', weight: 20 },
+      { name: 'Describe an analytics workload', weight: 30 }
     ]
   },
   {
@@ -1093,6 +1099,18 @@ const EXAMS: ExamSeed[] = [
       { name: 'Implement and manage Microsoft Entra identity and access', weight: 27 },
       { name: 'Manage security and threats by using Microsoft Defender XDR', weight: 33 },
       { name: 'Manage compliance by using Microsoft Purview', weight: 13 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'microsoft', slug: `microsoft-md-102-p${n}`, code: `MD-102-P${n}`,
+    title: `Microsoft Endpoint Administrator (MD-102) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for Microsoft MD-102 — a 100-minute, 65-question, blueprint-weighted set covering preparing infrastructure for devices (Entra device identity, Intune enrollment, identity & compliance), managing and maintaining devices (Windows Autopilot, configuration profiles, Intune Suite, remote actions, device query), managing applications (deploy/configure/protect including M365 Apps and app protection policies), and protecting devices (endpoint security, Microsoft Defender for Endpoint integration, updates). Aligned to the official Microsoft MD-102 study guide (skills measured as of April 28, 2026).`,
+    level: 'Associate', durationMinutes: 100, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Prepare infrastructure for devices', weight: 28 },
+      { name: 'Manage and maintain devices', weight: 32 },
+      { name: 'Manage applications', weight: 20 },
+      { name: 'Protect devices', weight: 20 }
     ]
   })),
   ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
@@ -1669,13 +1687,10 @@ async function main() {
   // without flooding the view with the entire catalog. Add to this list if
   // you need to smoke-test a specific exam path.
   const TEAM_GRANTS: { examSlug: string; tier: Tier }[] = [
-    // AI-900 bundle: 6 P-variants collapse into one expandable bundle card.
+    // AI-900 bundle: 3 P-variants collapse into one expandable bundle card.
     { examSlug: 'microsoft-ai-900-p1', tier: Tier.PRACTICE },
     { examSlug: 'microsoft-ai-900-p2', tier: Tier.PRACTICE },
     { examSlug: 'microsoft-ai-900-p3', tier: Tier.PRACTICE },
-    { examSlug: 'microsoft-ai-900-p4', tier: Tier.PRACTICE },
-    { examSlug: 'microsoft-ai-900-p5', tier: Tier.PRACTICE },
-    { examSlug: 'microsoft-ai-900-p6', tier: Tier.PRACTICE },
     // One VOUCHER row on the same bundle exercises the green "Voucher" strip
     // when the bundle card is expanded, and populates /my-content/vouchers.
     { examSlug: 'microsoft-ai-900-p1', tier: Tier.VOUCHER },
