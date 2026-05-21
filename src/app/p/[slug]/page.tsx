@@ -5,7 +5,10 @@ import { db } from '@/lib/db';
 import { getSetting } from '@/lib/settings';
 import { DEFAULT_PAGES } from '@/lib/pages';
 
-export const dynamic = 'force-dynamic';
+// ISR: CMS pages (about, terms, privacy, refunds, etc.) change rarely.
+// 10-min cache is fast enough for admin-driven edits to propagate while
+// avoiding a DB hit on every visit to legal/marketing pages.
+export const revalidate = 600;
 
 // Falls back to the DEFAULT_PAGES seed content when a page hasn't been
 // materialized into the DB yet — avoids a 404 on first visit before an

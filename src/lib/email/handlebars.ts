@@ -28,9 +28,19 @@ function register() {
   Handlebars.registerHelper('eq', (a: unknown, b: unknown) => a === b);
 }
 
+// Compile is the hot path on every transactional email (purchase
+// confirmations, voucher delivery, OTP, etc.). Handlebars.compile parses
+// the template each call; cache by source string so repeated sends of
+// the same template skip parsing entirely.
+const compileCache = new Map<string, Handlebars.TemplateDelegate>();
+
 export function compile(source: string): Handlebars.TemplateDelegate {
   register();
-  return Handlebars.compile(source, { noEscape: false });
+  const cached = compileCache.get(source);
+  if (cached) return cached;
+  const fn = Handlebars.compile(source, { noEscape: false });
+  compileCache.set(source, fn);
+  return fn;
 }
 
 export function render(source: string, vars: Record<string, unknown>): string {

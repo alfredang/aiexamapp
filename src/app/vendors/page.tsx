@@ -1,7 +1,10 @@
 import Link from 'next/link';
 import { db } from '@/lib/db';
 
-export const dynamic = 'force-dynamic';
+// ISR: vendor list + per-vendor exam/bundle counts cache for 10 min.
+// Vendor catalog changes infrequently (vendors are added rarely; exam
+// publish counts shift on the same cadence as the homepage at most).
+export const revalidate = 600;
 
 export default async function VendorsPage() {
   // Count only exams visible to the public (published + has questions)
