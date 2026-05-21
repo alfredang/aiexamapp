@@ -533,8 +533,8 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
                     <td className="px-2 py-2">
                       <div className="font-medium">{q.stem}</div>
                       <ul className="mt-1 space-y-0.5 text-xs text-slate-600 dark:text-slate-400">
-                        {opts.map((o) => (
-                          <li key={o.id} className={correct.includes(o.id) ? 'font-semibold text-emerald-700 dark:text-emerald-400' : ''}>
+                        {opts.map((o, i) => (
+                          <li key={`${i}-${o.id}`} className={correct.includes(o.id) ? 'font-semibold text-emerald-700 dark:text-emerald-400' : ''}>
                             {o.id.toUpperCase()}. {o.text} {correct.includes(o.id) && '✓'}
                           </li>
                         ))}

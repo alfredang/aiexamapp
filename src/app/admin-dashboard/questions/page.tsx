@@ -44,7 +44,7 @@ export default async function AdminQuestionsPage({ searchParams }: { searchParam
               <div className="mb-1 text-xs text-slate-500">{q.exam.code} · {q.domain || '—'} · D{q.difficulty} · {q.type} · {q.generatedBy || 'manual'}</div>
               <p className="font-medium">{q.stem}</p>
               <ul className="mt-2 space-y-1 text-sm">
-                {opts.map(o => <li key={o.id} className={correctIds.includes(o.id) ? 'text-green-700 dark:text-green-300' : 'text-slate-700 dark:text-slate-300'}>{correctIds.includes(o.id) ? '✓ ' : '○ '}{o.text}</li>)}
+                {opts.map((o, oi) => <li key={`${oi}-${o.id}`} className={correctIds.includes(o.id) ? 'text-green-700 dark:text-green-300' : 'text-slate-700 dark:text-slate-300'}>{correctIds.includes(o.id) ? '✓ ' : '○ '}{o.text}</li>)}
               </ul>
               <p className="mt-2 text-sm text-slate-600"><b>Explanation:</b> {q.explanation}</p>
               <div className="mt-3 flex gap-2">
