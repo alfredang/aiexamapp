@@ -1,13 +1,14 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { db } from '@/lib/db';
 import { formatPrice } from '@/lib/utils';
 import { DotPattern } from '@/components/dot-pattern';
 import { Search, ShieldCheck, Sparkles, BookOpen, BadgeCheck, Award, ChevronDown, HelpCircle } from 'lucide-react';
 import { LandingTestimonials } from '@/components/landing-testimonials';
 
-// Vendor + popular-exam counts come from live DB queries; without this the
-// page is statically prerendered and shows stale counts after seed updates.
-export const dynamic = 'force-dynamic';
+// ISR: refetch vendor + popular-bundle counts at most once every 5 minutes.
+// Avoids per-visit DB hits while keeping seed/publish changes visible quickly.
+export const revalidate = 300;
 
 export default async function HomePage() {
   const { getSetting } = await import('@/lib/settings');
@@ -88,14 +89,22 @@ export default async function HomePage() {
             </div>
           </div>
           <div className="relative hidden items-center justify-center md:flex">
-            <img
+            <Image
               src="/hero.webp"
               alt="ExamNova exam-prep dashboard preview"
+              width={1200}
+              height={800}
+              priority
+              sizes="(min-width: 1024px) 600px, (min-width: 768px) 480px, 100vw"
               className="block h-auto max-h-[480px] w-full max-w-full object-contain dark:hidden"
             />
-            <img
+            <Image
               src="/hero-dark.webp"
               alt="ExamNova exam-prep dashboard preview"
+              width={1200}
+              height={800}
+              priority
+              sizes="(min-width: 1024px) 600px, (min-width: 768px) 480px, 100vw"
               className="hidden h-auto max-h-[480px] w-full max-w-full object-contain dark:block [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_85%)] [-webkit-mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_85%)]"
             />
           </div>

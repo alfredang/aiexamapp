@@ -3,20 +3,26 @@ import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
 import { formatPrice } from '@/lib/utils';
 
-export const dynamic = 'force-dynamic';
+// ISR: vendor-page bundle listings cache for 5 min. New publishes appear
+// shortly after; avoids fetching the entire bundle catalog on every visit.
+export const revalidate = 300;
 
 export default async function VendorCatalogPage({ params }: { params: Promise<{ vendor: string }> }) {
   const { vendor: slug } = await params;
-  const vendor = await db.vendor.findUnique({ where: { slug } });
+  // Vendor lookup + filtered bundle query in parallel; the bundle filter is
+  // pushed to the DB via items.some so we no longer load the full catalog
+  // and filter in JS.
+  const [vendor, bundles] = await Promise.all([
+    db.vendor.findUnique({ where: { slug } }),
+    db.bundle.findMany({
+      where: {
+        published: true,
+        items: { some: { exam: { vendor: { slug } } } }
+      },
+      include: { items: { include: { exam: { include: { vendor: true } } } } }
+    })
+  ]);
   if (!vendor) notFound();
-
-  // Bundle-only catalog (per project policy): individual exam cards are
-  // hidden — customers only purchase bundles.
-  const allBundles = await db.bundle.findMany({
-    where: { published: true },
-    include: { items: { include: { exam: { include: { vendor: true } } } } }
-  });
-  const bundles = allBundles.filter(b => b.items[0]?.exam.vendor.slug === slug);
 
   type Card = { kind: 'bundle'; data: (typeof bundles)[number] };
   const cards: Card[] = bundles.map(b => ({ kind: 'bundle' as const, data: b }));
