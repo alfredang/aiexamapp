@@ -10,6 +10,16 @@ import { DEFAULT_PAGES } from '@/lib/pages';
 // avoiding a DB hit on every visit to legal/marketing pages.
 export const revalidate = 600;
 
+// Pre-render every known CMS page slug (admin-published + built-in
+// defaults) at build time. Required for the dynamic segment to be
+// ISR-cacheable in Next 15+ — without it, the route falls through to
+// fully-dynamic rendering and `revalidate` is ignored.
+export async function generateStaticParams() {
+  const dbRows = await db.page.findMany({ where: { published: true }, select: { slug: true } });
+  const slugs = new Set<string>([...DEFAULT_PAGES.map(p => p.slug), ...dbRows.map(r => r.slug)]);
+  return Array.from(slugs).map(slug => ({ slug }));
+}
+
 // Falls back to the DEFAULT_PAGES seed content when a page hasn't been
 // materialized into the DB yet — avoids a 404 on first visit before an
 // admin has opened /admin-dashboard/pages (which triggers seedDefaultPages).

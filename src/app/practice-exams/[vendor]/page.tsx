@@ -7,6 +7,16 @@ import { formatPrice } from '@/lib/utils';
 // shortly after; avoids fetching the entire bundle catalog on every visit.
 export const revalidate = 300;
 
+// Pre-render every known vendor at build time so the route is properly
+// ISR-cacheable. Without this, Next falls through to fully-dynamic
+// rendering for dynamic segments and ignores `revalidate` (cache-control
+// becomes "private, no-cache, no-store"). New vendors added after build
+// are still served via on-demand ISR thanks to dynamicParams=true (default).
+export async function generateStaticParams() {
+  const vendors = await db.vendor.findMany({ select: { slug: true } });
+  return vendors.map(v => ({ vendor: v.slug }));
+}
+
 export default async function VendorCatalogPage({ params }: { params: Promise<{ vendor: string }> }) {
   const { vendor: slug } = await params;
   // Vendor lookup + filtered bundle query in parallel; the bundle filter is
