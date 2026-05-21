@@ -481,10 +481,12 @@ const EXAMS: ExamSeed[] = [
     title: 'Microsoft Azure Fundamentals',
     description: 'Practice questions covering core Azure concepts, services, governance, and pricing.',
     level: 'Foundational', durationMinutes: 60, passingScore: 70, questionCount: 40,
+    // Aligned to MS Learn AZ-900 study guide ranges (verified 2026-05-20):
+    //   Cloud concepts 25–30 | Architecture 35–40 | Mgmt/governance 30–35
     domains: [
-      { name: 'Cloud concepts', weight: 25 },
-      { name: 'Azure architecture and services', weight: 35 },
-      { name: 'Azure management and governance', weight: 40 }
+      { name: 'Cloud concepts', weight: 28 },
+      { name: 'Azure architecture and services', weight: 40 },
+      { name: 'Azure management and governance', weight: 32 }
     ]
   },
   {
@@ -572,11 +574,14 @@ const EXAMS: ExamSeed[] = [
     title: 'Microsoft Azure Data Fundamentals',
     description: 'Core data concepts and how they are implemented using Azure data services.',
     level: 'Foundational', durationMinutes: 60, passingScore: 70, questionCount: 40,
+    // Aligned to MS Learn DP-900 study guide ranges (verified 2026-05-20):
+    //   Core 25–30 | Relational 20–25 | Non-relational 15–20 | Analytics 25–30
+    // D4 was renamed from "Analytics workloads on Azure" → "Describe an analytics workload".
     domains: [
-      { name: 'Core data concepts', weight: 27 },
-      { name: 'Considerations for relational data on Azure', weight: 22 },
-      { name: 'Considerations for non-relational data on Azure', weight: 17 },
-      { name: 'Analytics workloads on Azure', weight: 34 }
+      { name: 'Describe core data concepts', weight: 28 },
+      { name: 'Identify considerations for relational data on Azure', weight: 22 },
+      { name: 'Describe considerations for non-relational data on Azure', weight: 20 },
+      { name: 'Describe an analytics workload', weight: 30 }
     ]
   },
   {
