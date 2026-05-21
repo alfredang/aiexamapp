@@ -73,8 +73,8 @@ export function SourceStreamPanel({
                   </div>
                   <div className="mt-1 text-[13px] font-medium">{q.stem}</div>
                   <ul className="mt-1 space-y-0.5 text-[12px]">
-                    {q.options.map((o) => (
-                      <li key={o.id} className={q.correct.includes(o.id) ? 'font-semibold text-emerald-700 dark:text-emerald-300' : 'text-slate-600 dark:text-slate-400'}>
+                    {q.options.map((o, oi) => (
+                      <li key={`${oi}-${o.id}`} className={q.correct.includes(o.id) ? 'font-semibold text-emerald-700 dark:text-emerald-300' : 'text-slate-600 dark:text-slate-400'}>
                         {q.correct.includes(o.id) ? '✓ ' : '○ '}
                         {o.text}
                       </li>

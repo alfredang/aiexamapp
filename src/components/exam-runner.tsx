@@ -230,14 +230,14 @@ export function ExamRunner(props: ExamRunnerProps) {
         <div className="card p-6">
           <p className="text-base font-medium">{q.stem}</p>
           <div className="mt-4 space-y-2">
-            {q.options.map(o => {
+            {q.options.map((o, oi) => {
               const sel = a.answer.includes(o.id);
               const isAnswered = !!a.submitted;
               const correct = a.correct?.includes(o.id);
               const wrong = isAnswered && sel && !correct;
               return (
                 <button
-                  key={o.id}
+                  key={`${oi}-${o.id}`}
                   onClick={() => toggle(o.id)}
                   disabled={a.submitted && props.mode === 'PRACTICE'}
                   className={`flex w-full items-start justify-between gap-3 rounded-md border px-4 py-3 text-left text-sm transition ${

@@ -110,11 +110,11 @@ export default async function ResultsPage({ params }: { params: Promise<{ attemp
               </div>
               <p className="font-medium">{q.stem}</p>
               <ul className="mt-2 space-y-1 text-sm">
-                {(q.options as any[]).map((o: any) => {
+                {(q.options as any[]).map((o: any, oi: number) => {
                   const sel = ans.includes(o.id);
                   const isC = correctIds.includes(o.id);
                   return (
-                    <li key={o.id} className={`rounded px-3 py-1 ${isC ? 'bg-green-50 text-green-800 dark:bg-green-950/40 dark:text-green-200' : sel ? 'bg-red-50 text-red-800 dark:bg-red-950/40 dark:text-red-200' : 'text-slate-700 dark:text-slate-300'}`}>
+                    <li key={`${oi}-${o.id}`} className={`rounded px-3 py-1 ${isC ? 'bg-green-50 text-green-800 dark:bg-green-950/40 dark:text-green-200' : sel ? 'bg-red-50 text-red-800 dark:bg-red-950/40 dark:text-red-200' : 'text-slate-700 dark:text-slate-300'}`}>
                       {sel ? '● ' : '○ '}{o.text}{isC ? ' ✓' : ''}
                     </li>
                   );
