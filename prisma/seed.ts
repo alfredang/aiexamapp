@@ -166,16 +166,14 @@ const BUNDLES: BundleSeed[] = [
     slug: 'microsoft-sc-200',
     title: 'Microsoft Security Operations Analyst (SC-200)',
     description:
-      'All 5 SC-200 practice exams in one bundle — 300 questions covering threat mitigation with Microsoft Defender XDR, Microsoft Defender for Cloud, and Microsoft Sentinel, including incident response and KQL query authoring.',
-    price: 2000,         // $69 — PRACTICE tier
+      'All 3 SC-200 practice exams in one bundle — 195 curated questions covering managing a security operations environment (Defender XDR + Sentinel automation, SIEM platform configuration, data ingestion, and detection engineering), responding to security incidents across Defender XDR and Microsoft Defender for Endpoint, and performing threat hunting with KQL, Sentinel Graph, hunting notebooks, and the Sentinel MCP Server. Aligned to the official Microsoft Security Operations Analyst (SC-200) study guide (skills measured as of April 16, 2026).',
+    price: 2000,         // $20 — PRACTICE tier
     priceVoucher: 16500, // $165 — VOUCHER tier (adds real Microsoft SC-200 exam voucher)
     items: [
       { examSlug: 'microsoft-sc-200-p1', tier: 'PRACTICE', position: 1 },
       { examSlug: 'microsoft-sc-200-p2', tier: 'PRACTICE', position: 2 },
       { examSlug: 'microsoft-sc-200-p3', tier: 'PRACTICE', position: 3 },
-      { examSlug: 'microsoft-sc-200-p4', tier: 'PRACTICE', position: 4 },
-      { examSlug: 'microsoft-sc-200-p5', tier: 'PRACTICE', position: 5 },
-      { examSlug: 'microsoft-sc-200-p1', tier: 'VOUCHER', position: 6 }
+      { examSlug: 'microsoft-sc-200-p1', tier: 'VOUCHER', position: 4 }
     ]
   },
   // ───── Auto-generated multi-variant cert bundles ─────
@@ -1095,6 +1093,17 @@ const EXAMS: ExamSeed[] = [
       { name: 'Implement and manage Microsoft Entra identity and access', weight: 27 },
       { name: 'Manage security and threats by using Microsoft Defender XDR', weight: 33 },
       { name: 'Manage compliance by using Microsoft Purview', weight: 13 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'microsoft', slug: `microsoft-sc-200-p${n}`, code: `SC-200-P${n}`,
+    title: `Microsoft Security Operations Analyst (SC-200) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for Microsoft SC-200 — a 100-minute, 65-question, blueprint-weighted set covering managing a security operations environment (Defender XDR + Sentinel automation, SIEM platform configuration, data ingestion, and detection engineering), responding to security incidents across Defender XDR and Microsoft Defender for Endpoint, and performing threat hunting with KQL, Sentinel Graph, hunting notebooks, and the Sentinel MCP Server. Aligned to the official Microsoft SC-200 study guide (skills measured as of April 16, 2026).`,
+    level: 'Associate', durationMinutes: 100, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Manage a security operations environment', weight: 40 },
+      { name: 'Respond to security incidents', weight: 40 },
+      { name: 'Perform threat hunting', weight: 20 }
     ]
   })),
   ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
