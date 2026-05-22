@@ -50,6 +50,7 @@ const REF_R53_RESOLVER = { label: 'AWS Docs — What is Route 53 Resolver?', url
 const REF_R53_ROUTING = { label: 'AWS Docs — Choosing a routing policy', url: 'https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy.html' };
 const REF_PRIVATELINK = { label: 'AWS Docs — What is AWS PrivateLink?', url: 'https://docs.aws.amazon.com/vpc/latest/privatelink/what-is-privatelink.html' };
 const REF_VPC = { label: 'AWS Docs — What is Amazon VPC?', url: 'https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html' };
+const REF_REGIONS_AZ = { label: 'AWS Docs — Regions and Availability Zones', url: 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html' };
 const REF_CLOUDFRONT = { label: 'AWS Docs — What is Amazon CloudFront?', url: 'https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html' };
 const REF_GA = { label: 'AWS Docs — What is AWS Global Accelerator?', url: 'https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelerator.html' };
 const REF_VPC_ENDPOINT = { label: 'AWS Docs — Gateway endpoints for Amazon S3', url: 'https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-s3.html' };
@@ -347,7 +348,7 @@ const P1: Q[] = [
     ),
     correct: ['a'],
     explanation: 'Region selection must satisfy hard constraints first — here, EU data residency — and then optimize latency to the user base. Defaulting to us-east-1 or the cheapest Region can violate residency, and spreading data globally breaks the residency requirement.',
-    references: [REF_VPC, REF_DR]
+    references: [REF_REGIONS_AZ]
   },
   {
     domain: D1, difficulty: 2, type: QType.SINGLE,
@@ -1205,7 +1206,7 @@ const P2: Q[] = [
     ),
     correct: ['a'],
     explanation: 'Availability Zones are isolated data center groupings within a Region with low-latency links; spreading across multiple AZs survives a single data center failure while keeping latency low. A single AZ has no resilience, synchronous cross-Region writes add high latency, and edge locations are for content delivery, not application hosting.',
-    references: [REF_VPC, REF_DR]
+    references: [REF_REGIONS_AZ, REF_DR]
   },
   {
     domain: D1, difficulty: 2, type: QType.SINGLE,
