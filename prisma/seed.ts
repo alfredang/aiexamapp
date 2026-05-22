@@ -82,6 +82,7 @@ const HIDDEN_EXAM_SLUGS = [
   'aws-dop-c02',
   'aws-dva-c02',
   'aws-saa-c03',
+  'aws-soa-c03',
   'aws-sap-c02',
   'aws-mla-c01',
   'google-associate-cloud-engineer',
@@ -191,6 +192,7 @@ function buildMultiVariantBundles(): BundleSeed[] {
     { slug: 'aws-dop-c02', title: 'AWS Certified DevOps Engineer — Professional', description: 'All 8 AWS Certified DevOps Engineer Professional (DOP-C02) practice exams in one bundle — covering SDLC automation, configuration management, monitoring, incident & event response, security & compliance, and HA/business continuity.', variants: 8, price: 2000, priceVoucher: 30000 },
     { slug: 'aws-aif-c01', title: 'AWS Certified AI Practitioner', description: 'All 7 AWS Certified AI Practitioner (AIF-C01) practice exams in one bundle — covering fundamentals of AI/ML, generative AI on AWS, applications of foundation models, and responsible AI.', variants: 7, price: 2000, priceVoucher: 10000 },
     { slug: 'aws-dea-c01', title: 'AWS Certified Data Engineer — Associate', description: 'All 4 AWS Certified Data Engineer Associate (DEA-C01) practice exams in one bundle — covering data ingestion, data store management, data operations and support, and data security & governance.', variants: 4, price: 2000, priceVoucher: 15000 },
+    { slug: 'aws-soa-c03', title: 'AWS Certified CloudOps Engineer — Associate (SOA-C03)', description: 'All 3 SOA-C03 practice exams in one bundle — 195 curated questions covering monitoring, logging, analysis, remediation, and performance optimization (CloudWatch, CloudTrail, EventBridge, Systems Manager); reliability and business continuity (Auto Scaling, ELB, Route 53, AWS Backup, disaster recovery); deployment, provisioning, and automation (CloudFormation, StackSets, EC2 Image Builder, the AWS CDK); security and compliance (IAM, AWS KMS, AWS Config, GuardDuty, Security Hub); and networking and content delivery (VPC, Route 53, CloudFront, AWS Global Accelerator). Aligned to the official AWS Certified CloudOps Engineer - Associate (SOA-C03) exam guide.', variants: 3, price: 2000, priceVoucher: 15000 },
     { slug: 'aws-sap-c02', title: 'AWS Certified Solutions Architect — Professional (SAP-C02)', description: 'All 3 SAP-C02 practice exams in one bundle — 195 curated questions covering designing solutions for organizational complexity (multi-account architecture, hybrid and multi-VPC networking, cross-account security, disaster recovery, cost optimization); designing for new solutions (deployment strategies, business continuity, reliability, performance, security, cost); continuous improvement for existing solutions (operational excellence, security, performance, reliability, cost); and accelerating workload migration and modernization (the 7 Rs, migration tooling, re-architecture, and modernization to serverless and containers). Aligned to the official AWS Certified Solutions Architect - Professional (SAP-C02) exam guide.', variants: 3, price: 2000, priceVoucher: 30000 },
     { slug: 'microsoft-dp-900', title: 'Microsoft Azure Data Fundamentals (DP-900)', description: 'All 4 DP-900 practice exams in one bundle — covering core data concepts, relational and non-relational data, and data analytics on Azure.', variants: 4, price: 2000, priceVoucher: 9900 },
     { slug: 'microsoft-az-104', title: 'Microsoft Azure Administrator (AZ-104)', description: 'All 3 AZ-104 practice exams in one bundle — covering identities & governance, storage, compute, virtual networking, and monitoring & maintenance on Azure.', variants: 3, price: 2000, priceVoucher: 16500 },
@@ -200,6 +202,7 @@ function buildMultiVariantBundles(): BundleSeed[] {
     { slug: 'microsoft-md-102', title: 'Microsoft Endpoint Administrator (MD-102)', description: 'All 3 MD-102 practice exams in one bundle — 195 curated questions covering preparing infrastructure for devices (Microsoft Entra device identity, Intune enrollment, identity & compliance, Windows Hello for Business, Windows LAPS), managing and maintaining devices (Windows Autopilot, configuration profiles, Intune Suite add-ons, remote actions, device query), managing applications (deploy, configure, and protect apps including M365 Apps, app protection policies, and app configuration policies), and protecting devices (endpoint security policies, Microsoft Defender for Endpoint integration, and Windows / iOS / macOS / Android update management). Aligned to the official Microsoft Endpoint Administrator (MD-102) study guide (skills measured as of April 28, 2026).', variants: 3, price: 2000, priceVoucher: 16500 },
     { slug: 'microsoft-ms-102', title: 'Microsoft 365 Administrator Expert (MS-102)', description: 'All 3 MS-102 practice exams in one bundle — covering deploy & manage a Microsoft 365 tenant, implement & manage Microsoft Entra identity & access, manage security & threats with Defender XDR, and Microsoft Purview compliance.', variants: 3, price: 2000, priceVoucher: 16500 },
     { slug: 'microsoft-pl-300', title: 'Microsoft Power BI Data Analyst Associate (PL-300)', description: 'All 3 PL-300 practice exams in one bundle — covering preparing the data, modeling the data, visualizing & analyzing the data, and managing & securing Power BI assets, aligned to the official PL-300 study guide.', variants: 3, price: 2000, priceVoucher: 16500 },
+    { slug: 'microsoft-ms-700', title: 'Microsoft Teams Administrator Associate (MS-700)', description: 'All 3 MS-700 practice exams in one bundle — 195 curated questions covering configuring and managing a Microsoft Teams environment (network planning, security & compliance, governance and lifecycle, external and guest collaboration, Teams clients and devices), managing teams / channels / chats / apps, managing meetings and calling including Teams Phone (auto attendants, call queues, phone numbers, policies), and monitoring, reporting on, and troubleshooting Teams. Aligned to the official Managing Microsoft Teams (MS-700) study guide (skills measured as of April 28, 2026).', variants: 3, price: 2000, priceVoucher: 16500 },
     { slug: 'cisco-ccna', title: 'Cisco Certified Network Associate (CCNA)', description: 'All 6 CCNA (200-301) practice exams in one bundle — covering networking fundamentals, IP services, security fundamentals, automation & programmability, and network access.', variants: 6, price: 2000, priceVoucher: 30000 },
     { slug: 'cisco-ccnp-encor', title: 'Cisco CCNP Enterprise Core (ENCOR 350-401)', description: 'All 2 CCNP Enterprise Core (ENCOR 350-401) practice exams in one bundle — covering architecture, virtualization, infrastructure, network assurance, security, and automation.', variants: 2, price: 2000, priceVoucher: 40000 },
     { slug: 'comptia-server-plus', title: 'CompTIA Server+', description: 'All 4 CompTIA Server+ (SK0-005) practice exams in one bundle — covering server hardware install/management, server administration, security & disaster recovery, and troubleshooting.', variants: 4, price: 2000, priceVoucher: 36900 },
@@ -351,7 +354,7 @@ const EXAMS: ExamSeed[] = [
     vendorSlug: 'aws', slug: 'aws-soa-c03', code: 'SOA-C03',
     title: 'AWS Certified CloudOps Engineer — Associate',
     description: 'Deploy, manage, and operate workloads on AWS following the Well-Architected Framework. Covers monitoring, logging, remediation, performance optimisation, reliability and business continuity, deployment provisioning and automation, security and compliance, and networking. Replaces the SysOps Administrator (SOA-C02) exam. Real exam fee is USD 150 (voucher).',
-    level: 'Associate', durationMinutes: 180, passingScore: 72, questionCount: 65,
+    level: 'Associate', durationMinutes: 130, passingScore: 72, questionCount: 65,
     domains: [
       { name: 'Monitoring, Logging, Analysis, Remediation, and Performance Optimization', weight: 22 },
       { name: 'Reliability and Business Continuity', weight: 22 },
@@ -1124,6 +1127,18 @@ const EXAMS: ExamSeed[] = [
       { name: 'Manage a security operations environment', weight: 40 },
       { name: 'Respond to security incidents', weight: 40 },
       { name: 'Perform threat hunting', weight: 20 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'microsoft', slug: `microsoft-ms-700-p${n}`, code: `MS-700-P${n}`,
+    title: `Microsoft Teams Administrator Associate (MS-700) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for Microsoft MS-700 — a 100-minute, 65-question, blueprint-weighted set covering configuring and managing a Microsoft Teams environment (network planning, security & compliance, governance and lifecycle, external and guest collaboration, Teams clients and devices), managing teams, channels, chats, and apps, managing meetings and calling including Teams Phone (auto attendants, call queues, phone numbers, policies), and monitoring, reporting on, and troubleshooting Teams. Aligned to the official Managing Microsoft Teams (MS-700) study guide (skills measured as of April 28, 2026).`,
+    level: 'Associate', durationMinutes: 100, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Configure and manage a Teams environment', weight: 42 },
+      { name: 'Manage teams, channels, chats, and apps', weight: 23 },
+      { name: 'Manage meetings and calling', weight: 18 },
+      { name: 'Monitor, report on, and troubleshoot Teams', weight: 17 }
     ]
   })),
   ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
