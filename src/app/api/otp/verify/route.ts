@@ -3,6 +3,7 @@ import { z } from 'zod';
 import argon2 from 'argon2';
 import { db } from '@/lib/db';
 import { verifyOtp } from '@/lib/otp';
+import { rateLimit } from '@/lib/ratelimit';
 
 const Body = z.object({
   email: z.string().email(),
@@ -14,6 +15,17 @@ const Body = z.object({
 
 export async function POST(req: Request) {
   const data = Body.parse(await req.json());
+
+  // Rate-limit verification — caps 6-digit OTP brute-force and argon2 CPU abuse
+  // on this unauthenticated endpoint, and bounds unsolicited user-row creation
+  // via the TEASER_GATE / REGISTER upserts. Keyed on IP and on the target email.
+  const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+  const rlEmail = data.email.toLowerCase().trim();
+  if (!rateLimit(`otp-verify:ip:${ip}`, 20, 3_600_000).ok ||
+      !rateLimit(`otp-verify:email:${rlEmail}`, 10, 3_600_000).ok) {
+    return NextResponse.json({ error: 'Too many attempts. Please try again later.' }, { status: 429 });
+  }
+
   const ok = await verifyOtp(data.email, data.code, data.purpose);
   if (!ok) return NextResponse.json({ error: 'Invalid or expired code' }, { status: 400 });
 
