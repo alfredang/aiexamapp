@@ -198,6 +198,7 @@ function buildMultiVariantBundles(): BundleSeed[] {
     { slug: 'microsoft-md-102', title: 'Microsoft Endpoint Administrator (MD-102)', description: 'All 3 MD-102 practice exams in one bundle — 195 curated questions covering preparing infrastructure for devices (Microsoft Entra device identity, Intune enrollment, identity & compliance, Windows Hello for Business, Windows LAPS), managing and maintaining devices (Windows Autopilot, configuration profiles, Intune Suite add-ons, remote actions, device query), managing applications (deploy, configure, and protect apps including M365 Apps, app protection policies, and app configuration policies), and protecting devices (endpoint security policies, Microsoft Defender for Endpoint integration, and Windows / iOS / macOS / Android update management). Aligned to the official Microsoft Endpoint Administrator (MD-102) study guide (skills measured as of April 28, 2026).', variants: 3, price: 2000, priceVoucher: 16500 },
     { slug: 'microsoft-ms-102', title: 'Microsoft 365 Administrator Expert (MS-102)', description: 'All 3 MS-102 practice exams in one bundle — covering deploy & manage a Microsoft 365 tenant, implement & manage Microsoft Entra identity & access, manage security & threats with Defender XDR, and Microsoft Purview compliance.', variants: 3, price: 2000, priceVoucher: 16500 },
     { slug: 'microsoft-pl-300', title: 'Microsoft Power BI Data Analyst Associate (PL-300)', description: 'All 3 PL-300 practice exams in one bundle — covering preparing the data, modeling the data, visualizing & analyzing the data, and managing & securing Power BI assets, aligned to the official PL-300 study guide.', variants: 3, price: 2000, priceVoucher: 16500 },
+    { slug: 'microsoft-ms-700', title: 'Microsoft Teams Administrator Associate (MS-700)', description: 'All 3 MS-700 practice exams in one bundle — 195 curated questions covering configuring and managing a Microsoft Teams environment (network planning, security & compliance, governance and lifecycle, external and guest collaboration, Teams clients and devices), managing teams / channels / chats / apps, managing meetings and calling including Teams Phone (auto attendants, call queues, phone numbers, policies), and monitoring, reporting on, and troubleshooting Teams. Aligned to the official Managing Microsoft Teams (MS-700) study guide (skills measured as of April 28, 2026).', variants: 3, price: 2000, priceVoucher: 16500 },
     { slug: 'cisco-ccna', title: 'Cisco Certified Network Associate (CCNA)', description: 'All 6 CCNA (200-301) practice exams in one bundle — covering networking fundamentals, IP services, security fundamentals, automation & programmability, and network access.', variants: 6, price: 2000, priceVoucher: 30000 },
     { slug: 'cisco-ccnp-encor', title: 'Cisco CCNP Enterprise Core (ENCOR 350-401)', description: 'All 2 CCNP Enterprise Core (ENCOR 350-401) practice exams in one bundle — covering architecture, virtualization, infrastructure, network assurance, security, and automation.', variants: 2, price: 2000, priceVoucher: 40000 },
     { slug: 'comptia-server-plus', title: 'CompTIA Server+', description: 'All 4 CompTIA Server+ (SK0-005) practice exams in one bundle — covering server hardware install/management, server administration, security & disaster recovery, and troubleshooting.', variants: 4, price: 2000, priceVoucher: 36900 },
@@ -1122,6 +1123,18 @@ const EXAMS: ExamSeed[] = [
       { name: 'Manage a security operations environment', weight: 40 },
       { name: 'Respond to security incidents', weight: 40 },
       { name: 'Perform threat hunting', weight: 20 }
+    ]
+  })),
+  ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
+    vendorSlug: 'microsoft', slug: `microsoft-ms-700-p${n}`, code: `MS-700-P${n}`,
+    title: `Microsoft Teams Administrator Associate (MS-700) — Practice Exam ${n}`,
+    description: `Practice exam ${n} of 3 for Microsoft MS-700 — a 100-minute, 65-question, blueprint-weighted set covering configuring and managing a Microsoft Teams environment (network planning, security & compliance, governance and lifecycle, external and guest collaboration, Teams clients and devices), managing teams, channels, chats, and apps, managing meetings and calling including Teams Phone (auto attendants, call queues, phone numbers, policies), and monitoring, reporting on, and troubleshooting Teams. Aligned to the official Managing Microsoft Teams (MS-700) study guide (skills measured as of April 28, 2026).`,
+    level: 'Associate', durationMinutes: 100, passingScore: 70, questionCount: 65,
+    domains: [
+      { name: 'Configure and manage a Teams environment', weight: 42 },
+      { name: 'Manage teams, channels, chats, and apps', weight: 23 },
+      { name: 'Manage meetings and calling', weight: 18 },
+      { name: 'Monitor, report on, and troubleshoot Teams', weight: 17 }
     ]
   })),
   ...(['1', '2', '3'] as const).map((n): ExamSeed => ({
