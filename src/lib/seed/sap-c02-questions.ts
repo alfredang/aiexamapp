@@ -826,14 +826,14 @@ const P1: Q[] = [
     domain: D3, difficulty: 3, type: QType.SINGLE,
     stem: 'An existing single-Region application has grown and occasionally hits an AWS service quota, causing failed launches. The solutions architect wants to improve reliability against this. What should they do?',
     options: opts5(
-      'Monitor quota usage and request quota increases proactively before limits are reached',
-      'Use multiple Availability Zones and request quota increases as growth requires',
+      'Monitor quota usage with AWS Service Quotas and CloudWatch alarms, and request quota increases proactively before limits are reached',
+      'Spread the workload across more Availability Zones, since service quotas are tracked per Availability Zone',
       'Ignore the quota errors because they are transient',
       'Reduce the application capacity so it never approaches a quota',
       'Assume quotas do not apply to production accounts'
     ),
-    correct: ['a', 'b'],
-    explanation: 'Reliability improves by monitoring quota usage and proactively requesting increases, and by spreading load across AZs while still managing quotas as the application grows. Ignoring errors, artificially capping capacity, and assuming quotas do not apply all fail to address the limit.',
+    correct: ['a'],
+    explanation: 'AWS Service Quotas integrates with CloudWatch alarms to warn as usage approaches a limit, so the team can request increases proactively before launches fail. Service quotas are tracked per account and Region — not per Availability Zone — so adding AZs does not raise them. Ignoring errors, artificially capping capacity, and assuming quotas do not apply all fail to address the limit.',
     references: [REF_EC2, REF_ASG]
   },
 
@@ -1563,7 +1563,7 @@ const P2: Q[] = [
     references: [REF_CLOUDFRONT]
   },
   {
-    domain: D3, difficulty: 3, type: QType.SINGLE,
+    domain: D3, difficulty: 3, type: QType.MULTI,
     stem: 'An existing application\'s relational database is the bottleneck due to a read-heavy dashboard that runs the same queries constantly. Which two improvements best address this? (Choose two.)',
     options: opts5(
       'Add RDS read replicas and direct dashboard reads to them',

@@ -2289,7 +2289,7 @@ const P3: Q[] = [
       'Copy the snapshot to an S3 bucket and share the bucket'
     ),
     correct: ['a'],
-    explanation: 'To use an encrypted snapshot, the receiving account also needs permission to the KMS key that encrypted it; you cannot share an encrypted snapshot with a default AWS managed key, so a customer managed key is used and shared. Making it public is unsafe and not allowed for encrypted snapshots, and snapshots are not shared via S3 buckets.',
+    explanation: 'An encrypted EBS snapshot can be shared with another account only if it is encrypted with a customer managed KMS key — snapshots encrypted with the default AWS managed key cannot be shared at all. The receiving account must also be granted permission to use that customer managed key. Encrypted snapshots cannot be made public, disabling encryption is not part of any sharing workflow, and snapshots are not shared by copying them to an S3 bucket.',
     references: [REF_EBS_SNAP, REF_KMS]
   },
   {
