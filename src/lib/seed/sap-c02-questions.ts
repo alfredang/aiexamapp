@@ -50,6 +50,7 @@ const REF_R53_RESOLVER = { label: 'AWS Docs — What is Route 53 Resolver?', url
 const REF_R53_ROUTING = { label: 'AWS Docs — Choosing a routing policy', url: 'https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy.html' };
 const REF_PRIVATELINK = { label: 'AWS Docs — What is AWS PrivateLink?', url: 'https://docs.aws.amazon.com/vpc/latest/privatelink/what-is-privatelink.html' };
 const REF_VPC = { label: 'AWS Docs — What is Amazon VPC?', url: 'https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html' };
+const REF_REGIONS_AZ = { label: 'AWS Docs — Regions and Availability Zones', url: 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html' };
 const REF_CLOUDFRONT = { label: 'AWS Docs — What is Amazon CloudFront?', url: 'https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html' };
 const REF_GA = { label: 'AWS Docs — What is AWS Global Accelerator?', url: 'https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelerator.html' };
 const REF_VPC_ENDPOINT = { label: 'AWS Docs — Gateway endpoints for Amazon S3', url: 'https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-s3.html' };
@@ -347,7 +348,7 @@ const P1: Q[] = [
     ),
     correct: ['a'],
     explanation: 'Region selection must satisfy hard constraints first — here, EU data residency — and then optimize latency to the user base. Defaulting to us-east-1 or the cheapest Region can violate residency, and spreading data globally breaks the residency requirement.',
-    references: [REF_VPC, REF_DR]
+    references: [REF_REGIONS_AZ]
   },
   {
     domain: D1, difficulty: 2, type: QType.SINGLE,
@@ -826,14 +827,14 @@ const P1: Q[] = [
     domain: D3, difficulty: 3, type: QType.SINGLE,
     stem: 'An existing single-Region application has grown and occasionally hits an AWS service quota, causing failed launches. The solutions architect wants to improve reliability against this. What should they do?',
     options: opts5(
-      'Monitor quota usage and request quota increases proactively before limits are reached',
-      'Use multiple Availability Zones and request quota increases as growth requires',
+      'Monitor quota usage with AWS Service Quotas and CloudWatch alarms, and request quota increases proactively before limits are reached',
+      'Spread the workload across more Availability Zones, since service quotas are tracked per Availability Zone',
       'Ignore the quota errors because they are transient',
       'Reduce the application capacity so it never approaches a quota',
       'Assume quotas do not apply to production accounts'
     ),
-    correct: ['a', 'b'],
-    explanation: 'Reliability improves by monitoring quota usage and proactively requesting increases, and by spreading load across AZs while still managing quotas as the application grows. Ignoring errors, artificially capping capacity, and assuming quotas do not apply all fail to address the limit.',
+    correct: ['a'],
+    explanation: 'AWS Service Quotas integrates with CloudWatch alarms to warn as usage approaches a limit, so the team can request increases proactively before launches fail. Service quotas are tracked per account and Region — not per Availability Zone — so adding AZs does not raise them. Ignoring errors, artificially capping capacity, and assuming quotas do not apply all fail to address the limit.',
     references: [REF_EC2, REF_ASG]
   },
 
@@ -1205,7 +1206,7 @@ const P2: Q[] = [
     ),
     correct: ['a'],
     explanation: 'Availability Zones are isolated data center groupings within a Region with low-latency links; spreading across multiple AZs survives a single data center failure while keeping latency low. A single AZ has no resilience, synchronous cross-Region writes add high latency, and edge locations are for content delivery, not application hosting.',
-    references: [REF_VPC, REF_DR]
+    references: [REF_REGIONS_AZ, REF_DR]
   },
   {
     domain: D1, difficulty: 2, type: QType.SINGLE,
@@ -1563,7 +1564,7 @@ const P2: Q[] = [
     references: [REF_CLOUDFRONT]
   },
   {
-    domain: D3, difficulty: 3, type: QType.SINGLE,
+    domain: D3, difficulty: 3, type: QType.MULTI,
     stem: 'An existing application\'s relational database is the bottleneck due to a read-heavy dashboard that runs the same queries constantly. Which two improvements best address this? (Choose two.)',
     options: opts5(
       'Add RDS read replicas and direct dashboard reads to them',

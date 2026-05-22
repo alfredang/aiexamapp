@@ -160,9 +160,9 @@ const P1: Q[] = [
     domain: ENVIRONMENT, difficulty: 2, type: QType.SINGLE,
     stem: 'A helpdesk engineer must manage Teams users, meetings, and phone numbers but should NOT change org-wide Teams settings. Which administrator role follows least privilege?',
     options: opts4(
-      'Teams Communications Support Specialist / Teams Administrator scoped appropriately — but for full user+phone management without org settings, the Teams Communications Administrator role',
+      'Teams Communications Administrator',
       'Global Administrator',
-      'Teams Communications Support Engineer only',
+      'Teams Communications Support Engineer',
       'Teams Device Administrator'
     ),
     correct: ['a'],
