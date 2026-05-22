@@ -497,7 +497,7 @@ export const P2: Q[] = [
   {
     domain: RESILIENT,
     difficulty: 2,
-    type: QType.SINGLE,
+    type: QType.MULTI,
     stem: 'A company wants to protect against accidental deletion of critical Amazon DynamoDB tables and be able to restore a table to any point in the last 35 days. Which two settings should be enabled? (Choose two.)',
     options: opts5(
       'DynamoDB point-in-time recovery (PITR) on the table',
@@ -575,7 +575,7 @@ export const P2: Q[] = [
   {
     domain: RESILIENT,
     difficulty: 2,
-    type: QType.SINGLE,
+    type: QType.MULTI,
     stem: 'A critical Amazon RDS for MySQL database must have its automated backups retained for disaster recovery and protected so that an accidental console action cannot immediately delete the database. Which two settings improve recoverability and protection? (Choose two.)',
     options: opts5(
       'Set the automated backup retention period to a value greater than zero (for example, 14 days)',
