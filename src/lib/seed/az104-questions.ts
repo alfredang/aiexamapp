@@ -286,8 +286,8 @@ const P1: Q[] = [
     references: [REF_POLICY, REF_POLICY_EFFECTS, REF_MGMTGROUP]
   },
   {
-    domain: IDENTITY, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: An Azure Policy initiative is a collection of policy definitions grouped together to achieve a single overall compliance goal.',
+    domain: IDENTITY, difficulty: 2, type: QType.SINGLE,
+    stem: 'An Azure Policy initiative is a collection of policy definitions grouped together to achieve a single overall compliance goal.',
     options: opts4('True', 'False', 'Only for tagging policies', 'Only for management groups'),
     correct: ['a'],
     explanation: 'True. An initiative (policy set) groups multiple policy definitions so they can be assigned and tracked as a unit — for example, the Azure Security Benchmark initiative bundles dozens of definitions.',
@@ -1152,8 +1152,8 @@ const P2: Q[] = [
     references: [REF_AAD]
   },
   {
-    domain: IDENTITY, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Azure tags applied at a resource group are NOT automatically inherited by child resources.',
+    domain: IDENTITY, difficulty: 2, type: QType.SINGLE,
+    stem: 'Azure tags applied at a resource group are NOT automatically inherited by child resources.',
     options: opts4('True', 'False', 'Only when initiated via portal', 'Only on management groups'),
     correct: ['a'],
     explanation: 'True. Tags are not inherited automatically — child resources do not get parent tags. To enforce inheritance, use Azure Policy with the "Inherit a tag" modify effect.',
@@ -1992,8 +1992,8 @@ const P3: Q[] = [
     references: [REF_RBAC, REF_POLICY_EFFECTS]
   },
   {
-    domain: IDENTITY, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: A management group in Azure can be nested up to six levels of depth below the root management group.',
+    domain: IDENTITY, difficulty: 2, type: QType.SINGLE,
+    stem: 'A management group in Azure can be nested up to six levels of depth below the root management group.',
     options: opts4('True', 'False', 'Only 2 levels', 'Only 4 levels'),
     correct: ['a'],
     explanation: 'True. Microsoft documents a maximum of six levels of management group depth (excluding the root and subscription level).',

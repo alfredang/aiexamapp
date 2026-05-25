@@ -163,7 +163,7 @@ const P1: Q[] = [
     references: [REF_CISCO_SDN]
   },
   {
-    domain: CONCEPTS, difficulty: 1, type: QType.TRUE_FALSE,
+    domain: CONCEPTS, difficulty: 1, type: QType.SINGLE,
     stem: 'A broadcast domain is bounded by a router; a router does not forward Layer 2 broadcast frames.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -392,7 +392,7 @@ const P1: Q[] = [
     references: [REF_OBJ]
   },
   {
-    domain: OPS, difficulty: 1, type: QType.TRUE_FALSE,
+    domain: OPS, difficulty: 1, type: QType.SINGLE,
     stem: 'NetFlow/IPFIX records metadata about traffic flows (such as source/destination, ports, and byte counts) rather than capturing full packet payloads.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -652,7 +652,7 @@ const P1: Q[] = [
     references: [REF_RFC3022]
   },
   {
-    domain: TROUBLE, difficulty: 1, type: QType.TRUE_FALSE,
+    domain: TROUBLE, difficulty: 1, type: QType.SINGLE,
     stem: 'After resolving an incident, documenting the findings, actions, and outcomes is part of the troubleshooting methodology.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -771,7 +771,7 @@ const P2: Q[] = [
     references: [REF_CISCO_SDN]
   },
   {
-    domain: CONCEPTS, difficulty: 1, type: QType.TRUE_FALSE,
+    domain: CONCEPTS, difficulty: 1, type: QType.SINGLE,
     stem: 'A switch operating only at Layer 2 reduces the size of a collision domain but does not by itself reduce a broadcast domain.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -1005,7 +1005,7 @@ const P2: Q[] = [
     references: [REF_OBJ]
   },
   {
-    domain: OPS, difficulty: 1, type: QType.TRUE_FALSE,
+    domain: OPS, difficulty: 1, type: QType.SINGLE,
     stem: 'Accurate, synchronized time (e.g., via NTP) across devices is important for correlating log events during an investigation.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -1285,7 +1285,7 @@ const P2: Q[] = [
     references: [REF_IEEE_8021Q]
   },
   {
-    domain: TROUBLE, difficulty: 1, type: QType.TRUE_FALSE,
+    domain: TROUBLE, difficulty: 1, type: QType.SINGLE,
     stem: 'When troubleshooting, you should consider whether a recent change caused the problem as part of identifying the issue.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -1380,7 +1380,7 @@ const P3: Q[] = [
     references: [REF_OBJ]
   },
   {
-    domain: CONCEPTS, difficulty: 1, type: QType.TRUE_FALSE,
+    domain: CONCEPTS, difficulty: 1, type: QType.SINGLE,
     stem: 'In the TCP/IP model, the Internet layer corresponds roughly to the OSI Network layer.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -1658,7 +1658,7 @@ const P3: Q[] = [
     references: [REF_OBJ]
   },
   {
-    domain: OPS, difficulty: 1, type: QType.TRUE_FALSE,
+    domain: OPS, difficulty: 1, type: QType.SINGLE,
     stem: 'A jump box/bastion host is a hardened, monitored system used to administer devices in a protected segment.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -1940,7 +1940,7 @@ const P3: Q[] = [
     references: [REF_RFC2131]
   },
   {
-    domain: TROUBLE, difficulty: 1, type: QType.TRUE_FALSE,
+    domain: TROUBLE, difficulty: 1, type: QType.SINGLE,
     stem: 'Verifying full system functionality and implementing preventive measures is a required step before closing a troubleshooting case.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],

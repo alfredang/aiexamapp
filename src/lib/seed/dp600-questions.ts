@@ -169,8 +169,8 @@ const P1: Q[] = [
     references: [REF_ADMIN]
   },
   {
-    domain: PLAN, difficulty: 3, type: QType.TRUE_FALSE,
-    stem: 'True or False: A single OneLake exists per Microsoft Fabric tenant and is automatically provisioned without the customer creating or managing storage accounts.',
+    domain: PLAN, difficulty: 3, type: QType.SINGLE,
+    stem: 'A single OneLake exists per Microsoft Fabric tenant and is automatically provisioned without the customer creating or managing storage accounts.',
     options: opts4('True', 'False', 'Only with Premium capacity', 'Only when a lakehouse is created'),
     correct: ['a'],
     explanation: 'True. OneLake is a single, unified, tenant-wide data lake automatically provisioned for the tenant — there is one OneLake per tenant and no separate storage accounts to manage, similar to how OneDrive works for files.',
@@ -257,8 +257,8 @@ const P1: Q[] = [
     references: [REF_PIPELINE]
   },
   {
-    domain: PREP, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: Loading data into a Fabric lakehouse "Tables" area as Delta automatically makes it queryable through the SQL analytics endpoint.',
+    domain: PREP, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Loading data into a Fabric lakehouse "Tables" area as Delta automatically makes it queryable through the SQL analytics endpoint.',
     options: opts4('True', 'False', 'Only after manual table creation', 'Only for CSV files'),
     correct: ['a'],
     explanation: 'True. Delta tables placed in the lakehouse Tables area are automatically discovered and exposed as queryable tables on the SQL analytics endpoint with no extra DDL required.',
@@ -382,8 +382,8 @@ const P1: Q[] = [
     references: [REF_PIPELINE]
   },
   {
-    domain: PREP, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: A Fabric warehouse and a lakehouse can be queried together in a single T-SQL query by adding both to the same SQL query workspace (cross-database query).',
+    domain: PREP, difficulty: 2, type: QType.SINGLE,
+    stem: 'A Fabric warehouse and a lakehouse can be queried together in a single T-SQL query by adding both to the same SQL query workspace (cross-database query).',
     options: opts4('True', 'False', 'Only with Spark', 'Only via a pipeline'),
     correct: ['a'],
     explanation: 'True. Fabric supports cross-database (cross-warehouse/lakehouse SQL endpoint) queries within the same workspace using three-part names, so a single T-SQL query can join across a warehouse and a lakehouse.',
@@ -600,8 +600,8 @@ const P1: Q[] = [
     references: [REF_RELATION]
   },
   {
-    domain: MODEL, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: In a one-to-many relationship the filter, by default, propagates from the one-side dimension to the many-side fact table.',
+    domain: MODEL, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'In a one-to-many relationship the filter, by default, propagates from the one-side dimension to the many-side fact table.',
     options: opts4('True', 'False', 'Only if bidirectional', 'Only in DirectQuery'),
     correct: ['a'],
     explanation: 'True. By default the single (one) side filters the many side. Filtering from the many side back to the one side requires bidirectional cross-filtering, which is not the default.',
@@ -805,8 +805,8 @@ const P1: Q[] = [
     references: [REF_PERF]
   },
   {
-    domain: EXPLORE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: In KQL, the "render timechart" instruction visualizes summarized time-series results directly from a query.',
+    domain: EXPLORE, difficulty: 2, type: QType.SINGLE,
+    stem: 'In KQL, the "render timechart" instruction visualizes summarized time-series results directly from a query.',
     options: opts4('True', 'False', 'Only in Power BI', 'Only with T-SQL'),
     correct: ['a'],
     explanation: 'True. KQL\'s render operator (e.g., render timechart) visualizes query output, such as time-series, directly within the KQL query experience.',
@@ -1000,8 +1000,8 @@ const P2: Q[] = [
     references: [REF_ADMIN]
   },
   {
-    domain: PLAN, difficulty: 3, type: QType.TRUE_FALSE,
-    stem: 'True or False: Deployment pipelines and Git integration solve different problems — staged promotion versus source control — and can be used together.',
+    domain: PLAN, difficulty: 3, type: QType.SINGLE,
+    stem: 'Deployment pipelines and Git integration solve different problems — staged promotion versus source control — and can be used together.',
     options: opts4('True', 'False', 'Only one may be used per workspace', 'They are the same feature'),
     correct: ['a'],
     explanation: 'True. Git integration provides version control (branches/commits) while deployment pipelines provide staged promotion across Dev/Test/Prod; they are complementary and commonly used together.',
@@ -1088,8 +1088,8 @@ const P2: Q[] = [
     references: [REF_PIPELINE]
   },
   {
-    domain: PREP, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: OneLake stores data in open Delta/Parquet format, allowing multiple Fabric engines to use the same copy of data.',
+    domain: PREP, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'OneLake stores data in open Delta/Parquet format, allowing multiple Fabric engines to use the same copy of data.',
     options: opts4('True', 'False', 'Only Parquet, never Delta', 'Only for warehouses'),
     correct: ['a'],
     explanation: 'True. OneLake uses open Delta/Parquet formats so lakehouse, warehouse, and other engines can operate on the same physical data without duplicating it.',
@@ -1436,8 +1436,8 @@ const P2: Q[] = [
     references: [REF_CONTEXT]
   },
   {
-    domain: MODEL, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: A measure is evaluated at query time within the current filter context, whereas a calculated column is computed at data refresh and stored per row.',
+    domain: MODEL, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'A measure is evaluated at query time within the current filter context, whereas a calculated column is computed at data refresh and stored per row.',
     options: opts4('True', 'False', 'Both compute at refresh', 'Both compute per visual only'),
     correct: ['a'],
     explanation: 'True. Measures evaluate at query time using filter context; calculated columns are materialized per row during refresh and stored in the model.',
@@ -1641,8 +1641,8 @@ const P2: Q[] = [
     references: [REF_PERF]
   },
   {
-    domain: EXPLORE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: KQL\'s "project" operator is used to select and optionally rename a subset of columns.',
+    domain: EXPLORE, difficulty: 2, type: QType.SINGLE,
+    stem: 'KQL\'s "project" operator is used to select and optionally rename a subset of columns.',
     options: opts4('True', 'False', 'Only for numeric columns', 'Only inside summarize'),
     correct: ['a'],
     explanation: 'True. The project operator selects (and can rename/compute) a subset of columns, analogous to SQL SELECT of specific columns.',
@@ -1823,8 +1823,8 @@ const P3: Q[] = [
     references: [REF_CAPACITY]
   },
   {
-    domain: PLAN, difficulty: 3, type: QType.TRUE_FALSE,
-    stem: 'True or False: There is exactly one OneLake per Fabric tenant and it is provisioned automatically without managing storage accounts.',
+    domain: PLAN, difficulty: 3, type: QType.SINGLE,
+    stem: 'There is exactly one OneLake per Fabric tenant and it is provisioned automatically without managing storage accounts.',
     options: opts4('True', 'False', 'One per workspace', 'One per capacity'),
     correct: ['a'],
     explanation: 'True. OneLake is a single, automatically provisioned data lake per tenant; customers do not create or manage separate storage accounts.',
@@ -1924,8 +1924,8 @@ const P3: Q[] = [
     references: [REF_PIPELINE]
   },
   {
-    domain: PREP, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: Lakehouse Delta tables are automatically exposed for read-only T-SQL via the SQL analytics endpoint without manual DDL.',
+    domain: PREP, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Lakehouse Delta tables are automatically exposed for read-only T-SQL via the SQL analytics endpoint without manual DDL.',
     options: opts4('True', 'False', 'Only after manual CREATE TABLE', 'Only for CSV'),
     correct: ['a'],
     explanation: 'True. Delta tables in the lakehouse Tables area are auto-discovered and exposed on the SQL analytics endpoint for read-only T-SQL without manual DDL.',
@@ -2272,8 +2272,8 @@ const P3: Q[] = [
     references: [REF_CONTEXT]
   },
   {
-    domain: MODEL, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: By default, filters propagate from the one-side of a relationship to the many-side, not the reverse.',
+    domain: MODEL, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'By default, filters propagate from the one-side of a relationship to the many-side, not the reverse.',
     options: opts4('True', 'False', 'Only in DirectQuery', 'Only with aggregations'),
     correct: ['a'],
     explanation: 'True. Single-direction relationships propagate filters from the one-side to the many-side by default; reverse propagation requires bidirectional cross-filtering.',
@@ -2490,8 +2490,8 @@ const P3: Q[] = [
     references: [REF_PERF]
   },
   {
-    domain: EXPLORE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: KQL\'s render operator can visualize query results (e.g., timechart) directly within the query experience.',
+    domain: EXPLORE, difficulty: 2, type: QType.SINGLE,
+    stem: 'KQL\'s render operator can visualize query results (e.g., timechart) directly within the query experience.',
     options: opts4('True', 'False', 'Only in Power BI', 'Only with T-SQL'),
     correct: ['a'],
     explanation: 'True. The render operator visualizes KQL query output (such as render timechart) directly in the KQL query environment.',

@@ -473,7 +473,7 @@ const P1: Q[] = [
     references: [REF_KCTL]
   },
   {
-    domain: CLUSTER, difficulty: 2, type: QType.TRUE_FALSE,
+    domain: CLUSTER, difficulty: 2, type: QType.SINGLE,
     stem: 'On a default kubeadm cluster, kube-scheduler and kube-controller-manager run as Deployments in the kube-system namespace.',
     options: opts4('True', 'False', '', ''),
     correct: ['b'],
@@ -561,7 +561,7 @@ const P1: Q[] = [
     references: [REF_DEPLOY]
   },
   {
-    domain: WORK, difficulty: 2, type: QType.TRUE_FALSE,
+    domain: WORK, difficulty: 2, type: QType.SINGLE,
     stem: 'A Job with `completions: 5` and `parallelism: 2` runs at most 2 Pods at a time until 5 succeed.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -675,7 +675,7 @@ const P1: Q[] = [
     references: [REF_SVC]
   },
   {
-    domain: NET, difficulty: 2, type: QType.TRUE_FALSE,
+    domain: NET, difficulty: 2, type: QType.SINGLE,
     stem: 'A headless Service is created by setting `spec.clusterIP: None`.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -737,7 +737,7 @@ const P1: Q[] = [
     references: [REF_VOL]
   },
   {
-    domain: STORE, difficulty: 2, type: QType.TRUE_FALSE,
+    domain: STORE, difficulty: 2, type: QType.SINGLE,
     stem: 'A PVC with accessMode ReadWriteOnce can be mounted read-write by Pods on only one node at a time.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -903,7 +903,7 @@ const P1: Q[] = [
     references: [REF_DEBUG, REF_KUBEADM]
   },
   {
-    domain: TS, difficulty: 2, type: QType.TRUE_FALSE,
+    domain: TS, difficulty: 2, type: QType.SINGLE,
     stem: 'When the kube-apiserver is unreachable, `kubectl logs` can still retrieve container logs.',
     options: opts4('True', 'False', '', ''),
     correct: ['b'],
@@ -1316,7 +1316,7 @@ const P2: Q[] = [
     references: [REF_UPGRADE]
   },
   {
-    domain: CLUSTER, difficulty: 2, type: QType.TRUE_FALSE,
+    domain: CLUSTER, difficulty: 2, type: QType.SINGLE,
     stem: 'A bootstrap token created by `kubeadm token create` expires after 24 hours by default.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -1404,7 +1404,7 @@ const P2: Q[] = [
     references: [REF_AFFIN]
   },
   {
-    domain: WORK, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
+    domain: WORK, difficulty: 2, type: QType.SINGLE, isTeaser: true,
     stem: 'Setting `spec.nodeName` directly on a Pod bypasses the scheduler and binds the Pod to that node.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -1518,7 +1518,7 @@ const P2: Q[] = [
     references: [REF_NP]
   },
   {
-    domain: NET, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
+    domain: NET, difficulty: 2, type: QType.SINGLE, isTeaser: true,
     stem: 'A Service named `web` in namespace `prod` is resolvable from another namespace as `web.prod.svc.cluster.local`.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -1580,7 +1580,7 @@ const P2: Q[] = [
     references: [REF_VOL]
   },
   {
-    domain: STORE, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
+    domain: STORE, difficulty: 2, type: QType.SINGLE, isTeaser: true,
     stem: 'A PVC can bind to a PV only if the PV capacity is greater than or equal to the requested size and the access modes are compatible.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -1746,7 +1746,7 @@ const P2: Q[] = [
     references: [REF_DEBUG]
   },
   {
-    domain: TS, difficulty: 2, type: QType.TRUE_FALSE,
+    domain: TS, difficulty: 2, type: QType.SINGLE,
     stem: '`kubectl get events -n <ns>` is useful for diagnosing why a Pod failed to schedule or pull its image.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -2159,7 +2159,7 @@ const P3: Q[] = [
     references: [REF_KUBEADM, REF_ETCD]
   },
   {
-    domain: CLUSTER, difficulty: 2, type: QType.TRUE_FALSE,
+    domain: CLUSTER, difficulty: 2, type: QType.SINGLE,
     stem: 'On a kubeadm cluster, etcd serves client requests on port 2379 and peer (replication) traffic on port 2380.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -2247,7 +2247,7 @@ const P3: Q[] = [
     references: [REF_PRIO]
   },
   {
-    domain: WORK, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
+    domain: WORK, difficulty: 2, type: QType.SINGLE, isTeaser: true,
     stem: 'A DaemonSet automatically schedules a Pod on every node added to the cluster that matches its selector.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -2361,7 +2361,7 @@ const P3: Q[] = [
     references: [REF_SVC]
   },
   {
-    domain: NET, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
+    domain: NET, difficulty: 2, type: QType.SINGLE, isTeaser: true,
     stem: 'An Ingress resource has no effect unless an Ingress controller is deployed and running in the cluster.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -2423,7 +2423,7 @@ const P3: Q[] = [
     references: [REF_PV]
   },
   {
-    domain: STORE, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
+    domain: STORE, difficulty: 2, type: QType.SINGLE, isTeaser: true,
     stem: 'A StorageClass with `volumeBindingMode: WaitForFirstConsumer` delays PV provisioning until a Pod using the PVC is scheduled.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -2589,7 +2589,7 @@ const P3: Q[] = [
     references: [REF_DEBUG]
   },
   {
-    domain: TS, difficulty: 2, type: QType.TRUE_FALSE,
+    domain: TS, difficulty: 2, type: QType.SINGLE,
     stem: 'A Pod in `CrashLoopBackOff` is repeatedly starting and exiting; the back-off delay between restarts grows over time.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],

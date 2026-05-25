@@ -197,8 +197,8 @@ const P1: Q[] = [
     references: [REF_FUNC_DURABLE]
   },
   {
-    domain: COMPUTE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: In Azure App Service, application settings configured in the portal are exposed to your app as environment variables and override values in your configuration files at runtime.',
+    domain: COMPUTE, difficulty: 2, type: QType.SINGLE,
+    stem: 'In Azure App Service, application settings configured in the portal are exposed to your app as environment variables and override values in your configuration files at runtime.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'App Service application settings are injected as environment variables at runtime and take precedence over values shipped in configuration files such as appsettings.json, which is why they are the recommended place for environment-specific configuration.',
@@ -428,8 +428,8 @@ const P1: Q[] = [
     references: [REF_COSMOS_CHANGEFEED]
   },
   {
-    domain: STORAGE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: In Azure Cosmos DB, Request Units (RU/s) is the currency that abstracts the system resources (CPU, IOPS, memory) required to perform database operations such as reads and writes.',
+    domain: STORAGE, difficulty: 2, type: QType.SINGLE,
+    stem: 'In Azure Cosmos DB, Request Units (RU/s) is the currency that abstracts the system resources (CPU, IOPS, memory) required to perform database operations such as reads and writes.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'Request Units normalize the cost of operations across Cosmos DB. Each operation consumes RUs based on its resource cost, and you provision or autoscale RU/s throughput. Exceeding provisioned RU/s results in rate-limiting (HTTP 429).',
@@ -555,8 +555,8 @@ const P1: Q[] = [
     references: [REF_KEYVAULT_RBAC, REF_RBAC]
   },
   {
-    domain: SECURITY, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Azure Key Vault can store and manage secrets, keys, and certificates, and access to it can be controlled with either access policies or Azure RBAC.',
+    domain: SECURITY, difficulty: 2, type: QType.SINGLE,
+    stem: 'Azure Key Vault can store and manage secrets, keys, and certificates, and access to it can be controlled with either access policies or Azure RBAC.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'Key Vault is a centralized service for secrets, cryptographic keys, and TLS/SSL certificates. Authorization to the data plane can be configured using the legacy access policy model or the recommended Azure RBAC permission model.',
@@ -682,8 +682,8 @@ const P1: Q[] = [
     references: [REF_KQL]
   },
   {
-    domain: MONITOR, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: In Azure Monitor, metrics are lightweight numeric time-series data suited for near-real-time alerting and charting, whereas logs hold richer, structured/semi-structured records queried with KQL.',
+    domain: MONITOR, difficulty: 2, type: QType.SINGLE,
+    stem: 'In Azure Monitor, metrics are lightweight numeric time-series data suited for near-real-time alerting and charting, whereas logs hold richer, structured/semi-structured records queried with KQL.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'Azure Monitor distinguishes Metrics (numeric, time-series, low-latency, ideal for alerts and dashboards) from Logs (detailed event records in Log Analytics queried with KQL). Choosing the right data type matters for cost and latency.',
@@ -861,8 +861,8 @@ const P1: Q[] = [
     references: [REF_APIM_SUBS]
   },
   {
-    domain: CONNECT, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Azure Service Bus topics with subscriptions enable a publish/subscribe model where one published message can be delivered to multiple independent subscribers based on filter rules.',
+    domain: CONNECT, difficulty: 2, type: QType.SINGLE,
+    stem: 'Azure Service Bus topics with subscriptions enable a publish/subscribe model where one published message can be delivered to multiple independent subscribers based on filter rules.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'Service Bus topics implement publish/subscribe: a message sent to a topic is copied to each subscription, and subscription filters/rules control which messages each subscriber receives, decoupling senders from multiple receivers.',
@@ -1043,8 +1043,8 @@ const P2: Q[] = [
     references: [REF_APPSVC_CONFIG]
   },
   {
-    domain: COMPUTE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: An Azure Function can have multiple output bindings, allowing a single invocation to write to several destinations (for example, a queue and a Cosmos DB container).',
+    domain: COMPUTE, difficulty: 2, type: QType.SINGLE,
+    stem: 'An Azure Function can have multiple output bindings, allowing a single invocation to write to several destinations (for example, a queue and a Cosmos DB container).',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'A function has exactly one trigger but may declare multiple input and output bindings, so a single execution can write its results to several destinations declaratively without separate SDK calls.',
@@ -1300,8 +1300,8 @@ const P2: Q[] = [
     references: [REF_COSMOS_RU]
   },
   {
-    domain: STORAGE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Azure Blob Storage offers three primary blob types — block blobs, append blobs, and page blobs — and append blobs are optimized for append operations such as logging.',
+    domain: STORAGE, difficulty: 2, type: QType.SINGLE,
+    stem: 'Azure Blob Storage offers three primary blob types — block blobs, append blobs, and page blobs — and append blobs are optimized for append operations such as logging.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'Block blobs store general object data, append blobs are optimized for append-only scenarios like logging, and page blobs back random-access disk scenarios. Choosing the correct blob type matters for performance and supported operations.',
@@ -1401,8 +1401,8 @@ const P2: Q[] = [
     references: [REF_APPCONFIG_FEATURE]
   },
   {
-    domain: SECURITY, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Using a managed identity with DefaultAzureCredential removes the need to store and rotate client secrets or connection strings for service-to-service authentication in Azure.',
+    domain: SECURITY, difficulty: 2, type: QType.SINGLE,
+    stem: 'Using a managed identity with DefaultAzureCredential removes the need to store and rotate client secrets or connection strings for service-to-service authentication in Azure.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'Managed identities are credential-free identities managed by the platform; using DefaultAzureCredential, code obtains tokens automatically with nothing to store or rotate, which is the recommended secure pattern for Azure service-to-service auth.',
@@ -1502,8 +1502,8 @@ const P2: Q[] = [
     references: [REF_KQL]
   },
   {
-    domain: MONITOR, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Application Insights Live Metrics lets you observe near-real-time request, dependency, and failure rates with about a one-second latency, useful during deployments.',
+    domain: MONITOR, difficulty: 2, type: QType.SINGLE,
+    stem: 'Application Insights Live Metrics lets you observe near-real-time request, dependency, and failure rates with about a one-second latency, useful during deployments.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'Live Metrics streams telemetry with roughly one-second latency, letting you watch performance and failures in real time during a deployment or incident without it being affected by sampling.',
@@ -1668,8 +1668,8 @@ const P2: Q[] = [
     references: [REF_SERVICEBUS]
   },
   {
-    domain: CONNECT, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: API Management can transform requests and responses (for example, rewrite URLs, convert XML to JSON, and add or remove headers) using policies, without modifying backend code.',
+    domain: CONNECT, difficulty: 2, type: QType.SINGLE,
+    stem: 'API Management can transform requests and responses (for example, rewrite URLs, convert XML to JSON, and add or remove headers) using policies, without modifying backend code.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'API Management policies operate in the gateway pipeline and can rewrite URLs, transform payloads between XML and JSON, and manipulate headers, decoupling client-facing contracts from backend implementations without backend code changes.',
@@ -1876,8 +1876,8 @@ const P3: Q[] = [
     references: [REF_FUNC_PLANS]
   },
   {
-    domain: COMPUTE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Azure Container Instances can mount an Azure Files share into a container to persist data beyond the container lifecycle.',
+    domain: COMPUTE, difficulty: 2, type: QType.SINGLE,
+    stem: 'Azure Container Instances can mount an Azure Files share into a container to persist data beyond the container lifecycle.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'ACI supports mounting an Azure Files share as a volume so data written by the container persists independently of the container instance lifecycle, which is useful for stateful or output-producing jobs.',
@@ -2120,8 +2120,8 @@ const P3: Q[] = [
     references: [REF_EVENTGRID, REF_BLOB]
   },
   {
-    domain: STORAGE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: In Azure Cosmos DB, choosing a partition key that results in many distinct values that are accessed evenly generally improves scalability and avoids throttling.',
+    domain: STORAGE, difficulty: 2, type: QType.SINGLE,
+    stem: 'In Azure Cosmos DB, choosing a partition key that results in many distinct values that are accessed evenly generally improves scalability and avoids throttling.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'A high-cardinality partition key with even read/write distribution spreads load across physical partitions, improving scalability and avoiding hot partitions that would otherwise be throttled while other partitions stay idle.',
@@ -2221,8 +2221,8 @@ const P3: Q[] = [
     references: [REF_SAS]
   },
   {
-    domain: SECURITY, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: A user-assigned managed identity can be assigned to multiple Azure resources, allowing several services to share one identity and its role assignments.',
+    domain: SECURITY, difficulty: 2, type: QType.SINGLE,
+    stem: 'A user-assigned managed identity can be assigned to multiple Azure resources, allowing several services to share one identity and its role assignments.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'A user-assigned managed identity is a standalone Azure resource that can be attached to multiple resources, so they share the same identity and its RBAC assignments — useful when several services need identical access.',
@@ -2335,8 +2335,8 @@ const P3: Q[] = [
     references: [REF_AUTOSCALE]
   },
   {
-    domain: MONITOR, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Distributed tracing in Application Insights correlates telemetry across services using a shared operation/trace identifier so a single request can be followed end to end.',
+    domain: MONITOR, difficulty: 2, type: QType.SINGLE,
+    stem: 'Distributed tracing in Application Insights correlates telemetry across services using a shared operation/trace identifier so a single request can be followed end to end.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'Distributed tracing propagates a correlation/trace context (operation ID) across service boundaries so all spans for one request are linked, enabling end-to-end transaction diagnostics and the application map across components.',
@@ -2501,8 +2501,8 @@ const P3: Q[] = [
     references: [REF_EVENTHUBS_CP]
   },
   {
-    domain: CONNECT, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Azure Event Grid supports filtering events by subject, event type, and advanced fields so a subscription only receives the events it cares about.',
+    domain: CONNECT, difficulty: 2, type: QType.SINGLE,
+    stem: 'Azure Event Grid supports filtering events by subject, event type, and advanced fields so a subscription only receives the events it cares about.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'Event Grid subscriptions support subject (prefix/suffix), event type, and advanced filters on event data, so each subscriber receives only relevant events, reducing unnecessary processing.',

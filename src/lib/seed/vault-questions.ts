@@ -148,8 +148,8 @@ const P1: Q[] = [
     references: [REF_INTEGRATED_STORAGE, REF_HA]
   },
   {
-    domain: ARCH, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: In a Vault HA cluster, all standby nodes can independently service client read and write requests without involving the active node.',
+    domain: ARCH, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'In a Vault HA cluster, all standby nodes can independently service client read and write requests without involving the active node.',
     options: opts4('True', 'False', 'Only for read requests', 'Only when sealed'),
     correct: ['b'],
     explanation: 'False. In a standard HA cluster only the active node services requests; standby nodes forward (or redirect) client requests to the active node. Performance Standby nodes (Enterprise) can serve read-only requests, but that is not the default open-source behavior.',
@@ -275,8 +275,8 @@ const P1: Q[] = [
     references: [REF_USERPASS]
   },
   {
-    domain: AUTH, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: Multiple auth methods can be enabled simultaneously on a single Vault server, each at its own path.',
+    domain: AUTH, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Multiple auth methods can be enabled simultaneously on a single Vault server, each at its own path.',
     options: opts4('True', 'False', 'Only one per namespace', 'Only with Vault Enterprise'),
     correct: ['a'],
     explanation: 'True. Vault supports many auth methods enabled concurrently, each mounted at a unique path (default or custom via -path), so different client types can authenticate through the method best suited to them.',
@@ -532,8 +532,8 @@ const P1: Q[] = [
     references: [REF_DB, REF_DYNAMIC]
   },
   {
-    domain: SECRETS, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: A single secrets engine type can be enabled at multiple distinct paths on the same Vault server.',
+    domain: SECRETS, difficulty: 2, type: QType.SINGLE,
+    stem: 'A single secrets engine type can be enabled at multiple distinct paths on the same Vault server.',
     options: opts4('True', 'False', 'Only KV', 'Only with Enterprise'),
     correct: ['a'],
     explanation: 'True. The same engine type (e.g., kv or database) can be mounted at several paths using -path, allowing isolation between teams or environments on one Vault server.',
@@ -672,8 +672,8 @@ const P1: Q[] = [
     references: [REF_POLICY_CMD]
   },
   {
-    domain: POLICIES, difficulty: 3, type: QType.TRUE_FALSE,
-    stem: 'True or False: To allow a user to see the keys under `secret/metadata/team/` they need the `list` capability on that path, separate from `read`.',
+    domain: POLICIES, difficulty: 3, type: QType.SINGLE,
+    stem: 'To allow a user to see the keys under `secret/metadata/team/` they need the `list` capability on that path, separate from `read`.',
     options: opts4('True', 'False', 'list implies read', 'read implies list'),
     correct: ['a'],
     explanation: 'True. Listing keys requires the list capability; reading a value requires read. They are independent, so a policy must grant list explicitly to enumerate keys under a path.',
@@ -773,8 +773,8 @@ const P1: Q[] = [
     references: [REF_TOKENS]
   },
   {
-    domain: TOKENS, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: A token accessor can be used to look up and revoke a token without knowing the token value itself.',
+    domain: TOKENS, difficulty: 2, type: QType.SINGLE,
+    stem: 'A token accessor can be used to look up and revoke a token without knowing the token value itself.',
     options: opts4('True', 'False', 'Only for root tokens', 'Only for batch tokens'),
     correct: ['a'],
     explanation: 'True. The accessor is a reference that allows limited operations such as lookup and revoke by accessor, without exposing the actual token, which is useful for auditing and management.',
@@ -900,8 +900,8 @@ const P1: Q[] = [
     references: [REF_TRANSIT, REF_TRANSIT_REKEY]
   },
   {
-    domain: EAAS, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: With the Transit engine, applications never need to handle or store encryption key material directly.',
+    domain: EAAS, difficulty: 2, type: QType.SINGLE,
+    stem: 'With the Transit engine, applications never need to handle or store encryption key material directly.',
     options: opts4('True', 'False', 'Only with convergent keys', 'Only for signing'),
     correct: ['a'],
     explanation: 'True. Transit keeps key material in Vault and exposes only cryptographic operations through the API, so applications send data to be encrypted/decrypted without ever holding the keys.',
@@ -952,8 +952,8 @@ const P2: Q[] = [
     references: [REF_SEAL]
   },
   {
-    domain: ARCH, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: The Vault storage backend stores secrets in plaintext, so it must be on an encrypted disk.',
+    domain: ARCH, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'The Vault storage backend stores secrets in plaintext, so it must be on an encrypted disk.',
     options: opts4('True', 'False', 'Only for the file backend', 'Only for Consul'),
     correct: ['b'],
     explanation: 'False. All data is encrypted by Vault\'s barrier before it reaches the storage backend, so the backend never sees plaintext. Disk encryption is defense-in-depth but not required for confidentiality of Vault data.',
@@ -1183,8 +1183,8 @@ const P2: Q[] = [
     references: [REF_K8S_AUTH]
   },
   {
-    domain: AUTH, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Authentication (proving who you are) and authorization (what you may do) are distinct steps in Vault, with policies handling authorization.',
+    domain: AUTH, difficulty: 2, type: QType.SINGLE,
+    stem: 'Authentication (proving who you are) and authorization (what you may do) are distinct steps in Vault, with policies handling authorization.',
     options: opts4('True', 'False', 'They are the same step', 'Only for root tokens'),
     correct: ['a'],
     explanation: 'True. Auth methods perform authentication and issue a token; ACL policies attached to that token govern authorization for each subsequent request.',
@@ -1349,8 +1349,8 @@ const P2: Q[] = [
     references: [REF_KV2]
   },
   {
-    domain: SECRETS, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: The database secrets engine can rotate the root credential it uses to connect to the database so that even Vault\'s admin no longer knows it.',
+    domain: SECRETS, difficulty: 2, type: QType.SINGLE,
+    stem: 'The database secrets engine can rotate the root credential it uses to connect to the database so that even Vault\'s admin no longer knows it.',
     options: opts4('True', 'False', 'Only for PostgreSQL', 'Only with Enterprise'),
     correct: ['a'],
     explanation: 'True. The rotate-root operation changes the configured root password to a value only Vault knows, removing the original credential from human knowledge and strengthening security.',
@@ -1463,8 +1463,8 @@ const P2: Q[] = [
     references: [REF_CAPABILITIES, REF_KV2]
   },
   {
-    domain: POLICIES, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: The root policy grants unrestricted access and is associated with root tokens.',
+    domain: POLICIES, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'The root policy grants unrestricted access and is associated with root tokens.',
     options: opts4('True', 'False', 'Only in dev mode', 'Only with Enterprise'),
     correct: ['a'],
     explanation: 'True. The special root policy bypasses ACL checks entirely; root tokens carry it. Because of its power, root token use should be minimized and audited.',
@@ -1590,8 +1590,8 @@ const P2: Q[] = [
     references: [REF_TOKEN_TTL]
   },
   {
-    domain: TOKENS, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Creating a child token with a shorter TTL and fewer policies than the parent is a recommended least-privilege practice.',
+    domain: TOKENS, difficulty: 2, type: QType.SINGLE,
+    stem: 'Creating a child token with a shorter TTL and fewer policies than the parent is a recommended least-privilege practice.',
     options: opts4('True', 'False', 'Only for root tokens', 'Only for batch tokens'),
     correct: ['a'],
     explanation: 'True. Issuing narrowly-scoped, short-lived child tokens limits blast radius if a token leaks and aligns with least-privilege principles.',
@@ -1691,8 +1691,8 @@ const P2: Q[] = [
     references: [REF_TRANSIT_REKEY]
   },
   {
-    domain: EAAS, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: With Transit, the same Vault key can be used by many applications, centralizing key management and rotation.',
+    domain: EAAS, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'With Transit, the same Vault key can be used by many applications, centralizing key management and rotation.',
     options: opts4('True', 'False', 'Only one app per key', 'Only with Enterprise'),
     correct: ['a'],
     explanation: 'True. A Transit key is a centrally managed resource; multiple authorized applications can call encrypt/decrypt against it, and rotation is handled in one place rather than per application.',
@@ -1834,8 +1834,8 @@ const P3: Q[] = [
     references: [REF_AUTOUNSEAL]
   },
   {
-    domain: ARCH, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: Vault must be initialized exactly once per cluster, and initializing again on an existing cluster is not a normal operation.',
+    domain: ARCH, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Vault must be initialized exactly once per cluster, and initializing again on an existing cluster is not a normal operation.',
     options: opts4('True', 'False', 'It must be initialized on every boot', 'Only dev mode skips init'),
     correct: ['a'],
     explanation: 'True. Initialization is a one-time bootstrap that creates the master key and root token. An already-initialized cluster is not re-initialized; you unseal it instead.',
@@ -1987,8 +1987,8 @@ const P3: Q[] = [
     references: [REF_AWS_AUTH]
   },
   {
-    domain: AUTH, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: Disabling an auth method also revokes the tokens that were issued through it.',
+    domain: AUTH, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Disabling an auth method also revokes the tokens that were issued through it.',
     options: opts4('True', 'False', 'Only batch tokens survive', 'Only with Enterprise'),
     correct: ['a'],
     explanation: 'True. When an auth method is disabled, Vault revokes the tokens and leases created by it, preventing orphaned access through a removed method.',
@@ -2153,8 +2153,8 @@ const P3: Q[] = [
     references: [REF_LEASE, REF_AWS_SECRETS]
   },
   {
-    domain: SECRETS, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: The transit secrets engine stores the data you send it to be encrypted.',
+    domain: SECRETS, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'The transit secrets engine stores the data you send it to be encrypted.',
     options: opts4('True', 'False', 'Only ciphertext', 'Only for convergent keys'),
     correct: ['b'],
     explanation: 'False. Transit performs cryptographic operations and returns ciphertext but does not store the data. The calling application is responsible for storing the returned ciphertext.',
@@ -2293,8 +2293,8 @@ const P3: Q[] = [
     references: [REF_POLICIES, REF_CAPABILITIES]
   },
   {
-    domain: POLICIES, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Editing a policy immediately affects existing tokens that reference it on their next request.',
+    domain: POLICIES, difficulty: 2, type: QType.SINGLE,
+    stem: 'Editing a policy immediately affects existing tokens that reference it on their next request.',
     options: opts4('True', 'False', 'Only after token renewal', 'Only after reseal'),
     correct: ['a'],
     explanation: 'True. Policies are evaluated at request time, so updating a policy changes the effective permissions of all tokens that reference it on subsequent requests without needing re-issuance.',
@@ -2420,8 +2420,8 @@ const P3: Q[] = [
     references: [REF_TOKEN_ROLE]
   },
   {
-    domain: TOKENS, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: The token accessor is sensitive and grants the same access as the token itself.',
+    domain: TOKENS, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'The token accessor is sensitive and grants the same access as the token itself.',
     options: opts4('True', 'False', 'Only for service tokens', 'Only for batch tokens'),
     correct: ['b'],
     explanation: 'False. The accessor cannot be used to authenticate or read secrets; it only permits limited management operations like lookup and revoke, which is why it is safe to log for auditing.',
@@ -2521,8 +2521,8 @@ const P3: Q[] = [
     references: [REF_TRANSIT_DATAKEY]
   },
   {
-    domain: EAAS, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Transit key rotation can be scheduled/automated so keys are rotated periodically without re-encrypting all existing data immediately.',
+    domain: EAAS, difficulty: 2, type: QType.SINGLE,
+    stem: 'Transit key rotation can be scheduled/automated so keys are rotated periodically without re-encrypting all existing data immediately.',
     options: opts4('True', 'False', 'Only manual rotation exists', 'Only with batch tokens'),
     correct: ['a'],
     explanation: 'True. Transit supports automatic rotation (auto_rotate_period) and manual rotation; old data remains decryptable with prior versions, so no immediate bulk re-encryption is required.',

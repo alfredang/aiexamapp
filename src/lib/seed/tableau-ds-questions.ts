@@ -228,8 +228,8 @@ const P1: Q[] = [
     references: [REF_RELATE]
   },
   {
-    domain: CONNECT, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Creating an extract can improve workbook performance and allows you to work offline because the data is stored locally in Tableau\'s Hyper format.',
+    domain: CONNECT, difficulty: 2, type: QType.SINGLE,
+    stem: 'Creating an extract can improve workbook performance and allows you to work offline because the data is stored locally in Tableau\'s Hyper format.',
     options: opts4('True', 'False', 'Only true for cloud sources', 'Only true if the extract is unfiltered'),
     correct: ['a'],
     explanation: 'True. Extracts are stored in the high-performance Hyper engine on local disk, so queries are fast and the workbook can be used without a connection to the original source. Extracts can also be filtered, aggregated, or limited to top N rows.',
@@ -524,8 +524,8 @@ const P1: Q[] = [
     references: [REF_REFLINE]
   },
   {
-    domain: EXPLORE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Sorting a bar chart by clicking the sort icon on an axis is a "computed" sort that updates automatically as the data changes.',
+    domain: EXPLORE, difficulty: 2, type: QType.SINGLE,
+    stem: 'Sorting a bar chart by clicking the sort icon on an axis is a "computed" sort that updates automatically as the data changes.',
     options: opts4('True', 'False', 'Only manual sorts update', 'Sorting is not possible on bars'),
     correct: ['a'],
     explanation: 'True. A computed (toolbar/axis) sort orders members by a field and aggregation and re-evaluates as data changes. A manual sort (drag to reorder) fixes the order and does not update with new data.',
@@ -742,8 +742,8 @@ const P1: Q[] = [
     references: [REF_TOOLTIP]
   },
   {
-    domain: SHARE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: When you publish a workbook with a live connection to Tableau Server, viewers see data refreshed from the live source according to its connection, without you re-sending a file.',
+    domain: SHARE, difficulty: 2, type: QType.SINGLE,
+    stem: 'When you publish a workbook with a live connection to Tableau Server, viewers see data refreshed from the live source according to its connection, without you re-sending a file.',
     options: opts4('True', 'False', 'Only with extracts', 'Only on Tableau Public'),
     correct: ['a'],
     explanation: 'True. Publishing centralizes the workbook on Server/Cloud; a live connection means consumers see current source data when they open it, and extracts can be scheduled to refresh — no manual file distribution needed.',
@@ -856,8 +856,8 @@ const P1: Q[] = [
     references: [REF_REFLINE]
   },
   {
-    domain: CONCEPTS, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: A blue pill creates discrete headers and a green pill creates a continuous axis, regardless of whether the field is a dimension or a measure.',
+    domain: CONCEPTS, difficulty: 2, type: QType.SINGLE,
+    stem: 'A blue pill creates discrete headers and a green pill creates a continuous axis, regardless of whether the field is a dimension or a measure.',
     options: opts4('True', 'False', 'Only true for dimensions', 'Only true for measures'),
     correct: ['a'],
     explanation: 'True. Pill colour reflects discrete (blue → headers) vs continuous (green → axis). This is independent of dimension/measure: e.g., a measure can be made discrete and a continuous date is green.',
@@ -1012,8 +1012,8 @@ const P2: Q[] = [
     references: [REF_BLEND]
   },
   {
-    domain: CONNECT, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: A data source filter limits the data for ALL worksheets that use that data source in the workbook.',
+    domain: CONNECT, difficulty: 2, type: QType.SINGLE,
+    stem: 'A data source filter limits the data for ALL worksheets that use that data source in the workbook.',
     options: opts4('True', 'False', 'Only for the active sheet', 'Only on Tableau Server'),
     correct: ['a'],
     explanation: 'True. A data source filter is applied very early in the order of operations and affects every worksheet using that data source, making it useful for security/scope (e.g., excluding test rows) across the whole workbook.',
@@ -1295,8 +1295,8 @@ const P2: Q[] = [
     references: [REF_PARAM]
   },
   {
-    domain: EXPLORE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: A measure filter is applied after FIXED LOD expressions and after dimension filters in Tableau\'s order of operations.',
+    domain: EXPLORE, difficulty: 2, type: QType.SINGLE,
+    stem: 'A measure filter is applied after FIXED LOD expressions and after dimension filters in Tableau\'s order of operations.',
     options: opts4('True', 'False', 'Measure filters are applied first', 'There is no defined order'),
     correct: ['a'],
     explanation: 'True. The order is: extract → data source → context → FIXED → dimension → INCLUDE/EXCLUDE → measure → table calc filters. Measure filters come after FIXED LOD and dimension filters but before table-calc filters.',
@@ -1526,8 +1526,8 @@ const P2: Q[] = [
     references: [REF_FILTER]
   },
   {
-    domain: SHARE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Tableau Reader is free and can open .twbx files but cannot create new visualizations or connect to new data.',
+    domain: SHARE, difficulty: 2, type: QType.SINGLE,
+    stem: 'Tableau Reader is free and can open .twbx files but cannot create new visualizations or connect to new data.',
     options: opts4('True', 'False', 'Reader can edit calculations', 'Reader cannot open .twbx'),
     correct: ['a'],
     explanation: 'True. Tableau Reader is a free viewer that opens packaged workbooks and supports interaction (filter/sort/hover) but not authoring, editing, or new data connections.',
@@ -1692,8 +1692,8 @@ const P2: Q[] = [
     references: [REF_SHOWME]
   },
   {
-    domain: CONCEPTS, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Dimensions define the level of detail (granularity) of a view, while measures provide the numbers that get aggregated.',
+    domain: CONCEPTS, difficulty: 2, type: QType.SINGLE,
+    stem: 'Dimensions define the level of detail (granularity) of a view, while measures provide the numbers that get aggregated.',
     options: opts4('True', 'False', 'Only measures define granularity', 'Dimensions cannot be dates'),
     correct: ['a'],
     explanation: 'True. The set of dimensions in a view (including Detail) determines its granularity; measures are the aggregated values shown at that granularity.',
@@ -1848,8 +1848,8 @@ const P3: Q[] = [
     references: [REF_PIVOT]
   },
   {
-    domain: CONNECT, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Data Interpreter can be turned on and off, and you can review the changes it proposes before relying on them.',
+    domain: CONNECT, difficulty: 2, type: QType.SINGLE,
+    stem: 'Data Interpreter can be turned on and off, and you can review the changes it proposes before relying on them.',
     options: opts4('True', 'False', 'It is always on', 'It cannot be reviewed'),
     correct: ['a'],
     explanation: 'True. Data Interpreter is optional — you enable it on the Data Source page, and the "Review the results" link shows exactly what it cleaned/restructured so you can verify or disable it.',
@@ -2131,8 +2131,8 @@ const P3: Q[] = [
     references: [REF_PARAM]
   },
   {
-    domain: EXPLORE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Table calculations are computed after most filters, based on what is in the view, so changing a dimension filter can change the table-calc result.',
+    domain: EXPLORE, difficulty: 2, type: QType.SINGLE,
+    stem: 'Table calculations are computed after most filters, based on what is in the view, so changing a dimension filter can change the table-calc result.',
     options: opts4('True', 'False', 'Table calcs ignore the view', 'Table calcs run before context filters'),
     correct: ['a'],
     explanation: 'True. Table calculations operate on the aggregated result set already shaped by filters/LODs; altering which marks are present (e.g., a dimension filter) changes the partition and thus the table-calc output.',
@@ -2362,8 +2362,8 @@ const P3: Q[] = [
     references: [REF_DASHBOARD]
   },
   {
-    domain: SHARE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: You can export a single worksheet or a dashboard as an image (e.g., PNG) directly from Tableau Desktop.',
+    domain: SHARE, difficulty: 2, type: QType.SINGLE,
+    stem: 'You can export a single worksheet or a dashboard as an image (e.g., PNG) directly from Tableau Desktop.',
     options: opts4('True', 'False', 'Only worksheets, never dashboards', 'Only after publishing'),
     correct: ['a'],
     explanation: 'True. Worksheet/Dashboard > Export Image (or copying as image) produces a static raster/EMF of the current view or dashboard for use in documents and slides.',
@@ -2528,8 +2528,8 @@ const P3: Q[] = [
     references: [REF_REFLINE]
   },
   {
-    domain: CONCEPTS, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Putting a field on Detail increases the number of marks without adding a colour or size encoding or headers.',
+    domain: CONCEPTS, difficulty: 2, type: QType.SINGLE,
+    stem: 'Putting a field on Detail increases the number of marks without adding a colour or size encoding or headers.',
     options: opts4('True', 'False', 'Detail always adds colour', 'Detail removes marks'),
     correct: ['a'],
     explanation: 'True. The Detail target raises granularity (more marks for each member combination) but does not add a visual encoding (colour/size) or create row/column headers.',

@@ -297,8 +297,8 @@ const P1: Q[] = [
     references: [REF_ZT_RAMP]
   },
   {
-    domain: BEST, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: The Cloud Adoption Framework operates at portfolio/organizational scope while the Well-Architected Framework operates at the individual workload scope, and an SC-100 architect uses both at the appropriate level.',
+    domain: BEST, difficulty: 2, type: QType.SINGLE,
+    stem: 'The Cloud Adoption Framework operates at portfolio/organizational scope while the Well-Architected Framework operates at the individual workload scope, and an SC-100 architect uses both at the appropriate level.',
     options: opts4('True', 'False', 'Only CAF is used by architects', 'Only WAF is used by architects'),
     correct: ['a'],
     explanation: 'CAF guides organization- and portfolio-level cloud and security strategy; WAF guides workload-level design tradeoffs. A cybersecurity architect applies CAF for program scope and WAF for solution scope.',
@@ -515,8 +515,8 @@ const P1: Q[] = [
     references: [REF_PIM]
   },
   {
-    domain: OPS, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: In Microsoft\'s architecture, Microsoft Defender XDR provides cross-domain detection and response and can integrate with Microsoft Sentinel to combine XDR with broader SIEM correlation and SOAR.',
+    domain: OPS, difficulty: 2, type: QType.SINGLE,
+    stem: 'In Microsoft\'s architecture, Microsoft Defender XDR provides cross-domain detection and response and can integrate with Microsoft Sentinel to combine XDR with broader SIEM correlation and SOAR.',
     options: opts4('True', 'False', 'Only when on-premises AD is removed', 'Only for email signals'),
     correct: ['a'],
     explanation: 'Defender XDR delivers correlated detection/response across endpoints, identities, email, and apps, and integrates with Sentinel so the SOC gets XDR depth plus SIEM-wide correlation and automation. The integration is not limited to email or contingent on removing AD.',
@@ -707,8 +707,8 @@ const P1: Q[] = [
     references: [REF_GAP]
   },
   {
-    domain: INFRA, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Disabling public network access and using private endpoints for PaaS data services is consistent with the Zero Trust "assume breach" principle for infrastructure design.',
+    domain: INFRA, difficulty: 2, type: QType.SINGLE,
+    stem: 'Disabling public network access and using private endpoints for PaaS data services is consistent with the Zero Trust "assume breach" principle for infrastructure design.',
     options: opts4('True', 'False', 'Only for non-production', 'Only when there is no firewall'),
     correct: ['a'],
     explanation: 'Removing public exposure and forcing private connectivity reduces the attack surface and limits lateral reachability, directly supporting "assume breach" and least-privilege network design for any environment, not just non-production.',
@@ -925,8 +925,8 @@ const P1: Q[] = [
     references: [REF_KEYVAULT, REF_AKS_SEC]
   },
   {
-    domain: APPDATA, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Combining sensitivity labels (Purview Information Protection) with DLP policies provides classification plus enforcement, which is the Microsoft-recommended pattern for protecting sensitive data across its lifecycle.',
+    domain: APPDATA, difficulty: 2, type: QType.SINGLE,
+    stem: 'Combining sensitivity labels (Purview Information Protection) with DLP policies provides classification plus enforcement, which is the Microsoft-recommended pattern for protecting sensitive data across its lifecycle.',
     options: opts4('True', 'False', 'Only for email', 'Only for on-premises file shares'),
     correct: ['a'],
     explanation: 'Microsoft recommends classifying data with sensitivity labels and enforcing handling with DLP so protection follows the data across email, endpoints, SharePoint/OneDrive, Teams, and cloud apps throughout its lifecycle — not limited to email or on-prem shares.',
@@ -1133,8 +1133,8 @@ const P2: Q[] = [
     references: [REF_LZ, REF_CAF]
   },
   {
-    domain: BEST, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: The Microsoft cloud security benchmark is the default standard that Microsoft Defender for Cloud assesses Azure resources against, and additional regulatory standards can be added to the compliance dashboard.',
+    domain: BEST, difficulty: 2, type: QType.SINGLE,
+    stem: 'The Microsoft cloud security benchmark is the default standard that Microsoft Defender for Cloud assesses Azure resources against, and additional regulatory standards can be added to the compliance dashboard.',
     options: opts4('True', 'False', 'Only ISO 27001 is supported', 'Only for AWS workloads'),
     correct: ['a'],
     explanation: 'The Microsoft cloud security benchmark is Defender for Cloud\'s default applied standard, and architects can add other regulatory standards (CIS, NIST, PCI, ISO) to the regulatory compliance dashboard for Azure and connected clouds.',
@@ -1351,8 +1351,8 @@ const P2: Q[] = [
     references: [REF_PIM]
   },
   {
-    domain: OPS, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Conditional Access and Privileged Identity Management together support a Zero Trust identity design by enforcing adaptive access and just-in-time privileged elevation.',
+    domain: OPS, difficulty: 2, type: QType.SINGLE,
+    stem: 'Conditional Access and Privileged Identity Management together support a Zero Trust identity design by enforcing adaptive access and just-in-time privileged elevation.',
     options: opts4('True', 'False', 'Only Conditional Access is needed', 'Only PIM is needed'),
     correct: ['a'],
     explanation: 'Conditional Access enforces adaptive, risk-aware access for all users, while PIM enforces JIT, approval-gated privileged elevation. Together they implement the verify-explicitly and least-privilege principles for identity.',
@@ -1543,8 +1543,8 @@ const P2: Q[] = [
     references: [REF_GAP]
   },
   {
-    domain: INFRA, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Using Azure Bastion plus private endpoints and NSG micro-segmentation reduces the externally reachable attack surface and aligns infrastructure design with Zero Trust.',
+    domain: INFRA, difficulty: 2, type: QType.SINGLE,
+    stem: 'Using Azure Bastion plus private endpoints and NSG micro-segmentation reduces the externally reachable attack surface and aligns infrastructure design with Zero Trust.',
     options: opts4('True', 'False', 'Only Bastion matters', 'Only NSGs matter'),
     correct: ['a'],
     explanation: 'Bastion removes public management exposure, private endpoints remove public PaaS exposure, and NSG segmentation limits lateral movement — collectively shrinking the attack surface in line with Zero Trust assume-breach design.',
@@ -1761,8 +1761,8 @@ const P2: Q[] = [
     references: [REF_WAF_APP, REF_KEYVAULT, REF_DLP]
   },
   {
-    domain: APPDATA, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Using managed identities for application-to-service authentication removes the need to store and rotate connection-string secrets, supporting least-privilege and reducing secret-sprawl risk.',
+    domain: APPDATA, difficulty: 2, type: QType.SINGLE,
+    stem: 'Using managed identities for application-to-service authentication removes the need to store and rotate connection-string secrets, supporting least-privilege and reducing secret-sprawl risk.',
     options: opts4('True', 'False', 'Only for storage accounts', 'Only in non-production'),
     correct: ['a'],
     explanation: 'Managed identities let apps authenticate to Entra-aware services (SQL, Storage, Key Vault, Service Bus) without stored secrets, eliminating secret rotation burden and reducing secret sprawl across all environments.',
@@ -1969,8 +1969,8 @@ const P3: Q[] = [
     references: [REF_LZ, REF_CAF]
   },
   {
-    domain: BEST, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: An SC-100 architect uses the Cloud Adoption Framework for program/portfolio-level security strategy and the Well-Architected Framework for workload-level security design, applying each at its intended scope.',
+    domain: BEST, difficulty: 2, type: QType.SINGLE,
+    stem: 'An SC-100 architect uses the Cloud Adoption Framework for program/portfolio-level security strategy and the Well-Architected Framework for workload-level security design, applying each at its intended scope.',
     options: opts4('True', 'False', 'CAF and WAF have identical scope', 'Only one framework should ever be used'),
     correct: ['a'],
     explanation: 'CAF (portfolio/program) and WAF (workload) are complementary; the architect applies each at its intended scope rather than treating them as identical or mutually exclusive.',
@@ -2187,8 +2187,8 @@ const P3: Q[] = [
     references: [REF_PIM]
   },
   {
-    domain: OPS, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Continuous access evaluation strengthens a Zero Trust identity design by enabling near-real-time enforcement of critical events such as account disablement or detected risk, instead of waiting for token expiry.',
+    domain: OPS, difficulty: 2, type: QType.SINGLE,
+    stem: 'Continuous access evaluation strengthens a Zero Trust identity design by enabling near-real-time enforcement of critical events such as account disablement or detected risk, instead of waiting for token expiry.',
     options: opts4('True', 'False', 'Only for guest users', 'Only when MFA is disabled'),
     correct: ['a'],
     explanation: 'CAE enforces critical security events in near real time, closing the gap between a risk/identity change and token expiry, which strengthens the verify-explicitly principle for all applicable users.',
@@ -2379,8 +2379,8 @@ const P3: Q[] = [
     references: [REF_GAP]
   },
   {
-    domain: INFRA, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Combining Azure Firewall in the hub, NSG micro-segmentation in spokes, and private endpoints for PaaS implements defense in depth consistent with Zero Trust infrastructure design.',
+    domain: INFRA, difficulty: 2, type: QType.SINGLE,
+    stem: 'Combining Azure Firewall in the hub, NSG micro-segmentation in spokes, and private endpoints for PaaS implements defense in depth consistent with Zero Trust infrastructure design.',
     options: opts4('True', 'False', 'Only the firewall is required', 'Only private endpoints matter'),
     correct: ['a'],
     explanation: 'A hub firewall (centralized inspection), spoke NSG segmentation (least-privilege east-west), and private endpoints (no public PaaS exposure) layer complementary controls, implementing defense in depth aligned with Zero Trust.',
@@ -2597,8 +2597,8 @@ const P3: Q[] = [
     references: [REF_KEYVAULT, REF_AKS_SEC]
   },
   {
-    domain: APPDATA, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Layering an L7 WAF, managed-identity-based data access, Key Vault for secrets, and Purview labeling/DLP provides defense in depth for a sensitive public web application per Microsoft guidance.',
+    domain: APPDATA, difficulty: 2, type: QType.SINGLE,
+    stem: 'Layering an L7 WAF, managed-identity-based data access, Key Vault for secrets, and Purview labeling/DLP provides defense in depth for a sensitive public web application per Microsoft guidance.',
     options: opts4('True', 'False', 'Only the WAF is needed', 'Only Key Vault is needed'),
     correct: ['a'],
     explanation: 'Defense in depth layers complementary controls: L7 WAF at the edge, identity-based data access, Key Vault secret management, and Purview classification/DLP. No single control alone provides equivalent protection.',

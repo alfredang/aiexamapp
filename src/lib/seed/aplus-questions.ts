@@ -153,8 +153,8 @@ const P1: Q[] = [
     references: [REF_1101]
   },
   {
-    domain: HW, difficulty: 1, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: ESD (electrostatic discharge) can damage computer components even when no visible spark or shock is felt.',
+    domain: HW, difficulty: 1, type: QType.SINGLE, isTeaser: true,
+    stem: 'ESD (electrostatic discharge) can damage computer components even when no visible spark or shock is felt.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'True. ESD damage can occur well below the threshold a person can perceive (around 3,000V), so anti-static wrist straps and proper grounding are required even without a felt shock.',
@@ -289,8 +289,8 @@ const P1: Q[] = [
     references: [REF_1101]
   },
   {
-    domain: NET, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: DNS is responsible for resolving human-readable hostnames into IP addresses.',
+    domain: NET, difficulty: 1, type: QType.SINGLE,
+    stem: 'DNS is responsible for resolving human-readable hostnames into IP addresses.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'True. DNS translates names such as example.com into IP addresses so clients can route traffic to the correct host.',
@@ -492,8 +492,8 @@ const P1: Q[] = [
     references: [REF_WIN_INSTALL]
   },
   {
-    domain: OS, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: A 32-bit version of Windows can directly address more than 4 GB of RAM for a single process without special extensions.',
+    domain: OS, difficulty: 1, type: QType.SINGLE,
+    stem: 'A 32-bit version of Windows can directly address more than 4 GB of RAM for a single process without special extensions.',
     options: opts4('True', 'False', '', ''),
     correct: ['b'],
     explanation: 'False. A 32-bit OS is generally limited to about 4 GB of addressable memory. To use significantly more RAM, a 64-bit edition is required.',
@@ -620,8 +620,8 @@ const P1: Q[] = [
     references: [REF_1102]
   },
   {
-    domain: SEC, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: Tailgating is a social-engineering technique where an unauthorized person follows an authorized employee through a secure door.',
+    domain: SEC, difficulty: 1, type: QType.SINGLE,
+    stem: 'Tailgating is a social-engineering technique where an unauthorized person follows an authorized employee through a secure door.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'True. Tailgating (piggybacking) is a physical social-engineering tactic where an attacker follows an authorized person into a restricted area without proper credentials.',
@@ -758,8 +758,8 @@ const P1: Q[] = [
     references: [REF_WIN_CMD]
   },
   {
-    domain: TRB, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: When troubleshooting, you should always consider corporate policies, procedures, and impact before implementing a change.',
+    domain: TRB, difficulty: 1, type: QType.SINGLE,
+    stem: 'When troubleshooting, you should always consider corporate policies, procedures, and impact before implementing a change.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'True. The methodology explicitly requires considering corporate policies, procedures, and potential impact before applying a fix, often using change-management processes.',
@@ -868,8 +868,8 @@ const P2: Q[] = [
     references: [REF_1101]
   },
   {
-    domain: HW, difficulty: 1, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: An anti-static (ESD) wrist strap should be connected to a known ground point when servicing internal PC components.',
+    domain: HW, difficulty: 1, type: QType.SINGLE, isTeaser: true,
+    stem: 'An anti-static (ESD) wrist strap should be connected to a known ground point when servicing internal PC components.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'True. An ESD wrist strap must be grounded so static charge safely dissipates, protecting sensitive components during service.',
@@ -994,8 +994,8 @@ const P2: Q[] = [
     references: [REF_1101]
   },
   {
-    domain: NET, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: A default gateway is the router address a host uses to send traffic destined for other networks.',
+    domain: NET, difficulty: 1, type: QType.SINGLE,
+    stem: 'A default gateway is the router address a host uses to send traffic destined for other networks.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'True. The default gateway is the next-hop router for traffic leaving the local subnet. Without it, hosts cannot reach remote networks.',
@@ -1182,8 +1182,8 @@ const P2: Q[] = [
     references: [REF_WIN_CMD]
   },
   {
-    domain: OS, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: NTFS permissions can be applied to both files and folders to control user access on a Windows volume.',
+    domain: OS, difficulty: 1, type: QType.SINGLE,
+    stem: 'NTFS permissions can be applied to both files and folders to control user access on a Windows volume.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'True. NTFS supports access control lists on files and folders, enabling granular permissions per user/group.',
@@ -1325,8 +1325,8 @@ const P2: Q[] = [
     references: [REF_1102]
   },
   {
-    domain: SEC, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: A Windows firewall can restrict inbound and outbound network connections based on configured rules.',
+    domain: SEC, difficulty: 1, type: QType.SINGLE,
+    stem: 'A Windows firewall can restrict inbound and outbound network connections based on configured rules.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'True. A host firewall enforces rules controlling inbound and outbound traffic, helping block unauthorized connections.',
@@ -1468,8 +1468,8 @@ const P2: Q[] = [
     references: [REF_WIN_CMD]
   },
   {
-    domain: TRB, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: Verifying full system functionality and, if applicable, implementing preventive measures is part of the troubleshooting methodology before documentation.',
+    domain: TRB, difficulty: 1, type: QType.SINGLE,
+    stem: 'Verifying full system functionality and, if applicable, implementing preventive measures is part of the troubleshooting methodology before documentation.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'True. After implementing the solution you verify full functionality and apply preventive measures, then document findings, actions, and outcomes.',
@@ -1583,8 +1583,8 @@ const P3: Q[] = [
     references: [REF_1101]
   },
   {
-    domain: HW, difficulty: 1, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: A UPS (uninterruptible power supply) provides battery backup so a system can shut down gracefully during a power outage.',
+    domain: HW, difficulty: 1, type: QType.SINGLE, isTeaser: true,
+    stem: 'A UPS (uninterruptible power supply) provides battery backup so a system can shut down gracefully during a power outage.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'True. A UPS supplies temporary battery power during outages and conditions power, allowing a safe, graceful shutdown and protecting against data loss.',
@@ -1729,8 +1729,8 @@ const P3: Q[] = [
     references: [REF_1101]
   },
   {
-    domain: NET, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: A subnet mask determines which portion of an IP address represents the network and which represents the host.',
+    domain: NET, difficulty: 1, type: QType.SINGLE,
+    stem: 'A subnet mask determines which portion of an IP address represents the network and which represents the host.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'True. The subnet mask splits an IP address into network and host portions, which is essential for routing and determining local vs. remote destinations.',
@@ -1927,8 +1927,8 @@ const P3: Q[] = [
     references: [REF_WIN_CMD]
   },
   {
-    domain: OS, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: A 64-bit edition of Windows is required to make full use of more than approximately 4 GB of RAM.',
+    domain: OS, difficulty: 1, type: QType.SINGLE,
+    stem: 'A 64-bit edition of Windows is required to make full use of more than approximately 4 GB of RAM.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'True. A 32-bit OS is limited to roughly 4 GB of addressable memory, so a 64-bit edition is needed to use significantly more RAM.',
@@ -2065,8 +2065,8 @@ const P3: Q[] = [
     references: [REF_1102]
   },
   {
-    domain: SEC, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: Disabling AutoRun/AutoPlay for removable media helps prevent malware from automatically executing when a USB drive is inserted.',
+    domain: SEC, difficulty: 1, type: QType.SINGLE,
+    stem: 'Disabling AutoRun/AutoPlay for removable media helps prevent malware from automatically executing when a USB drive is inserted.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'True. Disabling AutoRun/AutoPlay prevents automatic execution of code from removable media, mitigating a common USB-based malware vector.',
@@ -2218,8 +2218,8 @@ const P3: Q[] = [
     references: [REF_1102]
   },
   {
-    domain: TRB, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: After resolving an issue, a technician should document the cause, the steps taken, and the outcome.',
+    domain: TRB, difficulty: 1, type: QType.SINGLE,
+    stem: 'After resolving an issue, a technician should document the cause, the steps taken, and the outcome.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'True. The final methodology step is to document findings, actions, and outcomes for future reference and knowledge sharing.',

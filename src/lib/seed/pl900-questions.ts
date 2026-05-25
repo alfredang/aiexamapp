@@ -217,8 +217,8 @@ const P1: Q[] = [
     references: [REF_PP_OVERVIEW, REF_DATAVERSE]
   },
   {
-    domain: BUSVAL, difficulty: 3, type: QType.TRUE_FALSE,
-    stem: 'True or False: Adopting Power Platform can reduce application backlog by letting business units build approved solutions while IT focuses on governance and complex systems.',
+    domain: BUSVAL, difficulty: 3, type: QType.SINGLE,
+    stem: 'Adopting Power Platform can reduce application backlog by letting business units build approved solutions while IT focuses on governance and complex systems.',
     options: opts4('True', 'False', 'Only true for Azure developers', 'Only true if no governance exists'),
     correct: ['a'],
     explanation: 'True. A recognized business value is reduced IT backlog: business units build approved low-code solutions while IT concentrates on governance and complex enterprise systems.',
@@ -396,8 +396,8 @@ const P1: Q[] = [
     references: [REF_POWERFX]
   },
   {
-    domain: CORE, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: Dataverse for Teams is a built-in low-capacity data platform that lets teams build apps, flows, and bots directly within Microsoft Teams.',
+    domain: CORE, difficulty: 1, type: QType.SINGLE,
+    stem: 'Dataverse for Teams is a built-in low-capacity data platform that lets teams build apps, flows, and bots directly within Microsoft Teams.',
     options: opts4('True', 'False', 'Only true for Power BI Premium', 'Only true on-premises'),
     correct: ['a'],
     explanation: 'True. Dataverse for Teams provides a built-in, lower-capacity data platform inside Microsoft Teams so teams can build apps, flows, and chatbots without a full Dataverse environment.',
@@ -523,8 +523,8 @@ const P1: Q[] = [
     references: [REF_CANVAS, REF_APP_TYPES]
   },
   {
-    domain: APPS, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: A model-driven app automatically provides responsive forms and views based on the underlying Dataverse tables.',
+    domain: APPS, difficulty: 1, type: QType.SINGLE,
+    stem: 'A model-driven app automatically provides responsive forms and views based on the underlying Dataverse tables.',
     options: opts4('True', 'False', 'Only true with premium Power BI', 'Only true for canvas apps'),
     correct: ['a'],
     explanation: 'True. Model-driven apps generate responsive forms, views, and navigation from the Dataverse data model, so makers focus on the data and process rather than pixel layout.',
@@ -650,8 +650,8 @@ const P1: Q[] = [
     references: [REF_FLOW_OVERVIEW, REF_FLOW_TRIGGER]
   },
   {
-    domain: FLOW, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: Power Automate cloud flows can integrate Power Apps so that an app can start a flow and receive results.',
+    domain: FLOW, difficulty: 1, type: QType.SINGLE,
+    stem: 'Power Automate cloud flows can integrate Power Apps so that an app can start a flow and receive results.',
     options: opts4('True', 'False', 'Only true for desktop flows', 'Only true with Power BI Premium'),
     correct: ['a'],
     explanation: 'True. Power Apps can call Power Automate cloud flows (for example, via the Power Apps trigger) to run logic and return results to the app.',
@@ -777,8 +777,8 @@ const P1: Q[] = [
     references: [REF_BI_DESKTOP, REF_BI_SERVICE]
   },
   {
-    domain: BI, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: A Power BI report can contain multiple pages with several visualizations on each page.',
+    domain: BI, difficulty: 1, type: QType.SINGLE,
+    stem: 'A Power BI report can contain multiple pages with several visualizations on each page.',
     options: opts4('True', 'False', 'Only true in the mobile app', 'Only true for dashboards'),
     correct: ['a'],
     explanation: 'True. A Power BI report can have one or many pages, each containing multiple visualizations built from a dataset.',
@@ -891,8 +891,8 @@ const P1: Q[] = [
     references: [REF_PAGES]
   },
   {
-    domain: PAGES, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: Microsoft Copilot Studio lets makers test an agent before publishing it to users.',
+    domain: PAGES, difficulty: 1, type: QType.SINGLE,
+    stem: 'Microsoft Copilot Studio lets makers test an agent before publishing it to users.',
     options: opts4('True', 'False', 'Only true for Power BI', 'Only with premium Power Pages'),
     correct: ['a'],
     explanation: 'True. Copilot Studio includes a test pane so makers can interact with and validate an agent before publishing it to channels and users.',
@@ -1047,8 +1047,8 @@ const P2: Q[] = [
     references: [REF_PP_OVERVIEW]
   },
   {
-    domain: BUSVAL, difficulty: 3, type: QType.TRUE_FALSE,
-    stem: 'True or False: Power Platform can reduce total cost of ownership by reusing connectors and components instead of building integrations from scratch each time.',
+    domain: BUSVAL, difficulty: 3, type: QType.SINGLE,
+    stem: 'Power Platform can reduce total cost of ownership by reusing connectors and components instead of building integrations from scratch each time.',
     options: opts4('True', 'False', 'Only true for Azure', 'Only true without Dataverse'),
     correct: ['a'],
     explanation: 'True. Reusing pre-built connectors and reusable components lowers development effort and total cost of ownership compared with custom-coding every integration.',
@@ -1226,8 +1226,8 @@ const P2: Q[] = [
     references: [REF_POWERFX]
   },
   {
-    domain: CORE, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: Connectors can be either Microsoft-published or custom-built to extend Power Platform connectivity.',
+    domain: CORE, difficulty: 1, type: QType.SINGLE,
+    stem: 'Connectors can be either Microsoft-published or custom-built to extend Power Platform connectivity.',
     options: opts4('True', 'False', 'Only Microsoft can publish connectors', 'Connectors do not exist'),
     correct: ['a'],
     explanation: 'True. Power Platform offers many Microsoft and third-party connectors, and makers can build custom connectors to integrate additional APIs.',
@@ -1353,8 +1353,8 @@ const P2: Q[] = [
     references: [REF_CANVAS, REF_APP_TYPES]
   },
   {
-    domain: APPS, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: Canvas apps allow drag-and-drop placement of controls onto screens for precise UI design.',
+    domain: APPS, difficulty: 1, type: QType.SINGLE,
+    stem: 'Canvas apps allow drag-and-drop placement of controls onto screens for precise UI design.',
     options: opts4('True', 'False', 'Only true for model-driven apps', 'Only true in Power BI'),
     correct: ['a'],
     explanation: 'True. Canvas apps provide a drag-and-drop design surface for placing and arranging controls to achieve precise, custom UI.',
@@ -1480,8 +1480,8 @@ const P2: Q[] = [
     references: [REF_FLOW_OVERVIEW, REF_FLOW_TRIGGER]
   },
   {
-    domain: FLOW, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: Power Automate desktop flows can be used to automate repetitive web and Windows UI tasks.',
+    domain: FLOW, difficulty: 1, type: QType.SINGLE,
+    stem: 'Power Automate desktop flows can be used to automate repetitive web and Windows UI tasks.',
     options: opts4('True', 'False', 'Only true for cloud flows', 'Only true with Power BI'),
     correct: ['a'],
     explanation: 'True. Desktop flows (RPA) automate repetitive interactions with web and Windows desktop user interfaces.',
@@ -1607,8 +1607,8 @@ const P2: Q[] = [
     references: [REF_BI_DESKTOP, REF_BI_SERVICE, REF_BI_MOBILE]
   },
   {
-    domain: BI, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: Power BI provides interactive visualizations such as bar charts, maps, and tables to explore data.',
+    domain: BI, difficulty: 1, type: QType.SINGLE,
+    stem: 'Power BI provides interactive visualizations such as bar charts, maps, and tables to explore data.',
     options: opts4('True', 'False', 'Only static images', 'Only text output'),
     correct: ['a'],
     explanation: 'True. Power BI offers many interactive visualizations (bar, line, map, table, and more) to explore and analyze data.',
@@ -1721,8 +1721,8 @@ const P2: Q[] = [
     references: [REF_PAGES]
   },
   {
-    domain: PAGES, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: Copilot Studio lets makers build agents using a low-code authoring experience with topics and conversation nodes.',
+    domain: PAGES, difficulty: 1, type: QType.SINGLE,
+    stem: 'Copilot Studio lets makers build agents using a low-code authoring experience with topics and conversation nodes.',
     options: opts4('True', 'False', 'Only with professional code', 'Only inside Power BI'),
     correct: ['a'],
     explanation: 'True. Copilot Studio provides a low-code authoring experience where makers build agents using topics, trigger phrases, and conversation nodes.',
@@ -1877,8 +1877,8 @@ const P3: Q[] = [
     references: [REF_PP_OVERVIEW]
   },
   {
-    domain: BUSVAL, difficulty: 3, type: QType.TRUE_FALSE,
-    stem: 'True or False: Power Platform can help organizations respond faster to change because solutions can be modified with low-code tools instead of long development cycles.',
+    domain: BUSVAL, difficulty: 3, type: QType.SINGLE,
+    stem: 'Power Platform can help organizations respond faster to change because solutions can be modified with low-code tools instead of long development cycles.',
     options: opts4('True', 'False', 'Only true for Azure developers', 'Only true without governance'),
     correct: ['a'],
     explanation: 'True. Low-code tools shorten the change cycle, increasing organizational agility and the ability to respond quickly to changing requirements.',
@@ -2056,8 +2056,8 @@ const P3: Q[] = [
     references: [REF_POWERFX]
   },
   {
-    domain: CORE, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: An environment can contain its own Dataverse database, apps, and flows, and is managed from the admin center.',
+    domain: CORE, difficulty: 1, type: QType.SINGLE,
+    stem: 'An environment can contain its own Dataverse database, apps, and flows, and is managed from the admin center.',
     options: opts4('True', 'False', 'Only true for Power BI', 'Environments do not exist'),
     correct: ['a'],
     explanation: 'True. An environment is a container that can include a Dataverse database, apps, and flows, and is managed in the Power Platform admin center.',
@@ -2183,8 +2183,8 @@ const P3: Q[] = [
     references: [REF_APPS_OVERVIEW]
   },
   {
-    domain: APPS, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: Model-driven apps focus on the data model and processes, generating a consistent UI automatically.',
+    domain: APPS, difficulty: 1, type: QType.SINGLE,
+    stem: 'Model-driven apps focus on the data model and processes, generating a consistent UI automatically.',
     options: opts4('True', 'False', 'Only true for canvas apps', 'Only true in Power BI'),
     correct: ['a'],
     explanation: 'True. Model-driven apps are driven by the Dataverse data model and processes, automatically producing a consistent, responsive UI.',
@@ -2310,8 +2310,8 @@ const P3: Q[] = [
     references: [REF_FLOW_OVERVIEW, REF_FLOW_TRIGGER]
   },
   {
-    domain: FLOW, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: A trigger defines what starts a flow, and actions define what the flow does after it starts.',
+    domain: FLOW, difficulty: 1, type: QType.SINGLE,
+    stem: 'A trigger defines what starts a flow, and actions define what the flow does after it starts.',
     options: opts4('True', 'False', 'Only true for desktop flows', 'Only true with Power BI'),
     correct: ['a'],
     explanation: 'True. In Power Automate, a trigger starts the flow and actions are the steps performed after the trigger fires.',
@@ -2437,8 +2437,8 @@ const P3: Q[] = [
     references: [REF_BI_DESKTOP, REF_BI_SERVICE, REF_BI_MOBILE]
   },
   {
-    domain: BI, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: Power BI reports can include interactive visuals such as charts, maps, and tables built from a dataset.',
+    domain: BI, difficulty: 1, type: QType.SINGLE,
+    stem: 'Power BI reports can include interactive visuals such as charts, maps, and tables built from a dataset.',
     options: opts4('True', 'False', 'Only static text', 'Only single numbers'),
     correct: ['a'],
     explanation: 'True. Power BI reports contain interactive visualizations (charts, maps, tables, and more) built from a dataset/semantic model.',
@@ -2551,8 +2551,8 @@ const P3: Q[] = [
     references: [REF_COPILOT]
   },
   {
-    domain: PAGES, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: Power Pages is intended for building secure, external-facing business websites with low code.',
+    domain: PAGES, difficulty: 1, type: QType.SINGLE,
+    stem: 'Power Pages is intended for building secure, external-facing business websites with low code.',
     options: opts4('True', 'False', 'Only internal apps', 'Only analytics dashboards'),
     correct: ['a'],
     explanation: 'True. Power Pages is the low-code product for building secure, external-facing business websites that connect to business data.',

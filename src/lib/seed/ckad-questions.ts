@@ -361,7 +361,7 @@ const P1: Q[] = [
     references: [REF_MULTI]
   },
   {
-    domain: DESIGN, difficulty: 2, type: QType.TRUE_FALSE,
+    domain: DESIGN, difficulty: 2, type: QType.SINGLE,
     stem: 'A Job with `restartPolicy: Always` is valid in its Pod template.',
     options: opts4('True', 'False', '', ''),
     correct: ['b'],
@@ -488,7 +488,7 @@ const P1: Q[] = [
     references: [REF_DEPLOY]
   },
   {
-    domain: DEPLOY, difficulty: 3, type: QType.TRUE_FALSE,
+    domain: DEPLOY, difficulty: 3, type: QType.SINGLE,
     stem: 'A Deployment with `progressDeadlineSeconds: 600` will report a `ProgressDeadlineExceeded` condition if the rollout makes no progress within 600 seconds.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -628,7 +628,7 @@ const P1: Q[] = [
     references: [REF_PODS]
   },
   {
-    domain: OBSERV, difficulty: 2, type: QType.TRUE_FALSE,
+    domain: OBSERV, difficulty: 2, type: QType.SINGLE,
     stem: '`kubectl logs --previous <pod>` retrieves logs from the previous terminated instance of a container that has restarted.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -716,7 +716,7 @@ const P1: Q[] = [
     references: [REF_SCTX]
   },
   {
-    domain: CONFIG, difficulty: 3, type: QType.TRUE_FALSE,
+    domain: CONFIG, difficulty: 3, type: QType.SINGLE,
     stem: 'Setting `automountServiceAccountToken: false` on a Pod or ServiceAccount prevents the API token from being mounted into the Pod.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -830,7 +830,7 @@ const P1: Q[] = [
     references: [REF_SVC]
   },
   {
-    domain: NET, difficulty: 3, type: QType.TRUE_FALSE,
+    domain: NET, difficulty: 3, type: QType.SINGLE,
     stem: 'A NetworkPolicy that specifies an `egress` rule restricts only outbound traffic from the selected Pods and does not by itself affect inbound traffic.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -1204,7 +1204,7 @@ const P2: Q[] = [
     references: [REF_MULTI]
   },
   {
-    domain: DESIGN, difficulty: 3, type: QType.TRUE_FALSE,
+    domain: DESIGN, difficulty: 3, type: QType.SINGLE,
     stem: 'A native sidecar is defined as an init container with `restartPolicy: Always` and keeps running alongside the main app containers.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -1331,7 +1331,7 @@ const P2: Q[] = [
     references: [REF_DEPLOY]
   },
   {
-    domain: DEPLOY, difficulty: 3, type: QType.TRUE_FALSE,
+    domain: DEPLOY, difficulty: 3, type: QType.SINGLE,
     stem: 'Scaling a Deployment with `kubectl scale` creates a new ReplicaSet revision.',
     options: opts4('True', 'False', '', ''),
     correct: ['b'],
@@ -1458,7 +1458,7 @@ const P2: Q[] = [
     references: [REF_PROBES]
   },
   {
-    domain: OBSERV, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
+    domain: OBSERV, difficulty: 2, type: QType.SINGLE, isTeaser: true,
     stem: 'A failing readiness probe causes the kubelet to restart the container.',
     options: opts4('True', 'False', '', ''),
     correct: ['b'],
@@ -1559,7 +1559,7 @@ const P2: Q[] = [
     references: [REF_CM]
   },
   {
-    domain: CONFIG, difficulty: 3, type: QType.TRUE_FALSE,
+    domain: CONFIG, difficulty: 3, type: QType.SINGLE,
     stem: 'Environment variables injected from a ConfigMap update automatically in a running container when the ConfigMap changes.',
     options: opts4('True', 'False', '', ''),
     correct: ['b'],
@@ -1673,7 +1673,7 @@ const P2: Q[] = [
     references: [REF_NP]
   },
   {
-    domain: NET, difficulty: 3, type: QType.TRUE_FALSE,
+    domain: NET, difficulty: 3, type: QType.SINGLE,
     stem: 'An Ingress resource requires a running Ingress controller to actually route traffic.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -2047,7 +2047,7 @@ const P3: Q[] = [
     references: [REF_DEPLOY]
   },
   {
-    domain: DESIGN, difficulty: 3, type: QType.TRUE_FALSE,
+    domain: DESIGN, difficulty: 3, type: QType.SINGLE,
     stem: 'Containers in the same Pod can communicate over localhost because they share the Pod\'s network namespace.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -2174,7 +2174,7 @@ const P3: Q[] = [
     references: [REF_DEPLOY]
   },
   {
-    domain: DEPLOY, difficulty: 3, type: QType.TRUE_FALSE,
+    domain: DEPLOY, difficulty: 3, type: QType.SINGLE,
     stem: 'With RollingUpdate, `maxSurge` and `maxUnavailable` cannot both be 0.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -2301,7 +2301,7 @@ const P3: Q[] = [
     references: [REF_PROBES]
   },
   {
-    domain: OBSERV, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
+    domain: OBSERV, difficulty: 2, type: QType.SINGLE, isTeaser: true,
     stem: '`kubectl top` requires a metrics provider (e.g. metrics-server) to be installed in the cluster.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -2402,7 +2402,7 @@ const P3: Q[] = [
     references: [REF_SA]
   },
   {
-    domain: CONFIG, difficulty: 3, type: QType.TRUE_FALSE,
+    domain: CONFIG, difficulty: 3, type: QType.SINGLE,
     stem: 'A ConfigMap mounted as a volume reflects updates in the container\'s filesystem after the kubelet sync, but subPath mounts do NOT receive updates.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -2516,7 +2516,7 @@ const P3: Q[] = [
     references: [REF_SVC]
   },
   {
-    domain: NET, difficulty: 3, type: QType.TRUE_FALSE,
+    domain: NET, difficulty: 3, type: QType.SINGLE,
     stem: 'A ClusterIP Service is reachable from outside the cluster by default.',
     options: opts4('True', 'False', '', ''),
     correct: ['b'],

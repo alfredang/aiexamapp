@@ -162,8 +162,8 @@ const P1: Q[] = [
     references: [REF_EVM]
   },
   {
-    domain: FUND, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Progressive elaboration means continuously improving and detailing a plan as more specific information becomes available.',
+    domain: FUND, difficulty: 2, type: QType.SINGLE,
+    stem: 'Progressive elaboration means continuously improving and detailing a plan as more specific information becomes available.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'Progressive elaboration is the iterative process of increasing the level of detail in a plan as the project progresses and more accurate information becomes available. It is a core characteristic of project planning.',
@@ -564,8 +564,8 @@ const P1: Q[] = [
     references: [REF_AGILE]
   },
   {
-    domain: AGILE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: A hybrid approach can combine predictive and agile elements within the same project.',
+    domain: AGILE, difficulty: 2, type: QType.SINGLE,
+    stem: 'A hybrid approach can combine predictive and agile elements within the same project.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'Hybrid life cycles deliberately combine predictive and adaptive elements — for example, planning some components up front while developing others iteratively. PMI explicitly recognizes hybrid as a valid delivery approach.',
@@ -769,8 +769,8 @@ const P1: Q[] = [
     references: [REF_BA]
   },
   {
-    domain: BA, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Requirements should be verified to ensure they are of acceptable quality (clear, consistent, and testable) and validated to ensure they deliver business value.',
+    domain: BA, difficulty: 2, type: QType.SINGLE,
+    stem: 'Requirements should be verified to ensure they are of acceptable quality (clear, consistent, and testable) and validated to ensure they deliver business value.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'Verification confirms requirements meet quality criteria such as clarity, consistency, and testability. Validation confirms they support business objectives and deliver value. Both are distinct, necessary activities in business analysis.',
@@ -1003,8 +1003,8 @@ const P2: Q[] = [
     references: [REF_EVM]
   },
   {
-    domain: FUND, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: A portfolio is a collection of projects, programs, and operations managed as a group to achieve strategic objectives.',
+    domain: FUND, difficulty: 2, type: QType.SINGLE,
+    stem: 'A portfolio is a collection of projects, programs, and operations managed as a group to achieve strategic objectives.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'A portfolio groups projects, programs, subsidiary portfolios, and operations managed together to achieve strategic objectives. Portfolio management focuses on doing the right work to maximize strategic value.',
@@ -1405,8 +1405,8 @@ const P2: Q[] = [
     references: [REF_AGILE]
   },
   {
-    domain: AGILE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: In Scrum, the sprint goal provides a single objective that gives the team focus for the sprint.',
+    domain: AGILE, difficulty: 2, type: QType.SINGLE,
+    stem: 'In Scrum, the sprint goal provides a single objective that gives the team focus for the sprint.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'The sprint goal is a single objective for the sprint that creates coherence and focus, guiding the team on why the increment is valuable. It is a core element of sprint planning in Scrum.',
@@ -1610,8 +1610,8 @@ const P2: Q[] = [
     references: [REF_BA]
   },
   {
-    domain: BA, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Stakeholder engagement is a continuous activity throughout business analysis, not a one-time step.',
+    domain: BA, difficulty: 2, type: QType.SINGLE,
+    stem: 'Stakeholder engagement is a continuous activity throughout business analysis, not a one-time step.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'Stakeholder engagement is continuous — stakeholders are identified, analyzed, and engaged throughout elicitation, analysis, and evaluation as understanding and circumstances change.',
@@ -1844,8 +1844,8 @@ const P3: Q[] = [
     references: [REF_EVM]
   },
   {
-    domain: FUND, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Operations are ongoing and produce repetitive outputs, whereas projects are temporary and produce unique outputs.',
+    domain: FUND, difficulty: 2, type: QType.SINGLE,
+    stem: 'Operations are ongoing and produce repetitive outputs, whereas projects are temporary and produce unique outputs.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'Operations are ongoing activities that produce repetitive outputs (e.g., manufacturing), while projects are temporary endeavors producing unique results. The distinction is fundamental in PMI terminology.',
@@ -2246,8 +2246,8 @@ const P3: Q[] = [
     references: [REF_AGILE]
   },
   {
-    domain: AGILE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: In Kanban, pulling work only when capacity is available helps limit work in progress and improve flow.',
+    domain: AGILE, difficulty: 2, type: QType.SINGLE,
+    stem: 'In Kanban, pulling work only when capacity is available helps limit work in progress and improve flow.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'Kanban uses a pull system: new work is started only when capacity frees up, which keeps work in progress within limits and improves flow and predictability.',
@@ -2451,8 +2451,8 @@ const P3: Q[] = [
     references: [REF_BA]
   },
   {
-    domain: BA, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Validating requirements ensures they will deliver business value and align with objectives.',
+    domain: BA, difficulty: 2, type: QType.SINGLE,
+    stem: 'Validating requirements ensures they will deliver business value and align with objectives.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'Validation confirms that requirements align with business objectives and will deliver the intended value. This is distinct from verification, which checks that requirements meet quality criteria such as clarity and consistency.',

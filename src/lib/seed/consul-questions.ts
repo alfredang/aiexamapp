@@ -204,8 +204,8 @@ const P1: Q[] = [
     references: [REF_ARCH, REF_CONSENSUS]
   },
   {
-    domain: ARCH, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Every node that runs a workload registered in Consul typically runs a Consul agent (client or server) locally.',
+    domain: ARCH, difficulty: 2, type: QType.SINGLE,
+    stem: 'Every node that runs a workload registered in Consul typically runs a Consul agent (client or server) locally.',
     options: opts4('True', 'False', 'Only server nodes run agents', 'Only when ACLs are enabled'),
     correct: ['a'],
     explanation: 'The Consul model places an agent on every node. Workload nodes usually run a client agent that handles local health checks and service registration and forwards RPCs to the servers, keeping the control plane decentralized.',
@@ -476,8 +476,8 @@ const P1: Q[] = [
     references: [REF_SERVICES, REF_REGISTER]
   },
   {
-    domain: SD, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: A node-level health check that goes critical affects every service registered on that node.',
+    domain: SD, difficulty: 2, type: QType.SINGLE,
+    stem: 'A node-level health check that goes critical affects every service registered on that node.',
     options: opts4('True', 'False', 'Only HTTP services', 'Only if ACLs are disabled'),
     correct: ['a'],
     explanation: 'A check associated with the node (not a specific service ID) reflects node health. When it goes critical, all services on that node are considered unhealthy for discovery, because the node itself is unhealthy.',
@@ -668,8 +668,8 @@ const P1: Q[] = [
     references: [REF_SERVICERESOLVER]
   },
   {
-    domain: MESH, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: With service mesh, application code generally connects to a local sidecar address and the proxies handle mTLS to the destination.',
+    domain: MESH, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'With service mesh, application code generally connects to a local sidecar address and the proxies handle mTLS to the destination.',
     options: opts4('True', 'False', 'Only for HTTP services', 'Only with gateways'),
     correct: ['a'],
     explanation: 'In the mesh model the application talks to its local sidecar (an upstream listener). The sidecars establish mutual TLS and enforce intentions, so application code does not manage certificates or peer IPs directly.',
@@ -795,8 +795,8 @@ const P1: Q[] = [
     references: [REF_TEMPLATE, REF_KV]
   },
   {
-    domain: NIA, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Network Infrastructure Automation aims to eliminate manual ticket-driven updates to load balancers and firewalls when services scale.',
+    domain: NIA, difficulty: 2, type: QType.SINGLE,
+    stem: 'Network Infrastructure Automation aims to eliminate manual ticket-driven updates to load balancers and firewalls when services scale.',
     options: opts4('True', 'False', 'Only for firewalls', 'Only in Enterprise'),
     correct: ['a'],
     explanation: 'NIA closes the gap between dynamic service changes and static network middleware by automatically driving Terraform (via CTS) so appliances stay in sync without manual change tickets each time services scale.',
@@ -992,8 +992,8 @@ const P2: Q[] = [
     references: [REF_DATACENTER, REF_FEDERATION]
   },
   {
-    domain: ARCH, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: Gossip in Consul is used for membership and failure detection.',
+    domain: ARCH, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Gossip in Consul is used for membership and failure detection.',
     options: opts4('True', 'False', 'Only for KV replication', 'Only across the WAN'),
     correct: ['a'],
     explanation: 'The Serf-based gossip layer handles cluster membership, fast failure detection, and event broadcast. It complements Raft, which handles consistent state replication; the two solve different problems.',
@@ -1306,8 +1306,8 @@ const P2: Q[] = [
     references: [REF_SERVICES, REF_DNS_NODE]
   },
   {
-    domain: SD, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: By default, Consul service DNS only returns instances that are passing their health checks.',
+    domain: SD, difficulty: 2, type: QType.SINGLE,
+    stem: 'By default, Consul service DNS only returns instances that are passing their health checks.',
     options: opts4('True', 'False', 'Only for TCP services', 'Only when ACLs are enabled'),
     correct: ['a'],
     explanation: 'Healthy-only is the default for service DNS, so failing instances are automatically excluded. Returning warning-state instances can be enabled with the `only_passing` DNS configuration toggle.',
@@ -1485,8 +1485,8 @@ const P2: Q[] = [
     references: [REF_SERVICERESOLVER, REF_SERVICESPLITTER]
   },
   {
-    domain: MESH, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: Intentions in Consul are enforced based on service identity rather than source IP address.',
+    domain: MESH, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Intentions in Consul are enforced based on service identity rather than source IP address.',
     options: opts4('True', 'False', 'Only for HTTP', 'Only across datacenters'),
     correct: ['a'],
     explanation: 'Intentions evaluate the authenticated mTLS service identity of the caller, not its IP. This keeps authorization stable even when workloads move and IPs change in dynamic environments.',
@@ -1625,8 +1625,8 @@ const P2: Q[] = [
     references: [REF_TEMPLATE, REF_KV]
   },
   {
-    domain: NIA, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: CTS uses Terraform to automate downstream network infrastructure based on Consul service changes.',
+    domain: NIA, difficulty: 2, type: QType.SINGLE,
+    stem: 'CTS uses Terraform to automate downstream network infrastructure based on Consul service changes.',
     options: opts4('True', 'False', 'Only KV changes', 'Only in dev mode'),
     correct: ['a'],
     explanation: 'CTS (Consul-Terraform-Sync) is purpose-built to drive Terraform modules from Consul catalog/service changes, automating network middleware updates as services scale up and down.',
@@ -1817,8 +1817,8 @@ const P3: Q[] = [
     references: [REF_CONSENSUS, REF_GOSSIP]
   },
   {
-    domain: ARCH, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: Consul client agents do not store the authoritative catalog; servers do.',
+    domain: ARCH, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Consul client agents do not store the authoritative catalog; servers do.',
     options: opts4('True', 'False', 'Only with ACLs', 'Only in dev mode'),
     correct: ['a'],
     explanation: 'The authoritative catalog and KV state live on the server agents and are replicated by Raft. Clients are stateless proxies that forward requests and run local checks.',
@@ -2141,8 +2141,8 @@ const P3: Q[] = [
     references: [REF_SERVICES, REF_REGISTER]
   },
   {
-    domain: SD, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Consul SRV DNS records include the port of each service instance.',
+    domain: SD, difficulty: 2, type: QType.SINGLE,
+    stem: 'Consul SRV DNS records include the port of each service instance.',
     options: opts4('True', 'False', 'Only for HTTP', 'Only with ACLs'),
     correct: ['a'],
     explanation: 'SRV records carry priority, weight, port, and target, so a single SRV query yields both the host and the port for each healthy instance — useful for clients that need the port from DNS.',
@@ -2307,8 +2307,8 @@ const P3: Q[] = [
     references: [REF_CA]
   },
   {
-    domain: MESH, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: Envoy is the recommended sidecar proxy for production Consul service mesh.',
+    domain: MESH, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Envoy is the recommended sidecar proxy for production Consul service mesh.',
     options: opts4('True', 'False', 'Only for gRPC', 'Only in Enterprise'),
     correct: ['a'],
     explanation: 'Envoy is the supported, recommended data-plane proxy for Consul service mesh in production, providing robust L4/L7 features. The built-in proxy is intended for testing and development only.',
@@ -2460,8 +2460,8 @@ const P3: Q[] = [
     references: [REF_TEMPLATE]
   },
   {
-    domain: NIA, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Watches let Consul invoke an external handler on changes without that handler polling Consul.',
+    domain: NIA, difficulty: 2, type: QType.SINGLE,
+    stem: 'Watches let Consul invoke an external handler on changes without that handler polling Consul.',
     options: opts4('True', 'False', 'Only for KV', 'Only in Enterprise'),
     correct: ['a'],
     explanation: 'A watch monitors a Consul view and calls the configured handler/HTTP endpoint when it changes, providing push-style, event-driven automation rather than the handler repeatedly polling Consul.',

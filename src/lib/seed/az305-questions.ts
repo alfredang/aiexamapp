@@ -142,8 +142,8 @@ const P1: Q[] = [
     references: [REF_POLICY, REF_MG]
   },
   {
-    domain: IDGM, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: An Azure Policy with the "deny" effect can prevent the creation of resources in non-approved regions.',
+    domain: IDGM, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'An Azure Policy with the "deny" effect can prevent the creation of resources in non-approved regions.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'True. The "allowed locations" built-in policy with a deny effect blocks resource creation in regions outside the approved list, a common governance guardrail. Audit-only effects would log but not block.',
@@ -386,8 +386,8 @@ const P1: Q[] = [
     references: [REF_DATALAKE, REF_STORAGE]
   },
   {
-    domain: DATA, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Read-access geo-redundant storage (RA-GRS) lets applications read from the secondary region even when the primary is available.',
+    domain: DATA, difficulty: 2, type: QType.SINGLE,
+    stem: 'Read-access geo-redundant storage (RA-GRS) lets applications read from the secondary region even when the primary is available.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'True. RA-GRS exposes a read-only secondary endpoint that applications can read from at any time, useful for read-scaling and resilience. Plain GRS replicates but does not expose the secondary for reads unless a failover occurs.',
@@ -591,8 +591,8 @@ const P1: Q[] = [
     references: [REF_FRONTDOOR, REF_TM]
   },
   {
-    domain: BCDR, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Azure Backup soft delete retains deleted backup data for an additional period to protect against accidental or malicious deletion.',
+    domain: BCDR, difficulty: 2, type: QType.SINGLE,
+    stem: 'Azure Backup soft delete retains deleted backup data for an additional period to protect against accidental or malicious deletion.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'True. Azure Backup soft delete keeps recovery points for a retention window after deletion so they can be recovered, mitigating ransomware/insider deletion. This is a recommended resilience control.',
@@ -744,8 +744,8 @@ const P1: Q[] = [
     references: [REF_VWAN]
   },
   {
-    domain: INFRA, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Azure Functions on the Consumption plan is well suited for short-lived, event-driven workloads that scale automatically to zero when idle.',
+    domain: INFRA, difficulty: 2, type: QType.SINGLE,
+    stem: 'Azure Functions on the Consumption plan is well suited for short-lived, event-driven workloads that scale automatically to zero when idle.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'True. The Consumption plan scales out per demand and to zero when idle, billing per execution — ideal for sporadic, event-driven code. Long-running or always-warm needs may instead use Premium or Dedicated plans.',
@@ -991,8 +991,8 @@ const P2: Q[] = [
     references: [REF_MG, REF_POLICY]
   },
   {
-    domain: IDGM, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: Azure Monitor can collect both metrics and logs and trigger alerts with action groups for notification and automation.',
+    domain: IDGM, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Azure Monitor can collect both metrics and logs and trigger alerts with action groups for notification and automation.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'True. Azure Monitor ingests platform/custom metrics and logs, and alert rules invoke action groups for email/SMS/webhook/automation responses, central to an observability design.',
@@ -1196,8 +1196,8 @@ const P2: Q[] = [
     references: [REF_SQL]
   },
   {
-    domain: DATA, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: Zone-redundant storage (ZRS) keeps copies of data across multiple availability zones within a single region.',
+    domain: DATA, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Zone-redundant storage (ZRS) keeps copies of data across multiple availability zones within a single region.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'True. ZRS synchronously replicates data across three availability zones in the primary region, protecting against a single-zone failure. It does not protect against a full regional outage (use GZRS for that).',
@@ -1427,8 +1427,8 @@ const P2: Q[] = [
     references: [REF_FRONTDOOR, REF_TM]
   },
   {
-    domain: BCDR, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Enabling cross-region restore on a GRS Recovery Services vault lets you restore VM backups in the paired secondary region.',
+    domain: BCDR, difficulty: 2, type: QType.SINGLE,
+    stem: 'Enabling cross-region restore on a GRS Recovery Services vault lets you restore VM backups in the paired secondary region.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'True. With a GRS vault and cross-region restore enabled, you can restore supported backups in the Azure paired region during a primary-region disruption, improving recovery flexibility.',
@@ -1580,8 +1580,8 @@ const P2: Q[] = [
     references: [REF_VWAN]
   },
   {
-    domain: INFRA, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: A Virtual Machine Scale Set can automatically increase and decrease the number of identical VM instances based on a metric such as CPU.',
+    domain: INFRA, difficulty: 2, type: QType.SINGLE,
+    stem: 'A Virtual Machine Scale Set can automatically increase and decrease the number of identical VM instances based on a metric such as CPU.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'True. VM Scale Sets support autoscale rules that add or remove identical instances based on metrics, ideal for elastic stateless workloads. Single VMs cannot scale horizontally automatically.',
@@ -1814,8 +1814,8 @@ const P3: Q[] = [
     references: [REF_POLICY, REF_MG]
   },
   {
-    domain: IDGM, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: Privileged Identity Management can require approval and impose a time limit before a user can use the Global Administrator role.',
+    domain: IDGM, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Privileged Identity Management can require approval and impose a time limit before a user can use the Global Administrator role.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'True. PIM supports eligible assignments with approval workflows and time-bound activation for privileged roles such as Global Administrator, enforcing just-in-time least privilege.',
@@ -2032,8 +2032,8 @@ const P3: Q[] = [
     references: [REF_SQLMI, REF_SQL]
   },
   {
-    domain: DATA, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: Geo-redundant storage (GRS) asynchronously replicates data to a secondary region hundreds of miles away to protect against a regional outage.',
+    domain: DATA, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Geo-redundant storage (GRS) asynchronously replicates data to a secondary region hundreds of miles away to protect against a regional outage.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'True. GRS asynchronously copies data to a paired secondary region, protecting against a primary-region outage. RA-GRS additionally exposes the secondary for read access.',
@@ -2263,8 +2263,8 @@ const P3: Q[] = [
     references: [REF_FRONTDOOR, REF_TM]
   },
   {
-    domain: BCDR, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Azure Site Recovery test failover lets you validate disaster recovery in an isolated network without affecting the production workload.',
+    domain: BCDR, difficulty: 2, type: QType.SINGLE,
+    stem: 'Azure Site Recovery test failover lets you validate disaster recovery in an isolated network without affecting the production workload.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'True. ASR test failover spins up replicated VMs in an isolated network for non-disruptive DR drills, a recommended practice to validate recovery plans.',
@@ -2416,8 +2416,8 @@ const P3: Q[] = [
     references: [REF_VWAN]
   },
   {
-    domain: INFRA, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Azure App Service abstracts the underlying OS so the team does not patch or manage the host operating system.',
+    domain: INFRA, difficulty: 2, type: QType.SINGLE,
+    stem: 'Azure App Service abstracts the underlying OS so the team does not patch or manage the host operating system.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
     explanation: 'True. App Service is a managed PaaS; Microsoft manages the host OS and patching, letting teams focus on the application. IaaS VMs, by contrast, require OS management.',
