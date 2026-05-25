@@ -23,7 +23,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ vend
   let gt = c.get('gt')?.value;
   if (!userId && !gt) {
     gt = `g_${crypto.randomUUID()}`;
-    c.set('gt', gt, { httpOnly: true, sameSite: 'lax', maxAge: 60 * 60 * 24 * 30, path: '/' });
+    // `secure` over HTTPS in production — the gt token is bearer-equivalent
+    // for the guest attempt and must not traverse plain HTTP. (Teaser-audit L1.)
+    c.set('gt', gt, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 60 * 60 * 24 * 30, path: '/' });
   }
 
   const teaserQuestions = await db.question.findMany({

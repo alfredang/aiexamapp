@@ -27,8 +27,12 @@ export async function generateMetadata({ params }: { params: Promise<{ vendor: s
   };
 }
 
-export default async function ExamDetailPage({ params }: { params: Promise<{ vendor: string; slug: string }> }) {
+export default async function ExamDetailPage({ params, searchParams }: { params: Promise<{ vendor: string; slug: string }>; searchParams: Promise<{ teaser?: string }> }) {
   const { vendor: vendorSlug, slug } = await params;
+  // Surface the teaser route's "no teaser questions" bounce — without this,
+  // a user who clicked "Try the free teaser" on an exam with 0 teaser
+  // questions silently landed back here with no explanation. (Teaser-audit L4.)
+  const teaserUnavailable = (await searchParams)?.teaser === 'unavailable';
   const exam = await db.exam.findUnique({
     where: { slug },
     include: {
@@ -120,6 +124,11 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ ven
   return (
     <div className="container-app py-10">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      {teaserUnavailable && (
+        <div className="mb-6 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-200">
+          The free teaser isn't available for this exam yet — it needs at least one teaser question.
+        </div>
+      )}
       <div className="mb-2 text-sm">
         <Link href="/practice-exams" className="text-blue-600 hover:underline">All exams</Link>
         <span className="text-slate-400"> / </span>

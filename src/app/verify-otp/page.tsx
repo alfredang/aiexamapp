@@ -8,7 +8,11 @@ function VerifyOtpInner() {
   const sp = useSearchParams();
   const email = sp.get('email') || '';
   const purpose = (sp.get('purpose') as 'LOGIN' | 'REGISTER' | 'TEASER_GATE') || 'LOGIN';
-  const next = sp.get('next') || '/post-login';
+  // Same-origin relative paths only. `next` is attacker-controllable in a
+  // crafted link; without this, values like `//evil.com` or `https://evil.com`
+  // would navigate the user off-site after sign-in. (Teaser-audit L2.)
+  const rawNext = sp.get('next') || '/post-login';
+  const next = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/post-login';
   const [code, setCode] = useState('');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
