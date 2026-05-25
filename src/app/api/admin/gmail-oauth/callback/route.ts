@@ -2,17 +2,16 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { getSetting, setSetting } from '@/lib/settings';
+import { getPublicOrigin, publicUrl } from '@/lib/url';
 
 export const dynamic = 'force-dynamic';
 
 function callbackUrl(req: Request): string {
-  const u = new URL(req.url);
-  const base = process.env.NEXTAUTH_URL || `${u.protocol}//${u.host}`;
-  return `${base.replace(/\/$/, '')}/api/admin/gmail-oauth/callback`;
+  return `${getPublicOrigin(req)}/api/admin/gmail-oauth/callback`;
 }
 
 function back(req: Request, params: Record<string, string>): NextResponse {
-  const target = new URL('/admin-dashboard/settings/email', req.url);
+  const target = publicUrl(req, '/admin-dashboard/settings/email');
   for (const [k, v] of Object.entries(params)) target.searchParams.set(k, v);
   return NextResponse.redirect(target);
 }

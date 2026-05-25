@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { publicUrl } from '@/lib/url';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,8 +17,13 @@ export async function POST(req: Request) {
       data: { adminId, action: 'user.impersonate.end', targetType: 'User', targetId: userId, metadata: {} }
     }).catch(() => {});
   }
-  const next = new URL(req.url).searchParams.get('next') || '/admin-dashboard/users';
-  return NextResponse.redirect(new URL(next, req.url));
+  // Same-origin guard on `next` — anything off-site or scheme-relative
+  // falls back to the safe default. Belt-and-braces with `publicUrl()`,
+  // which would also rewrite an off-site host but won't catch path
+  // traversal back to a phishing destination on our own domain.
+  const rawNext = new URL(req.url).searchParams.get('next') || '/admin-dashboard/users';
+  const next = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/admin-dashboard/users';
+  return NextResponse.redirect(publicUrl(req, next));
 }
 
 export async function GET(req: Request) {

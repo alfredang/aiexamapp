@@ -1,17 +1,15 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { getSetting } from '@/lib/settings';
+import { getPublicOrigin, publicUrl } from '@/lib/url';
 
 export const dynamic = 'force-dynamic';
 
 const SCOPE = 'https://www.googleapis.com/auth/gmail.send';
 
 function callbackUrl(req: Request): string {
-  const u = new URL(req.url);
-  // Honor X-Forwarded-Host / NEXTAUTH_URL when set so the URL matches the
-  // OAuth client's registered redirect URI.
-  const base = process.env.NEXTAUTH_URL || `${u.protocol}//${u.host}`;
-  return `${base.replace(/\/$/, '')}/api/admin/gmail-oauth/callback`;
+  // Must match the OAuth client's registered redirect URI exactly.
+  return `${getPublicOrigin(req)}/api/admin/gmail-oauth/callback`;
 }
 
 export async function GET(req: Request) {
@@ -22,7 +20,7 @@ export async function GET(req: Request) {
   const clientId = await getSetting('GMAIL_OAUTH_CLIENT_ID');
   if (!clientId) {
     return NextResponse.redirect(
-      new URL('/admin-dashboard/settings/email?error=missing_client_id', req.url)
+      publicUrl(req, '/admin-dashboard/settings/email?error=missing_client_id')
     );
   }
 
