@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { auth } from '@/lib/auth';
+import { publicUrl } from '@/lib/url';
 
 // Route handler (replaces the prior page.tsx). Next.js 16 disallows writing
 // cookies in Server Components, so the guest-token cookie must be set here.
@@ -34,7 +35,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ vend
   });
   if (teaserQuestions.length === 0) {
     // No teaser content yet — bounce back to the exam detail page with a notice flag.
-    return NextResponse.redirect(new URL(`/practice-exams/${vendorSlug}/${slug}?teaser=unavailable`, req.url));
+    return NextResponse.redirect(publicUrl(req, `/practice-exams/${vendorSlug}/${slug}?teaser=unavailable`));
   }
 
   // Admin-configurable teaser size (Settings → TEASER_QUESTION_COUNT, default 20).
@@ -55,5 +56,5 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ vend
       responses: {}
     }
   });
-  return NextResponse.redirect(new URL(`/exam/${attempt.id}`, req.url));
+  return NextResponse.redirect(publicUrl(req, `/exam/${attempt.id}`));
 }
