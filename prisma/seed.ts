@@ -1890,7 +1890,20 @@ async function main() {
   for (const b of BUNDLES) {
     const bundle = await db.bundle.upsert({
       where: { slug: b.slug },
-      update: { title: b.title, description: b.description, price: b.price, priceVoucher: b.priceVoucher ?? null, published: true },
+      // Sync catalog-content fields only. `published` is DELIBERATELY
+      // excluded — prod admins set bundle visibility manually (e.g.
+      // unpublishing a retired-cert bundle), and this seed runs on EVERY
+      // deploy (Docker CMD: prisma migrate deploy && tsx prisma/seed.ts).
+      // Overwriting `published` here silently re-publishes retired
+      // bundles on every deploy. Prod is authoritative for this flag —
+      // only `create` sets the initial value for brand-new bundles.
+      // (Mirrors the same rule applied to exam.upsert above.)
+      update: {
+        title: b.title,
+        description: b.description,
+        price: b.price,
+        priceVoucher: b.priceVoucher ?? null
+      },
       create: { slug: b.slug, title: b.title, description: b.description, price: b.price, priceVoucher: b.priceVoucher ?? null, published: true }
     });
     await db.bundleItem.deleteMany({ where: { bundleId: bundle.id } });
