@@ -77,19 +77,20 @@ const providers: NextAuthConfig['providers'] = [
       try {
         const email = String(creds?.email || '').toLowerCase().trim();
         const password = String(creds?.password || '');
-        console.log("authorize: email =", email);
-        if (!email || !password) { console.log("Missing email or password"); return null; }
+        if (!email || !password) return null;
         const user = await db.user.findUnique({ where: { email } });
-        if (!user) { console.log("User not found"); return null; }
-        if (!user.emailVerified) { console.log("Email not verified"); return null; }
-        if (!user.passwordHash) { console.log("No password hash"); return null; }
-        if (!user.active) { console.log("User not active"); return null; }
+        if (!user) return null;
+        if (!user.emailVerified) return null;
+        if (!user.passwordHash) return null;
+        if (!user.active) return null;
         const ok = await argon2.verify(user.passwordHash, password);
-        if (!ok) { console.log("Password verify failed"); return null; }
-        console.log("authorize successful for", email);
+        if (!ok) return null;
         return { id: user.id, email: user.email, name: user.name ?? undefined, role: user.role } as any;
       } catch (err) {
-        console.error("AUTHORIZE ERROR CAUGHT:", err);
+        // Authorize must never throw — return null and log the unexpected
+        // error for diagnostics. (Teaser-audit L5 removed the per-step debug
+        // logs that were spamming stdout on every password login.)
+        console.error('authorize threw unexpectedly', err);
         return null;
       }
     }

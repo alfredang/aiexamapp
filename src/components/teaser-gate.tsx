@@ -11,14 +11,18 @@ export function TeaserGate({ count, examSlug, vendorSlug, onClose }: { count: nu
   const [err, setErr] = useState('');
 
   async function send(e: React.FormEvent) {
-    e.preventDefault(); setBusy(true); setErr('');
+    e.preventDefault();
+    if (busy) return; // guard against rapid double-submit before React re-renders the disabled button (Teaser-audit L3)
+    setBusy(true); setErr('');
     const r = await fetch('/api/otp/request', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, purpose: 'TEASER_GATE' }) });
     setBusy(false);
     if (!r.ok) { setErr((await r.json()).error || 'Could not send code'); return; }
     setStep('otp');
   }
   async function verify(e: React.FormEvent) {
-    e.preventDefault(); setBusy(true); setErr('');
+    e.preventDefault();
+    if (busy) return; // guard against rapid double-submit before React re-renders the disabled button (Teaser-audit L3)
+    setBusy(true); setErr('');
     const r = await fetch('/api/otp/verify', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, code, purpose: 'TEASER_GATE' }) });
     if (!r.ok) { setBusy(false); setErr((await r.json()).error || 'Verification failed'); return; }
     // Now send a LOGIN OTP and ship the user to /verify-otp to complete sign-in
