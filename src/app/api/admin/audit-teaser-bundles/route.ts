@@ -121,55 +121,79 @@ export async function GET() {
   const emptyBundles = bundleRows.filter((b) => b.itemCount === 0);
   const deadBundles = bundleRows.filter((b) => b.itemCount > 0 && b.liveItemCount === 0);
 
-  // ── Q3: lonely base-shell exams (this category was missed by the
-  //       original audit and bit us on aws-soa-c03 / aws-sap-c02 — both
-  //       were published base shells with their sibling variants wired
-  //       into a published bundle, so visiting /practice-exams/aws/<base>
-  //       rendered as a lonely exam page with the "isn't yet available
-  //       in a bundle" CTA instead of falling through to the bundle).
+  // ── Q3: lonely exams — published exams that look like they should be
+  //       in a bundle but aren't. Two shapes that occur in practice:
   //
-  // A published exam is "lonely" iff:
-  //   1. it is published (= currently customer-visible at its detail page)
+  //   (a) Base shell. The exam's slug IS the cert slug (e.g. aws-soa-c03),
+  //       its sibling variants `{slug}-p1/-p2/-p3` are wired into a
+  //       published bundle, but the base shell itself isn't. Visiting
+  //       /practice-exams/aws/aws-soa-c03 then renders the lonely-exam
+  //       page with the "isn't yet available in a bundle" CTA instead
+  //       of falling through to the bundle. Fix: unpublish the base.
+  //       (bit us on aws-soa-c03 / aws-sap-c02 — see PR #54.)
+  //
+  //   (b) Orphan variant. The exam IS a variant (e.g.
+  //       oracle-oci-foundations-1z0-1085-p1), and there's a published
+  //       bundle whose slug + `-` is a prefix of this exam's slug (e.g.
+  //       oracle-oci-foundations), but the variant isn't in that
+  //       bundle's items[]. Common cause: a cert was renamed (here:
+  //       2026-05-19 OCI standardisation added the `-1z0-1085-` infix)
+  //       but the bundle's BundleItem rows were never repointed. Fix:
+  //       repoint the bundle items to the live variant slugs. (Bit us
+  //       on oracle-oci-foundations — see PR #58.)
+  //
+  // A published exam is flagged "lonely" iff:
+  //   1. it is published (= customer-visible at its detail page)
   //   2. it is NOT in any published bundle's items[] directly
-  //   3. BUT at least one sibling exam (`{slug}-p\d+` or `{slug}-practice-\d+`)
-  //      IS in a published bundle — meaning the bundle exists for this cert
-  //      and is just bypassing the base shell. THIS is what tells us the
-  //      fix is "unpublish the base shell" not "wire a new bundle".
+  //   3. AND there exists a published bundle whose slug + `-` is a
+  //      prefix of this exam's slug. The bundle is the cert family;
+  //      this exam belongs in it but isn't wired.
   //
-  // Bundles are pre-fetched with published-state and items; a tiny helper
-  // map gives us O(1) lookup of "is this slug in any published bundle".
+  // This generalisation catches both (a) — bundle.slug === exam.slug
+  // and the bundle wires sibling variants — and (b) — bundle.slug is a
+  // proper prefix of exam.slug.
   const examIdsInPublishedBundle = new Set<string>();
   for (const b of bundles) {
     if (!b.published) continue;
     for (const i of b.items) examIdsInPublishedBundle.add(i.examId);
   }
-  const slugsInPublishedBundle = new Set<string>();
+  // For each published bundle, the slugs of exams that are wired in.
+  const bundleSlugsToItemSlugs = new Map<string, string[]>();
   for (const b of bundles) {
     if (!b.published) continue;
-    for (const i of b.items) slugsInPublishedBundle.add(i.exam.slug);
+    bundleSlugsToItemSlugs.set(b.slug, b.items.map((i) => i.exam.slug));
   }
-  const VARIANT_RE = /^(.+?)-(?:p|practice-)\d+$/i;
+  // Sorted descending by length so longer/more-specific bundle slugs win
+  // over shorter ones if multiple match (e.g. an exam slug that has two
+  // related bundle slugs as prefixes — take the more specific one).
+  const publishedBundleSlugs = [...bundleSlugsToItemSlugs.keys()].sort(
+    (a, b) => b.length - a.length
+  );
+
   const lonelyBaseShells = exams
     .filter((e) => e.published)
     .filter((e) => !examIdsInPublishedBundle.has(e.id))
     .map((e) => {
-      // Find sibling variants in any published bundle.
-      const variantPrefix = `${e.slug}-`;
-      const siblings = [...slugsInPublishedBundle].filter((s) => {
-        if (!s.startsWith(variantPrefix)) return false;
-        const m = s.match(VARIANT_RE);
-        return !!m && m[1] === e.slug;
-      });
-      return { exam: e, siblings };
+      // Find the most-specific published bundle whose slug is a prefix
+      // of this exam. `bundle.slug + '-'` must be a prefix (or equal
+      // the exam slug, in which case the exam IS the base shell). The
+      // sort above ensures we pick the longest match first.
+      const matchingBundleSlug = publishedBundleSlugs.find((bs) =>
+        e.slug === bs || e.slug.startsWith(`${bs}-`)
+      );
+      if (!matchingBundleSlug) return null;
+      const siblings = bundleSlugsToItemSlugs.get(matchingBundleSlug) ?? [];
+      return { exam: e, matchingBundleSlug, siblings };
     })
-    .filter((row) => row.siblings.length > 0)
+    .filter((row): row is NonNullable<typeof row> => row !== null)
     .map((row) => ({
       vendor: row.exam.vendor.slug,
       slug: row.exam.slug,
       code: row.exam.code,
       title: row.exam.title,
       publishedQuestions: pubBy.get(row.exam.id) || 0,
-      siblingsInBundle: row.siblings.sort()
+      relatedBundleSlug: row.matchingBundleSlug,
+      siblingsInBundle: [...row.siblings].sort()
     }))
     .sort((a, b) => a.vendor.localeCompare(b.vendor) || a.slug.localeCompare(b.slug));
 
