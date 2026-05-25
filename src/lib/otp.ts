@@ -12,6 +12,14 @@ export async function issueOtp(email: string, purpose: OtpPurpose, ip: string) {
   const emailRl = rateLimit(`otp:email:${email}`, 3, 60 * 60_000);
   if (!emailRl.ok) return { ok: false as const, error: 'Too many codes sent to this email' };
 
+  // Invalidate any prior unconsumed codes for this email+purpose so only
+  // the newest code is ever valid. Caps the brute-force surface to one
+  // 6-digit code at a time, not N live codes accumulating. (Teaser-audit M2.)
+  await db.otpCode.updateMany({
+    where: { email: email.toLowerCase().trim(), purpose, consumed: false },
+    data: { consumed: true }
+  });
+
   const code = String(Math.floor(100000 + Math.random() * 900000));
   await db.otpCode.create({
     data: {

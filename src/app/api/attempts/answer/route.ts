@@ -32,6 +32,14 @@ export async function POST(req: Request) {
 
   const question = await db.question.findUnique({ where: { id: data.questionId } });
   if (!question || question.examId !== attempt.examId) return NextResponse.json({ error: 'Question not in exam' }, { status: 400 });
+  // Scope the answer API to the attempt's own question set. Without this,
+  // an attempt holder (notably an anonymous teaser holder) can POST any
+  // PUBLISHED question of the exam and receive `correct` / `explanation` /
+  // `references` back — exfiltrating the full paid question bank's answers
+  // from a free teaser. (Teaser-audit M3.)
+  if (!attempt.questionIds.includes(data.questionId)) {
+    return NextResponse.json({ error: 'Question not in this attempt' }, { status: 400 });
+  }
 
   const correct = isAnswerCorrect(question, data.answer);
 
