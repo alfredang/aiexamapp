@@ -152,18 +152,19 @@ export function BundleAsExamView({ bundle, userId }: { bundle: Bundle; userId?: 
             </dl>
           </div>
 
-          {/* Teaser CTA is for converting ANONYMOUS visitors. Signed-in users
-              either already own the bundle (use the practice runner) or are
-              about to buy it (BundleBuyForm below) — the teaser only created
-              a junk 20-question attempt under their account. (Teaser-audit M4.) */}
-          {!userId && (
-            <Link href={`/practice-exams/${vendor.slug}/${first.slug}/teaser`} className="card-hover block p-5">
-              <div className="mb-1 text-xs font-semibold uppercase text-blue-700 dark:text-blue-300">Free</div>
-              <div className="font-semibold">Try our free practice teaser</div>
-              <p className="mt-1 text-sm text-slate-600 dark:text-slate-100">No credit card required.</p>
-              <div className="btn-outline mt-3 w-full">Start free practice exam</div>
-            </Link>
-          )}
+          {/* Teaser CTA is shown to everyone — anonymous AND signed-in.
+              Previously hidden for signed-in users (Teaser-audit M4) on the
+              concern that it created a junk teaser attempt under their
+              account. We accept that trade-off: signed-in users still want to
+              sample before buying, and the teaser route already creates the
+              attempt under their userId (not as a guest), so it shows in
+              their history correctly tagged isTeaser=true. */}
+          <Link href={`/practice-exams/${vendor.slug}/${first.slug}/teaser`} className="card-hover block p-5">
+            <div className="mb-1 text-xs font-semibold uppercase text-blue-700 dark:text-blue-300">Free</div>
+            <div className="font-semibold">Try our free practice teaser</div>
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-100">No credit card required.</p>
+            <div className="btn-outline mt-3 w-full">Start free practice exam</div>
+          </Link>
 
           <BundleBuyForm
             bundleId={bundle.id}
