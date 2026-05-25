@@ -42,19 +42,27 @@ export default async function ExamDetailPage({ params, searchParams }: { params:
   });
 
   // We need session info early to decide whether unpublished exams are
-  // viewable (admins can see anything; entitled users can see exams they
-  // own even when those exams are hidden from the public catalog because
-  // they're sold via a bundle).
+  // viewable (entitled users can see exams they own even when those
+  // exams are hidden from the public catalog because they're sold via
+  // a bundle).
+  //
+  // Note: admins are intentionally NOT bypassed here. Earlier we let
+  // admins see any unpublished exam at its public URL — but that meant
+  // when an admin browsed to a lonely-base-shell URL (e.g. aws-soa-c03,
+  // which is unpublished so the bundle view wins for customers), the
+  // admin saw a misleading "isn't yet available in a bundle" message
+  // because the base shell isn't in any bundle item. To preview an
+  // unpublished exam's content, admins should use the admin dashboard
+  // routes (`/admin-dashboard/exams/[id]` and `/test`) — that's the
+  // right tool. The public URL should mirror the customer experience.
   const session = await auth();
   const userId = (session?.user as any)?.id as string | undefined;
-  const role = (session?.user as any)?.role as string | undefined;
-  const isAdmin = role === 'ADMIN';
 
   // Is the unpublished exam (if any) one this user is entitled to via a
   // bundle purchase? If yes, they should still see the exam detail page so
   // they can launch attempts.
   let userIsEntitled = false;
-  if (exam && !exam.published && userId && !isAdmin) {
+  if (exam && !exam.published && userId) {
     const ent = await db.entitlement.findFirst({
       where: { userId, examId: exam.id, tier: { in: ['PRACTICE', 'BUNDLE', 'VOUCHER', 'ADMIN_GRANT'] } }
     });
@@ -62,11 +70,12 @@ export default async function ExamDetailPage({ params, searchParams }: { params:
   }
 
   // Routing rules:
-  //   - Exam found AND (published OR admin OR entitled)  →  render exam page
+  //   - Exam found AND (published OR entitled)  →  render exam page
   //   - Otherwise try Bundle by the same slug (the bundle wins when an
-  //     unpublished base shell shares its slug, e.g. aws-saa-c03)
+  //     unpublished base shell shares its slug, e.g. aws-saa-c03,
+  //     aws-soa-c03, aws-sap-c02)
   //   - Otherwise 404
-  const examIsViewable = !!exam && (exam.published || isAdmin || userIsEntitled);
+  const examIsViewable = !!exam && (exam.published || userIsEntitled);
   if (!examIsViewable) {
     const bundle = await db.bundle.findUnique({
       where: { slug },
