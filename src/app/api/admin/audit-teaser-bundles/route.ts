@@ -121,6 +121,58 @@ export async function GET() {
   const emptyBundles = bundleRows.filter((b) => b.itemCount === 0);
   const deadBundles = bundleRows.filter((b) => b.itemCount > 0 && b.liveItemCount === 0);
 
+  // ── Q3: lonely base-shell exams (this category was missed by the
+  //       original audit and bit us on aws-soa-c03 / aws-sap-c02 — both
+  //       were published base shells with their sibling variants wired
+  //       into a published bundle, so visiting /practice-exams/aws/<base>
+  //       rendered as a lonely exam page with the "isn't yet available
+  //       in a bundle" CTA instead of falling through to the bundle).
+  //
+  // A published exam is "lonely" iff:
+  //   1. it is published (= currently customer-visible at its detail page)
+  //   2. it is NOT in any published bundle's items[] directly
+  //   3. BUT at least one sibling exam (`{slug}-p\d+` or `{slug}-practice-\d+`)
+  //      IS in a published bundle — meaning the bundle exists for this cert
+  //      and is just bypassing the base shell. THIS is what tells us the
+  //      fix is "unpublish the base shell" not "wire a new bundle".
+  //
+  // Bundles are pre-fetched with published-state and items; a tiny helper
+  // map gives us O(1) lookup of "is this slug in any published bundle".
+  const examIdsInPublishedBundle = new Set<string>();
+  for (const b of bundles) {
+    if (!b.published) continue;
+    for (const i of b.items) examIdsInPublishedBundle.add(i.examId);
+  }
+  const slugsInPublishedBundle = new Set<string>();
+  for (const b of bundles) {
+    if (!b.published) continue;
+    for (const i of b.items) slugsInPublishedBundle.add(i.exam.slug);
+  }
+  const VARIANT_RE = /^(.+?)-(?:p|practice-)\d+$/i;
+  const lonelyBaseShells = exams
+    .filter((e) => e.published)
+    .filter((e) => !examIdsInPublishedBundle.has(e.id))
+    .map((e) => {
+      // Find sibling variants in any published bundle.
+      const variantPrefix = `${e.slug}-`;
+      const siblings = [...slugsInPublishedBundle].filter((s) => {
+        if (!s.startsWith(variantPrefix)) return false;
+        const m = s.match(VARIANT_RE);
+        return !!m && m[1] === e.slug;
+      });
+      return { exam: e, siblings };
+    })
+    .filter((row) => row.siblings.length > 0)
+    .map((row) => ({
+      vendor: row.exam.vendor.slug,
+      slug: row.exam.slug,
+      code: row.exam.code,
+      title: row.exam.title,
+      publishedQuestions: pubBy.get(row.exam.id) || 0,
+      siblingsInBundle: row.siblings.sort()
+    }))
+    .sort((a, b) => a.vendor.localeCompare(b.vendor) || a.slug.localeCompare(b.slug));
+
   // Drill-down on the unpublished, non-archived exams (~19 rows on prod
   // at time of writing). The dead-bundle symptom is that these are linked
   // from published bundles. The diagnostic question: do they have content
@@ -156,6 +208,7 @@ export async function GET() {
     examsMissingTeaser: noTeaser,
     examsWithLowTeaser: lowTeaser,
     unpublishedExamDetails,
+    lonelyBaseShells,
     emptyBundles,
     deadBundles
   });
