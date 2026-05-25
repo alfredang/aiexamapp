@@ -308,8 +308,8 @@ const P1: Q[] = [
     references: [REF_CONN_TESTS, REF_ROUTES]
   },
   {
-    domain: DESIGN, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: VPC Network Peering is transitive, so if VPC-A peers with VPC-B and VPC-B peers with VPC-C, then VPC-A can reach VPC-C automatically.',
+    domain: DESIGN, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'VPC Network Peering is transitive, so if VPC-A peers with VPC-B and VPC-B peers with VPC-C, then VPC-A can reach VPC-C automatically.',
     options: opts4('True', 'False', 'Only with custom routes exported', 'Only in the same region'),
     correct: ['b'],
     explanation: 'VPC Network Peering is non-transitive. VPC-A cannot reach VPC-C through VPC-B; each pair must peer directly or use Network Connectivity Center for transitive connectivity.',
@@ -487,8 +487,8 @@ const P1: Q[] = [
     references: [REF_IPV6]
   },
   {
-    domain: VPC, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: A VPC network in Google Cloud is a global resource, while its subnets are regional resources.',
+    domain: VPC, difficulty: 2, type: QType.SINGLE,
+    stem: 'A VPC network in Google Cloud is a global resource, while its subnets are regional resources.',
     options: opts4('True', 'False', 'Both are zonal', 'Both are regional'),
     correct: ['a'],
     explanation: 'A VPC network is a global resource that spans all regions; subnets are regional resources, each tied to one region and spanning its zones.',
@@ -679,8 +679,8 @@ const P1: Q[] = [
     references: [REF_HTTPS_LB, REF_BACKEND]
   },
   {
-    domain: SERVICES, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Cloud CDN can be used with an internal passthrough Network Load Balancer to cache content for internal clients.',
+    domain: SERVICES, difficulty: 2, type: QType.SINGLE,
+    stem: 'Cloud CDN can be used with an internal passthrough Network Load Balancer to cache content for internal clients.',
     options: opts4('True', 'False', 'Only with Premium Tier', 'Only for static buckets'),
     correct: ['b'],
     explanation: 'Cloud CDN is only available with the external Application Load Balancer (and certain external proxy configurations). It cannot be attached to an internal passthrough Network Load Balancer.',
@@ -925,8 +925,8 @@ const P1: Q[] = [
     references: [REF_NET_TIERS, REF_CDN]
   },
   {
-    domain: OPS, difficulty: 3, type: QType.TRUE_FALSE,
-    stem: 'True or False: VPC Flow Logs capture the full packet payload of every connection in the subnet.',
+    domain: OPS, difficulty: 3, type: QType.SINGLE,
+    stem: 'VPC Flow Logs capture the full packet payload of every connection in the subnet.',
     options: opts4('True', 'False', 'Only for TCP', 'Only when Packet Mirroring is off'),
     correct: ['b'],
     explanation: 'VPC Flow Logs capture sampled connection metadata (5-tuple, bytes, packets, timing), not full payloads. Full payload capture requires Packet Mirroring.',
@@ -1146,8 +1146,8 @@ const P2: Q[] = [
     references: [REF_FW_POLICY, REF_CONN_TESTS]
   },
   {
-    domain: DESIGN, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: In Shared VPC, the host project owns the network resources and service projects deploy resources into shared subnets.',
+    domain: DESIGN, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'In Shared VPC, the host project owns the network resources and service projects deploy resources into shared subnets.',
     options: opts4('True', 'False', 'Only in auto mode', 'Only with peering'),
     correct: ['a'],
     explanation: 'That is exactly the Shared VPC model: a host project owns subnets/routes/firewalls and attached service projects deploy resources into the shared subnets.',
@@ -1325,8 +1325,8 @@ const P2: Q[] = [
     references: [REF_IPV6]
   },
   {
-    domain: VPC, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: Every VPC network includes an implied rule that allows all egress and an implied rule that denies all ingress.',
+    domain: VPC, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Every VPC network includes an implied rule that allows all egress and an implied rule that denies all ingress.',
     options: opts4('True', 'False', 'Only egress is implied', 'Only ingress is implied'),
     correct: ['a'],
     explanation: 'Every VPC has two implied rules: allow all egress and deny all ingress. You add higher-priority rules to override these defaults.',
@@ -1517,8 +1517,8 @@ const P2: Q[] = [
     references: [REF_BACKEND, REF_HEALTHCHECK]
   },
   {
-    domain: SERVICES, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Google Cloud Armor security policies can be attached to internal passthrough Network Load Balancers.',
+    domain: SERVICES, difficulty: 2, type: QType.SINGLE,
+    stem: 'Google Cloud Armor security policies can be attached to internal passthrough Network Load Balancers.',
     options: opts4('True', 'False', 'Only in Premium Tier', 'Only with Cloud CDN'),
     correct: ['b'],
     explanation: 'Cloud Armor protects backend services of external Application Load Balancers (and certain proxy load balancers). It is not applicable to internal passthrough (L4) load balancers.',
@@ -1763,8 +1763,8 @@ const P2: Q[] = [
     references: [REF_NET_TIERS]
   },
   {
-    domain: OPS, difficulty: 3, type: QType.TRUE_FALSE,
-    stem: 'True or False: Firewall Rules Logging records every connection in the VPC regardless of whether logging is enabled on individual rules.',
+    domain: OPS, difficulty: 3, type: QType.SINGLE,
+    stem: 'Firewall Rules Logging records every connection in the VPC regardless of whether logging is enabled on individual rules.',
     options: opts4('True', 'False', 'Only for deny rules', 'Only for egress'),
     correct: ['b'],
     explanation: 'Firewall Rules Logging is configured per rule; only connections matching rules that have logging enabled are recorded — it is not global by default.',
@@ -1984,8 +1984,8 @@ const P3: Q[] = [
     references: [REF_CONN_TESTS, REF_ROUTES]
   },
   {
-    domain: DESIGN, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: A VPC network spans all Google Cloud regions globally, while each subnet is scoped to a single region.',
+    domain: DESIGN, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'A VPC network spans all Google Cloud regions globally, while each subnet is scoped to a single region.',
     options: opts4('True', 'False', 'Both are global', 'Both are zonal'),
     correct: ['a'],
     explanation: 'A VPC is a global resource spanning all regions; each subnet is a regional resource bound to one region (and its zones).',
@@ -2163,8 +2163,8 @@ const P3: Q[] = [
     references: [REF_IPV6]
   },
   {
-    domain: VPC, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: VPC firewall rules are stateful, so return traffic for an allowed connection is automatically permitted.',
+    domain: VPC, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'VPC firewall rules are stateful, so return traffic for an allowed connection is automatically permitted.',
     options: opts4('True', 'False', 'Only for egress', 'Only for TCP'),
     correct: ['a'],
     explanation: 'VPC firewall rules are stateful: if a connection is allowed, the return traffic is automatically permitted without a separate rule.',
@@ -2355,8 +2355,8 @@ const P3: Q[] = [
     references: [REF_BACKEND, REF_HEALTHCHECK]
   },
   {
-    domain: SERVICES, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Cloud CDN can be enabled on a backend service of a global external Application Load Balancer.',
+    domain: SERVICES, difficulty: 2, type: QType.SINGLE,
+    stem: 'Cloud CDN can be enabled on a backend service of a global external Application Load Balancer.',
     options: opts4('True', 'False', 'Only with HA VPN', 'Only for internal LBs'),
     correct: ['a'],
     explanation: 'Cloud CDN is enabled per backend service of an external Application Load Balancer to cache content at Google\'s edge.',
@@ -2601,8 +2601,8 @@ const P3: Q[] = [
     references: [REF_NET_TIERS, REF_CDN]
   },
   {
-    domain: OPS, difficulty: 3, type: QType.TRUE_FALSE,
-    stem: 'True or False: Packet Mirroring captures full packet contents, whereas VPC Flow Logs capture only sampled metadata.',
+    domain: OPS, difficulty: 3, type: QType.SINGLE,
+    stem: 'Packet Mirroring captures full packet contents, whereas VPC Flow Logs capture only sampled metadata.',
     options: opts4('True', 'False', 'Both capture full packets', 'Both capture only metadata'),
     correct: ['a'],
     explanation: 'Packet Mirroring clones full packets (headers and payloads) to a collector, while VPC Flow Logs record only sampled connection metadata.',

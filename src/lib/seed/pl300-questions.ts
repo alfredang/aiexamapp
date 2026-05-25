@@ -375,7 +375,7 @@ const P1: Q[] = [
     references: [REF_PRIVACY, REF_CREDENTIALS]
   },
   {
-    domain: PREPARE, difficulty: 1, type: QType.TRUE_FALSE,
+    domain: PREPARE, difficulty: 1, type: QType.SINGLE,
     stem: 'TRUE or FALSE: In Power BI Desktop, connecting Live to a shared semantic model published in the Power BI service requires you to author Power Query transformations against that semantic model before building visuals.',
     options: opts4('TRUE', 'FALSE', '', ''),
     correct: ['b'],
@@ -1239,7 +1239,7 @@ const P2: Q[] = [
     references: [REF_PQ_FOLDING, REF_PQ_UI]
   },
   {
-    domain: PREPARE, difficulty: 1, type: QType.TRUE_FALSE,
+    domain: PREPARE, difficulty: 1, type: QType.SINGLE,
     stem: 'TRUE or FALSE: A semantic model in DirectQuery storage mode does not require scheduled refresh because every visual queries the source at render time.',
     options: opts4('TRUE', 'FALSE', '', ''),
     correct: ['a'],

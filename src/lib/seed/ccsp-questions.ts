@@ -153,8 +153,8 @@ const P1: Q[] = [
     references: [REF_CSA_GUIDANCE, REF_CCSP_OUTLINE]
   },
   {
-    domain: CONCEPTS, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: In a SaaS model the customer is generally responsible for patching the underlying application code provided by the vendor.',
+    domain: CONCEPTS, difficulty: 2, type: QType.SINGLE,
+    stem: 'In a SaaS model the customer is generally responsible for patching the underlying application code provided by the vendor.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['b'],
     explanation: 'False. In SaaS the provider manages and patches the application, infrastructure, and platform. The customer\'s responsibility is largely limited to data, access management, and configuration.',
@@ -306,8 +306,8 @@ const P1: Q[] = [
     references: [REF_CCSP_OUTLINE]
   },
   {
-    domain: DATA, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: Encrypting data at rest alone is sufficient to protect data while it is being actively processed in memory by an application.',
+    domain: DATA, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Encrypting data at rest alone is sufficient to protect data while it is being actively processed in memory by an application.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['b'],
     explanation: 'False. At-rest encryption does not protect data in use. Protecting data being processed requires additional measures such as confidential computing/trusted execution environments and strong access controls.',
@@ -467,8 +467,8 @@ const P1: Q[] = [
     references: [REF_CSA_GUIDANCE, REF_NIST_800207]
   },
   {
-    domain: INFRA, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: A host-based intrusion detection system (HIDS) on cloud workloads can complement network controls by detecting malicious activity inside the guest OS.',
+    domain: INFRA, difficulty: 2, type: QType.SINGLE,
+    stem: 'A host-based intrusion detection system (HIDS) on cloud workloads can complement network controls by detecting malicious activity inside the guest OS.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'True. HIDS monitors processes, files, and logs inside the guest OS, detecting threats that network controls may miss. Defense in depth combines host and network controls.',
@@ -589,8 +589,8 @@ const P1: Q[] = [
     references: [REF_CSA_GUIDANCE]
   },
   {
-    domain: APP, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: DAST can find runtime and configuration issues that SAST may miss because it tests the running application.',
+    domain: APP, difficulty: 2, type: QType.SINGLE,
+    stem: 'DAST can find runtime and configuration issues that SAST may miss because it tests the running application.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'True. DAST exercises a running application and can surface runtime, environment, and configuration flaws not visible in static code. SAST and DAST are complementary.',
@@ -724,8 +724,8 @@ const P1: Q[] = [
     references: [REF_CCSP_OUTLINE, REF_NIST_800218]
   },
   {
-    domain: OPS, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Time synchronization (e.g., via NTP) across cloud systems is important for correlating events during an investigation.',
+    domain: OPS, difficulty: 2, type: QType.SINGLE,
+    stem: 'Time synchronization (e.g., via NTP) across cloud systems is important for correlating events during an investigation.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'True. Accurate, synchronized timestamps are essential to correlate logs across systems and reconstruct an incident timeline.',
@@ -831,8 +831,8 @@ const P1: Q[] = [
     references: [REF_CCSP_OUTLINE]
   },
   {
-    domain: LEGAL, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Under most data-protection regimes and the shared responsibility model, using a cloud processor transfers the customer\'s accountability for personal data to the provider.',
+    domain: LEGAL, difficulty: 2, type: QType.SINGLE,
+    stem: 'Under most data-protection regimes and the shared responsibility model, using a cloud processor transfers the customer\'s accountability for personal data to the provider.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['b'],
     explanation: 'False. The controller (customer) remains accountable for personal data even when a processor (provider) handles it. Responsibility for some controls is shared, but legal accountability is not transferred.',
@@ -928,8 +928,8 @@ const P2: Q[] = [
     references: [REF_NIST_800145]
   },
   {
-    domain: CONCEPTS, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Rapid elasticity means resources can be provisioned and released to scale rapidly with demand, sometimes appearing unlimited to the consumer.',
+    domain: CONCEPTS, difficulty: 2, type: QType.SINGLE,
+    stem: 'Rapid elasticity means resources can be provisioned and released to scale rapidly with demand, sometimes appearing unlimited to the consumer.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'True. NIST defines rapid elasticity as the ability to provision and release capabilities rapidly, often appearing unlimited and appropriable in any quantity at any time.',
@@ -1058,8 +1058,8 @@ const P2: Q[] = [
     references: [REF_NIST_800122, REF_CCSP_OUTLINE]
   },
   {
-    domain: DATA, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Crypto-shredding is effective only if the data was encrypted before the keys are destroyed.',
+    domain: DATA, difficulty: 2, type: QType.SINGLE,
+    stem: 'Crypto-shredding is effective only if the data was encrypted before the keys are destroyed.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'True. Crypto-shredding relies on the data already being encrypted; destroying the keys makes the ciphertext unrecoverable. Unencrypted data is not protected by destroying keys.',
@@ -1214,8 +1214,8 @@ const P2: Q[] = [
     references: [REF_CSA_CCM, REF_CCSP_OUTLINE]
   },
   {
-    domain: INFRA, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Tested, documented failover procedures are necessary because untested BCDR plans may fail when actually invoked.',
+    domain: INFRA, difficulty: 2, type: QType.SINGLE,
+    stem: 'Tested, documented failover procedures are necessary because untested BCDR plans may fail when actually invoked.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'True. BCDR plans must be exercised; untested procedures often fail under real conditions due to drift, missing dependencies, or unfamiliar steps.',
@@ -1344,8 +1344,8 @@ const P2: Q[] = [
     references: [REF_CSA_GUIDANCE]
   },
   {
-    domain: APP, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Validating and sanitizing all untrusted input is a foundational defense for cloud web applications.',
+    domain: APP, difficulty: 2, type: QType.SINGLE,
+    stem: 'Validating and sanitizing all untrusted input is a foundational defense for cloud web applications.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'True. Treating all external input as untrusted and validating/sanitizing it is foundational to preventing injection, XSS, and related attacks.',
@@ -1484,8 +1484,8 @@ const P2: Q[] = [
     references: [REF_CSA_CCM, REF_CSA_GUIDANCE]
   },
   {
-    domain: OPS, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Vulnerability management in the cloud should include both provider-managed components (within their scope) and customer-managed components.',
+    domain: OPS, difficulty: 2, type: QType.SINGLE,
+    stem: 'Vulnerability management in the cloud should include both provider-managed components (within their scope) and customer-managed components.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'True. Under shared responsibility, the provider patches what it manages and the customer must patch its OS/apps/config; both must be covered for effective vulnerability management.',
@@ -1596,8 +1596,8 @@ const P2: Q[] = [
     references: [REF_CCSP_OUTLINE, REF_CSA_CCM]
   },
   {
-    domain: LEGAL, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: A right-to-audit clause or access to third-party assurance reports helps a customer verify provider compliance.',
+    domain: LEGAL, difficulty: 2, type: QType.SINGLE,
+    stem: 'A right-to-audit clause or access to third-party assurance reports helps a customer verify provider compliance.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'True. Right-to-audit or access to independent assurance (e.g., SOC 2, ISO 27001 certificates) lets customers gain assurance over provider controls without on-site audits in many cases.',
@@ -1698,8 +1698,8 @@ const P3: Q[] = [
     references: [REF_NIST_800145, REF_CSA_GUIDANCE]
   },
   {
-    domain: CONCEPTS, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Interoperability allows components/services from different providers to work together, supporting portability and reducing lock-in.',
+    domain: CONCEPTS, difficulty: 2, type: QType.SINGLE,
+    stem: 'Interoperability allows components/services from different providers to work together, supporting portability and reducing lock-in.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'True. Interoperability (often via open standards/APIs) lets components from different providers work together, supporting portability and mitigating lock-in.',
@@ -1833,8 +1833,8 @@ const P3: Q[] = [
     references: [REF_CCSP_OUTLINE, REF_NIST_800209]
   },
   {
-    domain: DATA, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Tokenization and encryption are identical because both make data unreadable.',
+    domain: DATA, difficulty: 2, type: QType.SINGLE,
+    stem: 'Tokenization and encryption are identical because both make data unreadable.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['b'],
     explanation: 'False. Encryption mathematically transforms data using keys; tokenization substitutes a surrogate value with the real value stored separately. They differ in mechanism, scope reduction, and reversibility model.',
@@ -1999,8 +1999,8 @@ const P3: Q[] = [
     references: [REF_CSA_GUIDANCE, REF_NIST_800218]
   },
   {
-    domain: INFRA, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Placing sensitive backend services on private subnets without public IPs reduces their internet-facing attack surface.',
+    domain: INFRA, difficulty: 2, type: QType.SINGLE,
+    stem: 'Placing sensitive backend services on private subnets without public IPs reduces their internet-facing attack surface.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'True. Private subnets without public IPs remove direct internet exposure, reducing attack surface; access is brokered via controlled paths (bastion, private endpoints, VPN).',
@@ -2139,8 +2139,8 @@ const P3: Q[] = [
     references: [REF_NIST_800218]
   },
   {
-    domain: APP, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Using short-lived, automatically rotated credentials for service-to-service calls reduces the impact of credential leakage.',
+    domain: APP, difficulty: 2, type: QType.SINGLE,
+    stem: 'Using short-lived, automatically rotated credentials for service-to-service calls reduces the impact of credential leakage.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'True. Short-lived, auto-rotated credentials limit the useful lifetime of a leaked secret, reducing the window an attacker can exploit it.',
@@ -2279,8 +2279,8 @@ const P3: Q[] = [
     references: [REF_NIST_80061, REF_NIST_80092]
   },
   {
-    domain: OPS, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Restore testing is unnecessary as long as backup jobs report success.',
+    domain: OPS, difficulty: 2, type: QType.SINGLE,
+    stem: 'Restore testing is unnecessary as long as backup jobs report success.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['b'],
     explanation: 'False. A successful backup job does not guarantee a usable restore; periodic restore/DR testing is required to validate recoverability and RTO.',
@@ -2396,8 +2396,8 @@ const P3: Q[] = [
     references: [REF_CSA_STAR, REF_CCSP_OUTLINE]
   },
   {
-    domain: LEGAL, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: e-Discovery obligations may require a cloud customer to preserve and produce relevant electronically stored information held by its provider.',
+    domain: LEGAL, difficulty: 2, type: QType.SINGLE,
+    stem: 'e-Discovery obligations may require a cloud customer to preserve and produce relevant electronically stored information held by its provider.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'True. Legal e-discovery can require preservation (legal hold) and production of relevant ESI even when it resides with a cloud provider; contracts should enable this.',

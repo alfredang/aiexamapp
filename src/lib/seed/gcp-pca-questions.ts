@@ -194,8 +194,8 @@ const P1: Q[] = [
     references: [REF_INTERCONNECT]
   },
   {
-    domain: DESIGN, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: A global external Application Load Balancer can route a single anycast IP to backends in multiple regions, automatically directing users to the closest healthy backend.',
+    domain: DESIGN, difficulty: 2, type: QType.SINGLE,
+    stem: 'A global external Application Load Balancer can route a single anycast IP to backends in multiple regions, automatically directing users to the closest healthy backend.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'The global external Application Load Balancer uses a single anycast IP and Google\'s global network to route each user to the nearest healthy backend region, providing low latency and cross-region failover.',
@@ -412,8 +412,8 @@ const P1: Q[] = [
     references: [REF_GKE, REF_SA]
   },
   {
-    domain: PROVISION, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: A regional managed instance group can automatically recreate a VM that fails its application health check, restoring the desired number of healthy instances.',
+    domain: PROVISION, difficulty: 2, type: QType.SINGLE,
+    stem: 'A regional managed instance group can automatically recreate a VM that fails its application health check, restoring the desired number of healthy instances.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'Managed instance groups support autohealing: when an instance fails its configured health check, the MIG recreates it to maintain the desired count of healthy instances.',
@@ -552,8 +552,8 @@ const P1: Q[] = [
     references: [REF_ARMOR]
   },
   {
-    domain: SECURITY, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Granting a group an IAM role at the folder level automatically applies that role to all projects and resources beneath that folder through policy inheritance.',
+    domain: SECURITY, difficulty: 2, type: QType.SINGLE,
+    stem: 'Granting a group an IAM role at the folder level automatically applies that role to all projects and resources beneath that folder through policy inheritance.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'IAM policies are inherited down the resource hierarchy, so a role granted at a folder applies to all projects and resources beneath it unless further restricted.',
@@ -705,8 +705,8 @@ const P1: Q[] = [
     references: [REF_BIGQUERY, REF_COST]
   },
   {
-    domain: ANALYZE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Right-sizing recommendations from Compute Engine can identify over-provisioned VMs whose machine type can be reduced to lower cost without harming performance.',
+    domain: ANALYZE, difficulty: 2, type: QType.SINGLE,
+    stem: 'Right-sizing recommendations from Compute Engine can identify over-provisioned VMs whose machine type can be reduced to lower cost without harming performance.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'Compute Engine machine-type (right-sizing) recommendations analyze utilization and suggest smaller machine types for over-provisioned VMs, lowering cost while preserving performance.',
@@ -806,8 +806,8 @@ const P1: Q[] = [
     references: [REF_ANTHOS]
   },
   {
-    domain: IMPL, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Running a parallel pilot of a migrated workload alongside the existing system before full cutover reduces the risk of an unrecoverable migration failure.',
+    domain: IMPL, difficulty: 2, type: QType.SINGLE,
+    stem: 'Running a parallel pilot of a migrated workload alongside the existing system before full cutover reduces the risk of an unrecoverable migration failure.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'A parallel pilot validates the migrated workload under real conditions while the original system remains available, providing a safe fallback and reducing cutover risk.',
@@ -907,8 +907,8 @@ const P1: Q[] = [
     references: [REF_SRE, REF_ARCH]
   },
   {
-    domain: RELIABILITY, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: A 99.9% monthly availability SLO permits roughly 43 minutes of downtime per 30-day month as its error budget.',
+    domain: RELIABILITY, difficulty: 2, type: QType.SINGLE,
+    stem: 'A 99.9% monthly availability SLO permits roughly 43 minutes of downtime per 30-day month as its error budget.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: '99.9% of a 30-day month (43,200 minutes) leaves about 0.1%, roughly 43 minutes, as the allowable downtime / error budget for the month.',
@@ -1024,8 +1024,8 @@ const P2: Q[] = [
     references: [REF_VPN]
   },
   {
-    domain: DESIGN, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Choosing a regional (rather than zonal) GKE cluster places the control plane and nodes across multiple zones, improving availability during a zonal outage.',
+    domain: DESIGN, difficulty: 2, type: QType.SINGLE,
+    stem: 'Choosing a regional (rather than zonal) GKE cluster places the control plane and nodes across multiple zones, improving availability during a zonal outage.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'A regional GKE cluster replicates the control plane and spreads nodes across multiple zones, so a single zonal failure does not take down the cluster control plane or all nodes.',
@@ -1216,8 +1216,8 @@ const P2: Q[] = [
     references: [REF_VPC]
   },
   {
-    domain: PROVISION, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Granting IAM roles to a Google group and managing membership in the group is preferable to granting roles to many individual users.',
+    domain: PROVISION, difficulty: 2, type: QType.SINGLE,
+    stem: 'Granting IAM roles to a Google group and managing membership in the group is preferable to granting roles to many individual users.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'Assigning roles to groups and managing access via group membership simplifies administration, reduces error, and is an IAM best practice compared to per-user bindings.',
@@ -1382,8 +1382,8 @@ const P2: Q[] = [
     references: [REF_ARMOR]
   },
   {
-    domain: SECURITY, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Using customer-managed encryption keys (CMEK) lets an organization disable or rotate the key, which can render the protected data unreadable until the key is restored.',
+    domain: SECURITY, difficulty: 2, type: QType.SINGLE,
+    stem: 'Using customer-managed encryption keys (CMEK) lets an organization disable or rotate the key, which can render the protected data unreadable until the key is restored.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'CMEK gives the customer control over the key lifecycle; disabling or destroying the key makes data encrypted with it inaccessible, which is part of the control (and risk) CMEK provides.',
@@ -1535,8 +1535,8 @@ const P2: Q[] = [
     references: [REF_BIGQUERY, REF_COST]
   },
   {
-    domain: ANALYZE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Sustained use discounts on Compute Engine are applied automatically when eligible predefined machine types run for a significant portion of the month.',
+    domain: ANALYZE, difficulty: 2, type: QType.SINGLE,
+    stem: 'Sustained use discounts on Compute Engine are applied automatically when eligible predefined machine types run for a significant portion of the month.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'Sustained use discounts are applied automatically (no commitment) for eligible predefined machine types that run for a large fraction of the billing month.',
@@ -1636,8 +1636,8 @@ const P2: Q[] = [
     references: [REF_DTS, REF_MIGRATE]
   },
   {
-    domain: IMPL, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Infrastructure as code with automated CI/CD makes a migrated environment easier to recreate consistently in case of failure than manually built infrastructure.',
+    domain: IMPL, difficulty: 2, type: QType.SINGLE,
+    stem: 'Infrastructure as code with automated CI/CD makes a migrated environment easier to recreate consistently in case of failure than manually built infrastructure.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'IaC plus automated CI/CD captures the environment declaratively, so it can be recreated consistently and quickly after a failure, unlike manually built, undocumented infrastructure.',
@@ -1737,8 +1737,8 @@ const P2: Q[] = [
     references: [REF_CLOUDSQL]
   },
   {
-    domain: RELIABILITY, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Blameless postmortems focus on systemic causes and improvements rather than punishing individuals, which encourages honest reporting and learning.',
+    domain: RELIABILITY, difficulty: 2, type: QType.SINGLE,
+    stem: 'Blameless postmortems focus on systemic causes and improvements rather than punishing individuals, which encourages honest reporting and learning.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'Blameless postmortems concentrate on systemic contributing factors and concrete improvements instead of individual blame, which fosters transparency and continuous reliability improvement.',
@@ -1854,8 +1854,8 @@ const P3: Q[] = [
     references: [REF_INTERCONNECT, REF_VPC]
   },
   {
-    domain: DESIGN, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: BigQuery is a serverless data warehouse, so the architect does not provision or manage compute clusters to run SQL analytics.',
+    domain: DESIGN, difficulty: 2, type: QType.SINGLE,
+    stem: 'BigQuery is a serverless data warehouse, so the architect does not provision or manage compute clusters to run SQL analytics.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'BigQuery is serverless: Google manages the underlying compute and storage, and the architect simply runs SQL without provisioning or managing clusters.',
@@ -2046,8 +2046,8 @@ const P3: Q[] = [
     references: [REF_MIG]
   },
   {
-    domain: PROVISION, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Workload Identity Federation lets external workloads (e.g., another cloud or CI system) impersonate a Google service account using short-lived tokens without exporting a service account key.',
+    domain: PROVISION, difficulty: 2, type: QType.SINGLE,
+    stem: 'Workload Identity Federation lets external workloads (e.g., another cloud or CI system) impersonate a Google service account using short-lived tokens without exporting a service account key.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'Workload Identity Federation exchanges an external identity provider token for short-lived Google credentials, removing the need to create and export long-lived service account keys.',
@@ -2212,8 +2212,8 @@ const P3: Q[] = [
     references: [REF_ARMOR]
   },
   {
-    domain: SECURITY, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Organization policy constraints are evaluated when resources are created or modified, so they can prevent non-compliant configurations rather than only detecting them afterward.',
+    domain: SECURITY, difficulty: 2, type: QType.SINGLE,
+    stem: 'Organization policy constraints are evaluated when resources are created or modified, so they can prevent non-compliant configurations rather than only detecting them afterward.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'Organization Policy is a preventive control: constraints are enforced at resource create/modify time, blocking non-compliant configurations rather than merely reporting them later.',
@@ -2365,8 +2365,8 @@ const P3: Q[] = [
     references: [REF_BIGQUERY, REF_COST]
   },
   {
-    domain: ANALYZE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Moving infrequently accessed data from Standard to Coldline or Archive storage classes can significantly reduce storage cost while keeping the data retrievable.',
+    domain: ANALYZE, difficulty: 2, type: QType.SINGLE,
+    stem: 'Moving infrequently accessed data from Standard to Coldline or Archive storage classes can significantly reduce storage cost while keeping the data retrievable.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'Transitioning rarely accessed data to Coldline/Archive lowers at-rest storage cost substantially while the data remains retrievable (subject to retrieval and minimum-duration costs).',
@@ -2466,8 +2466,8 @@ const P3: Q[] = [
     references: [REF_CICD, REF_MIGRATE]
   },
   {
-    domain: IMPL, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Defining the target environment as infrastructure as code before migration makes the cutover more repeatable and easier to validate across environments.',
+    domain: IMPL, difficulty: 2, type: QType.SINGLE,
+    stem: 'Defining the target environment as infrastructure as code before migration makes the cutover more repeatable and easier to validate across environments.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'Capturing the target environment as IaC makes provisioning repeatable and consistent across dev/staging/prod, which de-risks and speeds the migration cutover.',
@@ -2567,8 +2567,8 @@ const P3: Q[] = [
     references: [REF_SRE, REF_ARCH]
   },
   {
-    domain: RELIABILITY, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Regularly testing backup restores (not just taking backups) is necessary to be confident a disaster-recovery plan will actually work.',
+    domain: RELIABILITY, difficulty: 2, type: QType.SINGLE,
+    stem: 'Regularly testing backup restores (not just taking backups) is necessary to be confident a disaster-recovery plan will actually work.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'Backups that are never test-restored may be unusable when needed; periodic restore testing validates that the DR plan and backups actually work.',

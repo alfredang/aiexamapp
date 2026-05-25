@@ -64,6 +64,12 @@ const opts4 = (a: string, b: string, c: string, d: string): Opt[] => [
   { id: 'a', text: a }, { id: 'b', text: b }, { id: 'c', text: c }, { id: 'd', text: d }
 ];
 
+// Helper for genuine TRUE_FALSE questions. Five RHCSA records were
+// originally authored as binary True/False but used `opts4('True',
+// 'False', '', '')` — which would render two empty buttons at runtime.
+// Switching them to `tf()` keeps them as proper TRUE_FALSE questions.
+const tf = (): Opt[] => [{ id: 'a', text: 'True' }, { id: 'b', text: 'False' }];
+
 // ───────────────────── Practice Exam 1 ─────────────────────
 const P1: Q[] = [
   // ── Understand and Use Essential Tools (3) ──
@@ -344,7 +350,7 @@ const P1: Q[] = [
   {
     domain: TOOLS, difficulty: 1, type: QType.TRUE_FALSE,
     stem: 'Running `cd` with no arguments changes the working directory to the current user\'s home directory.',
-    options: opts4('True', 'False', '', ''),
+    options: tf(),
     correct: ['a'],
     explanation: '`cd` with no argument (equivalently `cd ~`) returns you to `$HOME`. The shell treats the bare `cd` as a request to go to the home directory, so the statement is true.',
     references: [REF_SHELL]
@@ -908,9 +914,9 @@ const P1: Q[] = [
     references: [REF_SELINUX]
   },
   {
-    domain: SECURITY, difficulty: 2, type: QType.TRUE_FALSE,
+    domain: SECURITY, difficulty: 2, type: QType.SINGLE,
     stem: 'The command `ls -Z` displays the SELinux security context of files.',
-    options: opts4('True', 'False', '', ''),
+    options: tf(),
     correct: ['a'],
     explanation: '`ls -Z` adds the SELinux context (user:role:type:level) to the listing, while `ls -l` shows only the traditional DAC owner/group/mode. The statement is therefore true.',
     references: [REF_SELINUX]
@@ -1210,7 +1216,7 @@ const P2: Q[] = [
   {
     domain: TOOLS, difficulty: 1, type: QType.TRUE_FALSE,
     stem: 'The `pwd` command prints the absolute path of the current working directory.',
-    options: opts4('True', 'False', '', ''),
+    options: tf(),
     correct: ['a'],
     explanation: '`pwd` (print working directory) outputs the full absolute path of the directory you are currently in, so the statement is true.',
     references: [REF_SHELL]
@@ -1577,7 +1583,7 @@ const P2: Q[] = [
   {
     domain: DEPLOY, difficulty: 2, type: QType.TRUE_FALSE,
     stem: 'On RHEL 9, `dnf info httpd` displays the version, size, and summary of the httpd package.',
-    options: opts4('True', 'False', '', ''),
+    options: tf(),
     correct: ['a'],
     explanation: '`dnf info httpd` prints package metadata such as name, version, size, and summary (equivalent to `rpm -qi` for an installed package), so the statement is true.',
     references: [REF_DNF]
@@ -2076,7 +2082,7 @@ const P3: Q[] = [
   {
     domain: TOOLS, difficulty: 1, type: QType.TRUE_FALSE,
     stem: 'The command `mkdir -p /srv/app/conf` creates any missing parent directories and does not error if the path already exists.',
-    options: opts4('True', 'False', '', ''),
+    options: tf(),
     correct: ['a'],
     explanation: '`mkdir -p` creates intermediate parent directories as needed and exits successfully even when the directory already exists, so the statement is true.',
     references: [REF_SHELL]
@@ -2616,7 +2622,7 @@ const P3: Q[] = [
   {
     domain: SECURITY, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
     stem: 'The persistent boot-time SELinux mode is configured via the `SELINUX=` directive in `/etc/selinux/config`.',
-    options: opts4('True', 'False', '', ''),
+    options: tf(),
     correct: ['a'],
     explanation: 'The `SELINUX=` line in `/etc/selinux/config` (often symlinked from `/etc/sysconfig/selinux`) sets the mode applied at every boot, whereas `setenforce` only changes it at runtime. The statement is true.',
     references: [REF_SELINUX]

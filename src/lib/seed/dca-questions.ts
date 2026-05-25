@@ -460,8 +460,8 @@ const P1: Q[] = [
     references: [REF_SWARM_SVC]
   },
   {
-    domain: ORCH, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: Swarm mode is a separate product you must install in addition to the Docker Engine.',
+    domain: ORCH, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Swarm mode is a separate product you must install in addition to the Docker Engine.',
     options: opts4('True', 'False', 'Only on Windows', 'Only with Docker Desktop'),
     correct: ['b'],
     explanation: 'False. Swarm mode is built into the Docker Engine; you simply run `docker swarm init` to enable it — no separate package or installation is required.',
@@ -587,8 +587,8 @@ const P1: Q[] = [
     references: [REF_DOCKERFILE, REF_SWARM_SVC]
   },
   {
-    domain: IMAGE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Running `docker image prune` (without -a) removes all unused images, including tagged ones not used by any container.',
+    domain: IMAGE, difficulty: 2, type: QType.SINGLE,
+    stem: 'Running `docker image prune` (without -a) removes all unused images, including tagged ones not used by any container.',
     options: opts4('True', 'False', 'Only with --volumes', 'Only in swarm mode'),
     correct: ['b'],
     explanation: 'False. `docker image prune` removes only dangling images (untagged, no repository). You must add `-a`/`--all` to also remove unused but tagged images.',
@@ -835,8 +835,8 @@ const P1: Q[] = [
     references: [REF_SECURITY, REF_CAPS]
   },
   {
-    domain: SEC, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: By default, the root user inside a container (without userns-remap) is the same root (UID 0) as on the host.',
+    domain: SEC, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'By default, the root user inside a container (without userns-remap) is the same root (UID 0) as on the host.',
     options: opts4('True', 'False', 'Only on Windows', 'Only with --privileged'),
     correct: ['a'],
     explanation: 'True. Without user-namespace remapping, container UID 0 maps to host UID 0; that is exactly why running as non-root and/or enabling userns-remap is recommended to limit breakout impact.',
@@ -1304,8 +1304,8 @@ const P2: Q[] = [
     references: [REF_SWARM_SVC]
   },
   {
-    domain: ORCH, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: You can run `docker service create` from a swarm worker node.',
+    domain: ORCH, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'You can run `docker service create` from a swarm worker node.',
     options: opts4('True', 'False', 'Only with --force', 'Only for global services'),
     correct: ['b'],
     explanation: 'False. Orchestration commands such as `docker service create/scale/update` must be issued against a manager node; workers only execute tasks and cannot accept these commands.',
@@ -1444,8 +1444,8 @@ const P2: Q[] = [
     references: [REF_DOCKERFILE]
   },
   {
-    domain: IMAGE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: A Dockerfile may contain multiple FROM instructions, each starting a new build stage.',
+    domain: IMAGE, difficulty: 2, type: QType.SINGLE,
+    stem: 'A Dockerfile may contain multiple FROM instructions, each starting a new build stage.',
     options: opts4('True', 'False', 'Only with buildx', 'Only one FROM is ever allowed'),
     correct: ['a'],
     explanation: 'True. Multiple `FROM` lines define multi-stage builds; each `FROM` begins a new stage that can be named with `AS <name>` and selectively copied from.',
@@ -1692,8 +1692,8 @@ const P2: Q[] = [
     references: [REF_SECRETS, REF_SWARM_SVC]
   },
   {
-    domain: SEC, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: Anyone with access to the Docker daemon (Unix socket or unauthenticated TCP) can effectively obtain root on the host.',
+    domain: SEC, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Anyone with access to the Docker daemon (Unix socket or unauthenticated TCP) can effectively obtain root on the host.',
     options: opts4('True', 'False', 'Only on Windows', 'Only with --privileged'),
     correct: ['a'],
     explanation: 'True. The Docker API is root-equivalent: a caller can run privileged containers and bind-mount the host filesystem, so daemon access must be tightly controlled (TLS, socket permissions).',
@@ -1767,8 +1767,8 @@ const P2: Q[] = [
     references: [REF_VOLUMES, REF_BINDMOUNT]
   },
   {
-    domain: STORAGE, difficulty: 3, type: QType.TRUE_FALSE,
-    stem: 'True or False: A bind mount can shadow (hide) files that exist at the same path inside the image.',
+    domain: STORAGE, difficulty: 3, type: QType.SINGLE,
+    stem: 'A bind mount can shadow (hide) files that exist at the same path inside the image.',
     options: opts4('True', 'False', 'Only for named volumes', 'Only in swarm mode'),
     correct: ['a'],
     explanation: 'True. A bind mount overlays the host path onto the target, hiding any image content previously at that path; unlike an empty named volume, a bind mount is never pre-populated from the image.',
@@ -1955,8 +1955,8 @@ const P3: Q[] = [
 
   // ── Networking (3) ──
   {
-    domain: NET, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: Containers attached to the default (legacy) bridge network get automatic DNS-based name resolution between each other just like on user-defined bridge networks.',
+    domain: NET, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Containers attached to the default (legacy) bridge network get automatic DNS-based name resolution between each other just like on user-defined bridge networks.',
     options: opts4('True', 'False', 'Only with --link', 'Only in swarm mode'),
     correct: ['b'],
     explanation: 'False. The default `bridge` network does NOT provide automatic container name resolution; only user-defined networks include the embedded DNS server. The legacy `--link` flag was the old workaround on the default bridge.',
@@ -2151,8 +2151,8 @@ const P3: Q[] = [
     references: [REF_SWARM_SVC]
   },
   {
-    domain: ORCH, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: In a swarm, manager nodes can also run service tasks (act as workers) by default.',
+    domain: ORCH, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'In a swarm, manager nodes can also run service tasks (act as workers) by default.',
     options: opts4('True', 'False', 'Only if drained', 'Only single-node swarms'),
     correct: ['a'],
     explanation: 'True. By default managers also schedule and run tasks; you can set a manager to `Drain` availability if you want it to handle orchestration only and not run workloads.',
@@ -2291,8 +2291,8 @@ const P3: Q[] = [
     references: [REF_LAYERS, REF_BUILD]
   },
   {
-    domain: IMAGE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: `docker commit` creates a new image from the current state of a running or stopped container.',
+    domain: IMAGE, difficulty: 2, type: QType.SINGLE,
+    stem: '`docker commit` creates a new image from the current state of a running or stopped container.',
     options: opts4('True', 'False', 'Only for paused containers', 'Only in swarm mode'),
     correct: ['a'],
     explanation: 'True. `docker commit <container> <image>` snapshots a container\'s filesystem into a new image, though building from a Dockerfile is preferred for reproducibility.',
@@ -2539,8 +2539,8 @@ const P3: Q[] = [
     references: [REF_BINDMOUNT, REF_SECURITY]
   },
   {
-    domain: SEC, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: Running a container with --privileged is recommended as a default for convenience.',
+    domain: SEC, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Running a container with --privileged is recommended as a default for convenience.',
     options: opts4('True', 'False', 'Only for databases', 'Only on managers'),
     correct: ['b'],
     explanation: 'False. `--privileged` disables most isolation (all capabilities, device access, relaxed seccomp/AppArmor) and should be avoided unless a specific workload truly requires it.',
@@ -2614,8 +2614,8 @@ const P3: Q[] = [
     references: [REF_VOLUMES, REF_BINDMOUNT]
   },
   {
-    domain: STORAGE, difficulty: 3, type: QType.TRUE_FALSE,
-    stem: 'True or False: Anonymous volumes (created when no name is given, e.g. -v /data) can be removed by docker volume prune once no container references them.',
+    domain: STORAGE, difficulty: 3, type: QType.SINGLE,
+    stem: 'Anonymous volumes (created when no name is given, e.g. -v /data) can be removed by docker volume prune once no container references them.',
     options: opts4('True', 'False', 'Only named volumes can be pruned', 'Volumes can never be pruned'),
     correct: ['a'],
     explanation: 'True. Anonymous (and unused named) volumes not referenced by any container are removed by `docker volume prune`; this is why important data should use clearly named volumes and be backed up.',

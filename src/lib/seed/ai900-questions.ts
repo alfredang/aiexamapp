@@ -248,8 +248,8 @@ const P1: Q[] = [
     references: [REF_RAI, REF_STUDY]
   },
   {
-    domain: AIW, difficulty: 3, type: QType.TRUE_FALSE,
-    stem: 'True or False: A workload that uses an Azure AI service to extract text from a scanned PDF and another that auto-summarizes a meeting transcript are both examples of AI workloads recognized in the AI-900 skills outline.',
+    domain: AIW, difficulty: 3, type: QType.SINGLE,
+    stem: 'A workload that uses an Azure AI service to extract text from a scanned PDF and another that auto-summarizes a meeting transcript are both examples of AI workloads recognized in the AI-900 skills outline.',
     options: opts4('True', 'False', 'Only the OCR example is recognized', 'Only the summarization example is recognized'),
     correct: ['a'],
     explanation: 'True. Document processing (OCR/intelligent document processing) and NLP (summarization) are both AI workload categories in the AI-900 study guide.',
@@ -559,8 +559,8 @@ const P1: Q[] = [
     references: [REF_FACE, REF_RAI]
   },
   {
-    domain: CV, difficulty: 3, type: QType.TRUE_FALSE,
-    stem: 'True or False: The Azure AI Vision Read API (OCR) can extract both printed and handwritten text from images.',
+    domain: CV, difficulty: 3, type: QType.SINGLE,
+    stem: 'The Azure AI Vision Read API (OCR) can extract both printed and handwritten text from images.',
     options: opts4('True', 'False', 'Only printed text', 'Only handwritten text'),
     correct: ['a'],
     explanation: 'True. The Read API uses deep-learning models to extract printed and handwritten text from photos and documents.',
@@ -935,8 +935,8 @@ const P1: Q[] = [
     references: [REF_AOAI, REF_AOAI_MODELS]
   },
   {
-    domain: GENAI, difficulty: 3, type: QType.TRUE_FALSE,
-    stem: 'True or False: Azure OpenAI gives the SAME GPT-family models as the public OpenAI API but adds Azure-grade security, networking, regional deployment, and content safety integration.',
+    domain: GENAI, difficulty: 3, type: QType.SINGLE,
+    stem: 'Azure OpenAI gives the SAME GPT-family models as the public OpenAI API but adds Azure-grade security, networking, regional deployment, and content safety integration.',
     options: opts4('True', 'False', 'Only true for embeddings', 'Only true for image models'),
     correct: ['a'],
     explanation: 'True. Azure OpenAI provides Microsoft-managed access to the OpenAI models with Azure security, private networking, regional deployments, and integrated content filters.',
@@ -1091,8 +1091,8 @@ const P2: Q[] = [
     references: [REF_RAI_DASH, REF_FAIRNESS]
   },
   {
-    domain: AIW, difficulty: 3, type: QType.TRUE_FALSE,
-    stem: 'True or False: A Responsible AI scorecard exported from Azure Machine Learning can be shared with non-technical stakeholders to communicate model fairness, error analysis, and explanations.',
+    domain: AIW, difficulty: 3, type: QType.SINGLE,
+    stem: 'A Responsible AI scorecard exported from Azure Machine Learning can be shared with non-technical stakeholders to communicate model fairness, error analysis, and explanations.',
     options: opts4('True', 'False', 'Only available to administrators', 'Only available in preview regions'),
     correct: ['a'],
     explanation: 'True. The Responsible AI scorecard is a configurable PDF report intended to communicate model insights to both technical and non-technical stakeholders.',
@@ -1402,8 +1402,8 @@ const P2: Q[] = [
     references: [REF_OCR, REF_DOC_INTEL]
   },
   {
-    domain: CV, difficulty: 3, type: QType.TRUE_FALSE,
-    stem: 'True or False: Liveness detection in Azure AI Face is intended to confirm that the face presented to the camera belongs to a real, present person and not a photo or mask.',
+    domain: CV, difficulty: 3, type: QType.SINGLE,
+    stem: 'Liveness detection in Azure AI Face is intended to confirm that the face presented to the camera belongs to a real, present person and not a photo or mask.',
     options: opts4('True', 'False', 'It detects emotions only', 'It detects ages only'),
     correct: ['a'],
     explanation: 'True. Liveness detection is an anti-spoofing feature that confirms the person is physically present, defending against printed photos, recorded videos, and 3D masks.',
@@ -1778,8 +1778,8 @@ const P2: Q[] = [
     references: [REF_AOAI_MODELS, REF_DALLE]
   },
   {
-    domain: GENAI, difficulty: 3, type: QType.TRUE_FALSE,
-    stem: 'True or False: A common Responsible-AI mitigation for generative AI is to keep humans in the loop for high-stakes decisions (such as medical, legal, or financial actions).',
+    domain: GENAI, difficulty: 3, type: QType.SINGLE,
+    stem: 'A common Responsible-AI mitigation for generative AI is to keep humans in the loop for high-stakes decisions (such as medical, legal, or financial actions).',
     options: opts4('True', 'False', 'Only for low-stakes decisions', 'Only outside Azure'),
     correct: ['a'],
     explanation: 'True. Microsoft\'s guidance for Azure OpenAI and generative AI explicitly recommends meaningful human review for high-stakes scenarios and avoiding fully autonomous use for consequential decisions.',
@@ -1934,8 +1934,8 @@ const P3: Q[] = [
     references: [REF_INTERP, REF_RAI_DASH]
   },
   {
-    domain: AIW, difficulty: 3, type: QType.TRUE_FALSE,
-    stem: 'True or False: According to Microsoft\'s Responsible AI Standard, the six principles are fairness, reliability and safety, privacy and security, inclusiveness, transparency, and accountability.',
+    domain: AIW, difficulty: 3, type: QType.SINGLE,
+    stem: 'According to Microsoft\'s Responsible AI Standard, the six principles are fairness, reliability and safety, privacy and security, inclusiveness, transparency, and accountability.',
     options: opts4('True', 'False', 'Only four principles', 'Eight principles'),
     correct: ['a'],
     explanation: 'True. Microsoft\'s Responsible AI Standard is built on those six principles, and Azure Machine Learning provides tools to operationalize each.',
@@ -2245,8 +2245,8 @@ const P3: Q[] = [
     references: [REF_DOC_INTEL, REF_OCR]
   },
   {
-    domain: CV, difficulty: 3, type: QType.TRUE_FALSE,
-    stem: 'True or False: Optical character recognition (OCR) is one of the recognized computer-vision solution types in the AI-900 skills outline.',
+    domain: CV, difficulty: 3, type: QType.SINGLE,
+    stem: 'Optical character recognition (OCR) is one of the recognized computer-vision solution types in the AI-900 skills outline.',
     options: opts4('True', 'False', 'OCR is part of NLP only', 'OCR is part of generative AI only'),
     correct: ['a'],
     explanation: 'True. The AI-900 skills outline lists image classification, object detection, OCR, and facial detection/analysis as common computer-vision solution types.',
@@ -2398,8 +2398,8 @@ const P3: Q[] = [
     references: [REF_SPEECH, REF_STT, REF_TTS, REF_CLU]
   },
   {
-    domain: NLP, difficulty: 3, type: QType.TRUE_FALSE,
-    stem: 'True or False: Azure AI Translator can translate documents (e.g., DOCX, PDF) and preserve their formatting, in addition to translating plain text.',
+    domain: NLP, difficulty: 3, type: QType.SINGLE,
+    stem: 'Azure AI Translator can translate documents (e.g., DOCX, PDF) and preserve their formatting, in addition to translating plain text.',
     options: opts4('True', 'False', 'It can only translate emojis', 'It only translates images'),
     correct: ['a'],
     explanation: 'True. Document Translation in Azure AI Translator translates entire documents asynchronously while preserving structure and formatting; text translation handles real-time text.',
@@ -2616,8 +2616,8 @@ const P3: Q[] = [
     references: [REF_FOUNDRY, REF_GENAI]
   },
   {
-    domain: GENAI, difficulty: 3, type: QType.TRUE_FALSE,
-    stem: 'True or False: A model catalog\'s value is that you can compare and deploy many foundation models (open and proprietary) through one interface without integrating each provider separately.',
+    domain: GENAI, difficulty: 3, type: QType.SINGLE,
+    stem: 'A model catalog\'s value is that you can compare and deploy many foundation models (open and proprietary) through one interface without integrating each provider separately.',
     options: opts4('True', 'False', 'Only Microsoft models are available', 'Only image models are available'),
     correct: ['a'],
     explanation: 'True. The Foundry model catalog lets you discover, evaluate, and deploy models from Microsoft, OpenAI, Meta Llama, Mistral, DeepSeek, Hugging Face, and others through one interface.',

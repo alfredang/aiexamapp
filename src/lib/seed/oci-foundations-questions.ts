@@ -186,8 +186,8 @@ const P1: Q[] = [
     references: [REF_SUPPORT]
   },
   {
-    domain: INTRO, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: An OCI region can contain only one availability domain.',
+    domain: INTRO, difficulty: 1, type: QType.SINGLE,
+    stem: 'An OCI region can contain only one availability domain.',
     options: opts4('True', 'False', 'Only in Always Free tenancies', 'Only for government regions'),
     correct: ['b'],
     explanation: 'False. A region contains one OR more availability domains. Some regions have a single AD while others have three; the model supports more than one.',
@@ -326,8 +326,8 @@ const P1: Q[] = [
     references: [REF_COMPART]
   },
   {
-    domain: IAM, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: In OCI, a group is a collection of users who all need the same type of access to a set of resources.',
+    domain: IAM, difficulty: 2, type: QType.SINGLE,
+    stem: 'In OCI, a group is a collection of users who all need the same type of access to a set of resources.',
     options: opts4('True', 'False', 'Only for federated users', 'Only in the root compartment'),
     correct: ['a'],
     explanation: 'True. A group is a collection of users with the same access needs; policies reference groups to grant that access.',
@@ -518,8 +518,8 @@ const P1: Q[] = [
     references: [REF_LB]
   },
   {
-    domain: NET, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: A public subnet and a private subnet can coexist within the same VCN.',
+    domain: NET, difficulty: 2, type: QType.SINGLE,
+    stem: 'A public subnet and a private subnet can coexist within the same VCN.',
     options: opts4('True', 'False', 'Only across two VCNs', 'Only in multi-AD regions'),
     correct: ['a'],
     explanation: 'True. A VCN can contain both public and private subnets. Whether instances get public IPs depends on subnet type and routing/gateway configuration.',
@@ -645,8 +645,8 @@ const P1: Q[] = [
     references: [REF_FUNCTIONS]
   },
   {
-    domain: COMPUTE, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: An OCPU on Oracle Cloud Infrastructure provides the equivalent compute capacity of one physical core.',
+    domain: COMPUTE, difficulty: 1, type: QType.SINGLE,
+    stem: 'An OCPU on Oracle Cloud Infrastructure provides the equivalent compute capacity of one physical core.',
     options: opts4('True', 'False', 'Only for bare metal', 'Only for Always Free'),
     correct: ['a'],
     explanation: 'True. An OCPU (Oracle CPU) corresponds to physical core capacity. This differs from vendors that count hyper-threaded vCPUs as full CPUs.',
@@ -759,8 +759,8 @@ const P1: Q[] = [
     references: [REF_TIERS]
   },
   {
-    domain: STORAGE, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: Block volumes can persist independently of the compute instance they were attached to.',
+    domain: STORAGE, difficulty: 1, type: QType.SINGLE,
+    stem: 'Block volumes can persist independently of the compute instance they were attached to.',
     options: opts4('True', 'False', 'Only for bare metal', 'Only in Always Free'),
     correct: ['a'],
     explanation: 'True. A block volume has a lifecycle independent of any instance — it can be detached and reattached to another instance, and data persists after instance termination.',
@@ -912,8 +912,8 @@ const P1: Q[] = [
     references: [REF_WAF]
   },
   {
-    domain: SECOBS, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: In the shared responsibility model, configuring IAM policies and securing customer data are the customer\'s responsibility.',
+    domain: SECOBS, difficulty: 2, type: QType.SINGLE,
+    stem: 'In the shared responsibility model, configuring IAM policies and securing customer data are the customer\'s responsibility.',
     options: opts4('True', 'False', 'Only for paid tenancies', 'Only in commercial regions'),
     correct: ['a'],
     explanation: 'True. Customers are responsible for security IN the cloud — IAM configuration, data classification/protection, network security rules, and OS patching.',
@@ -1011,8 +1011,8 @@ const P2: Q[] = [
     references: [REF_REGIONS]
   },
   {
-    domain: INTRO, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: OCI Service Level Agreements can cover not only availability but also manageability and performance.',
+    domain: INTRO, difficulty: 1, type: QType.SINGLE,
+    stem: 'OCI Service Level Agreements can cover not only availability but also manageability and performance.',
     options: opts4('True', 'False', 'Only availability is ever covered', 'Only performance is covered'),
     correct: ['a'],
     explanation: 'True. OCI is distinctive in offering SLAs that can cover availability, manageability, and performance, whereas many providers cover availability only.',
@@ -1133,8 +1133,8 @@ const P2: Q[] = [
     references: [REF_MFA]
   },
   {
-    domain: IAM, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: An OCI policy can be written to grant a group access to resources only within a specific compartment.',
+    domain: IAM, difficulty: 2, type: QType.SINGLE,
+    stem: 'An OCI policy can be written to grant a group access to resources only within a specific compartment.',
     options: opts4('True', 'False', 'Only at the tenancy root', 'Only for federated groups'),
     correct: ['a'],
     explanation: 'True. Policy statements scope access to a compartment (e.g. "in compartment X"), enabling least-privilege, compartment-scoped permissions.',
@@ -1325,8 +1325,8 @@ const P2: Q[] = [
     references: [REF_SECLIST]
   },
   {
-    domain: NET, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: A NAT gateway allows instances in a private subnet to receive unsolicited inbound connections from the internet.',
+    domain: NET, difficulty: 2, type: QType.SINGLE,
+    stem: 'A NAT gateway allows instances in a private subnet to receive unsolicited inbound connections from the internet.',
     options: opts4('True', 'False', 'Only with a public IP', 'Only in single-AD regions'),
     correct: ['b'],
     explanation: 'False. A NAT gateway permits outbound-initiated connections only; it does not allow unsolicited inbound connections from the internet to private instances.',
@@ -1465,8 +1465,8 @@ const P2: Q[] = [
     references: [REF_AUTOSCALE]
   },
   {
-    domain: COMPUTE, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: Virtual machine instances on OCI share underlying physical hardware with other tenants\' VMs.',
+    domain: COMPUTE, difficulty: 1, type: QType.SINGLE,
+    stem: 'Virtual machine instances on OCI share underlying physical hardware with other tenants\' VMs.',
     options: opts4('True', 'False', 'Only bare metal does', 'Only in Always Free'),
     correct: ['a'],
     explanation: 'True. VM instances run on shared physical hosts via the hypervisor (multi-tenant). Bare metal provides a dedicated, single-tenant physical server.',
@@ -1579,8 +1579,8 @@ const P2: Q[] = [
     references: [REF_TIERS]
   },
   {
-    domain: STORAGE, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: Object Storage is designed for very high durability of stored objects.',
+    domain: STORAGE, difficulty: 1, type: QType.SINGLE,
+    stem: 'Object Storage is designed for very high durability of stored objects.',
     options: opts4('True', 'False', 'Only the Archive tier is durable', 'Only with a paid add-on'),
     correct: ['a'],
     explanation: 'True. Object Storage is engineered for high durability, storing redundant copies of data so objects are protected against hardware failure.',
@@ -1719,8 +1719,8 @@ const P2: Q[] = [
     references: [REF_WAF]
   },
   {
-    domain: SECOBS, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: OCI Vault can be used to manage customer-controlled encryption keys for OCI services.',
+    domain: SECOBS, difficulty: 2, type: QType.SINGLE,
+    stem: 'OCI Vault can be used to manage customer-controlled encryption keys for OCI services.',
     options: opts4('True', 'False', 'Only Oracle can manage keys', 'Only for Object Storage'),
     correct: ['a'],
     explanation: 'True. OCI Vault manages encryption keys and secrets; customers can create and control keys (optionally HSM-backed) and assign them to services such as Block and Object Storage.',
@@ -1836,8 +1836,8 @@ const P3: Q[] = [
     references: [REF_REGIONS]
   },
   {
-    domain: INTRO, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: A service limit increase in OCI is typically requested through a support/service request.',
+    domain: INTRO, difficulty: 1, type: QType.SINGLE,
+    stem: 'A service limit increase in OCI is typically requested through a support/service request.',
     options: opts4('True', 'False', 'Limits can never be increased', 'Only by creating a new tenancy'),
     correct: ['a'],
     explanation: 'True. Many OCI service limits are soft and can be raised by submitting a service limit increase (support) request rather than creating a new tenancy.',
@@ -1963,8 +1963,8 @@ const P3: Q[] = [
     references: [REF_MFA]
   },
   {
-    domain: IAM, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: In OCI, permissions are granted directly to individual users rather than to groups.',
+    domain: IAM, difficulty: 2, type: QType.SINGLE,
+    stem: 'In OCI, permissions are granted directly to individual users rather than to groups.',
     options: opts4('True', 'False', 'Only for federated users', 'Only in the root compartment'),
     correct: ['b'],
     explanation: 'False. OCI policies grant permissions to groups (or dynamic groups). Individual users gain access through group membership, not direct grants.',
@@ -2077,8 +2077,8 @@ const P3: Q[] = [
     references: [REF_GATEWAYS]
   },
   {
-    domain: NET, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: A service gateway keeps traffic between a VCN and supported Oracle services off the public internet.',
+    domain: NET, difficulty: 2, type: QType.SINGLE,
+    stem: 'A service gateway keeps traffic between a VCN and supported Oracle services off the public internet.',
     options: opts4('True', 'False', 'Only for Object Storage', 'Only in single-AD regions'),
     correct: ['a'],
     explanation: 'True. A service gateway provides a private path from the VCN to supported Oracle services (like Object Storage), so the traffic does not traverse the public internet.',
@@ -2295,8 +2295,8 @@ const P3: Q[] = [
     references: [REF_AUTOSCALE]
   },
   {
-    domain: COMPUTE, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: A bare metal instance gives the customer a dedicated physical server without an Oracle-managed hypervisor.',
+    domain: COMPUTE, difficulty: 1, type: QType.SINGLE,
+    stem: 'A bare metal instance gives the customer a dedicated physical server without an Oracle-managed hypervisor.',
     options: opts4('True', 'False', 'Only in Always Free', 'Only for Windows'),
     correct: ['a'],
     explanation: 'True. Bare metal provides an entire dedicated physical server with no Oracle hypervisor — useful for performance or licensing constraints. VMs are virtualized.',
@@ -2409,8 +2409,8 @@ const P3: Q[] = [
     references: [REF_TIERS]
   },
   {
-    domain: STORAGE, difficulty: 1, type: QType.TRUE_FALSE,
-    stem: 'True or False: By default, OCI encrypts data at rest in Block Volume, Object Storage, and File Storage.',
+    domain: STORAGE, difficulty: 1, type: QType.SINGLE,
+    stem: 'By default, OCI encrypts data at rest in Block Volume, Object Storage, and File Storage.',
     options: opts4('True', 'False', 'Only Object Storage is encrypted', 'Encryption is a paid add-on'),
     correct: ['a'],
     explanation: 'True. OCI encrypts data at rest by default across Block, Object, and File storage using Oracle-managed keys, with the option for customer-managed keys via Vault.',
@@ -2562,8 +2562,8 @@ const P3: Q[] = [
     references: [REF_WAF]
   },
   {
-    domain: SECOBS, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Delivering alarm notifications to email or PagerDuty subscriptions is a function of the OCI Notifications service.',
+    domain: SECOBS, difficulty: 2, type: QType.SINGLE,
+    stem: 'Delivering alarm notifications to email or PagerDuty subscriptions is a function of the OCI Notifications service.',
     options: opts4('True', 'False', 'Only the Audit service can notify', 'Only Cloud Guard can notify'),
     correct: ['a'],
     explanation: 'True. The Notifications service publishes messages to subscriptions (email, HTTPS, PagerDuty, Functions) and is commonly the delivery target for Monitoring alarms.',

@@ -176,8 +176,8 @@ const P1: Q[] = [
     references: [REF_GCS, REF_BQ_EXTERNAL, REF_GCS_LIFECYCLE]
   },
   {
-    domain: DESIGN, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: BigQuery is best suited as the primary transactional (OLTP) database for high-frequency single-row updates.',
+    domain: DESIGN, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'BigQuery is best suited as the primary transactional (OLTP) database for high-frequency single-row updates.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['b'],
     explanation: 'False. BigQuery is an analytical (OLAP) warehouse optimized for large scans, not high-frequency single-row OLTP updates; Cloud SQL, Spanner, or Bigtable serve transactional workloads.',
@@ -433,8 +433,8 @@ const P1: Q[] = [
     references: [REF_PUBSUB_SCHEMA]
   },
   {
-    domain: INGEST, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Cloud Dataproc can autoscale by adding secondary (preemptible/spot) workers to reduce cost for fault-tolerant batch jobs.',
+    domain: INGEST, difficulty: 2, type: QType.SINGLE,
+    stem: 'Cloud Dataproc can autoscale by adding secondary (preemptible/spot) workers to reduce cost for fault-tolerant batch jobs.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'True. Dataproc autoscaling policies can add secondary workers (preemptible/spot VMs) to scale cheaply for fault-tolerant batch processing. Secondary workers do not store HDFS data, so they suit compute-heavy stages.',
@@ -638,8 +638,8 @@ const P1: Q[] = [
     references: [REF_BQ_EXTERNAL]
   },
   {
-    domain: STORE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Bigtable is a strong choice when you need ad-hoc multi-row SQL analytics with complex joins.',
+    domain: STORE, difficulty: 2, type: QType.SINGLE,
+    stem: 'Bigtable is a strong choice when you need ad-hoc multi-row SQL analytics with complex joins.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['b'],
     explanation: 'False. Bigtable is a NoSQL wide-column store optimized for key/range access, not ad-hoc SQL joins; BigQuery is the appropriate analytics engine for that need.',
@@ -778,8 +778,8 @@ const P1: Q[] = [
     references: [REF_VERTEX_PIPE]
   },
   {
-    domain: ANALYZE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: A BigQuery authorized view lets users query results without granting them direct access to the underlying source tables.',
+    domain: ANALYZE, difficulty: 2, type: QType.SINGLE,
+    stem: 'A BigQuery authorized view lets users query results without granting them direct access to the underlying source tables.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'True. An authorized view runs against source tables on behalf of users who only have access to the view, not the underlying tables, enabling fine-grained sharing.',
@@ -905,8 +905,8 @@ const P1: Q[] = [
     references: [REF_BQ_BEST, REF_BQ_PART]
   },
   {
-    domain: MAINTAIN, difficulty: 3, type: QType.TRUE_FALSE,
-    stem: 'True or False: A documented disaster recovery plan for a data platform should define RPO and RPT/RTO targets and test restores periodically.',
+    domain: MAINTAIN, difficulty: 3, type: QType.SINGLE,
+    stem: 'A documented disaster recovery plan for a data platform should define RPO and RPT/RTO targets and test restores periodically.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'True. A sound DR plan defines recovery point/time objectives and validates them with periodic restore testing; untested backups are unreliable.',
@@ -1009,8 +1009,8 @@ const P2: Q[] = [
     references: [REF_BIGTABLE]
   },
   {
-    domain: DESIGN, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: Apache Beam pipelines on Dataflow can run the same code in both batch and streaming modes.',
+    domain: DESIGN, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Apache Beam pipelines on Dataflow can run the same code in both batch and streaming modes.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'True. The Beam unified model lets the same pipeline code execute in batch or streaming mode on Dataflow, differing mainly by the input source and windowing.',
@@ -1266,8 +1266,8 @@ const P2: Q[] = [
     references: [REF_PUBSUB_SCHEMA]
   },
   {
-    domain: INGEST, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Dataproc workflow templates can create an ephemeral cluster, run jobs, and delete the cluster automatically.',
+    domain: INGEST, difficulty: 2, type: QType.SINGLE,
+    stem: 'Dataproc workflow templates can create an ephemeral cluster, run jobs, and delete the cluster automatically.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'True. Dataproc workflow templates can manage an ephemeral cluster lifecycle — create, run the job graph, then delete — minimizing idle cost.',
@@ -1471,8 +1471,8 @@ const P2: Q[] = [
     references: [REF_SPANNER]
   },
   {
-    domain: STORE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: A BigQuery dataset’s region/location can be freely changed after creation without copying data.',
+    domain: STORE, difficulty: 2, type: QType.SINGLE,
+    stem: 'A BigQuery dataset’s region/location can be freely changed after creation without copying data.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['b'],
     explanation: 'False. Dataset location is fixed at creation; relocating data to another region requires copying or recreating it (e.g., via a dataset copy or export/import).',
@@ -1611,8 +1611,8 @@ const P2: Q[] = [
     references: [REF_DATAPREP]
   },
   {
-    domain: ANALYZE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: BigQuery ML supports model evaluation functions (such as ML.EVALUATE) to assess model quality with SQL.',
+    domain: ANALYZE, difficulty: 2, type: QType.SINGLE,
+    stem: 'BigQuery ML supports model evaluation functions (such as ML.EVALUATE) to assess model quality with SQL.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'True. BigQuery ML provides ML.EVALUATE and related functions to assess model metrics directly with SQL after training.',
@@ -1738,8 +1738,8 @@ const P2: Q[] = [
     references: [REF_CMEK]
   },
   {
-    domain: MAINTAIN, difficulty: 3, type: QType.TRUE_FALSE,
-    stem: 'True or False: Periodically testing restores from backups is required to validate a data platform’s recovery objectives.',
+    domain: MAINTAIN, difficulty: 3, type: QType.SINGLE,
+    stem: 'Periodically testing restores from backups is required to validate a data platform’s recovery objectives.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'True. Untested backups can fail at recovery time; periodic restore testing validates that RPO/RTO objectives are actually achievable.',
@@ -1842,8 +1842,8 @@ const P3: Q[] = [
     references: [REF_GCS, REF_BQ_EXTERNAL]
   },
   {
-    domain: DESIGN, difficulty: 2, type: QType.TRUE_FALSE, isTeaser: true,
-    stem: 'True or False: Cloud Spanner provides horizontally scalable, strongly consistent relational storage.',
+    domain: DESIGN, difficulty: 2, type: QType.SINGLE, isTeaser: true,
+    stem: 'Cloud Spanner provides horizontally scalable, strongly consistent relational storage.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'True. Spanner combines relational semantics and SQL with horizontal scalability and strong (external) consistency, including multi-region configurations.',
@@ -2099,8 +2099,8 @@ const P3: Q[] = [
     references: [REF_PUBSUB_SCHEMA]
   },
   {
-    domain: INGEST, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Pub/Sub provides at-least-once delivery by default, so consumers should be idempotent.',
+    domain: INGEST, difficulty: 2, type: QType.SINGLE,
+    stem: 'Pub/Sub provides at-least-once delivery by default, so consumers should be idempotent.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'True. Pub/Sub guarantees at-least-once delivery by default (duplicates are possible), so consumers should be designed to be idempotent.',
@@ -2304,8 +2304,8 @@ const P3: Q[] = [
     references: [REF_BQ_EXTERNAL]
   },
   {
-    domain: STORE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Clustering and partitioning can be used together on the same BigQuery table.',
+    domain: STORE, difficulty: 2, type: QType.SINGLE,
+    stem: 'Clustering and partitioning can be used together on the same BigQuery table.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'True. A table can be partitioned (e.g., by date) and clustered (e.g., by a high-filter column) simultaneously to maximize pruning and scan reduction.',
@@ -2444,8 +2444,8 @@ const P3: Q[] = [
     references: [REF_DATAPREP]
   },
   {
-    domain: ANALYZE, difficulty: 2, type: QType.TRUE_FALSE,
-    stem: 'True or False: Looker Studio can connect directly to BigQuery to build dashboards without copying data into another store.',
+    domain: ANALYZE, difficulty: 2, type: QType.SINGLE,
+    stem: 'Looker Studio can connect directly to BigQuery to build dashboards without copying data into another store.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'True. Looker Studio connects directly to BigQuery as a data source, so dashboards query BigQuery without copying data elsewhere.',
@@ -2571,8 +2571,8 @@ const P3: Q[] = [
     references: [REF_CMEK]
   },
   {
-    domain: MAINTAIN, difficulty: 3, type: QType.TRUE_FALSE,
-    stem: 'True or False: A disaster recovery plan should define and periodically test RPO and RTO for critical data pipelines.',
+    domain: MAINTAIN, difficulty: 3, type: QType.SINGLE,
+    stem: 'A disaster recovery plan should define and periodically test RPO and RTO for critical data pipelines.',
     options: opts4('True', 'False', '', '').slice(0, 2),
     correct: ['a'],
     explanation: 'True. DR plans must define RPO/RTO for critical pipelines and validate them through periodic testing to ensure recoverability.',

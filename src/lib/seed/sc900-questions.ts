@@ -160,7 +160,7 @@ const P1: Q[] = [
     references: [REF_ENCRYPT]
   },
   {
-    domain: CONCEPTS, difficulty: 1, type: QType.TRUE_FALSE,
+    domain: CONCEPTS, difficulty: 1, type: QType.SINGLE,
     stem: 'In modern security, identity is often described as the new primary security perimeter, replacing the traditional network perimeter.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -404,7 +404,7 @@ const P1: Q[] = [
     references: [REF_RBAC]
   },
   {
-    domain: ENTRA, difficulty: 1, type: QType.TRUE_FALSE,
+    domain: ENTRA, difficulty: 1, type: QType.SINGLE,
     stem: 'Microsoft Entra ID and on-premises Active Directory Domain Services are the same product with the same protocols.',
     options: opts4('True', 'False', '', ''),
     correct: ['b'],
@@ -661,7 +661,7 @@ const P1: Q[] = [
     references: [REF_DEFCLOUD]
   },
   {
-    domain: SECURITY, difficulty: 1, type: QType.TRUE_FALSE,
+    domain: SECURITY, difficulty: 1, type: QType.SINGLE,
     stem: 'Microsoft Sentinel can use playbooks to automate responses to incidents.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -905,7 +905,7 @@ const P1: Q[] = [
     references: [REF_CMGR]
   },
   {
-    domain: COMPLIANCE, difficulty: 1, type: QType.TRUE_FALSE,
+    domain: COMPLIANCE, difficulty: 1, type: QType.SINGLE,
     stem: 'Sensitivity labels can apply encryption that stays with a document even after it leaves the organization.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -996,7 +996,7 @@ const P2: Q[] = [
     references: [REF_IDENTITY]
   },
   {
-    domain: CONCEPTS, difficulty: 2, type: QType.TRUE_FALSE,
+    domain: CONCEPTS, difficulty: 2, type: QType.SINGLE,
     stem: 'Under the cloud shared responsibility model, the customer is never responsible for any security controls when using SaaS.',
     options: opts4('True', 'False', '', ''),
     correct: ['b'],
@@ -1227,7 +1227,7 @@ const P2: Q[] = [
     references: [REF_DEVICE]
   },
   {
-    domain: ENTRA, difficulty: 1, type: QType.TRUE_FALSE,
+    domain: ENTRA, difficulty: 1, type: QType.SINGLE,
     stem: 'Privileged Identity Management can require approval and provide time-bound activation for privileged roles.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -1445,7 +1445,7 @@ const P2: Q[] = [
     references: [REF_SENTINEL]
   },
   {
-    domain: SECURITY, difficulty: 1, type: QType.TRUE_FALSE,
+    domain: SECURITY, difficulty: 1, type: QType.SINGLE,
     stem: 'Microsoft Defender for Cloud can protect workloads across Azure, on-premises, and other cloud providers.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -1728,7 +1728,7 @@ const P2: Q[] = [
     references: [REF_IRM]
   },
   {
-    domain: COMPLIANCE, difficulty: 1, type: QType.TRUE_FALSE,
+    domain: COMPLIANCE, difficulty: 1, type: QType.SINGLE,
     stem: 'Microsoft Purview Compliance Manager includes both Microsoft-managed and customer-managed improvement actions.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -1832,7 +1832,7 @@ const P3: Q[] = [
     references: [REF_ENCRYPT]
   },
   {
-    domain: CONCEPTS, difficulty: 1, type: QType.TRUE_FALSE,
+    domain: CONCEPTS, difficulty: 1, type: QType.SINGLE,
     stem: 'Authorization determines what an authenticated identity is permitted to do.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -2050,7 +2050,7 @@ const P3: Q[] = [
     references: [REF_MFA]
   },
   {
-    domain: ENTRA, difficulty: 1, type: QType.TRUE_FALSE,
+    domain: ENTRA, difficulty: 1, type: QType.SINGLE,
     stem: 'Microsoft Entra ID Protection can feed sign-in and user risk signals into Conditional Access policies.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -2281,7 +2281,7 @@ const P3: Q[] = [
     references: [REF_BASTION]
   },
   {
-    domain: SECURITY, difficulty: 1, type: QType.TRUE_FALSE,
+    domain: SECURITY, difficulty: 1, type: QType.SINGLE,
     stem: 'Microsoft Defender for Endpoint includes endpoint detection and response (EDR) capabilities.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -2380,7 +2380,7 @@ const P3: Q[] = [
     references: [REF_SENTINEL]
   },
   {
-    domain: SECURITY, difficulty: 1, type: QType.TRUE_FALSE,
+    domain: SECURITY, difficulty: 1, type: QType.SINGLE,
     stem: 'Microsoft Sentinel can ingest data from non-Microsoft sources such as third-party firewalls.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
@@ -2559,7 +2559,7 @@ const P3: Q[] = [
     references: [REF_IRM]
   },
   {
-    domain: COMPLIANCE, difficulty: 1, type: QType.TRUE_FALSE,
+    domain: COMPLIANCE, difficulty: 1, type: QType.SINGLE,
     stem: 'Microsoft Purview eDiscovery can place content on legal hold so it is preserved during an investigation.',
     options: opts4('True', 'False', '', ''),
     correct: ['a'],
