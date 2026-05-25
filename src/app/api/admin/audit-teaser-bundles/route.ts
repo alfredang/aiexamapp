@@ -27,10 +27,15 @@ export async function GET() {
     return NextResponse.json({ error: 'forbidden' }, { status: 403 });
   }
 
-  const [exams, bundles, teaserGroups, pubGroups] = await Promise.all([
+  const [exams, bundles, teaserGroups, pubGroups, draftGroups] = await Promise.all([
     db.exam.findMany({
       where: { deletedAt: null },
-      include: { vendor: { select: { slug: true, name: true } } },
+      // Pulled for the unpublished-drilldown: when was the exam last edited
+      // (did someone manually toggle it off, or was it never enabled?) and
+      // when was it created.
+      include: {
+        vendor: { select: { slug: true, name: true } }
+      },
       orderBy: [{ vendor: { slug: 'asc' } }, { slug: 'asc' }]
     }),
     // Bundle has no direct vendor relation — derive it from items[0].exam.vendor.
@@ -60,11 +65,24 @@ export async function GET() {
       by: ['examId'],
       where: { status: 'PUBLISHED' },
       _count: { _all: true }
+    }),
+    db.question.groupBy({
+      by: ['examId'],
+      where: { status: 'DRAFT' },
+      _count: { _all: true }
     })
   ]);
 
   const teaserBy = new Map(teaserGroups.map((g) => [g.examId, g._count._all]));
   const pubBy = new Map(pubGroups.map((g) => [g.examId, g._count._all]));
+  const draftBy = new Map(draftGroups.map((g) => [g.examId, g._count._all]));
+
+  // Which exam IDs are referenced by ANY bundle item — used in the
+  // unpublished-exam drill-down to see whether dormant rows are at
+  // least wired into a bundle (which is the actual symptom we're
+  // chasing) or completely orphan.
+  const referencedExamIds = new Set<string>();
+  for (const b of bundles) for (const i of b.items) referencedExamIds.add(i.examId);
 
   const examRows = exams.map((e) => ({
     vendor: e.vendor.slug,
@@ -103,15 +121,41 @@ export async function GET() {
   const emptyBundles = bundleRows.filter((b) => b.itemCount === 0);
   const deadBundles = bundleRows.filter((b) => b.itemCount > 0 && b.liveItemCount === 0);
 
+  // Drill-down on the unpublished, non-archived exams (~19 rows on prod
+  // at time of writing). The dead-bundle symptom is that these are linked
+  // from published bundles. The diagnostic question: do they have content
+  // sitting in PUBLISHED or DRAFT (i.e. a flip-the-flag fix) or are they
+  // empty (i.e. need to be authored or de-linked)?
+  const unpublishedExamDetails = exams
+    .filter((e) => !e.published)
+    .map((e) => ({
+      vendor: e.vendor.slug,
+      slug: e.slug,
+      code: e.code,
+      title: e.title,
+      createdAt: e.createdAt.toISOString(),
+      updatedAt: e.updatedAt.toISOString(),
+      publishedQuestions: pubBy.get(e.id) || 0,
+      draftQuestions: draftBy.get(e.id) || 0,
+      referencedByBundle: referencedExamIds.has(e.id)
+    }))
+    .sort((a, b) =>
+      // Most-likely-to-be-fixable first: exams with content already
+      // (just unpublished) bubble up.
+      (b.publishedQuestions + b.draftQuestions) - (a.publishedQuestions + a.draftQuestions)
+    );
+
   return NextResponse.json({
     ok: true,
     totals: {
       exams: exams.length,
       publishedExams: examRows.filter((e) => e.published).length,
+      unpublishedExams: examRows.filter((e) => !e.published).length,
       bundles: bundles.length
     },
     examsMissingTeaser: noTeaser,
     examsWithLowTeaser: lowTeaser,
+    unpublishedExamDetails,
     emptyBundles,
     deadBundles
   });
