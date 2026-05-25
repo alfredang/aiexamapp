@@ -34,6 +34,9 @@ export function ExamRunner(props: ExamRunnerProps) {
   const [filter, setFilter] = useState<'all' | 'unanswered' | 'incorrect' | 'flagged'>('all');
   const [remaining, setRemaining] = useState(props.remainingSec);
   const [submitted, setSubmitted] = useState(false);
+  // Guards the teaser signup gate so it fires at most once per session —
+  // once the guest has seen it (converted or dismissed), don't re-trigger.
+  const [gateShown, setGateShown] = useState(false);
   const dirty = useRef(false);
 
   // Timer (Exam mode only)
@@ -84,6 +87,19 @@ export function ExamRunner(props: ExamRunnerProps) {
 
   const answeredCount = Object.values(answers).filter(r => r.answer?.length).length;
 
+  // Proactively open the teaser signup gate as soon as a guest teaser is
+  // complete, regardless of question types. Closes the bug where the gate
+  // was wired only inside revealAnswer() and so was skipped when the last
+  // answered question was MULTI (revealAnswer only runs for MULTI via the
+  // explicit "Check answer" button).
+  useEffect(() => {
+    const isGuestTeaser = props.isTeaser && !props.autoSubmitAtEnd;
+    if (isGuestTeaser && !gateShown && answeredCount >= props.questions.length) {
+      setGateShown(true);
+      props.onTeaserGate?.(answeredCount);
+    }
+  }, [answeredCount, gateShown, props.isTeaser, props.autoSubmitAtEnd, props.questions.length, props.onTeaserGate]);
+
   function setAnswer(answer: string[]) {
     setAnswers(prev => ({ ...prev, [q.id]: { ...prev[q.id], answer } }));
     dirty.current = true;
@@ -125,7 +141,8 @@ export function ExamRunner(props: ExamRunnerProps) {
     }
     // Teaser gate check (after answering, not flagging)
     const newCount = answeredCount + (a.submitted ? 0 : 1);
-    if (props.isTeaser && props.teaserGateAt?.includes(newCount)) {
+    if (props.isTeaser && !gateShown && props.teaserGateAt?.includes(newCount)) {
+      setGateShown(true);
       props.onTeaserGate?.(newCount);
     }
     // End-of-teaser auto-submit for non-guest users (no signup gate needed)
@@ -151,6 +168,15 @@ export function ExamRunner(props: ExamRunnerProps) {
 
   async function submitAttempt(force = false) {
     if (submitted) return;
+    // Guest-teaser safety net: intercept Submit so a guest can never reach
+    // /results without first seeing the signup gate. `force` (timer expiry)
+    // bypasses; teasers have no timer anyway.
+    const isGuestTeaser = props.isTeaser && !props.autoSubmitAtEnd;
+    if (!force && isGuestTeaser && !gateShown) {
+      setGateShown(true);
+      props.onTeaserGate?.(answeredCount);
+      return;
+    }
     // EXAM mode requires every question answered before manual submit.
     // `force=true` is passed by the timer-expiry effect so time-out still submits.
     if (!force && props.mode === 'EXAM') {
