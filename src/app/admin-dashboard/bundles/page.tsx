@@ -18,7 +18,7 @@ export const dynamic = 'force-dynamic';
 
 const PAGE_SIZE = 50;
 
-type SearchParams = Promise<{ q?: string; status?: string; vendor?: string; level?: string; page?: string }>;
+type SearchParams = Promise<{ q?: string; view?: string; status?: string; vendor?: string; level?: string; page?: string }>;
 
 type BundleRow = Awaited<ReturnType<typeof loadBundles>>[number];
 
@@ -139,10 +139,24 @@ const LEVELS = ['Foundational', 'Associate', 'Professional', 'Specialty'];
 export default async function AdminBundlesPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
   const q = (sp.q || '').trim();
-  const status = sp.status || '';
   const vendorFilter = sp.vendor || '';
   const levelFilter = sp.level || '';
   const page = Math.max(1, Number(sp.page) || 1);
+
+  // Single View dropdown matching the Exams page layout. Bundle has no
+  // `deletedAt`, so there's no Archived option — just Active/Inactive/All.
+  // Default is `active` so the list opens on the live catalog. Legacy
+  // ?status=published / ?status=draft links still work.
+  type View = 'active' | 'inactive' | 'all';
+  function resolveView(): View {
+    const raw = sp.view;
+    if (raw === 'active' || raw === 'inactive' || raw === 'all') return raw;
+    if (sp.status === 'published') return 'active';
+    if (sp.status === 'draft') return 'inactive';
+    if (sp.status === '') return 'active'; // explicit empty = all in old default
+    return 'active';
+  }
+  const view: View = resolveView();
 
   const where: Prisma.BundleWhereInput = {};
   if (q) {
@@ -151,8 +165,9 @@ export default async function AdminBundlesPage({ searchParams }: { searchParams:
       { slug: { contains: q, mode: 'insensitive' } }
     ];
   }
-  if (status === 'published') where.published = true;
-  if (status === 'draft') where.published = false;
+  if (view === 'active') where.published = true;
+  else if (view === 'inactive') where.published = false;
+  // view === 'all' → no filter on published
   if (vendorFilter) {
     where.items = { ...(where.items as any), some: { exam: { vendor: { slug: vendorFilter } } } };
   }
@@ -167,7 +182,8 @@ export default async function AdminBundlesPage({ searchParams }: { searchParams:
   ]);
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-  const baseParams = { q, status, vendor: vendorFilter, level: levelFilter };
+  // baseParams omits view when it's the default ('active') for cleaner URLs.
+  const baseParams = { q, view: view === 'active' ? undefined : view, vendor: vendorFilter, level: levelFilter };
   const buildHref = (p: number) =>
     `/admin-dashboard/bundles${buildQS({ ...baseParams, page: p === 1 ? undefined : p })}`;
 
@@ -183,7 +199,11 @@ export default async function AdminBundlesPage({ searchParams }: { searchParams:
       clearHref: `/admin-dashboard/bundles${buildQS({ ...baseParams, level: undefined })}`
     },
     q && { key: 'search', label: q, clearHref: `/admin-dashboard/bundles${buildQS({ ...baseParams, q: undefined })}` },
-    status && { key: 'status', label: status, clearHref: `/admin-dashboard/bundles${buildQS({ ...baseParams, status: undefined })}` }
+    view !== 'active' && {
+      key: 'view',
+      label: view,
+      clearHref: `/admin-dashboard/bundles${buildQS({ ...baseParams, view: undefined })}`
+    }
   ].filter(Boolean) as { key: string; label: string; clearHref: string }[];
 
   const BULK_FORM_ID = 'admin-bundles-bulk-form';
@@ -383,15 +403,15 @@ export default async function AdminBundlesPage({ searchParams }: { searchParams:
             ))}
           </select>
         </FilterField>
-        <FilterField label="Status">
-          <select name="status" defaultValue={status} className="input-sm">
-            <option value="">All</option>
-            <option value="published">Published</option>
-            <option value="draft">Draft</option>
-          </select>
-        </FilterField>
         <FilterField label="Search" className="min-w-[14rem] flex-1">
           <input name="q" defaultValue={q} placeholder="Title or slug…" className="input-sm" />
+        </FilterField>
+        <FilterField label="View">
+          <select name="view" defaultValue={view} className="input-sm">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="all">All</option>
+          </select>
         </FilterField>
       </FilterBar>
 
