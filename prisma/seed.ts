@@ -162,6 +162,26 @@ const BUNDLES: BundleSeed[] = [
     ]
   },
   {
+    // OCI Foundations is hand-written (not in buildMultiVariantBundles) because
+    // its live variant exams use the `oracle-oci-foundations-1z0-1085-p*`
+    // slug pattern, not the uniform `${slug}-p*` shape that auto-gen assumes.
+    // The old `oracle-oci-foundations-p1/p2/p3` rows are archived (2026-05-19
+    // OCI standardization renamed them) and the bundle items were never
+    // repointed until 2026-05-25 — see [[project_session_2026_05_25_snapshot]].
+    slug: 'oracle-oci-foundations',
+    title: 'Oracle Cloud Infrastructure Foundations Associate (1Z0-1085)',
+    description:
+      'All 3 OCI Foundations Associate (1Z0-1085) practice exams in one bundle — OCI introduction, identity & access management, networking, compute, storage, and security & observability. Aligned to the official 1Z0-1085 exam objectives.',
+    price: 2000,
+    priceVoucher: 12500,
+    items: [
+      { examSlug: 'oracle-oci-foundations-1z0-1085-p1', tier: 'PRACTICE', position: 1 },
+      { examSlug: 'oracle-oci-foundations-1z0-1085-p2', tier: 'PRACTICE', position: 2 },
+      { examSlug: 'oracle-oci-foundations-1z0-1085-p3', tier: 'PRACTICE', position: 3 },
+      { examSlug: 'oracle-oci-foundations-1z0-1085-p1', tier: 'VOUCHER', position: 4 }
+    ]
+  },
+  {
     slug: 'microsoft-sc-200',
     title: 'Microsoft Security Operations Analyst (SC-200)',
     description:
@@ -253,7 +273,10 @@ function buildMultiVariantBundles(): BundleSeed[] {
     { slug: 'cisco-ccnp-security-350-701', title: 'Cisco CCNP Security (SCOR 350-701)', description: 'All 3 CCNP Security (SCOR 350-701) practice exams in one bundle — security concepts, network security, securing the cloud, content security, endpoint protection & detection, and secure network access/visibility/enforcement.', variants: 3, price: 2000, priceVoucher: 40000 },
     { slug: 'comptia-project-plus', title: 'CompTIA Project+ (PK0-005)', description: 'All 3 CompTIA Project+ (PK0-005) practice exams in one bundle — project management concepts, project life cycle phases, tools & documentation, and basics of IT & governance.', variants: 3, price: 2000, priceVoucher: 25000 },
     { slug: 'oracle-java-se-17-1z0-829', title: 'Oracle Certified Professional: Java SE 17 Developer (1Z0-829)', description: 'All 3 Java SE 17 Developer (1Z0-829) practice exams in one bundle — the Java object-oriented approach, program flow, generics & collections, streams & lambdas, exceptions, the module system, concurrency, JDBC, and localization.', variants: 3, price: 2000, priceVoucher: 24500 },
-    { slug: 'oracle-oci-foundations', title: 'Oracle Cloud Infrastructure Foundations Associate (1Z0-1085)', description: 'All 3 OCI Foundations Associate (1Z0-1085) practice exams in one bundle — OCI introduction, identity & access management, networking, compute, storage, and security & observability. Aligned to the official 1Z0-1085 exam objectives.', variants: 3, price: 2000, priceVoucher: 12500 },
+    // oracle-oci-foundations intentionally NOT in this auto-gen list — its
+    // variant exams use the `oracle-oci-foundations-1z0-1085-p*` slug
+    // pattern, not the uniform `${slug}-p*`. See the explicit entry in the
+    // hand-written BUNDLES array above.
     { slug: 'isc2-sscp', title: 'ISC2 SSCP', description: 'All 3 SSCP practice exams in one bundle — security operations & administration, access controls, risk identification/monitoring/analysis, incident response & recovery, cryptography, network & communications security, and systems & application security.', variants: 3, price: 2000, priceVoucher: 28900 },
     { slug: 'pmi-rmp', title: 'PMI Risk Management Professional (PMI-RMP)', description: 'All 3 PMI-RMP practice exams in one bundle — risk strategy & planning, risk identification, risk analysis, risk response, and monitor & close risks.', variants: 3, price: 2000, priceVoucher: 52000 },
     { slug: 'linuxfoundation-kcsa', title: 'Kubernetes and Cloud Native Security Associate (KCSA)', description: 'All 3 KCSA practice exams in one bundle — overview of cloud native security, Kubernetes cluster component security, Kubernetes security fundamentals, the Kubernetes threat model, platform security, and compliance & security frameworks. Aligned to the CNCF KCSA curriculum.', variants: 3, price: 2000, priceVoucher: 25000 },
