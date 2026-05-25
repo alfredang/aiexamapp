@@ -32,9 +32,7 @@ export function TeaserGate({ count, examSlug, vendorSlug, onClose }: { count: nu
         <div className="mb-2 text-xs font-semibold uppercase text-blue-700 dark:text-blue-300">Great progress!</div>
         <h2 className="text-xl font-bold">You've completed {count} questions</h2>
         <p className="mt-1 text-sm text-slate-600">
-          {count >= 30
-            ? "You've finished the free teaser. Save your progress and unlock the full exam."
-            : 'Save your progress and continue. We will send you a 6-digit code.'}
+          You've finished the free teaser. Save your progress to see your results and unlock the full practice exam — we'll send you a 6-digit code.
         </p>
 
         {step === 'email' && (

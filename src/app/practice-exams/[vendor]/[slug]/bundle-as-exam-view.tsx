@@ -152,12 +152,18 @@ export function BundleAsExamView({ bundle, userId }: { bundle: Bundle; userId?: 
             </dl>
           </div>
 
-          <Link href={`/practice-exams/${vendor.slug}/${first.slug}/teaser`} className="card-hover block p-5">
-            <div className="mb-1 text-xs font-semibold uppercase text-blue-700 dark:text-blue-300">Free</div>
-            <div className="font-semibold">Try our free practice teaser</div>
-            <p className="mt-1 text-sm text-slate-600 dark:text-slate-100">No credit card required.</p>
-            <div className="btn-outline mt-3 w-full">Start free practice exam</div>
-          </Link>
+          {/* Teaser CTA is for converting ANONYMOUS visitors. Signed-in users
+              either already own the bundle (use the practice runner) or are
+              about to buy it (BundleBuyForm below) — the teaser only created
+              a junk 20-question attempt under their account. (Teaser-audit M4.) */}
+          {!userId && (
+            <Link href={`/practice-exams/${vendor.slug}/${first.slug}/teaser`} className="card-hover block p-5">
+              <div className="mb-1 text-xs font-semibold uppercase text-blue-700 dark:text-blue-300">Free</div>
+              <div className="font-semibold">Try our free practice teaser</div>
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-100">No credit card required.</p>
+              <div className="btn-outline mt-3 w-full">Start free practice exam</div>
+            </Link>
+          )}
 
           <BundleBuyForm
             bundleId={bundle.id}
