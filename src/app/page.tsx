@@ -138,11 +138,24 @@ export default async function HomePage() {
             {recentBundles.map((b) => {
               const first = b.items[0]?.exam;
               const totalQs = b.items.reduce((s, i) => s + i.exam.questionCount, 0);
+              // Strip the per-variant suffix from the code chip — the cards
+              // represent the whole bundle, not the first variant, so showing
+              // e.g. "SOA-C03-P1" misleads users into thinking they're
+              // browsing a single variant. Mirrors the convention used in
+              // [bundle-as-exam-view](src/app/practice-exams/[vendor]/[slug]/bundle-as-exam-view.tsx).
+              const displayCode = first?.code.replace(/-P\d+$/i, '');
+              // Link to the unified `/practice-exams/[vendor]/[slug]` route
+              // (which renders BundleAsExamView with PICK A PLAN) instead of
+              // the legacy `/bundles/[slug]` page. Keeps the URL surface
+              // consistent with the catalog and the vendor pages.
+              const bundleHref = first
+                ? `/practice-exams/${first.vendor.slug}/${b.slug}`
+                : `/bundles/${b.slug}`;
               return (
-                <Link key={b.id} href={`/bundles/${b.slug}`} className="card-hover p-5">
+                <Link key={b.id} href={bundleHref} className="card-hover p-5">
                   <div className="mb-2 flex items-center gap-2 text-xs">
                     {first && <span className="badge">{first.vendor.name}</span>}
-                    {first && <span className="badge">{first.code}</span>}
+                    {displayCode && <span className="badge">{displayCode}</span>}
                     {first && <span className="badge">{first.level}</span>}
                   </div>
                   <h3 className="font-semibold">{b.title}</h3>
