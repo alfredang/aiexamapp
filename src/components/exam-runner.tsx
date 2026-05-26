@@ -77,6 +77,17 @@ export function ExamRunner(props: ExamRunnerProps) {
   const stored = answers[q.id];
   const a: RunnerResponse = { ...stored, answer: stored?.answer ?? [] };
 
+  // Shuffle option positions per-attempt for SINGLE / MULTI questions so the
+  // correct answer isn't always in the same slot across users and attempts.
+  // Seed = (attemptId, questionId) → deterministic within the attempt, so
+  // Previous/Next navigation doesn't re-shuffle on each render. TRUE_FALSE
+  // is left untouched — convention is True before False, swapping is jarring
+  // with no anti-cheat benefit (only two options anyway).
+  const displayOptions = useMemo(() => {
+    if (q.type === 'TRUE_FALSE') return q.options;
+    return shuffleSeeded(q.options, `${props.attemptId}:${q.id}`);
+  }, [q.options, q.type, q.id, props.attemptId]);
+
   const visible = useMemo(() => props.questions.map((_, i) => i).filter(i => {
     const r = answers[props.questions[i].id];
     if (filter === 'unanswered') return !r?.answer?.length;
@@ -256,7 +267,7 @@ export function ExamRunner(props: ExamRunnerProps) {
         <div className="card p-6">
           <p className="text-base font-medium">{q.stem}</p>
           <div className="mt-4 space-y-2">
-            {q.options.map((o, oi) => {
+            {displayOptions.map((o, oi) => {
               const sel = a.answer.includes(o.id);
               const isAnswered = !!a.submitted;
               const correct = a.correct?.includes(o.id);
@@ -337,4 +348,35 @@ export function ExamRunner(props: ExamRunnerProps) {
       </div>
     </div>
   );
+}
+
+/**
+ * Deterministic Fisher-Yates shuffle, seeded from a string.
+ *
+ * Same seed → identical output. Different seed → different output. Used to
+ * randomise option position per (attemptId, questionId) so the correct
+ * answer's slot varies across users + attempts, but stays stable as the
+ * user navigates between questions inside one attempt.
+ *
+ * Seeded RNG: FNV-1a hash of the seed → xorshift32 PRNG. Cheap, no
+ * dependencies, statistically-uniform-enough for shuffling 2–6 options.
+ */
+function shuffleSeeded<T>(arr: readonly T[], seed: string): T[] {
+  const out = [...arr];
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i++) {
+    h ^= seed.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  const rng = (): number => {
+    h ^= h << 13;
+    h ^= h >>> 17;
+    h ^= h << 5;
+    return ((h >>> 0) % 0xffffffff) / 0xffffffff;
+  };
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
 }
