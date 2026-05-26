@@ -7,6 +7,7 @@ import { isAnswerCorrect, scoreAttempt, type Responses } from '@/lib/attempts';
 import { ExplanationView } from '@/components/explanation-view';
 import { ShareScore } from '@/components/share-score';
 import { ReviewFormModal } from '@/components/review-form-modal';
+import { ResultsSignupPrompt } from '@/components/results-signup-prompt';
 import { canUserReview } from '@/lib/reviews';
 
 export default async function ResultsPage({ params }: { params: Promise<{ attemptId: string }> }) {
@@ -72,6 +73,21 @@ export default async function ResultsPage({ params }: { params: Promise<{ attemp
       </div>
 
       <ShareScore attemptId={attempt.id} examTitle={`${attempt.exam.vendor.name} ${attempt.exam.code}`} score={score} passed={passed} />
+
+      {/* Anonymous guest who submitted the teaser without converting in
+          the in-attempt modal lands here. Give them a second chance to
+          create an account — same TEASER_GATE OTP flow, but the post-
+          verify redirect points back at this results page so they keep
+          the score they're looking at. Only renders for anonymous
+          (no userId), teaser-mode, guest-token-owned attempts. */}
+      {!userId && attempt.isTeaser && attempt.guestToken && (
+        <ResultsSignupPrompt
+          attemptId={attempt.id}
+          examSlug={attempt.exam.slug}
+          vendorSlug={attempt.exam.vendor.slug}
+          count={total}
+        />
+      )}
 
       {/* Per-domain breakdown */}
       <div className="mt-8 card p-6">

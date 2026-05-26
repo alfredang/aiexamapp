@@ -2,13 +2,45 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-export function TeaserGate({ count, examSlug, vendorSlug, onClose }: { count: number; examSlug: string; vendorSlug: string; onClose: () => void }) {
+type Props = {
+  count: number;
+  examSlug: string;
+  vendorSlug: string;
+  onClose: () => void;
+  // Optional overrides for the results-page reuse — when the modal opens
+  // AFTER submit (on /results/<id>) the user has already seen their score,
+  // so "Save your progress to see your results" is misleading copy.
+  // Defaults preserve the original in-attempt phrasing used since PR #45.
+  eyebrow?: string;
+  title?: string;
+  description?: string;
+  primaryLabel?: string;
+  // Where to send the user after they verify the OTP. Defaults to the
+  // exam's detail page (in-attempt flow). The results-page flow overrides
+  // this to `/results/<id>` so they land back where they were.
+  nextUrl?: string;
+};
+
+export function TeaserGate({
+  count,
+  examSlug,
+  vendorSlug,
+  onClose,
+  eyebrow = 'Great progress!',
+  title,
+  description = "You've finished the free teaser. Save your progress to see your results and unlock the full practice exam — we'll send you a 6-digit code.",
+  primaryLabel = 'Save my progress',
+  nextUrl
+}: Props) {
   const router = useRouter();
   const [step, setStep] = useState<'email' | 'otp' | 'done'>('email');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
+
+  const resolvedTitle = title ?? `You've completed ${count} questions`;
+  const resolvedNext = nextUrl ?? `/practice-exams/${vendorSlug}/${examSlug}`;
 
   async function send(e: React.FormEvent) {
     e.preventDefault();
@@ -27,23 +59,23 @@ export function TeaserGate({ count, examSlug, vendorSlug, onClose }: { count: nu
     if (!r.ok) { setBusy(false); setErr((await r.json()).error || 'Verification failed'); return; }
     // Now send a LOGIN OTP and ship the user to /verify-otp to complete sign-in
     await fetch('/api/otp/request', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, purpose: 'LOGIN' }) });
-    router.push(`/verify-otp?email=${encodeURIComponent(email)}&purpose=LOGIN&next=/practice-exams/${vendorSlug}/${examSlug}`);
+    router.push(`/verify-otp?email=${encodeURIComponent(email)}&purpose=LOGIN&next=${encodeURIComponent(resolvedNext)}`);
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
       <div className="card w-full max-w-md p-8">
-        <div className="mb-2 text-xs font-semibold uppercase text-blue-700 dark:text-blue-300">Great progress!</div>
-        <h2 className="text-xl font-bold">You've completed {count} questions</h2>
+        <div className="mb-2 text-xs font-semibold uppercase text-blue-700 dark:text-blue-300">{eyebrow}</div>
+        <h2 className="text-xl font-bold">{resolvedTitle}</h2>
         <p className="mt-1 text-sm text-slate-600">
-          You've finished the free teaser. Save your progress to see your results and unlock the full practice exam — we'll send you a 6-digit code.
+          {description}
         </p>
 
         {step === 'email' && (
           <form onSubmit={send} className="mt-5 space-y-3">
             <input className="input" type="email" required placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} />
             {err && <p className="text-sm text-red-600">{err}</p>}
-            <button className="btn-primary-grad w-full" disabled={busy}>{busy ? 'Sending…' : 'Save my progress'}</button>
+            <button className="btn-primary-grad w-full" disabled={busy}>{busy ? 'Sending…' : primaryLabel}</button>
             <button type="button" onClick={onClose} className="btn-ghost w-full text-sm">Continue without saving</button>
           </form>
         )}
