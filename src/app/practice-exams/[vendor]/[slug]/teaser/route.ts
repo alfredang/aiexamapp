@@ -16,6 +16,28 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ vend
   if (!exam || exam.vendor.slug !== vendorSlug) {
     return new NextResponse('Not found', { status: 404 });
   }
+  // Reachability guard — added 2026-05-26 after a user finished a teaser
+  // for an archived exam (microsoft-dp-100-p1) and landed on a 404 because
+  // the post-conversion redirect target no longer exists. The teaser
+  // route previously accepted ANY slug whose row existed in the DB,
+  // including archived (deletedAt set) and orphan-unpublished exams.
+  //
+  // An exam is "publicly reachable" iff its detail page or a bundle that
+  // contains it would render for an anonymous visitor. If neither holds,
+  // we refuse to start a teaser — the user would just be sent to a 404
+  // afterwards.
+  if (exam.deletedAt) {
+    return new NextResponse('Not found', { status: 404 });
+  }
+  if (!exam.published) {
+    const bundleRef = await db.bundleItem.findFirst({
+      where: { examId: exam.id, bundle: { published: true } },
+      select: { id: true }
+    });
+    if (!bundleRef) {
+      return new NextResponse('Not found', { status: 404 });
+    }
+  }
 
   const session = await auth();
   const userId = (session?.user as any)?.id as string | undefined;
