@@ -37,7 +37,19 @@ export const dynamic = 'force-dynamic';
 
 const KNOWN_LONELY_BASE_SHELLS = [
   'aws-soa-c03',
-  'aws-sap-c02'
+  'aws-sap-c02',
+  // aws-mla-c01 is a "shadowing" base shell rather than a strictly
+  // lonely one — its bundle (slug aws-mla-c01) DOES include the base
+  // shell in items[], so the lonelyBaseShells detector won't flag it.
+  // But the URL /practice-exams/aws/aws-mla-c01 resolves to exam-view
+  // instead of bundle-as-exam-view because the exam wins the routing
+  // race when both exist at the same slug. Unpublishing the exam
+  // shifts the URL to bundle-view (consistent with every other cert)
+  // while preserving customer entitlement to take the exam via the
+  // userIsEntitled bypass in /practice-exams/[vendor]/[slug]/page.tsx.
+  // The endpoint's defensive sibling-in-bundle guard still passes
+  // because aws-mla-c01-p1 IS a sibling variant in the bundle's items.
+  'aws-mla-c01'
 ] as const;
 
 const VARIANT_RE = /^(.+?)-(?:p|practice-)\d+$/i;
