@@ -68,6 +68,19 @@ const CLAUDE_ARCHITECT_DESCRIPTION =
 // re-added below now that the official AWS catalogue still offers it.
 const OBSOLETE_EXAM_SLUGS: string[] = [];
 
+// Bundles whose certs were retired by their vendor. Mirrored on the bundle
+// side: removed from BUNDLES + the buildMultiVariantBundles spec list, plus
+// listed here so the seed actively deletes any stray rows on each deploy.
+// Without this list, a one-off admin hard-delete (via
+// /api/admin/delete-retired-bundles) would be silently undone the next
+// time the seed ran, because if the slug were still in the source the
+// upsert's `create` branch would resurrect the bundle with published:true.
+const OBSOLETE_BUNDLE_SLUGS: string[] = [
+  'microsoft-ai-102', // AI-102 retired by Microsoft (drift audit 2026-05-20)
+  'microsoft-dp-100', // DP-100 retired by Microsoft
+  'microsoft-dp-203'  // DP-203 retired by Microsoft
+];
+
 // Slugs that should be kept in the DB but hidden from the public catalog
 // (Exam.published = false). Different from OBSOLETE — these aren't deleted;
 // they're just not surfaced until they reach a presentable question count.
@@ -216,8 +229,11 @@ function buildMultiVariantBundles(): BundleSeed[] {
     { slug: 'aws-sap-c02', title: 'AWS Certified Solutions Architect — Professional (SAP-C02)', description: 'All 3 SAP-C02 practice exams in one bundle — 195 curated questions covering designing solutions for organizational complexity (multi-account architecture, hybrid and multi-VPC networking, cross-account security, disaster recovery, cost optimization); designing for new solutions (deployment strategies, business continuity, reliability, performance, security, cost); continuous improvement for existing solutions (operational excellence, security, performance, reliability, cost); and accelerating workload migration and modernization (the 7 Rs, migration tooling, re-architecture, and modernization to serverless and containers). Aligned to the official AWS Certified Solutions Architect - Professional (SAP-C02) exam guide.', variants: 3, price: 2000, priceVoucher: 30000 },
     { slug: 'microsoft-dp-900', title: 'Microsoft Azure Data Fundamentals (DP-900)', description: 'All 4 DP-900 practice exams in one bundle — covering core data concepts, relational and non-relational data, and data analytics on Azure.', variants: 4, price: 2000, priceVoucher: 9900 },
     { slug: 'microsoft-az-104', title: 'Microsoft Azure Administrator (AZ-104)', description: 'All 3 AZ-104 practice exams in one bundle — covering identities & governance, storage, compute, virtual networking, and monitoring & maintenance on Azure.', variants: 3, price: 2000, priceVoucher: 16500 },
-    { slug: 'microsoft-ai-102', title: 'Microsoft Azure AI Engineer Associate (AI-102)', description: 'All 4 AI-102 practice exams in one bundle — covering plan & manage Azure AI solutions, implement decision & language solutions, generative AI solutions, and computer vision.', variants: 4, price: 2000, priceVoucher: 16500 },
-    { slug: 'microsoft-dp-100', title: 'Microsoft Azure Data Scientist Associate (DP-100)', description: 'All 2 DP-100 practice exams in one bundle — covering ML solution design, data exploration & model training, deployment preparation, and model retraining on Azure ML.', variants: 2, price: 2000, priceVoucher: 16500 },
+    // microsoft-ai-102 + microsoft-dp-100 + microsoft-dp-203 intentionally
+    // omitted — these certs were retired by Microsoft (drift audit 2026-05-20).
+    // Their bundles were hard-deleted on 2026-05-26; this entry is removed so
+    // future deploys don't resurrect them. Cleanup of any lingering row is
+    // handled by OBSOLETE_BUNDLE_SLUGS below.
     { slug: 'microsoft-dp-300', title: 'Microsoft Azure Database Administrator (DP-300)', description: 'All 4 DP-300 practice exams in one bundle — covering planning & implementing data platform resources, implementing secure environments, monitoring & optimization, automation, and HA/DR for Azure SQL.', variants: 4, price: 2000, priceVoucher: 16500 },
     { slug: 'microsoft-md-102', title: 'Microsoft Endpoint Administrator (MD-102)', description: 'All 3 MD-102 practice exams in one bundle — 195 curated questions covering preparing infrastructure for devices (Microsoft Entra device identity, Intune enrollment, identity & compliance, Windows Hello for Business, Windows LAPS), managing and maintaining devices (Windows Autopilot, configuration profiles, Intune Suite add-ons, remote actions, device query), managing applications (deploy, configure, and protect apps including M365 Apps, app protection policies, and app configuration policies), and protecting devices (endpoint security policies, Microsoft Defender for Endpoint integration, and Windows / iOS / macOS / Android update management). Aligned to the official Microsoft Endpoint Administrator (MD-102) study guide (skills measured as of April 28, 2026).', variants: 3, price: 2000, priceVoucher: 16500 },
     { slug: 'microsoft-ms-102', title: 'Microsoft 365 Administrator Expert (MS-102)', description: 'All 3 MS-102 practice exams in one bundle — covering deploy & manage a Microsoft 365 tenant, implement & manage Microsoft Entra identity & access, manage security & threats with Defender XDR, and Microsoft Purview compliance.', variants: 3, price: 2000, priceVoucher: 16500 },
@@ -295,15 +311,8 @@ function buildMultiVariantBundles(): BundleSeed[] {
     };
   });
 
-  // The microsoft-ai-102 bundle ALSO bundles the two non-pN orphan shells
-  // (microsoft-ai-102-official and microsoft-ai-102-practice). Fold them in
-  // as PRACTICE items so a single bundle purchase grants access to all 6.
-  const ai102 = out.find(b => b.slug === 'microsoft-ai-102');
-  if (ai102) {
-    const nextPos = ai102.items.reduce((m, i) => Math.max(m, i.position ?? 0), 0) + 1;
-    ai102.items.push({ examSlug: 'microsoft-ai-102-practice', tier: 'PRACTICE', position: nextPos });
-    ai102.items.push({ examSlug: 'microsoft-ai-102-official', tier: 'PRACTICE', position: nextPos + 1 });
-  }
+  // (microsoft-ai-102 ai-102 multi-shell folding removed — cert retired
+  // by Microsoft, bundle deleted, no longer assembled by buildMultiVariantBundles.)
 
   // 3 additional bundles whose variant slugs do NOT follow the -pN pattern
   // (CompTIA Cloud+ uses -practice-N, DP-203 mixes -pN and -practice-N,
@@ -322,17 +331,9 @@ function buildMultiVariantBundles(): BundleSeed[] {
       { examSlug: 'comptia-cloud-plus-practice-1', tier: 'VOUCHER', position: 6 }
     ]
   });
-  out.push({
-    slug: 'microsoft-dp-203',
-    title: 'Microsoft Azure Data Engineer Associate (DP-203)',
-    description: 'All 2 DP-203 practice exams in one bundle — covering designing & implementing data storage, data processing, security, monitoring, and optimization for Azure data engineering workloads.',
-    price: 2000, priceVoucher: 16500,
-    items: [
-      { examSlug: 'microsoft-dp-203-p1', tier: 'PRACTICE', position: 1 },
-      { examSlug: 'microsoft-dp-203-practice-6', tier: 'PRACTICE', position: 2 },
-      { examSlug: 'microsoft-dp-203-p1', tier: 'VOUCHER', position: 3 }
-    ]
-  });
+  // microsoft-dp-203 bundle removed — DP-203 retired by Microsoft per
+  // drift audit 2026-05-20. The hand-written entry that lived here is
+  // gone; any stray row gets cleaned up via OBSOLETE_BUNDLE_SLUGS below.
   out.push({
     slug: 'aws-mla-c01',
     title: 'AWS Certified Machine Learning Engineer — Associate',
@@ -1909,6 +1910,30 @@ async function main() {
   }
   if (variantsCreated > 0) console.log(`✓ Auto-created ${variantsCreated} variant exams from bundle references`);
   if (variantsRecoded > 0) console.log(`✓ Recoded ${variantsRecoded} existing variant exams to current vendor exam codes`);
+
+  // Hard-delete any bundle whose slug is in OBSOLETE_BUNDLE_SLUGS. These
+  // are retired-cert bundles that have already been removed from the
+  // BUNDLES array above. Without this pass, if anyone re-adds the slug
+  // by mistake OR if a stray row already exists in the DB from a prior
+  // deploy, the bundle stays alive. Mirror of the OBSOLETE_EXAM_SLUGS
+  // pattern used for the exam upsert. Refuses to delete bundles with
+  // historical orders — soft-disables instead, so order/fulfilment
+  // history stays intact (matches the admin UI delete-button rule).
+  for (const slug of OBSOLETE_BUNDLE_SLUGS) {
+    const stray = await db.bundle.findUnique({
+      where: { slug },
+      include: { _count: { select: { orders: true } } }
+    });
+    if (!stray) continue;
+    if (stray._count.orders > 0) {
+      await db.bundle.update({ where: { id: stray.id }, data: { published: false } });
+      console.log(`✓ Obsolete bundle '${slug}' has ${stray._count.orders} order(s) — soft-disabled instead of deleting`);
+    } else {
+      await db.bundleItem.deleteMany({ where: { bundleId: stray.id } });
+      await db.bundle.delete({ where: { id: stray.id } });
+      console.log(`✓ Hard-deleted obsolete bundle '${slug}'`);
+    }
+  }
 
   for (const b of BUNDLES) {
     const bundle = await db.bundle.upsert({
