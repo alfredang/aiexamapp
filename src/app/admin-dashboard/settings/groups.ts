@@ -66,10 +66,14 @@ export const PAYMENT_SUBGROUPS: SettingsGroup[] = [
 
 // Fulfillment fields appear on the Payment Setting page above the
 // three provider sub-groups — they apply to all providers.
+// Note: TEASER_QUESTION_COUNT is intentionally NOT exposed here — the
+// free teaser is fixed at exactly 10 questions in code (see
+// getTeaserSize() in src/lib/settings.ts). Marketing copy across the
+// site references "10 free" verbatim, so the value can't be admin-
+// configurable without diverging from the copy.
 export const PAYMENT_FULFILLMENT_FIELDS: FieldDef[] = [
   { key: 'VOUCHER_DELAY_DAYS', label: 'Voucher delay (days)', placeholder: '5' },
-  { key: 'FULFILLMENT_TIMEZONE', label: 'Fulfillment timezone', placeholder: 'Asia/Singapore' },
-  { key: 'TEASER_QUESTION_COUNT', label: 'Free teaser questions (per exam)', placeholder: '20' }
+  { key: 'FULFILLMENT_TIMEZONE', label: 'Fulfillment timezone', placeholder: 'Asia/Singapore' }
 ];
 
 // Email transport sub-groups shown as collapsible cards on the

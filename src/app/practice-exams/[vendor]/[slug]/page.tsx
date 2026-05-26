@@ -98,13 +98,12 @@ export default async function ExamDetailPage({ params, searchParams }: { params:
 
   // Run the three independent fetches concurrently — saves ~200–500ms vs
   // the previous sequential await chain.
-  const { getSetting } = await import('@/lib/settings');
-  const [teaserCount, teaserSizeRaw, ratingSummary] = await Promise.all([
+  const { getTeaserSize } = await import('@/lib/settings');
+  const [teaserCount, teaserN, ratingSummary] = await Promise.all([
     db.question.count({ where: { examId: exam.id, isTeaser: true, status: 'PUBLISHED' } }),
-    getSetting('TEASER_QUESTION_COUNT'),
+    getTeaserSize(),
     getExamRatingSummary(exam.id)
   ]);
-  const teaserN = Math.max(1, Math.min(50, Number(teaserSizeRaw) || 20));
   const domains = (exam.domains as any[]) || [];
   const jsonLd: any = {
     '@context': 'https://schema.org',
