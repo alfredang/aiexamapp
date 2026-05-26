@@ -320,7 +320,14 @@ export function ExamRunner(props: ExamRunnerProps) {
           )}
           <div className="mt-6 flex items-center justify-between">
             <button onClick={() => setIdx(Math.max(0, idx - 1))} className="btn-outline" disabled={idx === 0}><ChevronLeft className="h-4 w-4" /> Previous</button>
-            <button onClick={() => setIdx(Math.min(props.questions.length - 1, idx + 1))} className="btn-primary" disabled={idx === props.questions.length - 1}>Next <ChevronRight className="h-4 w-4" /></button>
+            {/* Hide Next entirely on the last question — there's nothing
+                to navigate to. Submit button stays available in the header
+                bar for the explicit-finish action. (Per user feedback
+                2026-05-26: the disabled Next button on Q10/10 was visually
+                indistinguishable from active and added clutter.) */}
+            {idx < props.questions.length - 1 && (
+              <button onClick={() => setIdx(idx + 1)} className="btn-primary">Next <ChevronRight className="h-4 w-4" /></button>
+            )}
           </div>
         </div>
 
