@@ -8,12 +8,24 @@
  * browser dutifully follows the redirect to the container's internal
  * address, gets DNS_PROBE_FINISHED_NXDOMAIN, and dead-ends.
  *
- * Resolution order (most authoritative first):
- *  1. `NEXTAUTH_URL` env — explicit, set in the prod env file.
- *  2. `X-Forwarded-Proto` + `X-Forwarded-Host` — Coolify/Traefik/nginx set
- *     these to the public scheme + host the client hit.
- *  3. Fall back to the origin of `req.url` — fine for local dev where
- *     there is no proxy in between.
+ * Resolution order:
+ *
+ *   PRODUCTION (most authoritative first):
+ *    1. `NEXTAUTH_URL` env — explicit, set in the prod env file.
+ *    2. `X-Forwarded-Proto` + `X-Forwarded-Host` — Coolify/Traefik/nginx
+ *       set these to the public scheme + host the client hit.
+ *    3. Fall back to the origin of `req.url` — fine when there is no
+ *       proxy in between.
+ *
+ *   DEVELOPMENT:
+ *    Always use `req.url`'s origin. Skip NEXTAUTH_URL entirely.
+ *    Reason: in dev, NEXTAUTH_URL is set to a convenience host in `.env`
+ *    (e.g. `http://127.0.0.1:3040`). If the developer browses to
+ *    `http://localhost:3040`, the redirect would cross-jump hosts —
+ *    cookies are host-scoped and get left behind, which means the
+ *    guest `gt` cookie set on `localhost` is invisible to the request
+ *    landing on `127.0.0.1`, so the exam page bounces to /login.
+ *    Honour whatever the dev typed and the flow holds together.
  *
  * Used by route handlers that issue redirects (teaser launch, admin
  * impersonate exit, Gmail OAuth start/callback). Do NOT use this for
@@ -22,6 +34,11 @@
  * Location header from an XHR.
  */
 export function getPublicOrigin(req: Request): string {
+  // In dev, the user's chosen host wins — see comment above.
+  if (process.env.NODE_ENV !== 'production') {
+    return new URL(req.url).origin;
+  }
+
   const envBase = process.env.NEXTAUTH_URL?.trim();
   if (envBase) return envBase.replace(/\/$/, '');
 
@@ -29,8 +46,6 @@ export function getPublicOrigin(req: Request): string {
   const host = req.headers.get('x-forwarded-host');
   if (proto && host) return `${proto}://${host}`;
 
-  // Local dev — no proxy in front. req.url is `http://127.0.0.1:3040/...`
-  // which is exactly what the browser used, so this is safe.
   return new URL(req.url).origin;
 }
 
