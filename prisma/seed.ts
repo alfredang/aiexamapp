@@ -1990,6 +1990,74 @@ async function main() {
     console.log(`✓ Seeded ${samples.length} sample testimonials`);
   }
 
+  // Stub CMS pages for slugs that should always exist (audit 2026-05-26
+  // found terms + contact URLs returned 404). Upserted with minimal
+  // placeholder content; admin can rewrite via /admin-dashboard/pages.
+  // `update` clause is intentionally narrow — only adds the row if
+  // missing, never overwrites edits an admin has made on prod.
+  const stubPages = [
+    {
+      slug: 'terms',
+      title: 'Terms of Service',
+      excerpt: 'How ExamNova works, what we promise, what we ask of you.',
+      bodyHtml: [
+        '<p><em>This page is a placeholder while the full Terms of Service are drafted. The summary below covers the practical commitments today.</em></p>',
+        '<h2>Use of the service</h2>',
+        '<p>ExamNova provides original practice questions for IT certification preparation. Questions are not from the vendor exams themselves and we are not affiliated with the cert issuers (AWS, Microsoft, Cisco, etc.).</p>',
+        '<h2>Purchases &amp; refunds</h2>',
+        '<p>All purchases are covered by our <a href="/p/refund-policy">Refund Policy</a> — within 7 days you can request a full refund through your purchase email.</p>',
+        '<h2>Privacy</h2>',
+        '<p>Your data is handled per our <a href="/p/privacy-policy">Privacy Policy</a>.</p>',
+        '<h2>Contact</h2>',
+        '<p>Questions about these terms? <a href="/p/contact">Get in touch</a>.</p>'
+      ].join('\n'),
+      showInFooter: true,
+      footerGroup: 'legal',
+      position: 30
+    },
+    {
+      slug: 'contact',
+      title: 'Contact Us',
+      excerpt: 'Reach the ExamNova team for support, billing, or feedback.',
+      bodyHtml: [
+        '<p>Email <a href="mailto:angch@tertiaryinfotech.com">angch@tertiaryinfotech.com</a> for:</p>',
+        '<ul>',
+        '<li><strong>Support</strong> — exam access issues, attempt errors, question content concerns.</li>',
+        '<li><strong>Billing</strong> — receipts, refunds, voucher redemption questions (see <a href="/p/refund-policy">Refund Policy</a>).</li>',
+        '<li><strong>Partnerships</strong> — bulk licensing, custom cert bundles, enterprise access.</li>',
+        '</ul>',
+        '<p>We respond to support requests within one business day.</p>'
+      ].join('\n'),
+      showInFooter: true,
+      footerGroup: 'company',
+      position: 30
+    }
+  ];
+  for (const p of stubPages) {
+    await db.page.upsert({
+      where: { slug: p.slug },
+      // Catalog-content fields only — `published`, `showInFooter`,
+      // `footerGroup`, `position` are admin-authoritative once the row
+      // exists. Matches the rule applied to exam + bundle upserts.
+      update: {
+        title: p.title,
+        excerpt: p.excerpt,
+        bodyHtml: p.bodyHtml
+      },
+      create: {
+        slug: p.slug,
+        title: p.title,
+        excerpt: p.excerpt,
+        bodyHtml: p.bodyHtml,
+        published: true,
+        showInFooter: p.showInFooter,
+        footerGroup: p.footerGroup,
+        position: p.position
+      }
+    });
+  }
+  console.log(`✓ Ensured ${stubPages.length} stub CMS pages exist (terms, contact)`);
+
   console.log(`Seed complete. Vendors: ${VENDORS.length}, Exams: ${EXAMS.length}, Bundles: ${BUNDLES.length}. Admins: ${admins.map(a => a.email).join(', ')}`);
 }
 

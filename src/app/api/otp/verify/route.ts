@@ -14,7 +14,19 @@ const Body = z.object({
 });
 
 export async function POST(req: Request) {
-  const data = Body.parse(await req.json());
+  // Defensive parsing — invalid JSON or schema-mismatched payload returns
+  // 400, not a 500 from an unhandled throw. The UI always sends a valid
+  // body; this is for direct API callers + curl probes.
+  const raw = await req.json().catch(() => null);
+  if (!raw) return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  const result = Body.safeParse(raw);
+  if (!result.success) {
+    return NextResponse.json(
+      { error: 'Invalid input', issues: result.error.flatten() },
+      { status: 400 }
+    );
+  }
+  const data = result.data;
 
   // Rate-limit verification — caps 6-digit OTP brute-force and argon2 CPU abuse
   // on this unauthenticated endpoint, and bounds unsolicited user-row creation
