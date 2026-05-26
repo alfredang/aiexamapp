@@ -1,7 +1,5 @@
 'use client';
-import { useState } from 'react';
 import { ExamRunner, type RunnerQuestion, type RunnerResponse } from '@/components/exam-runner';
-import { TeaserGate } from '@/components/teaser-gate';
 
 export function ExamShell(props: {
   attemptId: string;
@@ -16,31 +14,24 @@ export function ExamShell(props: {
   initialResponses: Record<string, RunnerResponse>;
   isGuest: boolean;
 }) {
-  const [gateAt, setGateAt] = useState<number | null>(null);
-
   return (
-    <>
-      <ExamRunner
-        attemptId={props.attemptId}
-        mode={props.mode}
-        isTeaser={props.isTeaser}
-        examTitle={props.examTitle}
-        examVendor={props.examVendor}
-        questions={props.questions}
-        remainingSec={props.remainingSec}
-        initialResponses={props.initialResponses}
-        teaserGateAt={props.isTeaser && props.isGuest ? [props.questions.length] : undefined}
-        onTeaserGate={(c) => setGateAt(c)}
-        autoSubmitAtEnd={props.isTeaser && !props.isGuest}
-      />
-      {gateAt !== null && (
-        <TeaserGate
-          count={gateAt}
-          examSlug={props.examSlug}
-          vendorSlug={props.vendorSlug}
-          onClose={() => setGateAt(null)}
-        />
-      )}
-    </>
+    <ExamRunner
+      attemptId={props.attemptId}
+      mode={props.mode}
+      isTeaser={props.isTeaser}
+      examTitle={props.examTitle}
+      examVendor={props.examVendor}
+      questions={props.questions}
+      remainingSec={props.remainingSec}
+      initialResponses={props.initialResponses}
+      // Auto-submit every teaser at completion (guests + signed-in alike).
+      // The in-attempt signup modal used to fire here for guests, but it's
+      // redundant since PR #70 added the results-page modal — and worse,
+      // it left customers stuck on Q10 (per user feedback 2026-05-26).
+      // Now finishing the teaser cleanly funnels everyone to /results,
+      // where ResultsSignupPrompt handles the conversion for anonymous
+      // viewers.
+      autoSubmitAtEnd={props.isTeaser}
+    />
   );
 }
