@@ -38,10 +38,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ vend
     return NextResponse.redirect(publicUrl(req, `/practice-exams/${vendorSlug}/${slug}?teaser=unavailable`));
   }
 
-  // Admin-configurable teaser size (Settings → TEASER_QUESTION_COUNT, default 20).
-  const { getSetting } = await import('@/lib/settings');
-  const sizeRaw = await getSetting('TEASER_QUESTION_COUNT');
-  const teaserSize = Math.max(1, Math.min(50, Number(sizeRaw) || 20));
+  // Admin-configurable teaser size, capped at 10. See getTeaserSize() doc.
+  const { getTeaserSize } = await import('@/lib/settings');
+  const teaserSize = await getTeaserSize();
   const ids = teaserQuestions.map((q) => q.id).sort(() => Math.random() - 0.5).slice(0, teaserSize);
 
   const attempt = await db.attempt.create({

@@ -11,9 +11,8 @@ import { LandingTestimonials } from '@/components/landing-testimonials';
 export const revalidate = 300;
 
 export default async function HomePage() {
-  const { getSetting } = await import('@/lib/settings');
-  const teaserSizeRaw = await getSetting('TEASER_QUESTION_COUNT');
-  const TEASER_N = Math.max(1, Math.min(50, Number(teaserSizeRaw) || 20));
+  const { getTeaserSize } = await import('@/lib/settings');
+  const TEASER_N = await getTeaserSize();
   // Vendor card counts include BOTH standalone published exams AND bundles
   // attributed to the vendor (via the first bundle item's exam vendor).
   // That matches what users actually see on /practice-exams/[vendor].

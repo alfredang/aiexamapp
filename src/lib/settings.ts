@@ -128,6 +128,33 @@ export async function getSetting(k: SettingKey): Promise<string> {
   return process.env[k] || '';
 }
 
+/**
+ * The free teaser is fixed at exactly 10 questions — both the minimum
+ * and the maximum. The marketing copy ("Try 10 questions free")
+ * promises that exact number across the home page, landing pages,
+ * FAQ, and the exam detail page, so the value has to stay pinned.
+ *
+ * Was previously a configurable admin setting (TEASER_QUESTION_COUNT,
+ * 1–50) but that gave admins enough rope to silently break the
+ * marketing promise — change the setting to 25 and the copy still
+ * said "10 free" everywhere else.
+ *
+ * The async signature is preserved so the five call sites don't need
+ * to change. The `TEASER_QUESTION_COUNT` setting key still exists in
+ * the schema (and any historical DB row stays harmless) but the
+ * value is no longer read.
+ *
+ * Used by:
+ *   - the teaser route (slice the random question pool)
+ *   - the home page / landing pages / CMS placeholders ({{TEASER_N}})
+ *   - the exam detail page (Free teaser CTA copy)
+ *   - the attempts start API (validate teaser request)
+ */
+export const TEASER_QUESTION_COUNT = 10;
+export async function getTeaserSize(): Promise<number> {
+  return TEASER_QUESTION_COUNT;
+}
+
 export async function getAllSettings(): Promise<Record<SettingKey, string>> {
   const rows = await db.setting.findMany({ where: { key: { in: [...SETTING_KEYS] } } });
   const map = new Map(rows.map((r) => [r.key, decrypt(r.value)]));

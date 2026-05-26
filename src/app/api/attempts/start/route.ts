@@ -52,11 +52,10 @@ export async function POST(req: Request) {
     : { examId: exam.id, status: 'PUBLISHED' as const };
   const all = await db.question.findMany({ where, select: { id: true } });
   if (all.length === 0) return NextResponse.json({ error: 'No questions available' }, { status: 400 });
-  let teaserLimit = 20;
+  let teaserLimit = 10;
   if (data.teaser) {
-    const { getSetting } = await import('@/lib/settings');
-    const raw = await getSetting('TEASER_QUESTION_COUNT');
-    teaserLimit = Math.max(1, Math.min(50, Number(raw) || 20));
+    const { getTeaserSize } = await import('@/lib/settings');
+    teaserLimit = await getTeaserSize();
   }
   const limit = data.teaser ? teaserLimit : exam.questionCount;
   // Questions are always shuffled — both practice and exam mode get a
