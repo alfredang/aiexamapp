@@ -29,19 +29,30 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ vend
     c.set('gt', gt, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 60 * 60 * 24 * 30, path: '/' });
   }
 
-  const teaserQuestions = await db.question.findMany({
-    where: { examId: exam.id, isTeaser: true, status: 'PUBLISHED' },
-    select: { id: true }
+  // The teaser pool: prefer curated (isTeaser:true) questions, but fall
+  // back to any other published question if the curated pool is shy of
+  // the target teaser size. That way the user always gets exactly
+  // `teaserSize` questions when the exam has at least that many
+  // published — regardless of how many of them are flagged isTeaser.
+  // (Some certs were seeded with only ~4 questions marked isTeaser per
+  // variant; without this fallback, those certs would render a 4-q
+  // teaser instead of the 10-q teaser the marketing copy promises.)
+  const allPublished = await db.question.findMany({
+    where: { examId: exam.id, status: 'PUBLISHED' },
+    select: { id: true, isTeaser: true }
   });
-  if (teaserQuestions.length === 0) {
-    // No teaser content yet — bounce back to the exam detail page with a notice flag.
+  if (allPublished.length === 0) {
+    // No published content at all — bounce back to the exam detail page with a notice flag.
     return NextResponse.redirect(publicUrl(req, `/practice-exams/${vendorSlug}/${slug}?teaser=unavailable`));
   }
 
-  // Admin-configurable teaser size, capped at 10. See getTeaserSize() doc.
+  // Pinned teaser size (10). See getTeaserSize() doc.
   const { getTeaserSize } = await import('@/lib/settings');
   const teaserSize = await getTeaserSize();
-  const ids = teaserQuestions.map((q) => q.id).sort(() => Math.random() - 0.5).slice(0, teaserSize);
+  const shuffle = <T>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
+  const flagged = shuffle(allPublished.filter((q) => q.isTeaser).map((q) => q.id));
+  const unflagged = shuffle(allPublished.filter((q) => !q.isTeaser).map((q) => q.id));
+  const ids = [...flagged, ...unflagged].slice(0, teaserSize);
 
   const attempt = await db.attempt.create({
     data: {
