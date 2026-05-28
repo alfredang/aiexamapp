@@ -17,6 +17,9 @@ async function main() {
   const result = await seedCcaFoundations(db);
   console.log(`✓ vendor: ${result.vendor}`);
   console.log(`✓ exam ${result.exam.slug}: ${result.exam.questionCount} questions (${result.exam.teaserCount} teaser)`);
+  if (result.exam.legacyRetired > 0) {
+    console.log(`✓ retired ${result.exam.legacyRetired} legacy pre-seed question(s) (cca-f-pdf / -extra / -fill)`);
+  }
   console.log(`✓ bundle: ${result.bundle}`);
 }
 

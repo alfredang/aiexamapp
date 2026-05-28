@@ -898,7 +898,7 @@ const CCA_BUNDLE = {
 // ───────────────────── Seed entry point ─────────────────────
 export type SeedResult = {
   vendor: 'created' | 'updated' | 'existing';
-  exam: { slug: string; questionCount: number; teaserCount: number };
+  exam: { slug: string; questionCount: number; teaserCount: number; legacyRetired: number };
   bundle: 'created' | 'updated';
 };
 
@@ -940,11 +940,26 @@ export async function seedCcaFoundations(db: PrismaClient): Promise<SeedResult> 
     create: { ...examData, slug: CCA_EXAM_SLUG, vendorId: vendor.id }
   });
 
-  // Replace questions tagged by our generator. Anything authored elsewhere
-  // (admin AI generator, hand edits via /admin-dashboard/questions) is left
-  // alone — see [[feedback_seed_upsert_published_flag]] for the pattern.
-  await db.question.deleteMany({
-    where: { examId: exam.id, generatedBy: 'manual:cca-foundations-seed' }
+  // Replace questions tagged by this generator. We also retire three
+  // legacy tags from a pre-2026-05-28 experimental population pass on
+  // the same exam:
+  //   - manual:cca-f-pdf    — PDF-sourced; conflicts with the
+  //                           [[feedback_no_exam_dumps]] rule.
+  //   - manual:cca-f-extra  — every row was teaser-flagged; experimental
+  //                           fill content with no doc-grounded refs.
+  //   - manual:cca-f-fill   — auto-generated padding from the same era.
+  // None have provenance back to official Anthropic documentation, so
+  // they're displaced by this hand-written grounded set. Anything
+  // authored via /admin-dashboard/questions (other generatedBy strings)
+  // is left untouched.
+  const REPLACED_TAGS = [
+    'manual:cca-foundations-seed',
+    'manual:cca-f-pdf',
+    'manual:cca-f-extra',
+    'manual:cca-f-fill'
+  ];
+  const wiped = await db.question.deleteMany({
+    where: { examId: exam.id, generatedBy: { in: REPLACED_TAGS } }
   });
   let teaserCount = 0;
   for (const q of QUESTIONS) {
@@ -999,9 +1014,20 @@ export async function seedCcaFoundations(db: PrismaClient): Promise<SeedResult> 
     }
   });
 
+  // legacyRetired = however many of the wiped rows weren't from a
+  // previous run of THIS seed. On a fresh DB or after the first run
+  // this is 0; the value matters when seeding into a DB that has the
+  // pre-2026-05-28 experimental tags still in it.
+  const legacyRetired = Math.max(0, wiped.count - QUESTIONS.length);
+
   return {
     vendor: existingVendor ? 'existing' : 'created',
-    exam: { slug: CCA_EXAM_SLUG, questionCount: QUESTIONS.length, teaserCount },
+    exam: {
+      slug: CCA_EXAM_SLUG,
+      questionCount: QUESTIONS.length,
+      teaserCount,
+      legacyRetired
+    },
     bundle: existingBundle ? 'updated' : 'created'
   };
 }
