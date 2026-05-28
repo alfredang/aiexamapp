@@ -1,4 +1,8 @@
 'use client';
+// Build marker: force-rebuild 2026-05-28 — Coolify Docker layer cache
+// was silently reusing the pre-d04565c image despite "successful" redeploys.
+// This comment line is the noop change that invalidates the COPY layer so
+// the exam-runner edits from PR #72 actually make it into the bundle.
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Flag, ChevronLeft, ChevronRight } from 'lucide-react';
