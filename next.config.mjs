@@ -10,7 +10,22 @@ const nextConfig = {
       // or a generic password-recovery instinct) gets pointed at the right
       // entry point instead of a bare 404.
       { source: '/reset-password', destination: '/forgot-password', permanent: true },
-      { source: '/reset-password/:rest*', destination: '/forgot-password', permanent: true }
+      { source: '/reset-password/:rest*', destination: '/forgot-password', permanent: true },
+
+      // Two Page records ended up published — /p/terms and /p/terms-of-service —
+      // both with identical "Terms of Service" content. /p/terms is the
+      // canonical (shorter, the one seeded by prisma/seed.ts). Redirect the
+      // long form so search engines don't see duplicate content. The DB row
+      // for /p/terms-of-service can be soft-deleted later; the redirect
+      // catches the URL before the route ever queries the DB. 2026-05-28.
+      { source: '/p/terms-of-service', destination: '/p/terms', permanent: true },
+
+      // Legacy /my-content URL was renamed to /user-dashboard during the
+      // 2026-05-25 refactor. Internal links were updated, but external
+      // bookmarks and old purchase emails still point at /my-content.
+      // Redirect so those don't 404.
+      { source: '/my-content', destination: '/user-dashboard', permanent: true },
+      { source: '/my-content/:rest*', destination: '/user-dashboard/:rest*', permanent: true }
     ];
   }
 };
