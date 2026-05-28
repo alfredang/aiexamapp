@@ -19,11 +19,15 @@ export async function GET(req: Request) {
     db.page.findMany({ where: { published: true }, select: { slug: true } }).catch(() => [])
   ]);
 
+  // /pricing and /faq used to live here but were never real pages — the
+  // catalog itself is the pricing surface (each bundle lists its tiers)
+  // and the FAQ is an in-page anchor on / (#faq), not a standalone route.
+  // Listing them produced two persistent 404s in the sitemap that hurt
+  // Google's trust in the rest of the URLs. Dropped 2026-05-28.
   const urls = [
     base,
     `${base}/practice-exams`,
-    `${base}/pricing`,
-    `${base}/faq`,
+    `${base}/vendors`,
     ...vendors.map((v) => `${base}/practice-exams/${v.slug}`),
     ...exams.map((e) => `${base}/practice-exams/${e.vendor.slug}/${e.slug}`),
     ...pages.map((p: any) => `${base}/p/${p.slug}`)
