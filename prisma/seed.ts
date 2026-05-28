@@ -100,7 +100,13 @@ const HIDDEN_EXAM_SLUGS = [
   'aws-mla-c01',
   'google-associate-cloud-engineer',
   'microsoft-ai-102-official',
-  'microsoft-ai-102-practice'
+  'microsoft-ai-102-practice',
+  // CCA-F is a single-exam cert (no -p1/-p2 variants — consolidated). The
+  // bundle slug equals the exam slug, so hiding the exam prevents the
+  // /practice-exams/anthropic/anthropic-cca-foundations route from
+  // resolving to the exam shell instead of the bundle. Mirrors the AWS
+  // single-exam-bundle pattern above.
+  'anthropic-cca-foundations'
 ];
 
 // Vendor allowlist for the public catalog. Any exam whose vendorSlug is NOT
@@ -206,6 +212,23 @@ const BUNDLES: BundleSeed[] = [
       { examSlug: 'microsoft-sc-200-p2', tier: 'PRACTICE', position: 2 },
       { examSlug: 'microsoft-sc-200-p3', tier: 'PRACTICE', position: 3 },
       { examSlug: 'microsoft-sc-200-p1', tier: 'VOUCHER', position: 4 }
+    ]
+  },
+  {
+    // CCA-F is a single-exam cert (intentionally not split into -p1/-p2/-p3
+    // variants — there isn't enough distinct blueprint surface to warrant
+    // three practice tests yet). Bundle slug matches the exam slug; the
+    // exam is in HIDDEN_EXAM_SLUGS so the bundle is the customer-facing
+    // surface on /practice-exams/anthropic/anthropic-cca-foundations.
+    // PRACTICE tier only — Anthropic does not yet run a paid proctored
+    // exam for this credential, so there's nothing to voucher.
+    slug: 'anthropic-cca-foundations',
+    title: 'Claude Certified Architect — Foundations (CCA-F)',
+    description:
+      'Practice exam for the Claude Certified Architect — Foundations (CCA-F) credential. 60 scenario-based questions covering the Claude Agent SDK, tool design and MCP integration, Claude Code configuration, prompt engineering, and context management. Aligned to the public Anthropic documentation at docs.anthropic.com, docs.claude.com, and modelcontextprotocol.io.',
+    price: 2000, // $20 — PRACTICE tier
+    items: [
+      { examSlug: 'anthropic-cca-foundations', tier: 'PRACTICE', position: 1 }
     ]
   },
   // ───── Auto-generated multi-variant cert bundles ─────
