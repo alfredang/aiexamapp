@@ -45,7 +45,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="container-app grid gap-6 py-12 md:grid-cols-2 md:py-20">
+    <div className="container-app grid gap-6 pb-12 pt-4 md:grid-cols-2 md:pb-20 md:pt-6">
       <div className="card p-8">
         <h1 className="text-2xl font-bold tracking-tight">Create your account</h1>
         <p className="mt-1 text-sm text-slate-600">Free to start. No credit card required.</p>
