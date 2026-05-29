@@ -58,7 +58,7 @@ const AI900_REPLACEMENT = {
 };
 
 type Result = {
-  tableauOrphans: { deleted: string[]; skipped: string[] };
+  tableauOrphans: { deleted: string[]; archived: string[]; skipped: string[] };
   awsShells: Record<string, 'unpublished' | 'already-unpublished' | 'absent'>;
   deadTrackBundles: Record<string, 'deleted' | 'unpublished' | 'absent'>;
   pmp: { countReconciled: Record<string, string>; reclassified: Record<string, Record<string, number>> };
@@ -67,7 +67,7 @@ type Result = {
 
 export async function fixKnownIssues(db: PrismaClient): Promise<Result> {
   const result: Result = {
-    tableauOrphans: { deleted: [], skipped: [] },
+    tableauOrphans: { deleted: [], archived: [], skipped: [] },
     awsShells: {},
     deadTrackBundles: {},
     pmp: { countReconciled: {}, reclassified: {} },
@@ -82,15 +82,22 @@ export async function fixKnownIssues(db: PrismaClient): Promise<Result> {
   }
   const tdsExams = await db.exam.findMany({
     where: { slug: { startsWith: 'tableau-tds-' } },
-    select: { id: true, slug: true, _count: { select: { attempts: true, orders: true } } }
+    select: { id: true, slug: true, deletedAt: true, _count: { select: { attempts: true, orders: true } } }
   });
   for (const e of tdsExams) {
     if (e._count.attempts === 0 && e._count.orders === 0) {
+      // Safe to hard-delete: no customer history.
       await db.question.deleteMany({ where: { examId: e.id } });
       await db.entitlement.deleteMany({ where: { examId: e.id } });
       await db.bundleItem.deleteMany({ where: { examId: e.id } });
       await db.exam.delete({ where: { id: e.id } });
       result.tableauOrphans.deleted.push(e.slug);
+    } else if (!e.deletedAt) {
+      // Has attempts/orders — archive (soft-delete) to hide the orphan from
+      // the catalog while preserving history. Idempotent: already-archived
+      // rows fall through to skipped.
+      await db.exam.update({ where: { id: e.id }, data: { deletedAt: new Date(), published: false } });
+      result.tableauOrphans.archived.push(e.slug);
     } else {
       result.tableauOrphans.skipped.push(e.slug);
     }
