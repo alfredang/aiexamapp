@@ -11,7 +11,7 @@ export function Nav() {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
       <div className="flex h-24 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center font-semibold tracking-tight" aria-label="ExamNova home">
+        <Link href="/" className="flex items-center gap-3 font-semibold tracking-tight" aria-label="Tertiary Infotech Academy home">
           <Logo />
         </Link>
         {!inBackend && (
@@ -37,15 +37,13 @@ function Logo() {
   return (
     <>
       <img
-        src="/logo-light.webp"
-        alt="ExamNova"
-        className="h-20 w-auto shrink-0 object-contain dark:hidden"
+        src="/logo-mark.png"
+        alt="Tertiary Infotech Academy"
+        className="h-12 w-12 shrink-0 object-contain"
       />
-      <img
-        src="/logo-dark.webp"
-        alt="ExamNova"
-        className="hidden h-20 w-auto shrink-0 object-contain dark:block"
-      />
+      <span className="text-lg font-semibold text-slate-900 dark:text-white sm:text-xl">
+        Tertiary Infotech Academy
+      </span>
     </>
   );
 }
