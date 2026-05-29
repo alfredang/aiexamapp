@@ -43,6 +43,27 @@ function searchClause(q: string) {
   return tokens.length === 1 ? tokenOr(tokens[0]) : { AND: tokens.map(tokenOr) };
 }
 
+/** Relation-filter fragment for the question-content dimension. Orthogonal to
+ *  the lifecycle View (active/inactive/archived) — this tracks whether the
+ *  exam's *questions* are ready.
+ *    ''       → any (no constraint)
+ *    'clean'  → has ≥1 PUBLISHED question and 0 DRAFT (ready to ship)
+ *    'drafts' → has ≥1 DRAFT question (work outstanding)
+ *    'empty'  → has 0 questions at all (a bare shell)
+ */
+function qstatusClause(qs: string) {
+  switch (qs) {
+    case 'clean':
+      return { questions: { some: { status: 'PUBLISHED' as const }, none: { status: 'DRAFT' as const } } };
+    case 'drafts':
+      return { questions: { some: { status: 'DRAFT' as const } } };
+    case 'empty':
+      return { questions: { none: {} } };
+    default:
+      return {};
+  }
+}
+
 async function deleteExam(formData: FormData) {
   'use server';
   const session = await auth();
@@ -108,6 +129,7 @@ async function bulkExamAction(formData: FormData) {
     const fVendor = String(formData.get('filterVendor') || '');
     const fLevel = String(formData.get('filterLevel') || '');
     const fQ = String(formData.get('filterQ') || '').trim();
+    const fQstatus = String(formData.get('filterQstatus') || '');
     const rawView = String(formData.get('filterView') || '');
     const fView: 'active' | 'inactive' | 'archived' | 'all' =
       rawView === 'inactive' || rawView === 'archived' || rawView === 'all'
@@ -123,7 +145,8 @@ async function bulkExamAction(formData: FormData) {
             : {}),
       ...(fVendor ? { vendor: { slug: fVendor } } : {}),
       ...(fLevel ? { level: fLevel } : {}),
-      ...searchClause(fQ)
+      ...searchClause(fQ),
+      ...qstatusClause(fQstatus)
     };
     const matching = await db.exam.findMany({ where, select: { id: true } });
     ids = matching.map((e) => e.id);
@@ -259,7 +282,7 @@ function fmtDate(d: Date | null | undefined): string {
 export default async function AdminExamsPage({
   searchParams
 }: {
-  searchParams: Promise<{ vendor?: string; level?: string; q?: string; view?: string; archived?: string; status?: string; page?: string }>;
+  searchParams: Promise<{ vendor?: string; level?: string; q?: string; view?: string; qstatus?: string; archived?: string; status?: string; page?: string }>;
 }) {
   const sp = await searchParams;
   const vendorFilter = sp.vendor || '';
@@ -283,12 +306,20 @@ export default async function AdminExamsPage({
     return 'active'; // default
   }
   const view: View = resolveView();
+
+  // Question-readiness dimension, orthogonal to the lifecycle View. Surfaced
+  // both as a "Questions" dropdown and as clickable tracker chips up top.
+  type QStatus = '' | 'clean' | 'drafts' | 'empty';
+  const qstatus: QStatus = (['clean', 'drafts', 'empty'] as const).includes(sp.qstatus as any)
+    ? (sp.qstatus as QStatus)
+    : '';
+
   const requestedPage = Math.max(1, Number(sp.page || 1) || 1);
 
   // Build the `where` for a given view, sharing the search + vendor + level
   // filters. Extracted so the empty-state hint can count how many rows would
   // match in OTHER views with the same search.
-  function whereFor(v: View) {
+  function buildWhere(v: View, qs: QStatus = qstatus) {
     return {
       ...(v === 'active'
         ? { deletedAt: null, published: true }
@@ -299,11 +330,23 @@ export default async function AdminExamsPage({
             : {}),
       ...(vendorFilter ? { vendor: { slug: vendorFilter } } : {}),
       ...(levelFilter ? { level: levelFilter } : {}),
-      ...searchClause(q)
+      ...searchClause(q),
+      ...qstatusClause(qs)
     };
   }
 
-  const where = whereFor(view);
+  const where = buildWhere(view);
+
+  // Tracker chip counts — respect the vendor/level/search filters, but each
+  // chip carries its own lifecycle View + question status so the numbers stay
+  // navigational. Plain COUNTs (no row hydration), run in parallel.
+  const [trkActive, trkInactive, trkArchived, trkDrafts, trkEmpty] = await Promise.all([
+    db.exam.count({ where: buildWhere('active', '') }),
+    db.exam.count({ where: buildWhere('inactive', '') }),
+    db.exam.count({ where: buildWhere('archived', '') }),
+    db.exam.count({ where: buildWhere('all', 'drafts') }),
+    db.exam.count({ where: buildWhere('all', 'empty') })
+  ]);
 
   const [vendors, totalCount] = await Promise.all([
     db.vendor.findMany({ orderBy: { name: 'asc' } }),
@@ -319,7 +362,7 @@ export default async function AdminExamsPage({
   let viewHints: { view: View; count: number }[] = [];
   if (totalCount === 0 && hasFilters) {
     const others = (['active', 'inactive', 'archived', 'all'] as const).filter((v) => v !== view);
-    const counts = await Promise.all(others.map((v) => db.exam.count({ where: whereFor(v) })));
+    const counts = await Promise.all(others.map((v) => db.exam.count({ where: buildWhere(v, qstatus) })));
     viewHints = others.map((v, i) => ({ view: v, count: counts[i] })).filter((h) => h.count > 0);
   }
 
@@ -328,31 +371,45 @@ export default async function AdminExamsPage({
   const exams = await loadExams(where, (page - 1) * PAGE_SIZE, PAGE_SIZE);
 
   // baseParams omits view when it's the default ('active') for cleaner URLs.
-  const baseParams = { vendor: vendorFilter, level: levelFilter, q, view: view === 'active' ? undefined : view };
+  const baseParams = { vendor: vendorFilter, level: levelFilter, q, view: view === 'active' ? undefined : view, qstatus: qstatus || undefined };
   const buildHref = (p: number) =>
     `/admin-dashboard/exams${buildQS({ ...baseParams, page: p === 1 ? undefined : p })}`;
 
   const viewParam = view === 'active' ? undefined : view;
+  const qstatusParam = qstatus || undefined;
+  // Tracker chips set both the lifecycle view and the question status at once.
+  const chipHref = (v: View, qs: QStatus) =>
+    `/admin-dashboard/exams${buildQS({ vendor: vendorFilter, level: levelFilter, q, view: v === 'active' ? undefined : v, qstatus: qs || undefined })}`;
+  const QSTATUS_LABEL: Record<Exclude<QStatus, ''>, string> = {
+    clean: 'all published',
+    drafts: 'has draft Qs',
+    empty: 'no questions'
+  };
   const activeFilters = [
     vendorFilter && {
       key: 'vendor',
       label: vendors.find((v) => v.slug === vendorFilter)?.name ?? vendorFilter,
-      clearHref: `/admin-dashboard/exams${buildQS({ level: levelFilter, q, view: viewParam })}`
+      clearHref: `/admin-dashboard/exams${buildQS({ level: levelFilter, q, view: viewParam, qstatus: qstatusParam })}`
     },
     levelFilter && {
       key: 'level',
       label: levelFilter,
-      clearHref: `/admin-dashboard/exams${buildQS({ vendor: vendorFilter, q, view: viewParam })}`
+      clearHref: `/admin-dashboard/exams${buildQS({ vendor: vendorFilter, q, view: viewParam, qstatus: qstatusParam })}`
     },
     q && {
       key: 'search',
       label: q,
-      clearHref: `/admin-dashboard/exams${buildQS({ vendor: vendorFilter, level: levelFilter, view: viewParam })}`
+      clearHref: `/admin-dashboard/exams${buildQS({ vendor: vendorFilter, level: levelFilter, view: viewParam, qstatus: qstatusParam })}`
     },
     view !== 'active' && {
       key: 'view',
       label: view,
-      clearHref: `/admin-dashboard/exams${buildQS({ vendor: vendorFilter, level: levelFilter, q })}`
+      clearHref: `/admin-dashboard/exams${buildQS({ vendor: vendorFilter, level: levelFilter, q, qstatus: qstatusParam })}`
+    },
+    qstatus && {
+      key: 'qstatus',
+      label: QSTATUS_LABEL[qstatus],
+      clearHref: `/admin-dashboard/exams${buildQS({ vendor: vendorFilter, level: levelFilter, q, view: viewParam })}`
     }
   ].filter(Boolean) as { key: string; label: string; clearHref: string }[];
 
@@ -565,6 +622,35 @@ export default async function AdminExamsPage({
         }
       />
 
+      {/* Question-readiness tracker — click a chip to filter the table.
+          Counts respect the active vendor/level/search filters. */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <span className="text-[12px] font-medium text-slate-500 dark:text-slate-400">Tracker:</span>
+        {(
+          [
+            { key: 'active', label: 'Active', count: trkActive, href: chipHref('active', ''), on: view === 'active' && !qstatus, dot: 'bg-emerald-500' },
+            { key: 'inactive', label: 'Inactive', count: trkInactive, href: chipHref('inactive', ''), on: view === 'inactive' && !qstatus, dot: 'bg-amber-500' },
+            { key: 'archived', label: 'Archived', count: trkArchived, href: chipHref('archived', ''), on: view === 'archived' && !qstatus, dot: 'bg-slate-400' },
+            { key: 'drafts', label: 'Draft questions', count: trkDrafts, href: chipHref('all', 'drafts'), on: qstatus === 'drafts', dot: 'bg-rose-500' },
+            { key: 'empty', label: 'No questions', count: trkEmpty, href: chipHref('all', 'empty'), on: qstatus === 'empty', dot: 'bg-slate-300 dark:bg-slate-600' }
+          ] as const
+        ).map((c) => (
+          <Link
+            key={c.key}
+            href={c.href}
+            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[12px] transition ${
+              c.on
+                ? 'border-blue-400 bg-blue-50 text-blue-900 dark:border-blue-500 dark:bg-blue-950/40 dark:text-blue-200'
+                : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800'
+            }`}
+          >
+            <span className={`h-2 w-2 rounded-full ${c.dot}`} />
+            {c.label}
+            <span className="font-semibold tabular-nums">{c.count}</span>
+          </Link>
+        ))}
+      </div>
+
       <FilterBar
         resetHref={activeFilters.length > 0 ? '/admin-dashboard/exams' : undefined}
         activeFilters={activeFilters}
@@ -600,6 +686,14 @@ export default async function AdminExamsPage({
             <option value="all">All</option>
           </select>
         </FilterField>
+        <FilterField label="Questions">
+          <select name="qstatus" defaultValue={qstatus} className="input-sm">
+            <option value="">Any</option>
+            <option value="clean">All published</option>
+            <option value="drafts">Has drafts</option>
+            <option value="empty">No questions</option>
+          </select>
+        </FilterField>
       </FilterBar>
 
       {/* Bulk form visible on Active / Inactive / All views. Hidden on
@@ -618,6 +712,7 @@ export default async function AdminExamsPage({
           <input type="hidden" name="filterLevel" value={levelFilter} />
           <input type="hidden" name="filterQ" value={q} />
           <input type="hidden" name="filterView" value={view} />
+          <input type="hidden" name="filterQstatus" value={qstatus} />
           <label className="inline-flex cursor-pointer items-center gap-1.5 text-slate-700 dark:text-slate-200">
             <SelectAllCheckbox formId={BULK_FORM_ID} className="h-4 w-4 accent-blue-600" />
             Select all
