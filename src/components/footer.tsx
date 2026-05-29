@@ -49,8 +49,8 @@ export async function Footer() {
       <div className="container-app grid gap-8 py-10 md:grid-cols-12">
         <div className="md:col-span-3">
           <div className="mb-3 flex items-center gap-2">
-            <img src="/logo-mark.png" alt="Tertiary Infotech Academy" className="h-10 w-10 shrink-0 object-contain" />
-            <span className="text-base font-semibold text-slate-900 dark:text-white">Tertiary Infotech Academy</span>
+            <img src="/logo-mark.png" alt="Tertiary Exams" className="h-10 w-10 shrink-0 object-contain" />
+            <span className="text-base font-semibold text-slate-900 dark:text-white">Tertiary Exams</span>
           </div>
           <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Practice smarter for your next certification.</p>
           <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
