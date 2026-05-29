@@ -158,27 +158,34 @@ export default async function AdminBundlesPage({ searchParams }: { searchParams:
   }
   const view: View = resolveView();
 
-  const where: Prisma.BundleWhereInput = {};
+  // filterWhere = everything except the published filter, so the tracker
+  // chips can count Published vs Draft within the same vendor/level/search
+  // scope. `where` then layers the view's published constraint on top.
+  const filterWhere: Prisma.BundleWhereInput = {};
   if (q) {
-    where.OR = [
+    filterWhere.OR = [
       { title: { contains: q, mode: 'insensitive' } },
       { slug: { contains: q, mode: 'insensitive' } }
     ];
   }
+  if (vendorFilter) {
+    filterWhere.items = { some: { exam: { vendor: { slug: vendorFilter } } } };
+  }
+  if (levelFilter) {
+    filterWhere.items = { some: { exam: { ...(vendorFilter ? { vendor: { slug: vendorFilter } } : {}), level: levelFilter } } };
+  }
+
+  const where: Prisma.BundleWhereInput = { ...filterWhere };
   if (view === 'active') where.published = true;
   else if (view === 'inactive') where.published = false;
   // view === 'all' → no filter on published
-  if (vendorFilter) {
-    where.items = { ...(where.items as any), some: { exam: { vendor: { slug: vendorFilter } } } };
-  }
-  if (levelFilter) {
-    where.items = { ...(where.items as any), some: { exam: { ...(vendorFilter ? { vendor: { slug: vendorFilter } } : {}), level: levelFilter } } };
-  }
 
-  const [vendors, total, bundles] = await Promise.all([
+  const [vendors, total, bundles, trkPublished, trkDraft] = await Promise.all([
     db.vendor.findMany({ orderBy: { name: 'asc' } }),
     db.bundle.count({ where }),
-    loadBundles(where, (page - 1) * PAGE_SIZE, PAGE_SIZE)
+    loadBundles(where, (page - 1) * PAGE_SIZE, PAGE_SIZE),
+    db.bundle.count({ where: { ...filterWhere, published: true } }),
+    db.bundle.count({ where: { ...filterWhere, published: false } })
   ]);
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
@@ -186,6 +193,10 @@ export default async function AdminBundlesPage({ searchParams }: { searchParams:
   const baseParams = { q, view: view === 'active' ? undefined : view, vendor: vendorFilter, level: levelFilter };
   const buildHref = (p: number) =>
     `/admin-dashboard/bundles${buildQS({ ...baseParams, page: p === 1 ? undefined : p })}`;
+  // Tracker chips set the lifecycle View (published = active, draft = inactive)
+  // while preserving the vendor/level/search filters.
+  const trkHref = (v: 'active' | 'inactive') =>
+    `/admin-dashboard/bundles${buildQS({ q, vendor: vendorFilter, level: levelFilter, view: v === 'active' ? undefined : v })}`;
 
   const activeFilters = [
     vendorFilter && {
@@ -385,6 +396,32 @@ export default async function AdminBundlesPage({ searchParams }: { searchParams:
           </Link>
         }
       />
+
+      {/* Bundle status tracker — click a chip to filter by published/draft.
+          Counts respect the active vendor/level/search filters. */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <span className="text-[12px] font-medium text-slate-500 dark:text-slate-400">Tracker:</span>
+        {(
+          [
+            { key: 'active', label: 'Published', count: trkPublished, href: trkHref('active'), on: view === 'active', dot: 'bg-emerald-500' },
+            { key: 'inactive', label: 'Draft', count: trkDraft, href: trkHref('inactive'), on: view === 'inactive', dot: 'bg-rose-500' }
+          ] as const
+        ).map((c) => (
+          <Link
+            key={c.key}
+            href={c.href}
+            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[12px] transition ${
+              c.on
+                ? 'border-blue-400 bg-blue-50 text-blue-900 dark:border-blue-500 dark:bg-blue-950/40 dark:text-blue-200'
+                : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800'
+            }`}
+          >
+            <span className={`h-2 w-2 rounded-full ${c.dot}`} />
+            {c.label}
+            <span className="font-semibold tabular-nums">{c.count}</span>
+          </Link>
+        ))}
+      </div>
 
       <FilterBar resetHref={activeFilters.length > 0 ? '/admin-dashboard/bundles' : undefined} activeFilters={activeFilters}>
         <FilterField label="Vendor">
