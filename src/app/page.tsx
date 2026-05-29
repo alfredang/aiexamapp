@@ -69,7 +69,6 @@ export default async function HomePage() {
         </div>
         <div className="container-app relative grid gap-10 py-16 md:grid-cols-2 md:py-24">
           <div>
-            <span className="badge-brand mb-4">Original AI-curated practice content</span>
             <h1 className="text-4xl font-bold leading-tight tracking-tight md:text-6xl">
               Practice Smarter <br />for Your <span className="gradient-text">Next Certification</span>
             </h1>
