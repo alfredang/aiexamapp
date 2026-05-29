@@ -18,25 +18,28 @@ const SOCIAL_IMAGE_PRIMARY = '/og-image.png';
 const SOCIAL_IMAGE_FALLBACK = '/hero.webp';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const fallbackTitle = 'ExamNova — Practice Smarter for Your Next Certification';
+  const fallbackTitle = 'Tertiary Exams — Practice Smarter for Your Next Certification';
   const fallbackDescription =
-    'Original practice questions for AWS, Microsoft, Cisco, CompTIA, Google Cloud, Anthropic and more.';
-  const fallbackOgDescription = 'Original practice questions for IT certifications.';
+    'Original, blueprint-aligned practice questions for AWS, Microsoft, Cisco, CompTIA, Google Cloud, Kubernetes, Anthropic and more. By Tertiary Infotech Academy.';
+  const fallbackOgDescription = 'Original practice exams for IT certifications by Tertiary Infotech Academy.';
+  const fallbackKeywords =
+    'IT certification practice exams, AWS practice exam, Azure practice exam, CompTIA practice exam, Cisco practice exam, Google Cloud practice exam, Kubernetes practice exam, CKAD, CKA, SAA-C03, AZ-900, exam voucher, Tertiary Infotech Academy, Tertiary Exams';
+  const siteName = 'Tertiary Exams';
 
   try {
     const s = await getAllSettings();
     const title = s.SITE_HOME_TITLE || fallbackTitle;
-    const ogTitle = s.SITE_HOME_TITLE || 'ExamNova';
+    const ogTitle = s.SITE_HOME_TITLE || siteName;
     const ogDescription = s.SITE_HOME_DESCRIPTION || fallbackOgDescription;
     return {
       title,
       description: s.SITE_HOME_DESCRIPTION || fallbackDescription,
-      keywords: s.SITE_HOME_KEYWORDS || undefined,
+      keywords: s.SITE_HOME_KEYWORDS || fallbackKeywords,
       openGraph: {
         title: ogTitle,
         description: ogDescription,
         type: 'website',
-        siteName: 'ExamNova',
+        siteName,
         images: [
           { url: SOCIAL_IMAGE_PRIMARY, width: 1200, height: 630, alt: ogTitle },
           { url: SOCIAL_IMAGE_FALLBACK, width: 1200, height: 630, alt: ogTitle }
@@ -53,19 +56,20 @@ export async function generateMetadata(): Promise<Metadata> {
     return {
       title: fallbackTitle,
       description: fallbackDescription,
+      keywords: fallbackKeywords,
       openGraph: {
-        title: 'ExamNova',
+        title: siteName,
         description: fallbackOgDescription,
         type: 'website',
-        siteName: 'ExamNova',
+        siteName,
         images: [
-          { url: SOCIAL_IMAGE_PRIMARY, width: 1200, height: 630, alt: 'ExamNova' },
-          { url: SOCIAL_IMAGE_FALLBACK, width: 1200, height: 630, alt: 'ExamNova' }
+          { url: SOCIAL_IMAGE_PRIMARY, width: 1200, height: 630, alt: siteName },
+          { url: SOCIAL_IMAGE_FALLBACK, width: 1200, height: 630, alt: siteName }
         ]
       },
       twitter: {
         card: 'summary_large_image',
-        title: 'ExamNova',
+        title: siteName,
         description: fallbackOgDescription,
         images: [SOCIAL_IMAGE_PRIMARY, SOCIAL_IMAGE_FALLBACK]
       }
