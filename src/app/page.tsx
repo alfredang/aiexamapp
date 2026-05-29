@@ -67,7 +67,7 @@ export default async function HomePage() {
         <div className="pointer-events-none absolute right-0 top-0 hidden h-full w-1/2 text-blue-200/40 md:block dark:text-blue-400/15 md:dark:hidden">
           <DotPattern className="h-full w-full" />
         </div>
-        <div className="container-app relative grid gap-10 pb-16 pt-4 md:grid-cols-2 md:pb-24 md:pt-6">
+        <div className="container-app relative grid gap-10 pb-6 pt-4 md:grid-cols-2 md:pb-10 md:pt-6">
           <div>
             <h1 className="text-4xl font-bold leading-tight tracking-tight md:text-6xl">
               Practice Smarter <br />for Your <span className="gradient-text">Next Certification</span>
@@ -111,8 +111,8 @@ export default async function HomePage() {
       </section>
 
       {/* Vendors */}
-      <section className="container-app py-14">
-        <div className="mb-6 flex items-end justify-between">
+      <section className="container-app py-8">
+        <div className="mb-4 flex items-end justify-between">
           <h2 className="text-2xl font-semibold">Browse by vendor</h2>
           <Link href="/vendors" className="text-sm text-blue-600 hover:underline">View all</Link>
         </div>
