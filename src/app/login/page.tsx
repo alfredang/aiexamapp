@@ -93,7 +93,7 @@ function LoginInner() {
       </div>
 
       <div className="card p-8">
-        <h1 className="text-2xl font-bold tracking-tight">New to ExamNova?</h1>
+        <h1 className="text-2xl font-bold tracking-tight">New to Tertiary Exams?</h1>
         <p className="mt-1 text-sm text-slate-600">Create a free account to save progress, retake teasers unlimited times, and unlock paid practice exams.</p>
         <ul className="mt-4 space-y-2 text-sm text-slate-700">
           <li>✓ Free practice teaser on every exam</li>
