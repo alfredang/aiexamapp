@@ -82,7 +82,8 @@ export default async function HomePage() {
             </form>
             <div className="mt-5 flex flex-wrap items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
               <span className="inline-flex items-center gap-1"><ShieldCheck className="h-4 w-4" /> Money-back guarantee</span>
-              <span className="inline-flex items-center gap-1"><Sparkles className="h-4 w-4" /> AI-curated content</span>
+              <span className="inline-flex items-center gap-1"><Sparkles className="h-4 w-4" /> Exam Mode</span>
+              <span className="inline-flex items-center gap-1"><Sparkles className="h-4 w-4" /> Practice Mode</span>
               <span className="inline-flex items-center gap-1"><Award className="h-4 w-4" /> 100+ certifications</span>
             </div>
           </div>
