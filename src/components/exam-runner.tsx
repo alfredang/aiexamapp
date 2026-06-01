@@ -285,7 +285,15 @@ export function ExamRunner(props: ExamRunnerProps) {
             <button onClick={checkAnswer} className="btn-outline mt-4 text-xs">Save answer</button>
           )}
           <div className="mt-6 flex items-center justify-between">
-            <button onClick={() => setIdx(Math.max(0, idx - 1))} className="btn-outline" disabled={idx === 0}><ChevronLeft className="h-4 w-4" /> Previous</button>
+            {/* Hide Previous entirely on the first question (nothing to go
+                back to). The empty <div> keeps it occupying the left slot so
+                justify-between still right-aligns Next. Mirrors the Next-hide
+                on the last question below. */}
+            {idx > 0 ? (
+              <button onClick={() => setIdx(Math.max(0, idx - 1))} className="btn-outline"><ChevronLeft className="h-4 w-4" /> Previous</button>
+            ) : (
+              <div />
+            )}
             {/* Hide Next entirely on the last question — there's nothing
                 to navigate to. Submit button stays available in the header
                 bar for the explicit-finish action. (Per user feedback
