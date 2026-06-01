@@ -16,9 +16,11 @@ const db = new PrismaClient();
 async function main() {
   const result = await seedCcaFoundations(db);
   console.log(`✓ vendor: ${result.vendor}`);
-  console.log(`✓ exam ${result.exam.slug}: ${result.exam.questionCount} questions (${result.exam.teaserCount} teaser)`);
-  if (result.exam.legacyRetired > 0) {
-    console.log(`✓ retired ${result.exam.legacyRetired} legacy pre-seed question(s) (cca-f-pdf / -extra / -fill)`);
+  for (const e of result.exams) {
+    console.log(`✓ exam ${e.slug}: ${e.questionCount} questions (${e.teaserCount} teaser)`);
+    if (e.legacyRetired > 0) {
+      console.log(`  ↳ retired ${e.legacyRetired} legacy pre-seed question(s) (cca-f-pdf / -extra / -fill)`);
+    }
   }
   console.log(`✓ bundle: ${result.bundle}`);
 }

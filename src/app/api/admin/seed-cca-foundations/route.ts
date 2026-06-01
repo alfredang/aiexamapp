@@ -7,9 +7,10 @@ export const runtime = 'nodejs';
 
 /**
  * One-shot admin endpoint to seed the Claude Certified Architect —
- * Foundations (CCA-F) bundle (vendor + 1 exam + 60 questions + bundle)
- * into the current database. Idempotent — safe to call repeatedly;
- * rewrites questions tagged `generatedBy: 'manual:cca-foundations-seed'`.
+ * Foundations (CCA-F) bundle (vendor + 3 practice-exam variants + 180
+ * questions + bundle) into the current database. Idempotent — safe to call
+ * repeatedly; rewrites questions tagged
+ * `manual:cca-foundations-{seed,p2-seed,p3-seed}`.
  *
  * Intended for bootstrapping the production DB after deploy without
  * shelling into the container.
