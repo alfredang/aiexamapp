@@ -101,12 +101,13 @@ const HIDDEN_EXAM_SLUGS = [
   'google-associate-cloud-engineer',
   'microsoft-ai-102-official',
   'microsoft-ai-102-practice',
-  // CCA-F is a single-exam cert (no -p1/-p2 variants — consolidated). The
-  // bundle slug equals the exam slug, so hiding the exam prevents the
-  // /practice-exams/anthropic/anthropic-cca-foundations route from
-  // resolving to the exam shell instead of the bundle. Mirrors the AWS
-  // single-exam-bundle pattern above.
-  'anthropic-cca-foundations'
+  // CCA-F is a 3-variant bundle (P1 keeps the bare slug; P2/P3 added 2026-06).
+  // The bundle slug equals the P1 exam slug, so hiding all three exams keeps
+  // the /practice-exams/anthropic/anthropic-cca-foundations route resolving to
+  // the bundle, not an exam shell. Mirrors the AWS single-exam-bundle pattern.
+  'anthropic-cca-foundations',
+  'anthropic-cca-foundations-p2',
+  'anthropic-cca-foundations-p3'
 ];
 
 // Vendor allowlist for the public catalog. Any exam whose vendorSlug is NOT
@@ -215,20 +216,20 @@ const BUNDLES: BundleSeed[] = [
     ]
   },
   {
-    // CCA-F is a single-exam cert (intentionally not split into -p1/-p2/-p3
-    // variants — there isn't enough distinct blueprint surface to warrant
-    // three practice tests yet). Bundle slug matches the exam slug; the
-    // exam is in HIDDEN_EXAM_SLUGS so the bundle is the customer-facing
-    // surface on /practice-exams/anthropic/anthropic-cca-foundations.
-    // PRACTICE tier only — Anthropic does not yet run a paid proctored
-    // exam for this credential, so there's nothing to voucher.
+    // CCA-F is a 3-variant practice bundle (P2/P3 added 2026-06). The bundle
+    // slug matches the P1 exam slug; all three variant exams are in
+    // HIDDEN_EXAM_SLUGS so the bundle is the customer-facing surface on
+    // /practice-exams/anthropic/anthropic-cca-foundations. PRACTICE tier only —
+    // Anthropic does not run a paid proctored exam for this credential.
     slug: 'anthropic-cca-foundations',
     title: 'Claude Certified Architect — Foundations (CCA-F)',
     description:
-      'Practice exam for the Claude Certified Architect — Foundations (CCA-F) credential. 60 scenario-based questions covering the Claude Agent SDK, tool design and MCP integration, Claude Code configuration, prompt engineering, and context management. Aligned to the public Anthropic documentation at docs.anthropic.com, docs.claude.com, and modelcontextprotocol.io.',
+      'Practice bundle for the Claude Certified Architect — Foundations (CCA-F) credential. 180 scenario-based questions across 3 practice exams covering the Claude Agent SDK, tool design and MCP integration, Claude Code configuration, prompt engineering, and context management. Aligned to the public Anthropic documentation at docs.anthropic.com, docs.claude.com, and modelcontextprotocol.io.',
     price: 2000, // $20 — PRACTICE tier
     items: [
-      { examSlug: 'anthropic-cca-foundations', tier: 'PRACTICE', position: 1 }
+      { examSlug: 'anthropic-cca-foundations', tier: 'PRACTICE', position: 1 },
+      { examSlug: 'anthropic-cca-foundations-p2', tier: 'PRACTICE', position: 2 },
+      { examSlug: 'anthropic-cca-foundations-p3', tier: 'PRACTICE', position: 3 }
     ]
   },
   // ───── Auto-generated multi-variant cert bundles ─────
@@ -902,11 +903,27 @@ const EXAMS: ExamSeed[] = [
     ]
   },
   // ───── Anthropic — Claude Certified Architect — Foundations ─────
-  // Single consolidated exam — no multi-variant -p1/-p2 split (this cert
-  // doesn't have enough question content to warrant variants).
+  // 3-variant practice bundle (P2/P3 added 2026-06). Variant 1 keeps the bare
+  // slug `anthropic-cca-foundations`; all three share CLAUDE_ARCHITECT_DOMAINS.
+  // Question content is seeded by src/lib/seed/cca-foundations-questions.ts
+  // (and its -p2/-p3 sibling modules) via /api/admin/seed-cca-foundations.
   {
     vendorSlug: 'anthropic', slug: 'anthropic-cca-foundations', code: 'CCA-F',
     title: 'Claude Certified Architect — Foundations',
+    description: CLAUDE_ARCHITECT_DESCRIPTION,
+    level: 'Foundational', durationMinutes: 120, passingScore: 72, questionCount: 60,
+    domains: CLAUDE_ARCHITECT_DOMAINS
+  },
+  {
+    vendorSlug: 'anthropic', slug: 'anthropic-cca-foundations-p2', code: 'CCA-F-P2',
+    title: 'Claude Certified Architect — Foundations (Practice Exam 2)',
+    description: CLAUDE_ARCHITECT_DESCRIPTION,
+    level: 'Foundational', durationMinutes: 120, passingScore: 72, questionCount: 60,
+    domains: CLAUDE_ARCHITECT_DOMAINS
+  },
+  {
+    vendorSlug: 'anthropic', slug: 'anthropic-cca-foundations-p3', code: 'CCA-F-P3',
+    title: 'Claude Certified Architect — Foundations (Practice Exam 3)',
     description: CLAUDE_ARCHITECT_DESCRIPTION,
     level: 'Foundational', durationMinutes: 120, passingScore: 72, questionCount: 60,
     domains: CLAUDE_ARCHITECT_DOMAINS

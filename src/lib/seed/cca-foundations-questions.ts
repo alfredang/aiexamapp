@@ -1,8 +1,10 @@
 /**
  * Claude Certified Architect — Foundations (CCA-F) bundle seed —
- * vendor, single consolidated practice exam, bundle, and 60
- * blueprint-aligned questions. Idempotent: replaces rows tagged
- * `generatedBy: 'manual:cca-foundations-seed'` and upserts catalog rows.
+ * vendor, 3 practice-exam variants (P1 + P2 + P3, 180 blueprint-aligned
+ * questions total), and the bundle. Idempotent: replaces rows tagged
+ * `generatedBy: 'manual:cca-foundations-{seed,p2-seed,p3-seed}'` and
+ * upserts catalog rows. P2/P3 question content lives in the sibling
+ * `cca-foundations-p2-questions.ts` / `-p3-questions.ts` modules.
  *
  * Exported as `seedCcaFoundations(db)` so the same code path is reachable
  * from the standalone CLI shim (`prisma/seeds/cca-foundations.ts`) and the
@@ -26,6 +28,8 @@
  * Anthropic documentation. See [[feedback_no_exam_dumps]] for rationale.
  */
 import { PrismaClient, QStatus, QType } from '@prisma/client';
+import { CCA_P2 } from './cca-foundations-p2-questions';
+import { CCA_P3 } from './cca-foundations-p3-questions';
 
 type Opt = { id: string; text: string };
 type Q = {
@@ -881,24 +885,65 @@ const QUESTIONS: Q[] = [
 ];
 
 // ───────────────────── Exam shell config ─────────────────────
-const CCA_EXAM_SLUG = 'anthropic-cca-foundations';
-const CCA_EXAM_CODE = 'CCA-F';
-const CCA_EXAM_TITLE = 'Claude Certified Architect — Foundations';
+// CCA-F is now a 3-variant practice bundle (was a single consolidated exam
+// pre-2026-06). Variant 1 keeps the original slug `anthropic-cca-foundations`
+// (preserves its history, teaser flow, and bundle-slug = exam-slug HIDDEN
+// pattern); P2/P3 are net-new sibling exams. All three share the same
+// CCA_DOMAINS blueprint. Each variant's question domain strings must match
+// CCA_DOMAINS exactly so the per-domain results breakdown maps.
 const CCA_EXAM_DESC =
   'Foundational certification covering Claude Code, the Claude Agent SDK, the Claude API, and the Model Context Protocol (MCP). Scenario-based questions test architectural judgment for production deployments — agentic loops, tool design, prompt engineering, structured output, and context management.';
+
+type Variant = {
+  slug: string;
+  code: string;
+  title: string;
+  questions: Q[];
+  tag: string;
+  // Legacy tags retired on this exam (counted as legacyRetired). Only the
+  // original variant carries pre-2026-05-28 experimental tags.
+  retiredTags: string[];
+};
+
+const VARIANTS: Variant[] = [
+  {
+    slug: 'anthropic-cca-foundations',
+    code: 'CCA-F',
+    title: 'Claude Certified Architect — Foundations',
+    questions: QUESTIONS,
+    tag: 'manual:cca-foundations-seed',
+    retiredTags: ['manual:cca-foundations-seed', 'manual:cca-f-pdf', 'manual:cca-f-extra', 'manual:cca-f-fill']
+  },
+  {
+    slug: 'anthropic-cca-foundations-p2',
+    code: 'CCA-F-P2',
+    title: 'Claude Certified Architect — Foundations (Practice Exam 2)',
+    questions: CCA_P2 as unknown as Q[],
+    tag: 'manual:cca-foundations-p2-seed',
+    retiredTags: ['manual:cca-foundations-p2-seed']
+  },
+  {
+    slug: 'anthropic-cca-foundations-p3',
+    code: 'CCA-F-P3',
+    title: 'Claude Certified Architect — Foundations (Practice Exam 3)',
+    questions: CCA_P3 as unknown as Q[],
+    tag: 'manual:cca-foundations-p3-seed',
+    retiredTags: ['manual:cca-foundations-p3-seed']
+  }
+];
 
 const CCA_BUNDLE = {
   slug: 'anthropic-cca-foundations',
   title: 'Claude Certified Architect — Foundations (CCA-F)',
   description:
-    'Practice exam for the Claude Certified Architect — Foundations (CCA-F) credential. 60 scenario-based questions covering the Claude Agent SDK, tool design and MCP integration, Claude Code configuration, prompt engineering, and context management. Aligned to the public Anthropic documentation at docs.anthropic.com, docs.claude.com, and modelcontextprotocol.io.',
+    'Practice bundle for the Claude Certified Architect — Foundations (CCA-F) credential. 180 scenario-based questions across 3 practice exams covering the Claude Agent SDK, tool design and MCP integration, Claude Code configuration, prompt engineering, and context management. Aligned to the public Anthropic documentation at docs.anthropic.com, docs.claude.com, and modelcontextprotocol.io.',
   price: 2000 // $20 PRACTICE tier. No voucher tier — Anthropic does not yet run a paid proctored exam for this credential.
 };
 
 // ───────────────────── Seed entry point ─────────────────────
 export type SeedResult = {
   vendor: 'created' | 'updated' | 'existing';
-  exam: { slug: string; questionCount: number; teaserCount: number; legacyRetired: number };
+  exams: { slug: string; questionCount: number; teaserCount: number; legacyRetired: number }[];
   bundle: 'created' | 'updated';
 };
 
@@ -917,69 +962,64 @@ export async function seedCcaFoundations(db: PrismaClient): Promise<SeedResult> 
         }
       });
 
-  // Upsert the exam shell (the prisma/seed.ts EXAM_SEEDS row keeps it in
-  // sync on every deploy too; this duplicate write is intentional so the
-  // standalone seed CLI works on a fresh DB without running the main seed).
-  // Note: we set published: false here because the bundle is the customer-
-  // facing product (HIDDEN_EXAM_SLUGS pattern); only the bundle shows on
-  // the catalog. The seed.ts visibility loop will keep it that way.
-  const examData = {
-    title: CCA_EXAM_TITLE,
-    code: CCA_EXAM_CODE,
-    description: CCA_EXAM_DESC,
-    level: 'Foundational',
-    durationMinutes: 120,
-    passingScore: 72,
-    questionCount: QUESTIONS.length,
-    domains: CCA_DOMAINS,
-    published: false
-  };
-  const exam = await db.exam.upsert({
-    where: { slug: CCA_EXAM_SLUG },
-    update: examData,
-    create: { ...examData, slug: CCA_EXAM_SLUG, vendorId: vendor.id }
-  });
+  // Upsert each variant exam + its questions. We set published: false because
+  // the bundle is the customer-facing product (HIDDEN_EXAM_SLUGS pattern);
+  // only the bundle shows on the catalog. The seed.ts visibility loop keeps
+  // it that way. The original variant also retires three pre-2026-05-28
+  // experimental tags (manual:cca-f-pdf/extra/fill) that were PDF-sourced or
+  // ungrounded — displaced by this hand-written, doc-grounded set. Questions
+  // authored via /admin-dashboard/questions (other generatedBy strings) are
+  // left untouched.
+  const examIdBySlug: Record<string, string> = {};
+  const examResults: SeedResult['exams'] = [];
 
-  // Replace questions tagged by this generator. We also retire three
-  // legacy tags from a pre-2026-05-28 experimental population pass on
-  // the same exam:
-  //   - manual:cca-f-pdf    — PDF-sourced; conflicts with the
-  //                           [[feedback_no_exam_dumps]] rule.
-  //   - manual:cca-f-extra  — every row was teaser-flagged; experimental
-  //                           fill content with no doc-grounded refs.
-  //   - manual:cca-f-fill   — auto-generated padding from the same era.
-  // None have provenance back to official Anthropic documentation, so
-  // they're displaced by this hand-written grounded set. Anything
-  // authored via /admin-dashboard/questions (other generatedBy strings)
-  // is left untouched.
-  const REPLACED_TAGS = [
-    'manual:cca-foundations-seed',
-    'manual:cca-f-pdf',
-    'manual:cca-f-extra',
-    'manual:cca-f-fill'
-  ];
-  const wiped = await db.question.deleteMany({
-    where: { examId: exam.id, generatedBy: { in: REPLACED_TAGS } }
-  });
-  let teaserCount = 0;
-  for (const q of QUESTIONS) {
-    await db.question.create({
-      data: {
-        examId: exam.id,
-        domain: q.domain,
-        difficulty: q.difficulty,
-        type: q.type,
-        stem: q.stem,
-        options: q.options,
-        correct: q.correct,
-        explanation: q.explanation,
-        references: q.references,
-        status: QStatus.PUBLISHED,
-        generatedBy: 'manual:cca-foundations-seed',
-        isTeaser: !!q.isTeaser
-      }
+  for (const v of VARIANTS) {
+    const examData = {
+      title: v.title,
+      code: v.code,
+      description: CCA_EXAM_DESC,
+      level: 'Foundational',
+      durationMinutes: 120,
+      passingScore: 72,
+      questionCount: v.questions.length,
+      domains: CCA_DOMAINS,
+      published: false
+    };
+    const exam = await db.exam.upsert({
+      where: { slug: v.slug },
+      update: examData,
+      create: { ...examData, slug: v.slug, vendorId: vendor.id }
     });
-    if (q.isTeaser) teaserCount++;
+    examIdBySlug[v.slug] = exam.id;
+
+    const wiped = await db.question.deleteMany({
+      where: { examId: exam.id, generatedBy: { in: v.retiredTags } }
+    });
+    let teaserCount = 0;
+    for (const q of v.questions) {
+      await db.question.create({
+        data: {
+          examId: exam.id,
+          domain: q.domain,
+          difficulty: q.difficulty,
+          type: q.type,
+          stem: q.stem,
+          options: q.options,
+          correct: q.correct,
+          explanation: q.explanation,
+          references: q.references,
+          status: QStatus.PUBLISHED,
+          generatedBy: v.tag,
+          isTeaser: !!q.isTeaser
+        }
+      });
+      if (q.isTeaser) teaserCount++;
+    }
+
+    // legacyRetired = wiped rows beyond this run's question count (the
+    // pre-2026-05-28 experimental tags). 0 on a fresh DB / steady state.
+    const legacyRetired = Math.max(0, wiped.count - v.questions.length);
+    examResults.push({ slug: v.slug, questionCount: v.questions.length, teaserCount, legacyRetired });
   }
 
   // Upsert the bundle. No priceVoucher — Anthropic doesn't run a paid proctored
@@ -1002,32 +1042,23 @@ export async function seedCcaFoundations(db: PrismaClient): Promise<SeedResult> 
     }
   });
 
-  // Replace bundle items deterministically. Single-item bundle wrapping the
-  // one consolidated CCA-F exam. position=1 since that's the only item.
+  // Replace bundle items deterministically: 3 PRACTICE variants in order.
   await db.bundleItem.deleteMany({ where: { bundleId: bundle.id } });
-  await db.bundleItem.create({
-    data: {
-      bundleId: bundle.id,
-      examId: exam.id,
-      tier: 'PRACTICE',
-      position: 1
-    }
-  });
-
-  // legacyRetired = however many of the wiped rows weren't from a
-  // previous run of THIS seed. On a fresh DB or after the first run
-  // this is 0; the value matters when seeding into a DB that has the
-  // pre-2026-05-28 experimental tags still in it.
-  const legacyRetired = Math.max(0, wiped.count - QUESTIONS.length);
+  let position = 1;
+  for (const v of VARIANTS) {
+    await db.bundleItem.create({
+      data: {
+        bundleId: bundle.id,
+        examId: examIdBySlug[v.slug],
+        tier: 'PRACTICE',
+        position: position++
+      }
+    });
+  }
 
   return {
     vendor: existingVendor ? 'existing' : 'created',
-    exam: {
-      slug: CCA_EXAM_SLUG,
-      questionCount: QUESTIONS.length,
-      teaserCount,
-      legacyRetired
-    },
+    exams: examResults,
     bundle: existingBundle ? 'updated' : 'created'
   };
 }
