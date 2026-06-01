@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Flag, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ExplanationView } from '@/components/explanation-view';
+import { shuffleSeeded } from '@/lib/shuffle';
 
 export type RunnerQuestion = {
   id: string;
@@ -331,33 +332,6 @@ export function ExamRunner(props: ExamRunnerProps) {
   );
 }
 
-/**
- * Deterministic Fisher-Yates shuffle, seeded from a string.
- *
- * Same seed → identical output. Different seed → different output. Used to
- * randomise option position per (attemptId, questionId) so the correct
- * answer's slot varies across users + attempts, but stays stable as the
- * user navigates between questions inside one attempt.
- *
- * Seeded RNG: FNV-1a hash of the seed → xorshift32 PRNG. Cheap, no
- * dependencies, statistically-uniform-enough for shuffling 2–6 options.
- */
-function shuffleSeeded<T>(arr: readonly T[], seed: string): T[] {
-  const out = [...arr];
-  let h = 2166136261;
-  for (let i = 0; i < seed.length; i++) {
-    h ^= seed.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  const rng = (): number => {
-    h ^= h << 13;
-    h ^= h >>> 17;
-    h ^= h << 5;
-    return ((h >>> 0) % 0xffffffff) / 0xffffffff;
-  };
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return out;
-}
+// shuffleSeeded now lives in '@/lib/shuffle' so the server-rendered results
+// page can apply the IDENTICAL per-attempt order. Keep the seed format
+// (`${attemptId}:${q.id}`) in sync with results/[attemptId]/page.tsx.

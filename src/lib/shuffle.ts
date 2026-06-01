@@ -1,0 +1,36 @@
+/**
+ * Deterministic Fisher-Yates shuffle, seeded from a string.
+ *
+ * Same seed → identical output. Different seed → different output. Used to
+ * randomise answer-option position per (attemptId, questionId) so the correct
+ * answer's slot varies across users and attempts, but stays stable within one
+ * attempt (so paging back/forth — and the post-submit results review — show
+ * the same order the taker saw).
+ *
+ * Seeded RNG: FNV-1a hash of the seed → xorshift32 PRNG. Cheap, no
+ * dependencies, statistically-uniform-enough for shuffling 2–6 options.
+ *
+ * Pure (no React/DOM), so it is safe to import from both the client exam
+ * runner and the server-rendered results page. Keep the seed format
+ * (`${attemptId}:${questionId}`) identical in every caller or the orders
+ * will diverge.
+ */
+export function shuffleSeeded<T>(arr: readonly T[], seed: string): T[] {
+  const out = [...arr];
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i++) {
+    h ^= seed.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  const rng = (): number => {
+    h ^= h << 13;
+    h ^= h >>> 17;
+    h ^= h << 5;
+    return ((h >>> 0) % 0xffffffff) / 0xffffffff;
+  };
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
