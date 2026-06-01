@@ -9,6 +9,7 @@ import { ShareScore } from '@/components/share-score';
 import { ReviewFormModal } from '@/components/review-form-modal';
 import { ResultsSignupPrompt } from '@/components/results-signup-prompt';
 import { canUserReview } from '@/lib/reviews';
+import { shuffleSeeded } from '@/lib/shuffle';
 
 export default async function ResultsPage({ params }: { params: Promise<{ attemptId: string }> }) {
   const { attemptId } = await params;
@@ -117,6 +118,13 @@ export default async function ResultsPage({ params }: { params: Promise<{ attemp
           const ans = r?.answer || [];
           const correct = isAnswerCorrect(q, ans);
           const correctIds = (q.correct as unknown as string[]) || [];
+          // Render options in the SAME per-attempt order the taker saw in the
+          // runner (TRUE_FALSE is never shuffled there). Seed format must match
+          // exam-runner.tsx: `${attemptId}:${questionId}`. Scoring is id-based,
+          // so this is display-only.
+          const opts = (q.options as any[]) as { id: string; text: string }[];
+          const displayOptions =
+            q.type === 'TRUE_FALSE' ? opts : shuffleSeeded(opts, `${attempt.id}:${q.id}`);
           return (
             <div key={q.id} className="card p-5">
               <div className="mb-2 flex items-center gap-2 text-xs">
@@ -126,7 +134,7 @@ export default async function ResultsPage({ params }: { params: Promise<{ attemp
               </div>
               <p className="font-medium">{q.stem}</p>
               <ul className="mt-2 space-y-1 text-sm">
-                {(q.options as any[]).map((o: any, oi: number) => {
+                {displayOptions.map((o, oi: number) => {
                   const sel = ans.includes(o.id);
                   const isC = correctIds.includes(o.id);
                   return (
@@ -142,7 +150,7 @@ export default async function ResultsPage({ params }: { params: Promise<{ attemp
                 </div>
                 <ExplanationView
                   text={q.explanation}
-                  options={(q.options as any[]) as { id: string; text: string }[]}
+                  options={displayOptions}
                   correctIds={correctIds}
                   references={(q.references as any[]) as { label: string; url: string }[]}
                 />
