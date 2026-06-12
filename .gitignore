@@ -36,3 +36,6 @@ practice-exams-pdfs-*/
 
 # Reference repositories cloned locally for question authoring
 /ckad-prep-master/
+
+# transient audit artifacts
+scripts/_*
