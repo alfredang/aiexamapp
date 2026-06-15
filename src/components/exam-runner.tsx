@@ -261,14 +261,6 @@ export function ExamRunner(props: ExamRunnerProps) {
               );
             })}
           </div>
-          {!a.submitted && props.mode === 'PRACTICE' && q.type === 'MULTI' && (
-            <button
-              onClick={checkAnswer}
-              disabled={!a.answer.length}
-              title={!a.answer.length ? 'Select at least one option first' : ''}
-              className="btn-primary-grad mt-4 disabled:cursor-not-allowed disabled:opacity-50"
-            >Check answer</button>
-          )}
           {!a.submitted && props.mode === 'PRACTICE' && q.type !== 'MULTI' && !a.answer.length && (
             <p className="mt-4 text-xs text-slate-500">Pick an option to reveal the answer.</p>
           )}
@@ -295,13 +287,27 @@ export function ExamRunner(props: ExamRunnerProps) {
             ) : (
               <div />
             )}
-            {/* Hide Next entirely on the last question — there's nothing
-                to navigate to. Submit button stays available in the header
-                bar for the explicit-finish action. (Per user feedback
-                2026-05-26: the disabled Next button on Q10/10 was visually
-                indistinguishable from active and added clutter.) */}
-            {idx < props.questions.length - 1 && (
-              <button onClick={() => setIdx(idx + 1)} className="btn-primary">Next <ChevronRight className="h-4 w-4" /></button>
+            {/* MULTI in PRACTICE: the right slot holds "Check answer" until the
+                user confirms their picks (one click ≠ done picking). Next is
+                hidden until then, so they can't skip past without checking —
+                and it's disabled until at least one option is selected. Once
+                checkAnswer() flips a.submitted, this falls through to Next. */}
+            {!a.submitted && props.mode === 'PRACTICE' && q.type === 'MULTI' ? (
+              <button
+                onClick={checkAnswer}
+                disabled={!a.answer.length}
+                title={!a.answer.length ? 'Select at least one option first' : ''}
+                className="btn-primary-grad disabled:cursor-not-allowed disabled:opacity-50"
+              >Check answer</button>
+            ) : (
+              /* Hide Next entirely on the last question — there's nothing
+                 to navigate to. Submit button stays available in the header
+                 bar for the explicit-finish action. (Per user feedback
+                 2026-05-26: the disabled Next button on Q10/10 was visually
+                 indistinguishable from active and added clutter.) */
+              idx < props.questions.length - 1 && (
+                <button onClick={() => setIdx(idx + 1)} className="btn-primary">Next <ChevronRight className="h-4 w-4" /></button>
+              )
             )}
           </div>
         </div>
