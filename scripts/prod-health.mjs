@@ -11,7 +11,7 @@
  */
 import fs from 'fs';
 
-const BASE = process.env.PROD_BASE || 'https://ai-exams.tertiaryinfo.tech';
+const BASE = process.env.PROD_BASE || 'https://exams.tertiaryinfotech.com';
 const EMAIL = process.env.PROD_ADMIN_EMAIL || 'angch@tertiaryinfotech.com';
 const PASSWORD = process.env.PROD_ADMIN_PASSWORD || 'password123';
 

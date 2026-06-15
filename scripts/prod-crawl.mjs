@@ -7,7 +7,7 @@
  */
 import fs from 'fs';
 
-const BASE = process.env.PROD_BASE || 'https://ai-exams.tertiaryinfo.tech';
+const BASE = process.env.PROD_BASE || 'https://exams.tertiaryinfotech.com';
 const CONCURRENCY = 12;
 
 function sitemapUrls() {

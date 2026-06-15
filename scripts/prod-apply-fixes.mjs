@@ -4,7 +4,7 @@
  *   3. POST /api/admin/fix-question-count
  * Both endpoints are idempotent + non-destructive. Run: node scripts/prod-apply-fixes.mjs
  */
-const BASE = process.env.PROD_BASE || 'https://ai-exams.tertiaryinfo.tech';
+const BASE = process.env.PROD_BASE || 'https://exams.tertiaryinfotech.com';
 const EMAIL = process.env.PROD_ADMIN_EMAIL || 'angch@tertiaryinfotech.com';
 const PASSWORD = process.env.PROD_ADMIN_PASSWORD || 'password123';
 

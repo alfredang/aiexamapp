@@ -1,6 +1,6 @@
 /* Apply the CCA-F 3-variant seed on prod (creates/fills P2+P3, fixes codes,
  * wires the 3-item bundle). Idempotent. Run: node scripts/prod-apply-cca.mjs */
-const BASE = process.env.PROD_BASE || 'https://ai-exams.tertiaryinfo.tech';
+const BASE = process.env.PROD_BASE || 'https://exams.tertiaryinfotech.com';
 const EMAIL = process.env.PROD_ADMIN_EMAIL || 'angch@tertiaryinfotech.com';
 const PASSWORD = process.env.PROD_ADMIN_PASSWORD || 'password123';
 const jar = new Map();

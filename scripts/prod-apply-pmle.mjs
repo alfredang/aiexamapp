@@ -1,6 +1,6 @@
 /* Apply the PMLE P1–P3 grounded top-up on prod. Login + POST + report.
  * Idempotent + non-destructive. Run: node scripts/prod-apply-pmle.mjs */
-const BASE = process.env.PROD_BASE || 'https://ai-exams.tertiaryinfo.tech';
+const BASE = process.env.PROD_BASE || 'https://exams.tertiaryinfotech.com';
 const EMAIL = process.env.PROD_ADMIN_EMAIL || 'angch@tertiaryinfotech.com';
 const PASSWORD = process.env.PROD_ADMIN_PASSWORD || 'password123';
 const jar = new Map();
