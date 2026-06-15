@@ -1,9 +1,9 @@
 ---
-description: Seed a practice-exam bundle on the live production deployment (ai-exams.tertiaryinfo.tech) via the admin POST /api/admin/seed-<bundle> endpoint.
+description: Seed a practice-exam bundle on the live production deployment (exams.tertiaryinfotech.com) via the admin POST /api/admin/seed-<bundle> endpoint.
 argument-hint: <bundle-slug>   (e.g. cka, ckad)
 ---
 
-You are seeding the **$ARGUMENTS** bundle on the production deployment at `https://ai-exams.tertiaryinfo.tech`.
+You are seeding the **$ARGUMENTS** bundle on the production deployment at `https://exams.tertiaryinfotech.com`.
 
 ## Prerequisites — verify before seeding
 
@@ -19,23 +19,23 @@ Run these shell commands in sequence from this repo's working directory:
 
 ```bash
 # 1. Fetch CSRF token
-curl -sS -c /tmp/seed-cookies.txt https://ai-exams.tertiaryinfo.tech/api/auth/csrf -o /tmp/seed-csrf.json
+curl -sS -c /tmp/seed-cookies.txt https://exams.tertiaryinfotech.com/api/auth/csrf -o /tmp/seed-csrf.json
 CSRF=$(jq -r .csrfToken /tmp/seed-csrf.json)
 
 # 2. Log in via NextAuth credentials provider id `password`
 #    (NOT the `otp` provider, and NOT /api/auth/signin/password which is the form page)
 curl -sS -c /tmp/seed-cookies.txt -b /tmp/seed-cookies.txt \
-  -X POST https://ai-exams.tertiaryinfo.tech/api/auth/callback/password \
+  -X POST https://exams.tertiaryinfotech.com/api/auth/callback/password \
   -H "Content-Type: application/x-www-form-urlencoded" \
   --data-urlencode "csrfToken=$CSRF" \
   --data-urlencode "email=angch@tertiaryinfotech.com" \
   --data-urlencode "password=password123" \
-  --data-urlencode "callbackUrl=https://ai-exams.tertiaryinfo.tech/admin-dashboard" \
+  --data-urlencode "callbackUrl=https://exams.tertiaryinfotech.com/admin-dashboard" \
   -w "login HTTP=%{http_code}\n" -o /dev/null
 
 # 3. Fire the seed (idempotent — safe to re-run)
 curl -sS -b /tmp/seed-cookies.txt \
-  -X POST https://ai-exams.tertiaryinfo.tech/api/admin/seed-$ARGUMENTS \
+  -X POST https://exams.tertiaryinfotech.com/api/admin/seed-$ARGUMENTS \
   -w "\nHTTP_STATUS=%{http_code}\n"
 ```
 

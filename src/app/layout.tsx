@@ -92,7 +92,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   // so it doesn't require a cookie consent banner under GDPR/ePrivacy. The
   // script is only injected if NEXT_PUBLIC_PLAUSIBLE_DOMAIN is set in the
   // env, so dev / preview / pre-launch envs run analytics-free by default.
-  // Set the env to the bare domain (e.g. "ai-exams.tertiaryinfo.tech").
+  // Set the env to the bare domain (e.g. "exams.tertiaryinfotech.com").
   const plausibleDomain = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN;
 
   return (

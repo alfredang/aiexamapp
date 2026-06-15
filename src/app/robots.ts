@@ -14,7 +14,7 @@ import type { MetadataRoute } from 'next';
 export default function robots(): MetadataRoute.Robots {
   const base =
     process.env.NEXTAUTH_URL?.replace(/\/$/, '') ||
-    'https://ai-exams.tertiaryinfo.tech';
+    'https://exams.tertiaryinfotech.com';
 
   return {
     rules: [

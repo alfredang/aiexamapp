@@ -110,21 +110,21 @@ For every new bundle `xyz` (mirror [src/lib/seed/ckad-questions.ts](src/lib/seed
 
 ```bash
 # 1. CSRF
-curl -sS -c /tmp/cookies.txt https://ai-exams.tertiaryinfo.tech/api/auth/csrf -o /tmp/csrf.json
+curl -sS -c /tmp/cookies.txt https://exams.tertiaryinfotech.com/api/auth/csrf -o /tmp/csrf.json
 CSRF=$(jq -r .csrfToken /tmp/csrf.json)
 
 # 2. Admin login via NextAuth credentials provider id `password`
 curl -sS -c /tmp/cookies.txt -b /tmp/cookies.txt \
-  -X POST https://ai-exams.tertiaryinfo.tech/api/auth/callback/password \
+  -X POST https://exams.tertiaryinfotech.com/api/auth/callback/password \
   -H "Content-Type: application/x-www-form-urlencoded" \
   --data-urlencode "csrfToken=$CSRF" \
   --data-urlencode "email=angch@tertiaryinfotech.com" \
   --data-urlencode "password=password123" \
-  --data-urlencode "callbackUrl=https://ai-exams.tertiaryinfo.tech/admin-dashboard"
+  --data-urlencode "callbackUrl=https://exams.tertiaryinfotech.com/admin-dashboard"
 
 # 3. Fire the seed (idempotent)
 curl -sS -b /tmp/cookies.txt -X POST \
-  https://ai-exams.tertiaryinfo.tech/api/admin/seed-xyz \
+  https://exams.tertiaryinfotech.com/api/admin/seed-xyz \
   -w "\nHTTP_STATUS=%{http_code}\n"
 ```
 
