@@ -1,11 +1,28 @@
-# ExamNova
+<div align="center">
 
-ExamNova is a full-stack certification practice-exam platform designed for commercial training and certification-preparation providers. It allows users to browse certification bundles, take free teaser attempts, purchase practice exams and real-exam vouchers, and take timed or practice-mode exams with detailed result breakdowns. The platform includes a robust admin backend with AI-assisted question generation, dynamic e-commerce features (Stripe, PayPal, HitPay, PayNow), invoicing, and voucher fulfillment.
+# Tertiary Exams
+
+[![Live](https://img.shields.io/badge/Live-exams.tertiaryinfotech.com-6d28d9?style=flat-square)](https://exams.tertiaryinfotech.com)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)](https://nextjs.org)
+[![React](https://img.shields.io/badge/React-19-61dafb?style=flat-square&logo=react)](https://react.dev)
+[![Prisma](https://img.shields.io/badge/Prisma-ORM-2d3748?style=flat-square&logo=prisma)](https://www.prisma.io)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?style=flat-square&logo=postgresql)](https://www.postgresql.org)
+[![Claude](https://img.shields.io/badge/AI-Claude-d97757?style=flat-square&logo=anthropic)](https://www.anthropic.com)
+
+**Practice smarter for your next certification.**
+
+[Live Site](https://exams.tertiaryinfotech.com) · [Catalog](https://exams.tertiaryinfotech.com/practice-exams)
+
+</div>
+
+Tertiary Exams is a full-stack certification practice-exam platform designed for commercial training and certification-preparation providers. It allows users to browse certification bundles, take free teaser attempts, purchase practice exams and real-exam vouchers, and take timed or practice-mode exams with detailed result breakdowns. The platform includes a robust admin backend with AI-assisted question generation, dynamic e-commerce features (Stripe, PayPal, HitPay, PayNow), invoicing, and voucher fulfillment.
 
 ## Table of Contents
 
 - [Overview](#overview)
+- [Screenshot](#screenshot)
 - [Features](#features)
+- [Certification Catalog](#certification-catalog)
 - [Demo](#demo)
 - [Tech Stack](#tech-stack)
 - [Architecture](#architecture)
@@ -28,9 +45,13 @@ ExamNova is a full-stack certification practice-exam platform designed for comme
 
 ## Overview
 
-ExamNova is built to provide an end-to-end e-commerce and exam-taking experience. It solves the problem of managing certification preparation platforms by bundling practice exams and optional real-exam vouchers into unified e-commerce products. The platform is designed for scalable content generation using Claude AI and Firecrawl, enabling administrators to quickly author and maintain a large library of high-quality, blueprint-aligned practice questions.
+Tertiary Exams is built to provide an end-to-end e-commerce and exam-taking experience. It solves the problem of managing certification preparation platforms by bundling practice exams and optional real-exam vouchers into unified e-commerce products. The platform is designed for scalable content generation using Claude AI and Firecrawl, enabling administrators to quickly author and maintain a large library of high-quality, blueprint-aligned practice questions.
 
 **Current Status:** The core application features, checkout flows, exam runners, and admin dashboards are implemented and functioning.
+
+## Screenshot
+
+![Screenshot](screenshot.png)
 
 ## Features
 
@@ -44,10 +65,115 @@ ExamNova is built to provide an end-to-end e-commerce and exam-taking experience
 - **Comprehensive Admin Dashboard:** Manage catalog, orders, users (RBAC), refunds, coupons, API tokens, dynamic settings, and CMS content (FAQ, Banners).
 - **Social Login:** Authenticate via Password, OTP, Google, GitHub, Microsoft, and LinkedIn (configurable in settings).
 
+## Certification Catalog
+
+Tertiary Exams covers **12 vendors** and **195+ practice exams** across cloud, security, networking, data, DevOps, AI, and project-management certifications. Each certification ships with one or more numbered practice exams (P1, P2, …) plus optional real-exam voucher bundles.
+
+### Amazon Web Services (AWS)
+
+| Code | Certification | Level |
+|---|---|---|
+| CLF-C02 | AWS Certified Cloud Practitioner | Foundational |
+| AIF-C01 | AWS Certified AI Practitioner | Foundational |
+| SAA-C03 | AWS Certified Solutions Architect – Associate | Associate |
+| DVA-C02 | AWS Certified Developer – Associate | Associate |
+| SOA-C03 | AWS Certified CloudOps Engineer – Associate | Associate |
+| DEA-C01 | AWS Certified Data Engineer – Associate | Associate |
+| MLA-C01 | AWS Certified Machine Learning Engineer – Associate | Associate |
+| SAP-C02 | AWS Certified Solutions Architect – Professional | Professional |
+| DOP-C02 | AWS Certified DevOps Engineer – Professional | Professional |
+| AIP-C01 | AWS Certified Generative AI Developer – Professional | Professional |
+| ANS-C01 | AWS Certified Advanced Networking – Specialty | Specialty |
+| SCS-C03 | AWS Certified Security – Specialty | Specialty |
+
+### Microsoft Azure / 365
+
+| Code | Certification | Level |
+|---|---|---|
+| AZ-900 | Microsoft Azure Fundamentals | Foundational |
+| AI-900 | Microsoft Azure AI Fundamentals | Foundational |
+| DP-900 | Microsoft Azure Data Fundamentals | Foundational |
+| SC-900 | Microsoft Security, Compliance & Identity Fundamentals | Foundational |
+| MS-900 | Microsoft 365 Fundamentals | Foundational |
+| AZ-104 | Microsoft Azure Administrator | Associate |
+| AZ-204 | Developing Solutions for Microsoft Azure | Associate |
+| AZ-500 | Microsoft Azure Security Technologies | Associate |
+| AI-102 | Microsoft Azure AI Engineer Associate | Associate |
+| DP-100 | Microsoft Azure Data Scientist Associate | Associate |
+| DP-203 | Microsoft Azure Data Engineer Associate | Associate |
+| DP-300 | Microsoft Azure Database Administrator | Associate |
+| MD-102 | Microsoft Endpoint Administrator | Associate |
+| MS-102 | Microsoft 365 Administrator Expert | Associate |
+| PL-300 | Microsoft Power BI Data Analyst | Associate |
+| SC-200 | Microsoft Security Operations Analyst | Associate |
+| AZ-305 | Designing Microsoft Azure Infrastructure Solutions | Expert |
+| AZ-400 | Designing & Implementing Microsoft DevOps Solutions | Expert |
+
+### CompTIA
+
+| Code | Certification | Level |
+|---|---|---|
+| 220-1101 / 220-1102 | CompTIA A+ (Core 1 & Core 2) | Foundational |
+| N10-009 | CompTIA Network+ | Associate |
+| SY0-701 | CompTIA Security+ | Associate |
+| DA0-001 | CompTIA Data+ | Associate |
+| CV0-004 | CompTIA Cloud+ | Associate |
+| SK0-005 | CompTIA Server+ | Associate |
+| XK0-005 | CompTIA Linux+ | Associate |
+| CS0-003 | CompTIA CySA+ | Professional |
+
+### Google Cloud
+
+| Code | Certification | Level |
+|---|---|---|
+| CDL | Google Cloud Digital Leader | Foundational |
+| ACE | Google Associate Cloud Engineer | Associate |
+| PCA | Google Professional Cloud Architect | Professional |
+| PDE | Google Professional Data Engineer | Professional |
+| PMLE | Google Professional Machine Learning Engineer | Professional |
+| PCSE | Google Professional Cloud Security Engineer | Professional |
+
+### Cisco
+
+| Code | Certification | Level |
+|---|---|---|
+| 200-201 | Cisco Certified CyberOps Associate (CBROPS) | Associate |
+| 200-301 | Cisco Certified Network Associate (CCNA) | Associate |
+| 350-401 | Implementing Cisco Enterprise Network Core (ENCOR / CCNP) | Professional |
+
+### Oracle
+
+| Code | Certification | Level |
+|---|---|---|
+| 1Z0-1085 | Oracle Cloud Infrastructure Foundations Associate | Foundational |
+| 1Z0-071 | Oracle Database SQL Certified Associate | Associate |
+| 1Z0-1072 | Oracle Cloud Infrastructure Architect Associate | Associate |
+| 1Z0-1127 | Oracle Cloud Infrastructure Generative AI Professional | Professional |
+| 1Z0-997 | Oracle Cloud Infrastructure Architect Professional | Professional |
+
+### Linux Foundation
+
+| Code | Certification | Level |
+|---|---|---|
+| CKA | Certified Kubernetes Administrator | Associate |
+| CKAD | Certified Kubernetes Application Developer | Associate |
+
+### Other Vendors
+
+| Vendor | Code | Certification | Level |
+|---|---|---|---|
+| ISC2 | CISSP | Certified Information Systems Security Professional | Associate |
+| PMI | PMP | Project Management Professional | Associate |
+| Scrum.org | PSM I | Professional Scrum Master I | Associate |
+| GitHub | Foundations | GitHub Foundations | Associate |
+| Anthropic | CCA-F | Claude Certified Architect – Foundations | Foundational |
+
+> Additional vendor slugs (AXELOS, IASSC, Tableau) are registered for upcoming catalog expansion.
+
 ## Demo
 
-- **Live Demo:** [Add deployment URL]
-- **Screenshot:** ![Screenshot](screenshot.png)
+- **Live Site:** [https://exams.tertiaryinfotech.com](https://exams.tertiaryinfotech.com)
+- **Catalog:** [https://exams.tertiaryinfotech.com/practice-exams](https://exams.tertiaryinfotech.com/practice-exams)
 
 ## Tech Stack
 
@@ -98,7 +224,7 @@ flowchart TD
 
 1. Clone the repository:
    ```bash
-   git clone [Add repository URL]
+   git clone https://github.com/alfredang/ai-exams.git
    cd ai-exams
    ```
 
@@ -237,6 +363,12 @@ The repository includes a multi-stage `Dockerfile` tailored for Next.js standalo
 
 Please ensure your code passes `npm run typecheck` and `npm run lint` before opening a pull request.
 
+## Developed By
+
+**[Tertiary Infotech Academy Pte. Ltd.](https://exams.tertiaryinfotech.com)** — building AI-assisted certification preparation tools.
+
+If you find this project useful, please consider giving it a ⭐ on GitHub.
+
 ## License
 
-© Tertiary Infotech Academy Pte Ltd. [Confirm license]
+© Tertiary Infotech Academy Pte. Ltd. All rights reserved.
