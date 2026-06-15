@@ -294,6 +294,7 @@ function buildMultiVariantBundles(): BundleSeed[] {
     // ───── Wave 3b: competitor-parity new certs (65 Q/variant × 3) ─────
     { slug: 'axelos-itil4-foundation', title: 'ITIL 4 Foundation', description: 'All 4 ITIL 4 Foundation practice exams in one bundle — key concepts of service management, the four dimensions & guiding principles, the service value system & value chain, and the ITIL practices. Aligned to the ITIL 4 Foundation syllabus.', variants: 4, price: 2000, priceVoucher: 38000 },
     { slug: 'tableau-desktop-specialist', title: 'Tableau Desktop Specialist', description: 'All 3 Tableau Desktop Specialist practice exams in one bundle — connecting to & preparing data, exploring & analyzing data, sharing insights, and understanding Tableau concepts.', variants: 3, price: 2000, priceVoucher: 10000 },
+    { slug: 'tableau-tcda', title: 'Tableau Certified Data Analyst', description: 'All 6 Tableau Certified Data Analyst (TDA-C01) practice exams in one bundle — covers connecting and transforming data, exploring and analyzing data, creating visualizations, and publishing & managing content.', variants: 6, price: 2000, priceVoucher: 15000 },
     { slug: 'iassc-lean-six-sigma-green-belt', title: 'IASSC Lean Six Sigma Green Belt', description: 'All 3 IASSC Lean Six Sigma Green Belt practice exams in one bundle — covering the Define, Measure, Analyze, Improve, and Control phases of the DMAIC methodology. Aligned to the IASSC Green Belt body of knowledge.', variants: 3, price: 2000, priceVoucher: 29500 },
     { slug: 'comptia-pentest-plus', title: 'CompTIA PenTest+ (PT0-003)', description: 'All 3 CompTIA PenTest+ practice exams in one bundle — engagement management, reconnaissance & enumeration, vulnerability discovery & analysis, attacks & exploits, and post-exploitation & lateral movement.', variants: 3, price: 2000, priceVoucher: 41200 },
     { slug: 'comptia-securityx', title: 'CompTIA SecurityX (CAS-005)', description: 'All 3 CompTIA SecurityX (CASP+) practice exams in one bundle — governance/risk & compliance, security architecture, security engineering, and security operations.', variants: 3, price: 2000, priceVoucher: 52400 },
@@ -1876,7 +1877,11 @@ async function main() {
     'comptia-network-plus': 'N10-009',
     'comptia-security-plus': 'SY0-701',
     'cisco-ccna': '200-301',
-    'cisco-ccnp-encor': '350-401'
+    'cisco-ccnp-encor': '350-401',
+    // Tableau Certified Data Analyst — opaque vendor code (can't derive "TDA-C01"
+    // from the "tableau-tcda" slug). Without this the auto-create logic would
+    // recode the existing TDA-C01-Pn exams to TCDA-Pn on every deploy.
+    'tableau-tcda': 'TDA-C01'
   };
   function vendorExamCodeFor(baseSlug: string): string {
     if (VENDOR_EXAM_CODE_OVERRIDES[baseSlug]) return VENDOR_EXAM_CODE_OVERRIDES[baseSlug];
