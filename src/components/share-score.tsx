@@ -1,4 +1,5 @@
 'use client';
+import { useEffect, useState } from 'react';
 import { ShareButtons } from './share-buttons';
 import { Share2 } from 'lucide-react';
 
@@ -13,12 +14,16 @@ export function ShareScore({
   score: number;
   passed: boolean;
 }) {
-  // Compute origin client-side so links use the live host.
-  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  // Defer origin until after mount: window.location.origin is client-only, so
+  // reading it during render makes the server ('') and client (real origin)
+  // produce different hrefs -> hydration mismatch. Start empty (matches the
+  // server) and fill in the live origin post-hydration.
+  const [origin, setOrigin] = useState('');
+  useEffect(() => setOrigin(window.location.origin), []);
   const url = `${origin}/results/${attemptId}/share`;
   const text = passed
-    ? `I just scored ${score}% on ${examTitle} on ExamNova!`
-    : `I'm preparing for ${examTitle} on ExamNova — scored ${score}% so far.`;
+    ? `I just scored ${score}% on ${examTitle} on Tertiary Exams!`
+    : `I'm preparing for ${examTitle} on Tertiary Exams — scored ${score}% so far.`;
 
   return (
     <div className="mt-6 card p-5">
