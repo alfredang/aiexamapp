@@ -1,58 +1,53 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
   <defs>
-    <linearGradient id="bg" x1="80" y1="78" x2="942" y2="940" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#111827"/>
-      <stop offset="0.48" stop-color="#7C2D12"/>
-      <stop offset="1" stop-color="#0F766E"/>
+    <linearGradient id="bg" x1="90" y1="80" x2="940" y2="944" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#020617"/>
+      <stop offset="0.48" stop-color="#1D4ED8"/>
+      <stop offset="1" stop-color="#0891B2"/>
     </linearGradient>
-    <linearGradient id="book" x1="218" y1="160" x2="806" y2="860" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FFFFFF"/>
-      <stop offset="1" stop-color="#FFF7ED"/>
+    <linearGradient id="tablet" x1="238" y1="140" x2="780" y2="884" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F8FAFC"/>
+      <stop offset="1" stop-color="#DBEAFE"/>
     </linearGradient>
-    <linearGradient id="spine" x1="222" y1="168" x2="380" y2="858" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#EA580C"/>
-      <stop offset="1" stop-color="#991B1B"/>
-    </linearGradient>
-    <linearGradient id="seal" x1="650" y1="620" x2="840" y2="878" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FDE68A"/>
-      <stop offset="1" stop-color="#14B8A6"/>
+    <linearGradient id="award" x1="626" y1="612" x2="850" y2="890" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FBBF24"/>
+      <stop offset="1" stop-color="#7C3AED"/>
     </linearGradient>
     <filter id="shadow" x="-35%" y="-35%" width="170%" height="170%">
-      <feDropShadow dx="0" dy="32" stdDeviation="36" flood-color="#020617" flood-opacity="0.40"/>
+      <feDropShadow dx="0" dy="32" stdDeviation="36" flood-color="#020617" flood-opacity="0.42"/>
     </filter>
   </defs>
 
   <rect width="1024" height="1024" fill="url(#bg)"/>
   <g opacity="0.18" fill="none" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round">
-    <path d="M96 272 C236 160 386 160 512 260"/>
-    <path d="M928 752 C778 870 606 862 486 756"/>
-    <path d="M118 814 C250 892 402 862 520 744"/>
-    <path d="M908 246 C790 152 640 158 522 260"/>
+    <path d="M92 270 C230 162 390 158 522 258"/>
+    <path d="M932 750 C772 876 596 866 468 752"/>
+    <path d="M116 812 C254 894 408 860 526 740"/>
+    <path d="M908 246 C778 150 638 154 520 256"/>
   </g>
 
   <g filter="url(#shadow)">
-    <rect x="214" y="152" width="596" height="720" rx="78" fill="url(#book)"/>
-    <path d="M214 230 C214 187 249 152 292 152 H380 V872 H292 C249 872 214 837 214 794 Z" fill="url(#spine)"/>
-    <rect x="430" y="238" width="248" height="40" rx="20" fill="#0F766E"/>
-    <rect x="430" y="326" width="300" height="26" rx="13" fill="#CBD5E1"/>
-    <rect x="430" y="390" width="246" height="26" rx="13" fill="#CBD5E1"/>
-    <rect x="430" y="454" width="328" height="26" rx="13" fill="#CBD5E1"/>
-    <text x="602" y="640" text-anchor="middle"
+    <rect x="232" y="142" width="560" height="736" rx="86" fill="url(#tablet)"/>
+    <rect x="292" y="220" width="440" height="118" rx="34" fill="#1D4ED8"/>
+    <text x="512" y="302" text-anchor="middle"
           font-family="Arial Black, Arial, Helvetica, sans-serif"
-          font-size="134" font-weight="900" fill="#111827">EXAM</text>
-    <rect x="426" y="686" width="352" height="30" rx="15" fill="#0F766E"/>
+          font-size="64" font-weight="900" fill="#FFFFFF">EXAM</text>
+    <rect x="310" y="404" width="404" height="34" rx="17" fill="#94A3B8"/>
+    <rect x="310" y="486" width="318" height="34" rx="17" fill="#CBD5E1"/>
+    <rect x="310" y="568" width="382" height="34" rx="17" fill="#CBD5E1"/>
+    <rect x="310" y="690" width="310" height="34" rx="17" fill="#1D4ED8"/>
   </g>
 
   <g filter="url(#shadow)">
-    <circle cx="720" cy="736" r="116" fill="url(#seal)"/>
-    <path d="M670 738 L714 782 L794 684" fill="none" stroke="#FFFFFF" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M668 842 L646 930 L720 884 L794 930 L772 842" fill="#0F766E"/>
+    <circle cx="724" cy="730" r="120" fill="url(#award)"/>
+    <path d="M672 732 L716 776 L802 674" fill="none" stroke="#FFFFFF" stroke-width="38" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M672 842 L646 936 L724 888 L802 936 L776 842" fill="#5B21B6"/>
   </g>
 
-  <g fill="#FFFFFF" opacity="0.84">
-    <circle cx="144" cy="378" r="16"/>
-    <circle cx="884" cy="386" r="15"/>
-    <circle cx="172" cy="682" r="20"/>
-    <circle cx="846" cy="850" r="17"/>
+  <g fill="#FFFFFF" opacity="0.88">
+    <circle cx="142" cy="382" r="16"/>
+    <circle cx="882" cy="374" r="16"/>
+    <circle cx="170" cy="678" r="20"/>
+    <circle cx="848" cy="852" r="18"/>
   </g>
 </svg>
