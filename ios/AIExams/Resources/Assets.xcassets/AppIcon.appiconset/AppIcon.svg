@@ -1,58 +1,59 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
   <defs>
-    <linearGradient id="bg" x1="96" y1="72" x2="912" y2="952" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#1E293B"/>
-      <stop offset="0.52" stop-color="#2563EB"/>
-      <stop offset="1" stop-color="#14B8A6"/>
+    <linearGradient id="bg" x1="72" y1="64" x2="946" y2="956" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0F172A"/>
+      <stop offset="0.45" stop-color="#166534"/>
+      <stop offset="1" stop-color="#F59E0B"/>
     </linearGradient>
-    <linearGradient id="paper" x1="272" y1="150" x2="756" y2="860" gradientUnits="userSpaceOnUse">
+    <linearGradient id="card" x1="244" y1="156" x2="782" y2="856" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#FFFFFF"/>
-      <stop offset="1" stop-color="#E6F3FF"/>
+      <stop offset="1" stop-color="#ECFDF5"/>
     </linearGradient>
-    <linearGradient id="gold" x1="655" y1="622" x2="850" y2="880" gradientUnits="userSpaceOnUse">
+    <linearGradient id="badge" x1="618" y1="620" x2="838" y2="884" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#FDE68A"/>
-      <stop offset="1" stop-color="#F97316"/>
+      <stop offset="1" stop-color="#DC2626"/>
     </linearGradient>
     <filter id="shadow" x="-35%" y="-35%" width="170%" height="170%">
-      <feDropShadow dx="0" dy="30" stdDeviation="34" flood-color="#020617" flood-opacity="0.36"/>
+      <feDropShadow dx="0" dy="32" stdDeviation="36" flood-color="#020617" flood-opacity="0.38"/>
     </filter>
   </defs>
 
   <rect width="1024" height="1024" fill="url(#bg)"/>
-  <g opacity="0.18" fill="none" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round">
-    <path d="M98 250 C232 154 376 150 512 246"/>
-    <path d="M926 266 C800 160 664 152 532 246"/>
-    <path d="M112 790 C254 880 410 858 528 748"/>
-    <path d="M904 792 C776 878 626 856 508 748"/>
+  <g opacity="0.2" fill="none" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round">
+    <path d="M92 276 C206 190 348 182 474 254"/>
+    <path d="M930 744 C780 866 596 872 448 762"/>
+    <path d="M118 820 C244 894 376 864 488 758"/>
+    <path d="M900 236 C776 148 638 150 524 248"/>
   </g>
 
   <g filter="url(#shadow)">
-    <rect x="236" y="136" width="552" height="736" rx="64" fill="url(#paper)"/>
-    <path d="M626 136 H724 C760 136 788 164 788 200 V298 Z" fill="#BFDBFE"/>
-    <path d="M626 136 V270 C626 286 638 298 654 298 H788" fill="#DBEAFE"/>
-    <rect x="300" y="232" width="238" height="34" rx="17" fill="#2563EB"/>
-    <rect x="300" y="304" width="360" height="26" rx="13" fill="#94A3B8"/>
-    <rect x="300" y="366" width="426" height="26" rx="13" fill="#CBD5E1"/>
-    <rect x="300" y="428" width="392" height="26" rx="13" fill="#CBD5E1"/>
-  </g>
-
-  <g fill="#0F172A">
-    <text x="512" y="634" text-anchor="middle"
+    <rect x="222" y="154" width="580" height="714" rx="72" fill="url(#card)"/>
+    <rect x="278" y="224" width="468" height="96" rx="28" fill="#166534"/>
+    <text x="512" y="292" text-anchor="middle"
           font-family="Arial Black, Arial, Helvetica, sans-serif"
-          font-size="156" font-weight="900">EXAM</text>
+          font-size="56" font-weight="900" fill="#FFFFFF">EXAM</text>
+    <rect x="304" y="390" width="118" height="30" rx="15" fill="#16A34A"/>
+    <rect x="462" y="390" width="254" height="30" rx="15" fill="#CBD5E1"/>
+    <rect x="304" y="466" width="118" height="30" rx="15" fill="#16A34A"/>
+    <rect x="462" y="466" width="254" height="30" rx="15" fill="#CBD5E1"/>
+    <rect x="304" y="542" width="118" height="30" rx="15" fill="#16A34A"/>
+    <rect x="462" y="542" width="254" height="30" rx="15" fill="#CBD5E1"/>
+    <path d="M326 402 L352 428 L402 368" fill="none" stroke="#FFFFFF" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M326 478 L352 504 L402 444" fill="none" stroke="#FFFFFF" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M326 554 L352 580 L402 520" fill="none" stroke="#FFFFFF" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="326" y="660" width="372" height="34" rx="17" fill="#166534"/>
   </g>
-  <rect x="326" y="682" width="372" height="28" rx="14" fill="#2563EB"/>
 
   <g filter="url(#shadow)">
-    <circle cx="734" cy="728" r="118" fill="url(#gold)"/>
-    <path d="M682 728 L724 770 L800 680" fill="none" stroke="#FFFFFF" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M680 838 L656 928 L734 882 L812 928 L788 838" fill="#EA580C"/>
+    <circle cx="728" cy="732" r="118" fill="url(#badge)"/>
+    <path d="M674 734 L718 778 L804 674" fill="none" stroke="#FFFFFF" stroke-width="38" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M676 842 L650 934 L728 888 L806 934 L780 842" fill="#B91C1C"/>
   </g>
 
-  <g fill="#FFFFFF" opacity="0.9">
-    <circle cx="156" cy="382" r="14"/>
-    <circle cx="878" cy="374" r="14"/>
-    <circle cx="168" cy="646" r="18"/>
-    <circle cx="848" cy="856" r="16"/>
+  <g fill="#FFFFFF" opacity="0.86">
+    <circle cx="140" cy="374" r="15"/>
+    <circle cx="884" cy="374" r="15"/>
+    <circle cx="166" cy="678" r="19"/>
+    <circle cx="852" cy="858" r="17"/>
   </g>
 </svg>
