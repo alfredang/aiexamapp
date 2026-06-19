@@ -17,6 +17,8 @@ targets:
       path: AIExams/Info.plist
       properties:
         CFBundleDisplayName: "AI Exams"
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
