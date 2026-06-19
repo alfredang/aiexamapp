@@ -1,19 +1,38 @@
-node_modules
-.next
+# macOS
+.DS_Store
+
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Xcode project user/workspace state
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# CocoaPods / Carthage (if ever added)
+Pods/
+Carthage/Build/
+
+# Secrets / signing
+*.p12
+*.mobileprovision
 .env
 .env.local
-.env.*.local
-.env.prod
-.env.production
-.DS_Store
-dist
-*.log
-*.tsbuildinfo
-.playwright-mcp/
-.mcp.json
-*.pdf
-# Source PDFs and any artifacts under those folders — never commit
-practice-exams-pdfs-*/
 
 # Selectively commit .claude/skills + agents + commands (project context). Ignore the rest.
 .claude/*
@@ -23,19 +42,3 @@ practice-exams-pdfs-*/
 !.claude/skills/**
 !.claude/agents/**
 !.claude/commands/**
-
-# Local debug screenshots from playwright-mcp runs
-/ai-assist-before.png
-/edit-ai-assist.png
-/page-editor.png
-/page-editor-v2.png
-/faq-admin.png
-/admin-ckad.png
-/ckad-page.png
-/screenshot.png
-
-# Reference repositories cloned locally for question authoring
-/ckad-prep-master/
-
-# transient audit artifacts
-scripts/_*
