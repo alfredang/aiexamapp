@@ -78,10 +78,10 @@
     <circle cx="616" cy="644" r="22" fill="#9BFBFF"/>
   </g>
 
-  <g aria-label="AI">
-    <path d="M338 644 L427 382 H489 L578 644 H520 L503 590 H412 L395 644 Z M427 542 H489 L458 442 Z" fill="#FFFFFF"/>
-    <path d="M620 382 H682 V644 H620 Z" fill="#FFFFFF"/>
-  </g>
+  <text x="512" y="590" text-anchor="middle"
+        font-family="Arial Black, Arial, Helvetica, sans-serif"
+        font-size="172" font-weight="900" fill="#FFFFFF">EXAM</text>
+  <rect x="318" y="636" width="388" height="22" rx="11" fill="#FFFFFF" opacity="0.92"/>
 
   <g filter="url(#shadow)">
     <circle cx="724" cy="708" r="112" fill="url(#gold)"/>
