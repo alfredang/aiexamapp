@@ -42,3 +42,11 @@ Carthage/Build/
 !.claude/skills/**
 !.claude/agents/**
 !.claude/commands/**
+
+# EXCEPTION: the create-env sub-skill holds ASC secrets (Apple ID password, key/issuer
+# ids) — keep it local-only, never push to GitHub. Re-ignored after the un-ignore above.
+.claude/skills/app-store-submission/create-env/
+
+# Playwright MCP session artifacts
+.playwright-mcp/
+ai-exams-availability-set.png

@@ -2,6 +2,16 @@
 
 Native SwiftUI client for Tertiary Exams mobile practice.
 
+<a href="https://apps.apple.com/us/app/tertiary-ai-exams/id6781995308">
+  <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store" height="48">
+</a>
+
+**Now live on the App Store** → [Tertiary AI Exams](https://apps.apple.com/us/app/tertiary-ai-exams/id6781995308)
+
+<p>
+  <img src="docs/app-screenshot.png" alt="AI Exams — My Exams" width="280">
+</p>
+
 ## Scope
 
 - Register and sign in with email/password.
