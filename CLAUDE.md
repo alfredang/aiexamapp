@@ -18,6 +18,17 @@ Do not add in-app purchase or checkout UI here.
 - Team: `GU9WTSTX9M` · Deployment target: iOS 17.0 · Device family: iPhone + iPad (1,2)
 - Portrait-only on iPhone; all orientations on iPad.
 
+## Repositories (do not mix these up)
+
+- **This iOS app → <https://github.com/alfredang/aiexamapp>** (git `origin`). All pushes,
+  PRs, and the **CI/CD auto-release** (`ios-auto-release` skill / GitHub Actions) target
+  **`alfredang/aiexamapp`**.
+- **The website → <https://github.com/alfredang/ai-exams>** serves
+  <https://exams.tertiaryinfotech.com/> (separate Next.js/Prisma repo). **Never push to,
+  force-push, or otherwise overwrite `ai-exams` from this project** — it is a different
+  codebase that only shares early git history. If `origin` ever points at `ai-exams`,
+  repoint it to `aiexamapp` before pushing.
+
 ## Common commands
 
 The Xcode project is generated from [project.yml](project.yml) with **XcodeGen** — edit

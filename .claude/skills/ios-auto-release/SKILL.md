@@ -36,8 +36,8 @@ the scheme, `PROVISIONING_PROFILE_SPECIFIER`, and `CODE_SIGN_IDENTITY` (usually 
 ## Gather the secrets (one-time)
 
 ```bash
-REPO=<owner>/<repo>
-KEYID=<ASC_KEY_ID>; ISSUER=<ASC_ISSUER_ID>           # App Store Connect API key
+REPO=alfredang/aiexamapp                              # AI Exams CI/CD targets THIS repo — NEVER ai-exams (the website)
+KEYID=<ASC_KEY_ID>; ISSUER=<ASC_ISSUER_ID>           # from .env / the create-env sub-skill (not committed)
 P8=~/.appstoreconnect/private_keys/AuthKey_$KEYID.p8
 
 # 1) ASC API key (upload + submit token)
