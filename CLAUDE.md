@@ -78,8 +78,10 @@ Foundation, SwiftUI, and `URLSession`.
   responses are decoded into `ServerError { error }` and surfaced as `APIError.server`.
   Endpoints used: `auth/login`, `auth/register`, `catalog`, `library`,
   `attempts/start`, `attempts/{id}`, `attempts/answer`, `attempts/submit`,
-  `account` (DELETE). The base URL is hardcoded here — change it in one place to point at
-  a staging server.
+  `account` (DELETE), plus the staff endpoints `staff/claims` (GET/POST) and
+  `staff/timesheet` (+ `/clock-in`, `/clock-out`) documented in
+  [docs/STAFF_API.md](docs/STAFF_API.md). The base URL is hardcoded here — change it in
+  one place to point at a staging server.
 - [AIExams/Models/APIModels.swift](AIExams/Models/APIModels.swift) — all Codable
   request/response DTOs (`AuthResponse`, `User`, `CatalogResponse`, `LibraryResponse`,
   attempt/answer/score types, `ExamMode`). Keep these in sync with the backend's
@@ -99,6 +101,16 @@ Foundation, SwiftUI, and `URLSession`.
   [AIExams/Views/ExamRunnerView.swift](AIExams/Views/ExamRunnerView.swift) drives the
   question flow. Scoring is computed server-side via `attempts/submit` — never trust
   client-side correctness. Practice mode reveals explanations; Exam mode is timed.
+
+### Staff features (role-gated)
+- [AIExams/Views/StaffView.swift](AIExams/Views/StaffView.swift) — a **Staff** tab shown
+  only when `user.role` is staff/admin/intern/contractor (`User.isStaffMember` in
+  [StaffModels.swift](AIExams/Models/StaffModels.swift)). Timesheet clock in/out plus
+  expense/medical claims with camera receipt capture
+  ([NewClaimView](AIExams/Views/NewClaimView.swift),
+  [CameraPicker](AIExams/Views/CameraPicker.swift)). Google Drive upload and timesheet
+  persistence happen **server-side**; the backend contract is
+  [docs/STAFF_API.md](docs/STAFF_API.md). Regular customers never see this tab.
 
 ### Theme
 - [AIExams/Theme.swift](AIExams/Theme.swift) — brand colors (`primary` blue, `secondary`

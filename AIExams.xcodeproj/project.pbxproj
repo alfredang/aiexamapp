@@ -11,10 +11,14 @@
 		0F42C9B1846AF7FCF510932A /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B74F98AD30777E1FF6F629A8 /* Theme.swift */; };
 		191B14D14936B700A4FB649E /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1258E02E112C6B84ABB3BE14 /* AccountView.swift */; };
 		1A3D7A6235B989A5950673AA /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 787DC21413BD9D6339DCB8B9 /* AuthView.swift */; };
+		1FFFCD9059E498E8E0259DF1 /* CameraPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = C24BACE5BA56136CF7AF9E8D /* CameraPicker.swift */; };
+		359E1B29CBE9852DD3B6B3D6 /* StaffView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 684881520F5DDD9D8733796A /* StaffView.swift */; };
 		39F7563749EEB832526DF7B1 /* ExamRunnerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32851E62E731A9EB3E174B24 /* ExamRunnerView.swift */; };
 		3DC0CA06D30DA7AC8F3D368B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 85D643A51DBCAB6E18D47747 /* PrivacyInfo.xcprivacy */; };
+		8037991A4DC248B1A7127699 /* NewClaimView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CCEBE30B99F4D3CE5758617 /* NewClaimView.swift */; };
 		842F7BB9A5BAF1C947E24319 /* APIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A679B14A9FD1C85F2517C0C5 /* APIModels.swift */; };
 		90F08887C0E57991F5DA8AC5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 081305CF426172429D427A18 /* Assets.xcassets */; };
+		9B265EA07C17E27E0F3E3542 /* StaffModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300B6B24FFD07AADB5696B00 /* StaffModels.swift */; };
 		9DC11BA10A4F4355989917F5 /* StartExamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CB5554623B28674635B62F4 /* StartExamView.swift */; };
 		B386AF7191B7BA7CC55AB112 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 833E0F3F93B4C9B8E2A55C5A /* RootView.swift */; };
 		CD17E015659EFF39407779AB /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FBB9D57DA360F40A95CED1D /* APIClient.swift */; };
@@ -31,15 +35,19 @@
 		1848A58F3A3745B20D53DC4E /* AIExams.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = AIExams.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1CB5554623B28674635B62F4 /* StartExamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartExamView.swift; sourceTree = "<group>"; };
 		2FBB9D57DA360F40A95CED1D /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+		300B6B24FFD07AADB5696B00 /* StaffModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StaffModels.swift; sourceTree = "<group>"; };
 		32851E62E731A9EB3E174B24 /* ExamRunnerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExamRunnerView.swift; sourceTree = "<group>"; };
 		3C008A22A2071F8CE65D83B5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		45049AC049FD2FC8384D3F52 /* CatalogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogView.swift; sourceTree = "<group>"; };
 		5D3C3667072A99408F5B3122 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
+		684881520F5DDD9D8733796A /* StaffView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StaffView.swift; sourceTree = "<group>"; };
+		6CCEBE30B99F4D3CE5758617 /* NewClaimView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewClaimView.swift; sourceTree = "<group>"; };
 		787DC21413BD9D6339DCB8B9 /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
 		833E0F3F93B4C9B8E2A55C5A /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		85D643A51DBCAB6E18D47747 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		A679B14A9FD1C85F2517C0C5 /* APIModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIModels.swift; sourceTree = "<group>"; };
 		B74F98AD30777E1FF6F629A8 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		C24BACE5BA56136CF7AF9E8D /* CameraPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPicker.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -47,6 +55,7 @@
 			isa = PBXGroup;
 			children = (
 				A679B14A9FD1C85F2517C0C5 /* APIModels.swift */,
+				300B6B24FFD07AADB5696B00 /* StaffModels.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -95,10 +104,13 @@
 			children = (
 				1258E02E112C6B84ABB3BE14 /* AccountView.swift */,
 				787DC21413BD9D6339DCB8B9 /* AuthView.swift */,
+				C24BACE5BA56136CF7AF9E8D /* CameraPicker.swift */,
 				45049AC049FD2FC8384D3F52 /* CatalogView.swift */,
 				32851E62E731A9EB3E174B24 /* ExamRunnerView.swift */,
 				000782E7FFE9EFEBB3DCCE0E /* LibraryView.swift */,
+				6CCEBE30B99F4D3CE5758617 /* NewClaimView.swift */,
 				833E0F3F93B4C9B8E2A55C5A /* RootView.swift */,
+				684881520F5DDD9D8733796A /* StaffView.swift */,
 				1CB5554623B28674635B62F4 /* StartExamView.swift */,
 			);
 			path = Views;
@@ -190,11 +202,15 @@
 				842F7BB9A5BAF1C947E24319 /* APIModels.swift in Sources */,
 				191B14D14936B700A4FB649E /* AccountView.swift in Sources */,
 				1A3D7A6235B989A5950673AA /* AuthView.swift in Sources */,
+				1FFFCD9059E498E8E0259DF1 /* CameraPicker.swift in Sources */,
 				04C2091162C3D3C20AD48DAD /* CatalogView.swift in Sources */,
 				39F7563749EEB832526DF7B1 /* ExamRunnerView.swift in Sources */,
 				FCF1B9BB709BF2EE36EEFAFC /* LibraryView.swift in Sources */,
+				8037991A4DC248B1A7127699 /* NewClaimView.swift in Sources */,
 				B386AF7191B7BA7CC55AB112 /* RootView.swift in Sources */,
 				D30CB4CF243EFA596226520A /* SessionStore.swift in Sources */,
+				9B265EA07C17E27E0F3E3542 /* StaffModels.swift in Sources */,
+				359E1B29CBE9852DD3B6B3D6 /* StaffView.swift in Sources */,
 				9DC11BA10A4F4355989917F5 /* StartExamView.swift in Sources */,
 				0F42C9B1846AF7FCF510932A /* Theme.swift in Sources */,
 			);
@@ -209,7 +225,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = GU9WTSTX9M;
 				INFOPLIST_FILE = AIExams/Info.plist;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
@@ -217,7 +233,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tertiaryinfotech.aiexams;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -230,7 +246,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = GU9WTSTX9M;
 				INFOPLIST_FILE = AIExams/Info.plist;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
@@ -238,7 +254,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tertiaryinfotech.aiexams;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";

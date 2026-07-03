@@ -60,6 +60,28 @@ struct APIClient {
         try await send("/api/mobile/account", method: "DELETE", body: Optional<String>.none)
     }
 
+    // MARK: Staff (claims + timesheet) — see docs/STAFF_API.md for the backend contract.
+
+    func claims() async throws -> ClaimsListResponse {
+        try await send("/api/mobile/staff/claims", method: "GET", body: Optional<String>.none)
+    }
+
+    func submitClaim(_ claim: SubmitClaimRequest) async throws -> ClaimResponse {
+        try await send("/api/mobile/staff/claims", method: "POST", body: claim)
+    }
+
+    func timesheet() async throws -> TimesheetResponse {
+        try await send("/api/mobile/staff/timesheet", method: "GET", body: Optional<String>.none)
+    }
+
+    func clockIn(note: String? = nil) async throws -> ClockResponse {
+        try await send("/api/mobile/staff/timesheet/clock-in", method: "POST", body: ClockRequest(note: note))
+    }
+
+    func clockOut(note: String? = nil) async throws -> ClockResponse {
+        try await send("/api/mobile/staff/timesheet/clock-out", method: "POST", body: ClockRequest(note: note))
+    }
+
     private func send<T: Decodable, B: Encodable>(_ path: String, method: String, body: B?, authorized: Bool = true) async throws -> T {
         let url = baseURL.appending(path: path)
         let bodyData = try body.map { try JSONEncoder().encode($0) }

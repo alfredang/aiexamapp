@@ -8,6 +8,19 @@ land here, not in App Store Connect.
 
 ## [Unreleased]
 
+## [1.1] - 2026-07-03
+
+### Added
+- Staff tab (visible to staff, intern, and contractor accounts): submit expense and
+  medical claims by photographing the receipt with the camera.
+- Timesheet clock in/out for part-time contractors and interns, with live shift timer,
+  weekly hours, and recent shifts.
+
+## [1.0.1] - 2026-06-20
+
+### Changed
+- Renamed the app on the App Store to **Certificate Practice Exams** for clearer discovery.
+
 ## [1.0] - 2026-06-20
 
 ### Added
