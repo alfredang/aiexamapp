@@ -20,6 +20,7 @@ targets:
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         UILaunchScreen: {}
+        ITSAppUsesNonExemptEncryption: false
         NSCameraUsageDescription: "The camera is used to photograph receipts when staff submit expense or medical claims."
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
