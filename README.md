@@ -21,19 +21,6 @@ Native SwiftUI client for Tertiary Exams mobile practice.
 - Start purchased exams in Practice mode or Exam mode.
 - Save answers, reveal explanations in Practice mode, and submit for scoring.
 
-## Staff features (v1.1, role-gated)
-
-Accounts with a staff-like role (`staff` / `admin` / `intern` / `contractor`) get an extra
-**Staff** tab; regular exam customers never see it:
-
-- **Expense & medical claims** — photograph the receipt with the camera (or pick from the
-  photo library) and submit; the backend files it into per-person Google Drive folders.
-- **Timesheet clock in/out** — one-tap clock in/out with a live shift timer, weekly hours,
-  and recent shifts, logged to the central database.
-
-The app is a thin client: these call `/api/mobile/staff/*` endpoints implemented by the
-backend. The full contract is in [docs/STAFF_API.md](docs/STAFF_API.md).
-
 ## Build
 
 The Xcode project is generated with XcodeGen:

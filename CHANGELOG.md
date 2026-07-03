@@ -8,6 +8,11 @@ land here, not in App Store Connect.
 
 ## [Unreleased]
 
+### Removed
+- The role-gated staff features (expense/medical claims with camera receipt capture,
+  timesheet clock in/out) shipped in 1.1 — they were built for the wrong app and belong
+  in the separate **Tertiary HRMS** app. This app is exam practice only.
+
 ## [1.1] - 2026-07-03
 
 ### Added
