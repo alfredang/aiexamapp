@@ -50,3 +50,4 @@ Carthage/Build/
 # Playwright MCP session artifacts
 .playwright-mcp/
 ai-exams-availability-set.png
+__pycache__/
