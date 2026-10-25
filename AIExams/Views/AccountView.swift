@@ -6,64 +6,58 @@ struct AccountView: View {
     @State private var isDeleting = false
     @State private var errorMessage: String?
 
+    private var version: String {
+        let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
+        let b = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? ""
+        return "\(v) (\(b))"
+    }
+
     var body: some View {
         NavigationStack {
-            Group {
-                if session.token == nil {
-                    AuthView()
-                        .navigationTitle("Account")
-                } else {
-                    List {
-                        Section {
-                            Label(session.user?.email ?? "Signed in", systemImage: "person.crop.circle")
-                            if let name = session.user?.name, !name.isEmpty {
-                                Label(name, systemImage: "textformat")
-                            }
-                        }
-
-                        Section {
-                            Link(destination: URL(string: "https://exams.tertiaryinfotech.com/")!) {
-                                Label("Open Tertiary Exams Website", systemImage: "safari")
-                            }
-                            Text("Purchases, payments, invoices, and vouchers stay on the website. This app is for mobile practice.")
-                                .font(.footnote)
-                                .foregroundStyle(Theme.mutedInk)
-                        }
-
-                        Section {
-                            if let errorMessage {
-                                Text(errorMessage)
-                                    .font(.footnote)
-                                    .foregroundStyle(.red)
-                            }
-                            Button(role: .destructive) {
-                                showingDeleteConfirmation = true
-                            } label: {
-                                Label(isDeleting ? "Deleting..." : "Delete Account", systemImage: "trash")
-                            }
-                            .disabled(isDeleting)
-
-                            Button(role: .destructive) {
-                                session.signOut()
-                            } label: {
-                                Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
-                            }
-                        }
+            List {
+                Section("Signed in as") {
+                    if let name = session.user?.name, !name.isEmpty {
+                        Label(name, systemImage: "person.crop.circle")
                     }
-                    .navigationTitle("Account")
+                    Label(session.user?.email ?? "", systemImage: "envelope")
+                }
+
+                Section {
+                    Text("Your practice exams and scores are shared with your Tertiary Exams account, so you can switch between this app and a computer at any time.")
+                        .font(.footnote)
+                        .foregroundStyle(Theme.mutedInk)
+                }
+
+                Section {
+                    Link(destination: URL(string: "https://www.tertiaryinfotech.com/privacy")!) {
+                        Label("Privacy policy", systemImage: "hand.raised")
+                    }
+                    LabeledContent("Version", value: version)
+                }
+
+                Section {
+                    Button {
+                        session.signOut()
+                    } label: {
+                        Label("Sign out", systemImage: "rectangle.portrait.and.arrow.right")
+                    }
+                    Button(role: .destructive) {
+                        showingDeleteConfirmation = true
+                    } label: {
+                        Label(isDeleting ? "Deleting…" : "Delete account", systemImage: "trash")
+                    }
+                    .disabled(isDeleting)
+                    if let errorMessage {
+                        Text(errorMessage).font(.footnote).foregroundStyle(Theme.fail)
+                    }
                 }
             }
-            .confirmationDialog(
-                "Delete your account?",
-                isPresented: $showingDeleteConfirmation,
-                titleVisibility: .visible
-            ) {
-                Button("Delete Account", role: .destructive) {
-                    Task { await deleteAccount() }
-                }
+            .navigationTitle("Account")
+            .confirmationDialog("Delete your account?", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
+                Button("Delete account", role: .destructive) { Task { await deleteAccount() } }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("Your account will be anonymized and disabled. Purchase records may be retained for legal and accounting purposes.")
+                Text("Your account will be anonymized and disabled, and you will lose access to your practice exams. Purchase records may be retained for legal and accounting purposes.")
             }
         }
     }
@@ -75,7 +69,7 @@ struct AccountView: View {
             _ = try await session.api.deleteAccount()
             session.signOut()
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = session.handle(error)
         }
     }
 }

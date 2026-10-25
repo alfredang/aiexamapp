@@ -8,6 +8,28 @@ land here, not in App Store Connect.
 
 ## [Unreleased]
 
+## [1.3] - 2026-10-25
+
+### Added
+- Sign in with a 6-digit code sent to your email — no password needed. Creating an
+  account takes just your full name and email. Password sign-in is still available.
+- History tab: best, average and latest score for each certification, the exam
+  domains to focus on, and every attempt you've taken.
+- Full score report after every attempt: correct/total with PASS or FAIL, results by
+  exam domain (weakest first), and a review of every question against the answer key,
+  filterable by All, Missed and Flagged. Retake in one tap.
+- Exam mode now works like the live test: countdown timer, Flag for review, a Review
+  Screen (Completed / Flagged / Incomplete) and automatic submission when time runs out.
+- Practice mode: check each answer to see whether it's right, the explanation and its
+  exam domain; jump to any question from the question grid.
+- Multiple-select ("Select TWO answers") and sequencing questions.
+- Resume an unfinished attempt straight from My Exams.
+
+### Changed
+- The app now focuses on taking the practice exams linked to your account. The catalog
+  and free teasers were removed.
+- Your session is stored in the iOS Keychain.
+
 ### Removed
 - The role-gated staff features (expense/medical claims with camera receipt capture,
   timesheet clock in/out) shipped in 1.1 — they were built for the wrong app and belong

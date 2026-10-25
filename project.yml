@@ -17,6 +17,7 @@ targets:
       path: AIExams/Info.plist
       properties:
         CFBundleDisplayName: "AI Exams"
+        CFBundleIconName: AppIcon
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         UILaunchScreen: {}
@@ -34,7 +35,7 @@ targets:
         DEVELOPMENT_TEAM: GU9WTSTX9M
         CODE_SIGN_STYLE: Automatic
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        CURRENT_PROJECT_VERSION: 13
-        MARKETING_VERSION: "1.2"
+        CURRENT_PROJECT_VERSION: 14
+        MARKETING_VERSION: "1.3"
         TARGETED_DEVICE_FAMILY: "1,2"
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: false

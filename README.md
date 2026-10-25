@@ -14,12 +14,18 @@ Native SwiftUI client for Tertiary Exams mobile practice.
 
 ## Scope
 
-- Register and sign in with email/password.
-- Browse the public exam catalog without checkout or payment actions.
-- View purchased practice exams from the user's existing entitlements.
-- Start free teasers from catalog entries.
-- Start purchased exams in Practice mode or Exam mode.
-- Save answers, reveal explanations in Practice mode, and submit for scoring.
+The app is for customers to take the practice exams they already own, on the move.
+Buying, vouchers and account administration happen on the website; the app has no
+catalog, checkout or admin features.
+
+- Sign in with a 6-digit email code (or a password); create an account with full name + email.
+- **My Exams** — every practice exam linked to the account, with best/latest score and
+  one tap into **Exam mode** (timed) or **Practice mode**; resume unfinished attempts.
+- **Exam mode** — countdown, Flag for review, Review Screen, auto-submit at time-up.
+- **Practice mode** — check each answer for the explanation and exam domain.
+- **Results** — PASS/FAIL, per-domain breakdown, full answer review, Retake.
+- **History** — best/average/latest per certification and every attempt.
+- **Account** — sign out, delete account, privacy policy.
 
 ## Build
 
