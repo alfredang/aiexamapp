@@ -92,6 +92,10 @@ struct ExamRunnerView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { toolbar }
+        // Navy test-centre title bar with light text, joined to the status bar below.
+        .toolbarBackground(Theme.navy, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .task { await load() }
         .task(id: payload?.attempt.id) { await runClock() }
         .overlay { if timeUp { timeUpOverlay } }
@@ -126,8 +130,9 @@ struct ExamRunnerView: View {
         ToolbarItem(placement: .principal) {
             VStack(spacing: 0) {
                 Text(payload?.exam.code.strippingVariant ?? "").font(.subheadline.weight(.bold).monospaced())
-                Text(isExam ? "Exam mode" : "Practice mode").font(.caption2).foregroundStyle(Theme.mutedInk)
+                Text(isExam ? "Exam mode" : "Practice mode").font(.caption2).foregroundStyle(.white.opacity(0.75))
             }
+            .foregroundStyle(.white)
         }
         ToolbarItem(placement: .topBarTrailing) {
             if payload != nil {
@@ -610,6 +615,8 @@ struct ExamRunnerView: View {
     /// Puts the runner in a representative state for App Store screenshots.
     private func screenshotSetup(_ loaded: AttemptResponse) async {
         switch ScreenshotAutomation.route {
+        case "play-exam", "play-practice":
+            await autoplay(loaded)
         case "review":
             openReview()
         case "practice", "exam":
@@ -621,6 +628,42 @@ struct ExamRunnerView: View {
         default:
             break
         }
+    }
+    #endif
+
+    #if DEBUG
+    /// Answers every question (a varied pick per question), flags two, then
+    /// walks to the end like a candidate: Exam mode opens the Review Screen
+    /// and submits; Practice mode checks each answer and finishes.
+    private func autoplay(_ loaded: AttemptResponse) async {
+        for (i, q) in loaded.questions.enumerated() {
+            index = i
+            let opts = q.displayOptions
+            let pick = (i * 7 + 3) % max(opts.count, 1)
+            switch q.type {
+            case .ordering:
+                setAnswer(q, (i % 2 == 0 ? opts : opts.reversed()).map(\.id))
+            case .multi:
+                for k in 0..<q.requiredCount { select(opts[(pick + k) % opts.count], q) }
+            default:
+                select(opts[pick], q)
+            }
+            if i == 2 || i == 5 { toggleFlag(q) }
+            if isExam { await save(q) } else { await check(q) }
+            if !isExam && ScreenshotAutomation.smart && i % 6 != 0,
+               let key = reveals[q.id]?.correct, reveals[q.id]?.isCorrect != true {
+                answers[q.id]?.answer = key
+                if let r = try? await session.api.answer(attemptId: attemptId, questionId: q.id, answer: key, flagged: answers[q.id]?.flagged) {
+                    reveals[q.id] = AnswerResponse(saved: r.saved, isCorrect: true, correct: r.correct, explanation: r.explanation)
+                }
+            }
+            try? await Task.sleep(for: .milliseconds(150))
+        }
+        index = loaded.questions.count - 1
+        next()  // last question: Exam → Review Screen, Practice → finish dialog
+        try? await Task.sleep(for: .seconds(4))
+        confirmSubmit = false
+        await submit()
     }
     #endif
 
