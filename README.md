@@ -8,6 +8,8 @@ Native SwiftUI client for Tertiary Exams mobile practice.
 
 **Now live on the App Store** → [Certificate Practice Exams](https://apps.apple.com/us/app/id6781995308)
 
+Android counterpart: [aiexamapp_android](https://github.com/alfredang/aiexamapp_android) — same design and features, in Google Play review as `sg.com.tertiarycourses.aiexams`.
+
 <p>
   <img src="docs/app-screenshot.png" alt="AI Exams — My Exams" width="280">
 </p>
