@@ -1,9 +1,11 @@
+import AuthenticationServices
 import SwiftUI
 
 /// Sign in with a 6-digit email code (default), with a password, or create an
 /// account with full name + email. Every path ends with a mobile token.
 struct AuthView: View {
     @EnvironmentObject private var session: SessionStore
+    @StateObject private var social = SocialSignIn()
 
     private enum Flow: String, CaseIterable, Identifiable {
         case signIn = "Sign in"
@@ -50,6 +52,10 @@ struct AuthView: View {
                         emailStep
                     }
 
+                    if !codeSent && !(flow == .signIn && usePassword) {
+                        socialButtons
+                    }
+
                     if let errorMessage {
                         Label(errorMessage, systemImage: "exclamationmark.triangle.fill")
                             .font(.subheadline)
@@ -69,18 +75,39 @@ struct AuthView: View {
             .frame(maxWidth: .infinity)
         }
         .scrollDismissesKeyboard(.interactively)
-        .background(Theme.background.ignoresSafeArea())
+        .background(alignment: .top) {
+            // Soft blue hero wash, as on the website.
+            LinearGradient(colors: [Theme.accent.opacity(0.7), Theme.background], startPoint: .top, endPoint: .bottom)
+                .frame(height: 420)
+                .frame(maxHeight: .infinity, alignment: .top)
+                .background(Theme.background)
+                .ignoresSafeArea()
+        }
     }
 
     private var header: some View {
-        VStack(spacing: 10) {
-            Image(systemName: "checkmark.seal.fill")
-                .font(.system(size: 52))
-                .foregroundStyle(Theme.primary)
-                .accessibilityHidden(true)
-            Text("Certificate Practice Exams")
-                .font(.title2.weight(.bold))
-                .multilineTextAlignment(.center)
+        VStack(spacing: 12) {
+            HStack(spacing: 10) {
+                Image("LogoMark")
+                    .resizable()
+                    .frame(width: 40, height: 40)
+                Text("Tertiary Exams")
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(Theme.ink)
+            }
+            .accessibilityElement(children: .combine)
+
+            VStack(spacing: 0) {
+                Text("Certificate")
+                    .foregroundStyle(Theme.ink)
+                Text("Practice Exams.")
+                    .foregroundStyle(Theme.headlineGradient)
+            }
+            .font(.system(size: 34, weight: .heavy))
+            .multilineTextAlignment(.center)
+            .padding(.top, 8)
+            .accessibilityElement(children: .combine)
+
             Text("Take your practice exams anywhere, in Exam mode or Practice mode.")
                 .font(.subheadline)
                 .foregroundStyle(Theme.mutedInk)
@@ -124,6 +151,42 @@ struct AuthView: View {
                 }
                 .frame(maxWidth: .infinity, minHeight: 44)
             }
+        }
+    }
+
+    private var socialButtons: some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 10) {
+                Rectangle().fill(Theme.line).frame(height: 1)
+                Text("or").font(.footnote).foregroundStyle(Theme.mutedInk)
+                Rectangle().fill(Theme.line).frame(height: 1)
+            }
+            SignInWithAppleButton(flow == .register ? .signUp : .signIn) { request in
+                social.prepareApple(request)
+            } onCompletion: { result in
+                Task { await finishSocial { try await social.apple(result, api: session.api) } }
+            }
+            .signInWithAppleButtonStyle(.black)
+            .frame(height: 48)
+            .disabled(isBusy)
+
+            Button {
+                Task { await finishSocial { try await social.google(api: session.api) } }
+            } label: {
+                HStack(spacing: 8) {
+                    Image("GoogleLogo")
+                        .resizable()
+                        .frame(width: 20, height: 20)
+                        .accessibilityHidden(true)
+                    Text(flow == .register ? "Sign up with Google" : "Sign in with Google")
+                }
+                .font(.body.weight(.semibold))
+                .foregroundStyle(Theme.ink)
+                .frame(maxWidth: .infinity, minHeight: 48)
+                .background(Theme.surface, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Theme.line))
+            }
+            .disabled(isBusy)
         }
     }
 
@@ -209,11 +272,12 @@ struct AuthView: View {
 
     private func labeled<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(title).font(.subheadline.weight(.semibold))
+            Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(Theme.ink)
             content()
                 .padding(.horizontal, 12)
                 .frame(minHeight: 48)
-                .background(Theme.background, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .background(Theme.surface, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Theme.line))
         }
     }
 
@@ -262,6 +326,20 @@ struct AuthView: View {
         } catch {
             errorMessage = error.localizedDescription
             code = ""
+        }
+    }
+
+    private func finishSocial(_ run: () async throws -> AuthResponse) async {
+        guard !isBusy else { return }
+        isBusy = true
+        defer { isBusy = false }
+        do {
+            session.signIn(try await run())
+            errorMessage = nil
+        } catch is CancellationError {
+            // User closed the sheet — not an error.
+        } catch {
+            errorMessage = error.localizedDescription
         }
     }
 

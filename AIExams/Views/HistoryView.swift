@@ -76,6 +76,7 @@ struct HistoryView: View {
                         }
                     }
                     .background(Theme.surface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Theme.line))
                 }
                 .padding()
                 .readableWidth()
@@ -90,6 +91,7 @@ struct HistoryView: View {
                 .padding(.horizontal, 14)
                 .frame(minHeight: 40)
                 .background(selected ? Theme.navy : Theme.surface, in: Capsule())
+                .overlay(Capsule().stroke(selected ? Theme.navy : Theme.line))
                 .foregroundStyle(selected ? .white : Theme.ink)
         }
         .buttonStyle(.plain)

@@ -20,7 +20,9 @@ targets:
         CFBundleIconName: AppIcon
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
-        UILaunchScreen: {}
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+        UIUserInterfaceStyle: Light
         ITSAppUsesNonExemptEncryption: false
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
@@ -29,13 +31,18 @@ targets:
           - UIInterfaceOrientationPortraitUpsideDown
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
+    entitlements:
+      path: AIExams/AIExams.entitlements
+      properties:
+        com.apple.developer.applesignin:
+          - Default
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.tertiaryinfotech.aiexams
         DEVELOPMENT_TEAM: GU9WTSTX9M
         CODE_SIGN_STYLE: Automatic
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        CURRENT_PROJECT_VERSION: 15
-        MARKETING_VERSION: "1.3"
+        CURRENT_PROJECT_VERSION: 18
+        MARKETING_VERSION: "1.5"
         TARGETED_DEVICE_FAMILY: "1,2"
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: false

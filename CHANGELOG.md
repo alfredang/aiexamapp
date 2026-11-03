@@ -8,6 +8,16 @@ land here, not in App Store Connect.
 
 ## [Unreleased]
 
+## [1.5] - 2026-10-30 (build 18)
+
+### Added
+- Sign in with Apple and Sign in with Google, alongside the email code. Both use the
+  same account as the Tertiary Exams website.
+
+### Changed
+- New look matching the Tertiary Exams website: Tertiary Exams logo, light theme
+  only, blue launch screen and brand-blue accents throughout.
+
 ## [1.3] - 2026-10-25
 
 ### Added

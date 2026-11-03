@@ -52,6 +52,8 @@ struct AccountView: View {
                     }
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(Theme.background)
             .navigationTitle("Account")
             .confirmationDialog("Delete your account?", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
                 Button("Delete account", role: .destructive) { Task { await deleteAccount() } }

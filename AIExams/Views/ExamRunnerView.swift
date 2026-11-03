@@ -253,7 +253,7 @@ struct ExamRunnerView: View {
                 in: RoundedRectangle(cornerRadius: 12, style: .continuous)
             )
             .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(selected || (reveal != nil && isCorrect) ? tint : Theme.line.opacity(0.6), lineWidth: selected ? 2 : 1))
+                .stroke(selected || (reveal != nil && isCorrect) ? tint : Theme.line, lineWidth: selected ? 2 : 1))
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -369,6 +369,7 @@ struct ExamRunnerView: View {
                     }
                 }
                 .background(Theme.surface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Theme.line))
             }
             .padding(16)
             .readableWidth()
@@ -691,7 +692,7 @@ struct OrderingInput: View {
                 } label: {
                     HStack(alignment: .top, spacing: 12) {
                         ZStack {
-                            Circle().fill(position != nil ? Theme.primary : Theme.line.opacity(0.4)).frame(width: 30, height: 30)
+                            Circle().fill(position != nil ? Theme.primary : Theme.line).frame(width: 30, height: 30)
                             Text(position.map { "\($0 + 1)" } ?? "")
                                 .font(.subheadline.weight(.bold)).foregroundStyle(.white)
                         }
@@ -704,7 +705,7 @@ struct OrderingInput: View {
                     .padding(14)
                     .frame(minHeight: 52)
                     .background(position != nil ? Theme.primary.opacity(0.08) : Theme.surface, in: RoundedRectangle(cornerRadius: 12))
-                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(position != nil ? Theme.primary : Theme.line.opacity(0.6)))
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(position != nil ? Theme.primary : Theme.line))
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)

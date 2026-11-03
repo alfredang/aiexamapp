@@ -37,6 +37,16 @@ struct APIClient {
         try await send("/api/mobile/auth/login", method: "POST", body: ["email": email, "password": password], authorized: false)
     }
 
+    func exchangeGoogleCode(_ code: String, verifier: String) async throws -> AuthResponse {
+        try await send("/api/mobile/auth/google/exchange", method: "POST",
+                       body: ["code": code, "verifier": verifier], authorized: false)
+    }
+
+    func appleSignIn(identityToken: String, nonce: String, fullName: String?) async throws -> AuthResponse {
+        try await send("/api/mobile/auth/apple", method: "POST",
+                       body: AppleSignInBody(identityToken: identityToken, nonce: nonce, fullName: fullName), authorized: false)
+    }
+
     // MARK: Exams
 
     func library() async throws -> LibraryResponse {
@@ -121,4 +131,10 @@ private struct CodeVerify: Codable {
     let email: String
     let code: String
     let purpose: CodePurpose
+}
+
+private struct AppleSignInBody: Codable {
+    let identityToken: String
+    let nonce: String
+    let fullName: String?
 }

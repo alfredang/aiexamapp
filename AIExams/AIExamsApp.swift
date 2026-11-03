@@ -8,6 +8,7 @@ struct AIExamsApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
+                .tint(Theme.primary)
                 .environmentObject(session)
                 .environmentObject(launcher)
                 .fullScreenCover(item: $launcher.active, onDismiss: { launcher.closed() }) { route in

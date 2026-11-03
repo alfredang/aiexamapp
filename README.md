@@ -18,7 +18,10 @@ The app is for customers to take the practice exams they already own, on the mov
 Buying, vouchers and account administration happen on the website; the app has no
 catalog, checkout or admin features.
 
-- Sign in with a 6-digit email code (or a password); create an account with full name + email.
+- Sign in with a 6-digit email code, **Sign in with Apple** or **Sign in with Google** (or a
+  password); create an account with full name + email. Google runs through the website's own
+  login in an ephemeral `ASWebAuthenticationSession` with PKCE (`/api/mobile/auth/google/*`),
+  Apple through `/api/mobile/auth/apple` — see `AIExams/Services/SocialSignIn.swift`.
 - **My Exams** — every practice exam linked to the account, with best/latest score and
   one tap into **Exam mode** (timed) or **Practice mode**; resume unfinished attempts.
 - **Exam mode** — countdown, Flag for review, Review Screen, auto-submit at time-up.

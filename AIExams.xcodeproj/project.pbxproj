@@ -12,6 +12,7 @@
 		191B14D14936B700A4FB649E /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1258E02E112C6B84ABB3BE14 /* AccountView.swift */; };
 		1A3D7A6235B989A5950673AA /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 787DC21413BD9D6339DCB8B9 /* AuthView.swift */; };
 		275FD99D50BF5595E9621740 /* ExamLauncher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 763A1FAD37A9F12CBDB1BD47 /* ExamLauncher.swift */; };
+		37D94E8C580091B8A54615A2 /* SocialSignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF0FD775229D450737A2957 /* SocialSignIn.swift */; };
 		39F7563749EEB832526DF7B1 /* ExamRunnerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32851E62E731A9EB3E174B24 /* ExamRunnerView.swift */; };
 		3DC0CA06D30DA7AC8F3D368B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 85D643A51DBCAB6E18D47747 /* PrivacyInfo.xcprivacy */; };
 		763155989FA72E68CE465CF1 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA8011448BA3E62B71501282 /* HistoryView.swift */; };
@@ -42,9 +43,11 @@
 		833E0F3F93B4C9B8E2A55C5A /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		85D643A51DBCAB6E18D47747 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		98B4C824A693D39B20A7E9C0 /* ResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsView.swift; sourceTree = "<group>"; };
+		9BF0FD775229D450737A2957 /* SocialSignIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialSignIn.swift; sourceTree = "<group>"; };
 		A679B14A9FD1C85F2517C0C5 /* APIModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIModels.swift; sourceTree = "<group>"; };
 		B74F98AD30777E1FF6F629A8 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		D3E40498ECA0723DCCF69177 /* ScreenshotAutomation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotAutomation.swift; sourceTree = "<group>"; };
+		DF626FD9438EBB5FC0178C0E /* AIExams.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AIExams.entitlements; sourceTree = "<group>"; };
 		EA8011448BA3E62B71501282 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -84,6 +87,7 @@
 		D6C7F57E2C137F4AB9F1845E /* AIExams */ = {
 			isa = PBXGroup;
 			children = (
+				DF626FD9438EBB5FC0178C0E /* AIExams.entitlements */,
 				15E722022EC5864CCB685E6D /* AIExamsApp.swift */,
 				3C008A22A2071F8CE65D83B5 /* Info.plist */,
 				85D643A51DBCAB6E18D47747 /* PrivacyInfo.xcprivacy */,
@@ -118,6 +122,7 @@
 				500C32144BF53DC5C108AC62 /* Keychain.swift */,
 				D3E40498ECA0723DCCF69177 /* ScreenshotAutomation.swift */,
 				5D3C3667072A99408F5B3122 /* SessionStore.swift */,
+				9BF0FD775229D450737A2957 /* SocialSignIn.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -208,6 +213,7 @@
 				B386AF7191B7BA7CC55AB112 /* RootView.swift in Sources */,
 				9518CE0FC0CDF5F96C58F5D0 /* ScreenshotAutomation.swift in Sources */,
 				D30CB4CF243EFA596226520A /* SessionStore.swift in Sources */,
+				37D94E8C580091B8A54615A2 /* SocialSignIn.swift in Sources */,
 				0F42C9B1846AF7FCF510932A /* Theme.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -219,9 +225,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = AIExams/AIExams.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 18;
 				DEVELOPMENT_TEAM = GU9WTSTX9M;
 				INFOPLIST_FILE = AIExams/Info.plist;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
@@ -229,7 +236,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.3;
+				MARKETING_VERSION = 1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tertiaryinfotech.aiexams;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -240,9 +247,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = AIExams/AIExams.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 18;
 				DEVELOPMENT_TEAM = GU9WTSTX9M;
 				INFOPLIST_FILE = AIExams/Info.plist;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
@@ -250,7 +258,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.3;
+				MARKETING_VERSION = 1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tertiaryinfotech.aiexams;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
