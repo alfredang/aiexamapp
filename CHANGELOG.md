@@ -8,6 +8,15 @@ land here, not in App Store Connect.
 
 ## [Unreleased]
 
+## [1.6] - 2026-11-22 (build 19)
+
+**What's New (user-facing):**
+> Sign in with Google now lets you choose which Google account to use, so you can sign in with your work or personal account.
+
+### Fixed
+- Sign in with Google now lets you choose which Google account to use, so you can
+  pick your work or personal account instead of being signed in to the last one.
+
 ## [1.5] - 2026-10-30 (build 18)
 
 ### Added
