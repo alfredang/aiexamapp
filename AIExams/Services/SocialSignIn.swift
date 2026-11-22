@@ -24,8 +24,10 @@ final class SocialSignIn: NSObject, ObservableObject, ASWebAuthenticationPresent
                 else { cont.resume(throwing: error ?? APIError.offline) }
             }
             session.presentationContextProvider = self
-            // Ephemeral: no "wants to sign in" prompt and no leftover website session.
-            session.prefersEphemeralWebBrowserSession = true
+            // Shared (not ephemeral) so Google's account chooser lists every account
+            // signed in to Safari; the server sends prompt=select_account, so the
+            // user always picks which account to use (personal vs work).
+            session.prefersEphemeralWebBrowserSession = false
             if !session.start() { cont.resume(throwing: APIError.server("Could not open Google sign-in.", status: 0)) }
         }
 
