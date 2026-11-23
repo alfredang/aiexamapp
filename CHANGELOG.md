@@ -8,6 +8,16 @@ land here, not in App Store Connect.
 
 ## [Unreleased]
 
+## [1.7] - 2026-11-23 (build 20)
+
+**What's New (user-facing):**
+> My Exams and History now refresh when you return to the app, so question counts and scores always match the website.
+
+### Fixed
+- My Exams and History reload whenever the app comes back to the foreground. Before, a list
+  loaded before a question bank changed kept its old figures (CCAR-P showed 63 questions
+  after the bank grew to 113) until you pulled to refresh.
+
 ## [1.6] - 2026-11-22 (build 19)
 
 **What's New (user-facing):**

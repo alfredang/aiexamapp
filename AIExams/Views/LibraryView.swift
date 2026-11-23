@@ -5,6 +5,7 @@ import SwiftUI
 struct LibraryView: View {
     @EnvironmentObject private var session: SessionStore
     @EnvironmentObject private var launcher: ExamLauncher
+    @Environment(\.scenePhase) private var scenePhase
     @State private var exams: [LibraryExam]?
     @State private var history: HistoryResponse?
     @State private var errorMessage: String?
@@ -57,6 +58,11 @@ struct LibraryView: View {
             .refreshable { await load() }
             .task { await load() }
             .onChange(of: launcher.refreshCount) { Task { await load() } }
+            // Reload on return to the app: an admin can change a question bank (e.g. CCAR-P
+            // 63 -> 113 questions) while the app sits in the background with the old list.
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active { Task { await load() } }
+            }
         }
     }
 
